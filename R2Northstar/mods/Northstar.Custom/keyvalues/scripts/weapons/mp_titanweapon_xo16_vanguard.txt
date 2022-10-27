@@ -96,8 +96,8 @@ WeaponData
 	"damage_far_distance" 							"1800"
 	"damage_near_value"   							"45"
 	"damage_far_value"								"40"
-	"damage_near_value_titanarmor"					"100"
-	"damage_far_value_titanarmor" 					"80"
+	"damage_near_value_titanarmor"					"80"
+	"damage_far_value_titanarmor" 					"60"
 
 	"deploy_time" 									"1.75"
 
