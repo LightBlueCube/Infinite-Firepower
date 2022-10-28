@@ -52,7 +52,7 @@ SB-7274：当泰坦为帝王且拥有 "帝王边境" 涂装时，替换泰坦武
 
 #### 野牛装备
 
-左栏位：强力的护盾
+左栏位：带burn的涡旋防护罩（子弹打到直接反弹，不能攒一起后释放）
 
 中栏位：NULL（空）
 
@@ -60,7 +60,7 @@ SB-7274：当泰坦为帝王且拥有 "帝王边境" 涂装时，替换泰坦武
 
 主武器：NULL（空）
 
-近战栏位：melee_titan_punch_fighter 拥有mod："berserker","allow_as_primary"
+近战栏位：melee_titan_punch_fighter 拥有mod："berserker","allow_as_primary" 伤害：2500/拳
 
 其他栏位保持不变
 
