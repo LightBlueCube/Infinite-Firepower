@@ -31,7 +31,7 @@ void function SetTitanLoadoutReplace( entity titan )
 	}
 	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
-		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰\n温馨提示：野牛攻击请按近战键（默认为F键）",  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1);
+		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰\n温馨提示：野牛攻击请按近战键（默认为F键）",  -1, 0.3, 200, 200, 225, 255, 0.15, 8, 1);
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
