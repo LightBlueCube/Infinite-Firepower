@@ -6,7 +6,23 @@
 
 有啥服务器的问题和bug反馈也可以发这
 
-## 更新日志
+## 特别鸣谢（名字按首字母顺序排列）：
+
+[cmggy][cmggy]
+
+[DZ][DZ]
+
+[Pan-da32767][Pan-da32767]
+
+[RycXEpd][RycXEpd]
+
+[VoyageDB][VoyageDB]
+
+[zxcPandora][zxcPandora]
+
+----
+
+### 更新日志
 
 ----
 
@@ -63,20 +79,6 @@ SB-7274：当泰坦为帝王且拥有 "帝王边境" 涂装时，替换泰坦武
 其他栏位保持不变
 
 ----
-
-### 特别感谢（名字按首字母顺序排列）：
-
-[cmggy][cmggy]
-
-[DZ][DZ]
-
-[Pan-da32767][Pan-da32767]
-
-[RycXEpd][RycXEpd]
-
-[VoyageDB][VoyageDB]
-
-[zxcPandora][zxcPandora]
 
 [RycXEpd]:https://github.com/RycXEpd
 [VoyageDB]:https://github.com/DBmaoha
