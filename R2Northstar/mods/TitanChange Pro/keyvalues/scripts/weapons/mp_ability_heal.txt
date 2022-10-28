@@ -2,7 +2,7 @@ WeaponData
 {
 	Mods
 	{
-		titan
+		tcp
 		{
 			"regen_ammo_refill_rate"	"*2"
 		}

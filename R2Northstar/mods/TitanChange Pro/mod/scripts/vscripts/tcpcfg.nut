@@ -27,7 +27,7 @@ void function SetTitanLoadoutReplace( entity titan )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
         titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream" )
 	  	titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread"] )
-        titan.GiveOffhandWeapon( "mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE )
+        titan.GiveOffhandWeapon( "mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE,["tcp"] )
 	}
 	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
@@ -42,7 +42,7 @@ void function SetTitanLoadoutReplace( entity titan )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveOffhandWeapon("mp_titanability_particle_wall", OFFHAND_SPECIAL )
-		titan.GiveOffhandWeapon("mp_ability_heal", OFFHAND_ORDNANCE )
+		titan.GiveOffhandWeapon("mp_ability_heal", OFFHAND_ORDNANCE, ["tcp"] )
 		titan.GiveOffhandWeapon( "melee_titan_punch_fighter", OFFHAND_MELEE, ["berserker", "allow_as_primary"] )
 		titan.SetActiveWeaponByName( "melee_titan_punch_fighter" )
 	}
