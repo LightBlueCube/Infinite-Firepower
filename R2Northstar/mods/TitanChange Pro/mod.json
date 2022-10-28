@@ -1,0 +1,20 @@
+{
+    "Name": "titanchangepro",
+    "Description": "titanchangepro",
+    "Authors": ["change titan but is pro version"],
+    "Contacts": [
+        "VoyageDB,LightBlueCube(feiwu)"
+    ],
+    "LoadPriority": 101,
+    "Version": "1.0.0",
+    "RequiredOnClient": false,
+    "Scripts": [
+        {
+            "Path": "tcpcfg.nut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "tcpback"
+            }
+        }
+    ]
+}

@@ -1,0 +1,4 @@
+WeaponData
+{
+	"ammo_min_to_fire"								"0"
+}
