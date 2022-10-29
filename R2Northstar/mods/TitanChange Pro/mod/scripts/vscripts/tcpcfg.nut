@@ -1,8 +1,10 @@
-global function tcpback
+global function tcpback;
+//global function EMPTitanThinkConstant
 
 void function tcpback()
 {
 	AddSpawnCallback("npc_titan", OnTitanfall )
+	AddCallback_OnPilotBecomesTitan( OnPilotBecomesTitan )
 }
 
 void function OnTitanfall( entity titan )
@@ -43,8 +45,10 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
-		titan.GiveOffhandWeapon("mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","burn_mod_titan_vortex_shield"] )
-		titan.GiveOffhandWeapon("mp_ability_heal", OFFHAND_ORDNANCE, ["tcp"] )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","burn_mod_titan_vortex_shield"] )
+		titan.GiveOffhandWeapon( "mp_ability_heal", OFFHAND_ORDNANCE,["tcp"] )
 		titan.GiveOffhandWeapon( "melee_titan_punch_fighter", OFFHAND_MELEE, ["berserker", "allow_as_primary"] )
 		titan.SetActiveWeaponByName( "melee_titan_punch_fighter" )
 	}
@@ -66,5 +70,31 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.GiveOffhandWeapon("mp_titanability_smoke", OFFHAND_TITAN_CENTER )
 		titan.GiveOffhandWeapon("mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
+	}
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	{
+		SendHudMessage(player, "已启用电弧浪人装备，取消至尊泰坦以使用原版浪人",  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1);
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveWeapon("mp_titanweapon_leadwall",["tcp"])
+		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_SPECIAL )
+		titan.GiveOffhandWeapon( "mp_titanweapon_arc_wave", OFFHAND_ORDNANCE,["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
+		thread EMPTitanThinkConstant( titan ) 
+	}
+}
+
+void function OnPilotBecomesTitan( entity player, entity titan )
+{
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	{
+		thread EMPTitanThinkConstant( player ) 
 	}
 }
