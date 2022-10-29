@@ -521,8 +521,8 @@ void function DisableTitanRodeo( entity titan )
 	entity titanSoul = titan.GetTitanSoul()
 
 	Assert( IsValid( titanSoul ) )
-
-	titanSoul.SetIsValidRodeoTarget( false ) //Stops rodeo from happening on them.
+	if( IsValid( titanSoul ) )
+		titanSoul.SetIsValidRodeoTarget( false ) //Stops rodeo from happening on them.
 }
 
 void function AddOnRodeoStartedCallback( void functionref(entity,entity) callbackFunc )
@@ -861,6 +861,8 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 	if ( classicRodeo )
 	{
 		if( !IsAlive( rodeoPilot ) ) // we did a waitthread so here should have IsValid() check
+			return
+		if( !IsValid( rodeoPilot ) )
 			return
 		if( !IsValid( titanSoul ) )
    			return
