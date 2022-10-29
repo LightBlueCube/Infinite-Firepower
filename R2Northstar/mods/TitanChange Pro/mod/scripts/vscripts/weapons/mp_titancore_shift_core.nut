@@ -157,7 +157,7 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 		if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
         {
             titan.GetOffhandWeapon( OFFHAND_ORDNANCE ).AddMod( "tcp_dash_core" )
-            SendHudMessage(owner, "电弧冲刺核心启动\n启动期间电弧波无限使用",  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1);
+            SendHudMessage(owner, "电弧冲刺核心启动\n启动期间电弧波伤害增加且无限使用",  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1);
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
