@@ -164,6 +164,9 @@ void function EmpField_DamagedEntity( entity target, var damageInfo )
 		const ARC_TITAN_EMP_FADEOUT_DURATION	= 0.35
 
 		local attachID 	= titan.LookupAttachment( "hijack" )
+
+		if( attachID == 0 ){return}		//anti-crash 
+
 		local origin 	= titan.GetAttachmentOrigin( attachID )
 		local distSqr 	= DistanceSqr( origin, target.GetOrigin() )
 

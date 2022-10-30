@@ -13,8 +13,8 @@ WeaponData
 			"melee_lunge_target_range"					"500"
 			"melee_lunge_target_angle"					"15"
 
-			"melee_damage_heavyarmor"					"3200"
-			"melee_range"								"400"
+			"melee_damage_heavyarmor"					"++2700"
+			"melee_range"								"350"
 			"melee_anim_1p_number"						"3"			// ACT_VM_MELEE_ATTACK1, 2, or 3
 			"melee_anim_3p"								"ACT_GESTURE_MELEE_ATTACK3"
 			"damage_flags"								"DF_MELEE | DF_EXPLOSION | DF_CRITICAL | DF_KNOCK_BACK | DF_DOOM_FATALITY"

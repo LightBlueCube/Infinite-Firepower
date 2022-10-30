@@ -25,8 +25,8 @@ WeaponData
 		{
 			"damage_near_value"   							"*1.5"
 			"damage_far_value"								"*1.5"
-			"damage_near_value_titanarmor"					"*2"
-			"damage_far_value_titanarmor"					"*2"
+			"damage_near_value_titanarmor"					"*1.5"
+			"damage_far_value_titanarmor"					"*1.5"
 
 			"regen_ammo_refill_rate"						"*40.0"
 		}

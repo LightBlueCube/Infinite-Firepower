@@ -15,6 +15,13 @@
             "ServerCallback": {
                 "After": "tcpback"
             }
-        }
+        },
+        {
+			"Path": "teamshuffle.nut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "TeamShuffle_Init"
+			}
+		}
     ]
 }
