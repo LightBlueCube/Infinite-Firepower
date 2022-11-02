@@ -178,9 +178,9 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
             	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
         	}
 			titan.GiveWeapon("mp_titanweapon_leadwall",["tcp_dash_core"])
-			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "slow_recovery_vortex" )
+			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "shield_only" )
 			titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
-			titan.GiveOffhandWeapon( "mp_titanweapon_heat_shield", OFFHAND_ORDNANCE )
+			titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE )
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
@@ -306,7 +306,7 @@ void function RestorePlayerWeapons( entity player )
 				titan.GiveWeapon("mp_titanweapon_leadwall")
 				titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 				titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
-				titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","tcp"] )
+				titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["shield_only","sp_wider_return_spread"] )
 				titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
 			}
 		}
