@@ -221,8 +221,8 @@ function EndVortex( entity weapon )
 
 bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, entity vortexSphere, var damageInfo )
 {
-	if ( weapon.HasMod( "shield_only" ) )
-		return true
+	//if ( weapon.HasMod( "shield_only" ) )
+	//	return true
 
 	#if CLIENT
 		return true
@@ -245,8 +245,8 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 
 bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos )
 {
-	if ( weapon.HasMod( "shield_only" ) )
-		return true
+	//if ( weapon.HasMod( "shield_only" ) )
+	//	return true
 
 	#if CLIENT
 		return true
