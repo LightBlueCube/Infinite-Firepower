@@ -129,7 +129,7 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	if ( !IsValid( offhandWeapon ) )
 		return 0
 
-	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && owner.GetTitanSoul().GetTitan().GetModelName() != $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
+	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && owner.GetTitanSoul().GetTitan().GetModelName() != $"models/titans/heavy/titan_heavy_scorch_prime.mdl" && owner.GetTitanSoul().GetTitan().GetModelName() != $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 		return 0
 
 #if SERVER
@@ -156,7 +156,7 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 
 		if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
         {
-            titan.GetOffhandWeapon( OFFHAND_ORDNANCE ).AddMod( "tcp_dash_core" )
+            titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "tcp_dash_core" )
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
@@ -165,6 +165,22 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 		{
 			titan.GetOffhandWeapon( OFFHAND_MELEE ).AddMod( "tcp_dash_core" )
+			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
+			thread Shift_Core_End( weapon, owner, delay )
+			return 1
+		}
+
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+		{
+			array<entity> weapons = titan.GetMainWeapons()
+        	foreach( entity weapon in weapons )
+    	    {
+            	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        	}
+			titan.GiveWeapon("mp_titanweapon_leadwall",["tcp_dash_core"])
+			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "slow_recovery_vortex" )
+			titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+			titan.GiveOffhandWeapon( "mp_titanweapon_heat_shield", OFFHAND_ORDNANCE )
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
@@ -278,7 +294,32 @@ void function RestorePlayerWeapons( entity player )
 
 		entity meleeWeapon = titan.GetOffhandWeapon( OFFHAND_MELEE )
 
-		if( !(titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" || titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl") )
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+		{
+			if ( IsValid( titan ) )
+			{
+				array<entity> weapons = titan.GetMainWeapons()
+	        	foreach( entity weapon in weapons )
+    		    {
+        	    	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        		}
+				titan.GiveWeapon("mp_titanweapon_leadwall")
+				titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+				titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+				titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","tcp"] )
+				titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
+			}
+		}
+		if(titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl")
+			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_SPECIAL ) ) )
+				titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "tcp_dash_core" )
+			
+		if(titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl")
+			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_MELEE ) ) )
+				titan.GetOffhandWeapon( OFFHAND_MELEE ).RemoveMod( "tcp_dash_core" )
+
+
+		if( !(titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" || (titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" || titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl")) )
 		{
 			if ( IsValid( meleeWeapon ) )
 			{
@@ -295,14 +336,8 @@ void function RestorePlayerWeapons( entity player )
 	   	 		entity mainWeapon = titan.GetMainWeapons()[0]
    				mainWeapon.AllowUse( true )
 		    }
-
 		}
-		else if(titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl")
-			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
-				titan.GetOffhandWeapon( OFFHAND_ORDNANCE ).RemoveMod( "tcp_dash_core" )
-		else if(titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl")
-			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_MELEE ) ) )
-				titan.GetOffhandWeapon( OFFHAND_MELEE ).RemoveMod( "tcp_dash_core" )
+
 
 		if ( titan.IsNPC() )
 		{

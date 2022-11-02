@@ -1,10 +1,12 @@
+untyped //.s. need this
 global function tcpback;
-//global function EMPTitanThinkConstant
 
 void function tcpback()
 {
 	AddSpawnCallback("npc_titan", OnTitanfall )
 	AddCallback_OnPilotBecomesTitan( OnPilotBecomesTitan )
+	AddCallback_OnPlayerKilled( OnPlayerKilled )
+	AddCallback_OnNPCKilled( OnNPCKilled )
 }
 
 void function OnTitanfall( entity titan )
@@ -83,17 +85,82 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveWeapon("mp_titanweapon_leadwall",["tcp"])
-		titan.GiveOffhandWeapon( "mp_titanweapon_arc_wave", OFFHAND_ORDNANCE,["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_arc_wave", OFFHAND_SPECIAL,["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titanability_phase_dash", OFFHAND_ORDNANCE )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
-		thread EMPTitanThinkConstant( titan ) 
+		titan.GiveOffhandWeapon( "melee_titan_sword", OFFHAND_MELEE )
+	}
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
+	{
+		SendHudMessage(player, "已启用监察者泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1);
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.GiveOffhandWeapon("mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE,["tcp"] )
+		titan.GiveOffhandWeapon("mp_titanweapon_laser_lite", OFFHAND_SPECIAL )
+		titan.GiveOffhandWeapon("mp_titanability_hover", OFFHAND_TITAN_CENTER, ["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titancore_salvo_core", OFFHAND_EQUIPMENT )
+	}
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	{
+		SendHudMessage(player, "已启用壁垒泰坦装备，取消至尊泰坦以使用原版军团\n核心：壁垒超载核心，启用后冲刺加快，护盾无限使用，主武器连发，获得热能护盾",  -1, 0.3, 200, 200, 225, 255, 0.15, 12, 1);
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveWeapon("mp_titanweapon_leadwall")
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
 	}
 }
 
-void function OnPilotBecomesTitan( entity player, entity titan )
+void function OnPilotBecomesTitan( entity player ,entity titan )
 {
-	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" || titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 	{
-		thread EMPTitanThinkConstant( player ) 
+		if( "TitanIsEmpTitan" in player.s )
+		{
+			if( player.s.TitanIsEmpTitan == false )
+			{
+				player.s.TitanIsEmpTitan <- true;
+				thread EMPTitanThinkConstant( player );
+			}
+		} 
+		else
+		{
+			player.s.TitanIsEmpTitan <- true;
+			thread EMPTitanThinkConstant( player );
+		}
 	}
+}
+
+
+void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
+{
+    if( victim.IsTitan() )
+    {
+		victim.s.TitanIsEmpTitan <- false;
+	}
+	if( attacker == victim )
+    {
+		if( attacker.IsTitan() || victim.IsTitan() )
+		{
+			attacker.s.TitanIsEmpTitan <- false;
+			victim.s.TitanIsEmpTitan <- false;
+		}
+	}
+}
+void function OnNPCKilled( entity victim, entity attacker, var damageInfo)
+{
+	attacker.s.TitanIsEmpTitan <- false;
+	victim.s.TitanIsEmpTitan <- false;
 }

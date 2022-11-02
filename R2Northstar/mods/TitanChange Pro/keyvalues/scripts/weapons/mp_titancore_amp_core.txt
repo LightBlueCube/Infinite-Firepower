@@ -1,4 +1,4 @@
 WeaponData
 {
-	"core_duration"									"6.5"	//5.5
+	"core_duration"									"8"
 }

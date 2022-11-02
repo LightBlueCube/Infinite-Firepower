@@ -4,9 +4,9 @@ global function EmpTitans_Init
 
 global function EMPTitanThinkConstant
 
-const DAMAGE_AGAINST_TITANS 			= 80
+const DAMAGE_AGAINST_TITANS 			= 160
 
-const DAMAGE_AGAINST_PILOTS 			= 1
+const DAMAGE_AGAINST_PILOTS 			= 2
 
 const EMP_DAMAGE_TICK_RATE = 0.33
 const FX_EMP_FIELD						= $"P_xo_emp_field"
@@ -29,7 +29,7 @@ void function EMPTitanThinkConstant( entity titan )
 	titan.EndSignal( "StopEMPField" )
 
 	//We don't want pilots accidently rodeoing an electrified titan.
-	DisableTitanRodeo( titan )
+	//DisableTitanRodeo( titan )
 
 	//Used to identify this titan as an arc titan
 	SetTargetName( titan, "empTitan" )
