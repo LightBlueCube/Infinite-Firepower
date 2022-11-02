@@ -1,0 +1,22 @@
+WeaponData
+{
+	Mods
+	{
+		pas_defensive_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+
+		burn_mod_titan_smoke
+		{
+		}
+
+		tcp
+		{
+				"regen_ammo_refill_rate"						"*4"
+		}
+	}
+}

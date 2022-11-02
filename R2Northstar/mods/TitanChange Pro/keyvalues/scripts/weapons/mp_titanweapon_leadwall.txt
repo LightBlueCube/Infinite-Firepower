@@ -33,5 +33,10 @@ WeaponData
 		{
 			"ammo_clip_size"   								"1"
 		}
+		tcp_dash_core
+		{
+			"fire_mode"   									"auto"
+			"ammo_clip_size"   								"++12"
+		}
 	}
 }

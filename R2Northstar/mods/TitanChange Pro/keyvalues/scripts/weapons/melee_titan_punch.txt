@@ -4,7 +4,7 @@ WeaponData
 	{
 		berserker
 		{
-			"fire_rate"									"0.8"
+			"fire_rate"									"0.6"
 
 			"melee_attack_animtime"						"1.23"
 			"melee_raise_recovery_animtime_normal"		"0.77"
