@@ -169,13 +169,22 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
 		}
-
 		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+		{
+			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "slow_recovery_vortex" )
+			titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+			titan.GiveOffhandWeapon( "mp_titanweapon_flame_wall", OFFHAND_ORDNANCE,["tcp_dash_core"] )
+			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
+			thread Shift_Core_End( weapon, owner, delay )
+			return 1
+		}
+
+		/*if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 		{
 			array<entity> weapons = titan.GetMainWeapons()
         	foreach( entity weapon in weapons )
     	    {
-            	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+            	titan.TakeWeaponNow( weapon.GetWeaponClassName() )							旧壁垒代码，应该会有其他泰坦用得上的吧?
         	}
 			titan.GiveWeapon("mp_titanweapon_leadwall",["tcp_dash_core"])
 			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "shield_only" )
@@ -184,7 +193,7 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
-		}
+		}*/
 
 		titan.GetOffhandWeapon( OFFHAND_MELEE ).AddMod( "super_charged" )
 
@@ -294,19 +303,28 @@ void function RestorePlayerWeapons( entity player )
 
 		entity meleeWeapon = titan.GetOffhandWeapon( OFFHAND_MELEE )
 
-		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+		/*if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 		{
 			if ( IsValid( titan ) )
 			{
 				array<entity> weapons = titan.GetMainWeapons()
 	        	foreach( entity weapon in weapons )
     		    {
-        	    	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        	    	titan.TakeWeaponNow( weapon.GetWeaponClassName() )									旧壁垒代码
         		}
 				titan.GiveWeapon("mp_titanweapon_leadwall")
 				titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 				titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 				titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["shield_only","sp_wider_return_spread"] )
+				titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
+			}
+		}*/
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" ) //复原装备
+		{
+			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_SPECIAL ) ) )
+			{
+				titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "slow_recovery_vortex" )
+				titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 				titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
 			}
 		}

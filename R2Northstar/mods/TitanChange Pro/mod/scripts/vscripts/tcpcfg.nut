@@ -104,7 +104,7 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.GiveOffhandWeapon("mp_titanability_hover", OFFHAND_TITAN_CENTER, ["tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_salvo_core", OFFHAND_EQUIPMENT )
 	}
-	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	/*if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 	{
 		SendHudMessage(player, "已启用壁垒泰坦装备，取消至尊泰坦以使用原版军团\n核心：壁垒超载核心，启用后冲刺加快，护盾无限使用，主武器连发，获得锁定导弹",  -1, 0.3, 200, 200, 225, 255, 0.15, 12, 1);
 		array<entity> weapons = titan.GetMainWeapons()
@@ -120,12 +120,29 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["shield_only","sp_wider_return_spread"] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
+	}*/
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	{
+		SendHudMessage(player, "已启用壁垒泰坦装备，取消至尊泰坦以使用原版军团\n涡旋防护罩接到子弹会增加使用时间\n核心：壁垒超载核心，启用后冲刺加快，护盾无限使用，获得火墙",  -1, 0.3, 200, 200, 225, 255, 0.15, 12, 1);
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveWeapon("mp_titanweapon_meteor")
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","tcp_vortex"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
 	}
 }
 
 void function OnPilotBecomesTitan( entity player ,entity titan )
 {
-	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" || titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
 	{
 		if( "TitanIsEmpTitan" in player.s )
 		{
