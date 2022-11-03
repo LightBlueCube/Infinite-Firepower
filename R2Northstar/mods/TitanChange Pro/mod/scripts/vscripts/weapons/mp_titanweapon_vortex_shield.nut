@@ -399,8 +399,8 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_vortex_shield( entity wea
 		// should be fixed in a better way; possibly by giving ION a modded version of vortex?
 		if ( GetConVarInt( "bug_reproNum" ) != 131242 && weapon.IsChargeWeapon() )
 		{
-			if ( weapon.HasMod( "slow_recovery_vortex" ) )
-				allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
+			if ( weapon.HasMod( "tcp_vortex" ) )
+				allowSwitch = weapon.GetWeaponChargeFraction() < 0.2
 			else
 				allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
 		}
