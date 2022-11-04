@@ -122,7 +122,7 @@ void function SetTitanLoadoutReplace( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveWeapon("mp_titanweapon_leadwall",["tcp"])
 		titan.GiveOffhandWeapon( "mp_titanweapon_arc_wave", OFFHAND_SPECIAL,["tcp"] )
-		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_ORDNANCE )
+		titan.GiveOffhandWeapon( "mp_titanability_phase_dash", OFFHAND_ORDNANCE )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "melee_titan_sword", OFFHAND_MELEE )
 	}
