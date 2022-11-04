@@ -171,9 +171,13 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 		}
 		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 		{
+			array<entity> weapons = titan.GetMainWeapons()
+        	foreach( entity weapon in weapons )
+    	    {
+            	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        	}
+			titan.GiveWeapon("mp_titanweapon_meteor",["tcp_dash_core"])
 			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).RemoveMod( "slow_recovery_vortex" )
-			titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
-			titan.GiveOffhandWeapon( "mp_titanweapon_flame_wall", OFFHAND_ORDNANCE,["tcp_dash_core"] )
 			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 			thread Shift_Core_End( weapon, owner, delay )
 			return 1
@@ -323,8 +327,13 @@ void function RestorePlayerWeapons( entity player )
 		{
 			if ( IsValid( titan.GetOffhandWeapon( OFFHAND_SPECIAL ) ) )
 			{
+				array<entity> weapons = titan.GetMainWeapons()
+	        	foreach( entity weapon in weapons )
+    		    {
+        	    	titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        		}
+				titan.GiveWeapon("mp_titanweapon_meteor" )
 				titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "slow_recovery_vortex" )
-				titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 				titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE,["energy_field_energy_transfer","tcp"] )
 			}
 		}

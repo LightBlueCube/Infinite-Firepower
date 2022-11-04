@@ -652,11 +652,11 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	{
 		if ( projectile )
 		{
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 100	//很明显不是所有武器都写了vortex_drain，于是改用调nearvar除以100
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 200	//很明显不是所有武器都写了vortex_drain，于是改用调nearvar除以200（除100恢复的有点多）
 		}
 		else
 		{
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 100	//不知道projectile是什么玩意，但官方这样写的，就这样写吧
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 200	//不知道projectile是什么玩意，但官方这样写的，就这样写吧
 		}
 		//amount = 0.1	// 推荐开个常量存										//这行不用了，直接调用武器txt上的消耗量，但是是负的
 		/*if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )

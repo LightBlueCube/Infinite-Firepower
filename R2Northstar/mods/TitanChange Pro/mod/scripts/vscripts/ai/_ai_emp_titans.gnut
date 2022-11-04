@@ -6,7 +6,7 @@ global function EMPTitanThinkConstant
 
 const DAMAGE_AGAINST_TITANS 			= 160
 
-const DAMAGE_AGAINST_PILOTS 			= 2
+const DAMAGE_AGAINST_PILOTS 			= 20
 
 const EMP_DAMAGE_TICK_RATE = 0.33
 const FX_EMP_FIELD						= $"P_xo_emp_field"
