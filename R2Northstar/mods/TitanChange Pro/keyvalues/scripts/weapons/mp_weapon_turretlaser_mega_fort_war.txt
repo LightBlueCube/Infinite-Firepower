@@ -12,11 +12,11 @@ WeaponData
 		// Damage - When Used by Players
 		"damage_near_value"   							"200"
 		"damage_far_value"								"200"
-		"damage_near_value_titanarmor"					"6000"
-		"damage_far_value_titanarmor" 					"6000"
+		"damage_near_value_titanarmor"					"6250"
+		"damage_far_value_titanarmor" 					"6250"
 	}
 
-	"fire_rate"   									"1.2"
+	"fire_rate"   									"10"
 
 	RUI_CrosshairData
 	{
