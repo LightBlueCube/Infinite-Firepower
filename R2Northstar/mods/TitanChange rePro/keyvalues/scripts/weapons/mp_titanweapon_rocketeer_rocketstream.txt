@@ -1,0 +1,4 @@
+WeaponData
+{
+	"ammo_clip_size"   								"16"
+}
