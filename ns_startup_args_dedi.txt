@@ -1,5 +1,4 @@
 +setplaylist aitdm
 +mp_gamemode aitdm
-+setplaylistvaroverrides "max_players 12 scorelimit 1024 timelimit 16 earn_meter_pilot_multiplier 4 earn_meter_titan_multiplier 4 titan_shield_regen 1 classic_rodeo 1"
--port 37018
++setplaylistvaroverrides "max_players 12 scorelimit 1024 timelimit 20 earn_meter_pilot_multiplier 4 earn_meter_titan_multiplier 4 titan_shield_regen 1 classic_rodeo 1"
 +map mp_glitch
