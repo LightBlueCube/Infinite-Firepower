@@ -1,0 +1,7 @@
+{
+    "Name": "ifp",
+    "Description": "ifp",
+    "Authors": ["VoyageDB,LightBlueCube(feiwu)"],
+    "LoadPriority": 101,
+    "RequiredOnClient": false
+}

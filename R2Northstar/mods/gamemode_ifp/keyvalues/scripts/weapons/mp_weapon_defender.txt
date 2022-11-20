@@ -1,0 +1,87 @@
+WeaponData
+{
+	MP_BASE
+	{
+		// Damage - When Used by Players
+		"damage_rodeo"									"15000"	//7500
+		// Damage - When Used by NPCs
+		"npc_damage_near_value"   						"600"
+		"npc_damage_far_value"							"600"
+		"npc_damage_near_value_titanarmor"				"2400"
+		"npc_damage_far_value_titanarmor" 				"2400"
+	}
+		Mods
+	{
+		slammer
+		{
+		}
+  		 pro_screen
+        {
+        }
+        extended_ammo
+		{
+		}
+		burn_mod_defender
+		{
+		}
+
+		quick_charge
+		{
+			"charge_time" 									"*0.33"
+			"charge_cooldown_time"							"*0.66"
+			"charge_cooldown_delay"   						"0.0"
+			"charge_end_forces_fire"						"0"
+
+			//"damage_near_value"   							"300"
+			//"damage_far_value"								"300"
+			//"damage_near_value_titanarmor"					"825"
+			//"damage_far_value_titanarmor" 					"825"
+			//"damage_rodeo"									"15000"	//7500
+			"damage_near_value"   							"--250" //55
+			"damage_far_value"								"--250"  //45
+			"damage_near_value_titanarmor"					"--325"
+			"damage_far_value_titanarmor" 					"--325"
+			"damage_rodeo"									"--12500"	//2500
+
+			"spread_stand_hip"								"0"
+			"spread_stand_hip_run"							"0"
+			"spread_stand_ads"								"0"
+			"spread_stand_hip_sprint"                       "0"
+			"spread_crouch_hip"   							"0"
+			"spread_crouch_ads"   							"0"
+			"spread_air_hip"  								"0"
+			"spread_air_ads"  								"0"
+
+			"impulse_force"   								"50000"
+		}
+
+		PROTO_at_turret
+		{
+		}
+		pas_fast_ads
+		{
+		}
+		pas_fast_swap
+		{
+		}
+		tactical_cdr_on_kill
+		{
+
+		}
+		pas_run_and_gun
+		{
+		}
+		pas_fast_reload
+		{
+		}
+		pveBase
+		{
+		}
+		at_unlimited_ammo
+		{
+		}
+		longNPCCharge
+		{
+		}
+	}
+}

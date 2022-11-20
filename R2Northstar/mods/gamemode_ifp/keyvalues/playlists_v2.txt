@@ -1,0 +1,15 @@
+playlists
+{
+	Gamemodes
+	{
+		aitdm
+		{
+			inherit defaults
+			vars
+			{
+				battery_health_frac 2
+				amped_battery_health_frac 1
+			}
+		}
+	}
+}
