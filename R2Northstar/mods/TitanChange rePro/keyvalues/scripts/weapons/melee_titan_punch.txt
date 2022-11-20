@@ -1,0 +1,34 @@
+WeaponData
+{
+	Mods
+	{
+		berserker
+		{
+			"melee_attack_animtime"						"1.23"
+			"melee_raise_recovery_animtime_normal"		"0.77"
+			"melee_raise_recovery_animtime_quick"		"0.77"
+
+			"melee_lunge_target_range"					"500"
+			"melee_lunge_target_angle"					"15"
+
+			"melee_damage_heavyarmor"					"2500"
+			"fire_rate"									"0.6"
+			"melee_range"								"300"
+			"melee_anim_1p_number"						"3"			// ACT_VM_MELEE_ATTACK1, 2, or 3
+			"melee_anim_3p"								"ACT_GESTURE_MELEE_ATTACK3"
+			"damage_flags"								"DF_MELEE | DF_EXPLOSION | DF_CRITICAL | DF_KNOCK_BACK | DF_DOOM_FATALITY"
+			"impact_effect_table"						"40mm_splasher_rounds"
+
+		}
+
+		allow_as_primary
+		{
+			"fire_mode"									"offhand_melee_hybrid"
+			"attack_button_presses_melee"				"1"
+			"npc_min_range"   							"0"
+			"npc_max_range"   							"100"
+			"npc_min_engage_range"						"100"
+			"npc_min_engage_range_heavy_armor"			"100"
+		}
+	}
+}
