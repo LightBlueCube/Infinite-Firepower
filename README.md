@@ -123,7 +123,7 @@ MK5智障手枪伤害 40 -> 20  射击模式 semi -> auto
 
 中栏位：NULL（空）
 
-右栏位：激素（恢复速度为原版恢复速度 \* 4）
+右栏位：激素（恢复速度为原版恢复速度 \* 3）
 
 OFFHAND_MELEE（近战栏位）：melee_titan_punch_fighter[^7]
 
