@@ -102,7 +102,7 @@ void function StartNukeWARN( entity owner )
 					}
 				}
 			}*/
-			AddTeamScore( owner.GetTeam(), 1024 )
+			AddTeamScore( owner.GetTeam(), 2048 )
 		}
 		if(sec == 2)
 		{
