@@ -6,7 +6,7 @@ void function tcpback()
 	AddSpawnCallback("npc_titan", OnTitanfall )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_OnPilotBecomesTitan( SetPlayerTitanTitle )
-	AddCallback_OnPlayerRespawned( TitanUseCheck )
+	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnUpdateDerivedPlayerTitanLoadout( ApplyFDDerviedUpgrades )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
@@ -30,7 +30,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 			return
 		if( attacker != victim && !victim.IsNPC() )
 		{
-			if(attacker.GetClassName() == "npc_titan")
+			if( attacker.GetClassName() == "npc_titan" )
 				attacker = attacker.GetBossPlayer()
 			if( !"KillStreak" in attacker.s )
 				attacker.s.KillStreak <- 1
@@ -121,7 +121,7 @@ void function StartNukeWARN( entity owner )
 			{
 				EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 				EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-				SendHudMessage(player, "注意！玩家 \""+owner.GetPlayerName()+"\" 达到一命20杀并且选择启动Alpha核弹！\n////////////////Alpha核弹将在"+float(sec) / 10+"秒后落地////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+				SendHudMessage( player, "注意！玩家 \""+owner.GetPlayerName()+"\" 达到一命20杀并且选择启动Alpha核弹！\n////////////////Alpha核弹将在"+float(sec) / 10+"秒后落地////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 			}
 		}
 		sec = sec - 1
@@ -132,8 +132,6 @@ void function StartNukeWARN( entity owner )
 		if( IsValid( player ) )
 		{
 			thread explode( player )
-			if(IsAlive(player))
-				player.Die()
 		}
 	}
 	foreach ( entity npc in GetNPCArray() )
@@ -157,57 +155,27 @@ void function StartNukeWARN( entity owner )
 
 void function explode( entity player )
 {
-	for (int value = 8; value > 0; value = value - 1)
+	StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
+	wait 0.1
+	for (int value = 32; value > 0; value = value - 1)
 	{
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-
 	}
-	wait 1.8
+	wait 0.4
+	if(IsAlive(player))
+		player.Die()
+	wait 1.4
 	ScreenFadeToBlackForever( player, 0 )
 }
 
-void function TitanUseCheck( entity player )
+void function RestoreKillStreak( entity player )
 {
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
-	foreach( weapon in player.GetMainWeapons() )
-	{
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_particle_accelerator" )
-			printt("泰坦使用率检查---10")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_meteor" )
-			printt("泰坦使用率检查---11")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_sniper" )
-			printt("泰坦使用率检查---12")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_leadwall" )
-			printt("泰坦使用率检查---13")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_sticky_40mm" )
-			printt("泰坦使用率检查---14")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_predator_cannon" )
-			printt("泰坦使用率检查---15")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_xo16_vanguard" )
-			printt("泰坦使用率检查---16")
-	}
 }
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
 	if( player.s.titanTitle != "" )
 		player.SetTitle( player.s.titanTitle )
-	foreach( weapon in player.GetMainWeapons() )
-	{
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_particle_accelerator" )
-			printt("泰坦使用率检查---10")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_meteor" )
-			printt("泰坦使用率检查---11")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_sniper" )
-			printt("泰坦使用率检查---12")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_leadwall" )
-			printt("泰坦使用率检查---13")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_sticky_40mm" )
-			printt("泰坦使用率检查---14")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_predator_cannon" )
-			printt("泰坦使用率检查---15")
-		if( weapon.GetWeaponClassName() == "mp_titanweapon_xo16_vanguard" )
-			printt("泰坦使用率检查---16")
-	}
 }
 
 
@@ -229,7 +197,7 @@ void function OnTitanfall( entity titan )
 
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//检查玩家的模型
 	{
-		printt("泰坦使用率检查---1")
+		printt("TitanUseChecker----1")
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野兽泰坦装备，取消至尊泰坦以使用原版北极星",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
@@ -252,7 +220,7 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
-		printt("泰坦使用率检查---2")
+		printt("TitanUseChecker----2")
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用远征装备， 取消\"边境帝王\"战绘以使用原版帝王",  -1, 0.3, 200, 200, 225, 0, 0.15, 12, 1);
@@ -275,7 +243,7 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
-		printt("泰坦使用率检查---3")
+		printt("TitanUseChecker----3")
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
@@ -301,6 +269,42 @@ void function OnTitanfall( entity titan )
 	else
 	{
 		player.s.titanTitle <- ""		//当玩家不是任何魔改泰坦时，重置他的title防止一直显示上一次用过的魔改泰坦
+		//以下为泰坦使用率检查，做平衡用
+		if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion.mdl" )	//离子
+		{
+			printt("TitanUseChecker-----11")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch.mdl" )	//烈焰
+		{
+			printt("TitanUseChecker-----12")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/light/titan_light_northstar.mdl" )	//北极星
+		{
+			printt("TitanUseChecker-----13")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/light/titan_light_ronin.mdl" )	//浪人
+		{
+			printt("TitanUseChecker-----14")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone.mdl" )	//强力
+		{
+			printt("TitanUseChecker-----15")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion.mdl" )	//军团
+		{
+			printt("TitanUseChecker-----16")
+			soul.s.TitanHasBeenChange <- true
+		}
+		if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() != -1 && titan.GetSkin() != 3 )	//帝王
+		{
+			printt("TitanUseChecker-----17")
+			soul.s.TitanHasBeenChange <- true
+		}
 	}
 }
 

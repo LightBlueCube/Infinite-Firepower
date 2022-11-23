@@ -2388,9 +2388,9 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 		int addHealth = int( healingAmount * frac )
 
 		int totalHealth = minint( titan.GetMaxHealth(), titan.GetHealth() + addHealth )
-		if ( soul.IsDoomed() && batteryIsAmped )
+		if ( battery == null && SoulHasPassive( soul, ePassives.PAS_VANGUARD_COREMETER ) )
 		{
-			UndoomTitan( titan, 1 )
+			titan.SetHealth( minint( titan.GetMaxHealth(), titan.GetHealth() + 2500 ) )
 			soul.SetShieldHealth( soul.GetShieldHealthMax() )
 		}
 		else
