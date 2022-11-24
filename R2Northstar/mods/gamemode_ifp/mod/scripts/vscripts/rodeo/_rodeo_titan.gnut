@@ -984,7 +984,8 @@ void function ClassicRodeoThink( entity rodeoPilot, entity titanSoul, RodeoPacka
 	{
 		if( ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 ) // modified condition: titan's bossplayer applied a battery to their titan
 		{ // remove new-applied battery! then being kicked off!
-			waitthread ClassicRodeo_TryRemoveEnemyNewBattery( rodeoPilot, titanSoul, rodeoPackage )
+			//waitthread ClassicRodeo_TryRemoveEnemyNewBattery( rodeoPilot, titanSoul, rodeoPackage )
+			titanSoul.s.classicRodeoBatteryCount <- 0
 		}
 		if( rodeoPilot.GetTitanSoulBeingRodeoed() == titanSoul ) // pilot still rodeoing
 		{
