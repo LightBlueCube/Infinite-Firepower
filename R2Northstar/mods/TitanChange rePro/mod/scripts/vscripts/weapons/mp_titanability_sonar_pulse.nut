@@ -109,12 +109,12 @@ void function FastEmpSonar( entity projectile, entity inflictor )
 	SetTeam( inflictor, projectile.GetTeam() )
 	inflictor.SetOwner( projectile.GetOwner() )
 	int val = 0
-	while( val <= 8 )
+	while( val <= 16 )
 	{
 		thread EMPSonarThinkConstant( inflictor )
 		++val
 	}
-	wait 0.5
+	wait 0.7
 	inflictor.Destroy()
 }
 
