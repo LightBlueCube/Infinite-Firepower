@@ -65,6 +65,14 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 		{
 			thread EmpSonar( projectile )
 		}
+		if( mods.contains( "tcp_fast_emp" ) )
+		{
+			entity inflictor = CreateScriptMover( projectile.GetOrigin() )
+			if( IsValid( owner ) )
+				owner.TakeSharedEnergy( int( float( owner.GetSharedEnergyCount() ) / 2 ) )
+			thread FastEmpSonar( projectile, inflictor )
+			return
+		}
 
 		if ( !IsValid( owner ) )
 			return
@@ -93,6 +101,20 @@ void function EmpSonar( entity projectile )
 		++val
 	}
 	wait 3
+	inflictor.Destroy()
+}
+
+void function FastEmpSonar( entity projectile, entity inflictor )
+{
+	SetTeam( inflictor, projectile.GetTeam() )
+	inflictor.SetOwner( projectile.GetOwner() )
+	int val = 0
+	while( val <= 8 )
+	{
+		thread EMPSonarThinkConstant( inflictor )
+		++val
+	}
+	wait 0.5
 	inflictor.Destroy()
 }
 
@@ -143,6 +165,7 @@ void function SonarPulseThink( entity enemy, vector position, int team, entity s
 	int statusEffect = 0
 	if ( hasDamageAmp )
 		statusEffect = StatusEffect_AddEndless( enemy, eStatusEffect.damage_received_multiplier, 0.25 )
+
 	SonarStart( enemy, position, team, sonarOwner )
 
 	int sonarTeam = sonarOwner.GetTeam()

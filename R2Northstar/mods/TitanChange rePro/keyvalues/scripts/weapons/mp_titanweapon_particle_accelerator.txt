@@ -1,0 +1,47 @@
+WeaponData
+{
+	Mods
+	{
+		proto_particle_accelerator
+		{
+		}
+
+		proto_particle_accelerator_pas
+		{
+		}
+
+		sticky_rounds
+		{
+
+		}
+
+		burn_mod_titan_particle_accelerator
+		{
+		}
+
+		pas_ion_weapon_ads
+		{
+		}
+		fd_split_shot_cost
+		{
+		}
+		fd_upgraded_proto_particle_accelerator
+		{
+		}
+		fd_upgraded_proto_particle_accelerator_pas
+		{
+		}
+		fd_balance
+		{
+		}
+
+		tcp
+		{
+			"damage_near_value"   							"*1.8"
+			"damage_far_value"								"*1.8"
+			"shared_energy_cost"							"0" //Amped Shots
+			"damage_near_value_titanarmor"					"*1.8"
+			"damage_far_value_titanarmor" 					"*1.8"
+		}
+	}
+}
