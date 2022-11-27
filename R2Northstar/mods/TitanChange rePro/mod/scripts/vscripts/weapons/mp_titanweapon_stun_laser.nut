@@ -135,7 +135,7 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 			if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
 				shieldRestoreAmount = int( 1.25 * shieldRestoreAmount )
 			if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && ( target.IsPlayer() || ( target.GetClassName() != "npc_titan" && !target.IsNPC() ) ) )
-				ScreenFadeToColor( target, 192, 192, 192, 255, 0.1, 1.5 )
+				ScreenFadeToColor( target, 192, 192, 192, 255, 0.1, 2 )
 			else
 				soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
 		}
