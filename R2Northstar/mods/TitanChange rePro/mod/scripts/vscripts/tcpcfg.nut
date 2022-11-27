@@ -59,7 +59,8 @@ void function StartNuke( entity player )
 			int sec = 40
 			while( sec > 0 )
 			{
-				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+				if( IsValid( player ) )
+					SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 				sec = sec - 1
 				wait 0.1
 			}
@@ -81,7 +82,8 @@ void function StartNuke( entity player )
 		int sec = 40
 		while( sec > 0 )
 		{
-			SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+			if( IsValid( player ) )
+				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 			sec = sec - 1
 			wait 0.1
 		}
@@ -102,16 +104,6 @@ void function StartNukeWARN( entity owner )
 	{
 		if(sec == 32)
 		{
-			/*foreach ( player in GetPlayerArray() )
-			{
-				if( IsValid( player ) )
-				{
-					for (int value = 2; value > 0; value = value - 1)
-					{
-						EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_charge" )
-					}
-				}
-			}*/
 			AddTeamScore( owner.GetTeam(), 2048 )
 		}
 		if(sec == 2)
@@ -186,56 +178,78 @@ void function StartNukeWARN( entity owner )
 void function playerWARN( entity player, entity owner, int sec, bool Is10sec = false )
 {
 	if( Is10sec == false )
-		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+	{
+		if( IsValid( player ) )
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+	}
 	else
+	{
+		if( IsValid( player ) )
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
+		}
+		wait 0.1
+		if( IsValid( player ) )
+			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
+	}
+	if( IsValid( player ) )
 	{
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-		SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
-		wait 0.1
-		SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
-		//SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 2) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
 	}
-	EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-	EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 	wait 0.1
-	EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-	EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+	if( IsValid( player ) )
+	{
+		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+	}
 	if( Is10sec == true )
 	{
-		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 2 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+		if( IsValid( player ) )
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 2 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 		wait 0.1
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 3 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+		if( IsValid( player ) )
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 3 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+		}
 	}
-	else
+	else if( IsValid( player ) )
 		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 }
 
 void function explode( entity player )
 {
-	StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
+	if( IsValid( player ) )
+		StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
 	wait 0.1
-	for (int value = 32; value > 0; value = value - 1)
+	if( IsValid( player ) )
 	{
-		//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-		EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
+		for (int value = 32; value > 0; value = value - 1)
+		{
+			//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
+			EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
+		}
 	}
 	wait 0.4
-	if(IsAlive(player))
-		player.Die()
+	if( IsValid( player ) )
+		if(IsAlive(player))
+			player.Die()
 	wait 1.4
-	ScreenFadeToBlackForever( player, 0 )
+	if( IsValid( player ) )
+		ScreenFadeToBlackForever( player, 0 )
 }
 
 void function RestoreKillStreak( entity player )
-{
+	{
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"使用\"键（默认为\"E\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
-}
+	}
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
 	if( player.s.titanTitle != "" )
@@ -297,10 +311,10 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-		titan.GiveWeapon("mp_titanweapon_xo16_shorty")
+		titan.GiveWeapon( "mp_titanweapon_xo16_shorty" )
 		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread"] )
-		titan.GiveOffhandWeapon("mp_titanability_smoke", OFFHAND_TITAN_CENTER )
-		titan.GiveOffhandWeapon("mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE,["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER )
+		titan.GiveOffhandWeapon( "mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE,["tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
 	}
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
@@ -326,44 +340,65 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "melee_titan_punch_fighter", OFFHAND_MELEE, ["berserker", "allow_as_primary"] )
 		titan.SetActiveWeaponByName( "melee_titan_punch_fighter" )
 	}
+	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
+	{
+		printt("TitanUseChecker----4")
 
+		soul.s.TitanHasBeenChange <- true
+		SendHudMessage(player, "已启用能核泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		player.s.titanTitle <- "能核"
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+		titan.GiveWeapon( "mp_titanweapon_particle_accelerator", ["tcp"] )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, ["tcp_vortex"] )
+		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER,["tcp_fast_emp"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE, ["tcp_flash","energy_field_energy_transfer"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )	//shield_core"] )
+	}
 	else
 	{
 		player.s.titanTitle <- ""		//当玩家不是任何魔改泰坦时，重置他的title防止一直显示上一次用过的魔改泰坦
 		//以下为泰坦使用率检查，做平衡用
 		if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 		{
-			printt("TitanUseChecker-----11")
+			printt("TitanUseChecker-----011")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )	//烈焰
 		{
-			printt("TitanUseChecker-----12")
+			printt("TitanUseChecker-----012")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
 		{
-			printt("TitanUseChecker-----13")
+			printt("TitanUseChecker-----013")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
 		{
-			printt("TitanUseChecker-----14")
+			printt("TitanUseChecker-----014")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 		{
-			printt("TitanUseChecker-----15")
+			printt("TitanUseChecker-----015")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
 		{
-			printt("TitanUseChecker-----16")
+			printt("TitanUseChecker-----016")
 			soul.s.TitanHasBeenChange <- true
 		}
 		if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王
 		{
-			printt("TitanUseChecker-----17")
+			printt("TitanUseChecker-----017")
 			soul.s.TitanHasBeenChange <- true
 		}
 	}

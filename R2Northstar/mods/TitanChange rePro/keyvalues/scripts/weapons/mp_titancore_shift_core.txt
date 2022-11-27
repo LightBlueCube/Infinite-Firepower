@@ -1,0 +1,20 @@
+WeaponData
+{
+	Mods
+	{
+		fd_duration
+		{
+		}
+
+		tcp_dash_core
+		{
+			"core_duration"								"12.0" //Needs to match charge_cooldown_delay
+			"charge_cooldown_delay"   					"12.0"
+		}
+		tcp_shield_core
+		{
+			"core_duration"								"1.0" //Needs to match charge_cooldown_delay
+			"charge_cooldown_delay"   					"1.0"
+		}
+	}
+}

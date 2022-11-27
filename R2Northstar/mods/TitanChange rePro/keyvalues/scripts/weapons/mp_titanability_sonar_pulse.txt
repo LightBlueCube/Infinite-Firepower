@@ -18,5 +18,10 @@ WeaponData
 		{
 			//给nut做识别用
 		}
+
+		tcp_fast_emp
+		{
+			//给nut做识别用
+		}
 	}
 }
