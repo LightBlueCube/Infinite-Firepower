@@ -109,12 +109,12 @@ void function FastEmpSonar( entity projectile, entity inflictor )
 	SetTeam( inflictor, projectile.GetTeam() )
 	inflictor.SetOwner( projectile.GetOwner() )
 	int val = 0
-	while( val <= 16 )
+	while( val <= 8 )
 	{
-		thread EMPSonarThinkConstant( inflictor )
+		thread EMPSonarThinkConstant( inflictor, false )
 		++val
 	}
-	wait 0.7
+	wait 0.5
 	inflictor.Destroy()
 }
 
@@ -235,6 +235,12 @@ array<entity> function GetNearbyEnemiesForSonarPulse( int team, vector origin )
 
 
 
+const DAMAGE_AGAINST_TITANS_EMPBOMB 			= 40
+const DAMAGE_AGAINST_PILOTS_EMPBOMB 			= 2
+
+const EMP_DAMAGE_TICK_RATE_EMPBOMB = 0.1
+
+
 const DAMAGE_AGAINST_TITANS 			= 20
 const DAMAGE_AGAINST_PILOTS 			= 2
 
@@ -247,16 +253,19 @@ struct
 	array<entity> empTitans
 } file
 
-void function timeoutcheck( entity titan )
+void function timeoutcheck( entity titan, bool EMPSonar )
 {
-	wait 3
+	if( EMPSonar )
+		wait 3
+	else
+		wait 0.5
 	titan.Signal("empistimeout")
 }
 
-void function EMPSonarThinkConstant( entity titan )
+void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 {
 	RegisterSignal( "empistimeout" )
-	thread timeoutcheck( titan )
+	thread timeoutcheck( titan, EMPSonar )
 
 	titan.EndSignal( "empistimeout" )
 	//titan.EndSignal( "OnDeath" )
@@ -342,26 +351,55 @@ void function EMPSonarThinkConstant( entity titan )
 		}
 	)
 
-	wait RandomFloat( EMP_DAMAGE_TICK_RATE )
-
-	while ( true )
+	if( EMPSonar )
 	{
-		origin = titan.GetOrigin()
 
-		RadiusDamage(
-   			origin,									// center
-   			titan,									// attacker
-   			titan,									// inflictor
-   			DAMAGE_AGAINST_PILOTS,					// damage
-   			DAMAGE_AGAINST_TITANS,					// damageHeavyArmor
-   			ARC_TITAN_EMP_FIELD_INNER_RADIUS,		// innerRadius
-   			ARC_TITAN_EMP_FIELD_RADIUS,				// outerRadius
-   			SF_ENVEXPLOSION_NO_DAMAGEOWNER,			// flags
-   			0,										// distanceFromAttacker
-   			DAMAGE_AGAINST_PILOTS,					// explosionForce
-   			DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,	// scriptDamageFlags
-   			eDamageSourceId.mp_weapon_grenade_emp )			// scriptDamageSourceIdentifier
+		wait RandomFloat( EMP_DAMAGE_TICK_RATE )
 
-		wait EMP_DAMAGE_TICK_RATE
+		while ( true )
+		{
+			origin = titan.GetOrigin()
+
+			RadiusDamage(
+   				origin,									// center
+   				titan,									// attacker
+   				titan,									// inflictor
+   				DAMAGE_AGAINST_PILOTS,					// damage
+   				DAMAGE_AGAINST_TITANS,					// damageHeavyArmor
+   				ARC_TITAN_EMP_FIELD_INNER_RADIUS,		// innerRadius
+   				ARC_TITAN_EMP_FIELD_RADIUS,				// outerRadius
+   				SF_ENVEXPLOSION_NO_DAMAGEOWNER,			// flags
+   				0,										// distanceFromAttacker
+   				DAMAGE_AGAINST_PILOTS,					// explosionForce
+   				DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,	// scriptDamageFlags
+	   			eDamageSourceId.mp_weapon_grenade_emp )			// scriptDamageSourceIdentifier
+
+			wait EMP_DAMAGE_TICK_RATE
+		}
+	}
+	else
+	{
+		wait RandomFloat( EMP_DAMAGE_TICK_RATE_EMPBOMB )
+
+		while ( true )
+		{
+			origin = titan.GetOrigin()
+
+			RadiusDamage(
+   				origin,									// center
+   				titan,									// attacker
+   				titan,									// inflictor
+   				DAMAGE_AGAINST_PILOTS_EMPBOMB,					// damage
+   				DAMAGE_AGAINST_TITANS_EMPBOMB,					// damageHeavyArmor
+   				ARC_TITAN_EMP_FIELD_INNER_RADIUS,		// innerRadius
+   				ARC_TITAN_EMP_FIELD_RADIUS,				// outerRadius
+   				SF_ENVEXPLOSION_NO_DAMAGEOWNER,			// flags
+   				0,										// distanceFromAttacker
+   				DAMAGE_AGAINST_PILOTS_EMPBOMB,					// explosionForce
+   				DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,	// scriptDamageFlags
+	   			eDamageSourceId.mp_weapon_grenade_emp )			// scriptDamageSourceIdentifier
+
+			wait EMP_DAMAGE_TICK_RATE_EMPBOMB
+		}
 	}
 }
