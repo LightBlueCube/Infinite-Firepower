@@ -208,7 +208,7 @@ function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attack
 		if( weapon.HasMod("tcp") && outOfEnergy )
 		{
 			if( inADS )
-				return 6
+				return 8
 			return 2
 		}
 	}
