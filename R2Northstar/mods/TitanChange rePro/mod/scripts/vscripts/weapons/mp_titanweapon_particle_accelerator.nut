@@ -180,7 +180,7 @@ function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attack
 				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 30 >= 0 ) ? 30 : owner.GetSharedEnergyTotal() )
 			}
 			if( inADS )
-				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 60 >= 0 ) ? 60 : owner.GetSharedEnergyTotal() )
+				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 80 >= 0 ) ? 80 : owner.GetSharedEnergyTotal() )
 		}
 
 
@@ -209,7 +209,7 @@ function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attack
 		{
 			if( inADS )
 				return 6
-			return 3
+			return 2
 		}
 	}
 	return 1
