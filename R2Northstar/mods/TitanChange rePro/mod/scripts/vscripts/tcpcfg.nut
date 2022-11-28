@@ -187,7 +187,6 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 		if( IsValid( player ) )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.37, 255, 0, 0, 0, 0, 0.1, 0);
 		}
 		wait 0.1
@@ -197,12 +196,10 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 	if( IsValid( player ) )
 	{
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 	}
 	wait 0.1
 	if( IsValid( player ) )
 	{
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 	}
 	if( Is10sec == true )
@@ -212,7 +209,6 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 		wait 0.1
 		if( IsValid( player ) )
 		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 3 ) / 10 +"秒后被彻底抹除////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
 		}
