@@ -7,7 +7,7 @@ WeaponData
 		// Damage - When Used by Players
 		"damage_near_value"   							"20"
 		"damage_far_value"								"20"
-		"damage_rodeo" 									"1250"	//1000
+		"damage_rodeo" 									"625"	//1000
 		// Damage - When Used by NPCs
 		"npc_damage_near_value"   						"40"	//80
 		"npc_damage_far_value"							"40"	//80

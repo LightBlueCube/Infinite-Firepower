@@ -3,7 +3,7 @@ WeaponData
 	MP_BASE
 	{
 		// Damage - When Used by Players
-		"damage_rodeo"									"15000"	//7500
+		"damage_rodeo"									"4000"	//7500
 		// Damage - When Used by NPCs
 		"npc_damage_near_value"   						"600"
 		"npc_damage_far_value"							"600"
@@ -36,12 +36,11 @@ WeaponData
 			//"damage_far_value"								"300"
 			//"damage_near_value_titanarmor"					"825"
 			//"damage_far_value_titanarmor" 					"825"
-			//"damage_rodeo"									"15000"	//7500
 			"damage_near_value"   							"--250" //55
 			"damage_far_value"								"--250"  //45
 			"damage_near_value_titanarmor"					"--325"
 			"damage_far_value_titanarmor" 					"--325"
-			"damage_rodeo"									"--12500"	//2500
+			"damage_rodeo"									"1250"
 
 			"spread_stand_hip"								"0"
 			"spread_stand_hip_run"							"0"
