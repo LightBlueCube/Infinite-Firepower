@@ -266,11 +266,14 @@ void function OnHit_TitanWeaponParticleAccelerator( entity victim, var damageInf
 
 	if ( ( IsSingleplayer() || SoulHasPassive( soul, ePassives.PAS_ION_WEAPON ) ) && IsCriticalHit( attacker, victim, DamageInfo_GetHitBox( damageInfo ), DamageInfo_GetDamage( damageInfo ), DamageInfo_GetDamageType( damageInfo ) ) )
 	{
-			array<string> mods = inflictor.ProjectileGetMods()
+		array<string> mods = inflictor.ProjectileGetMods()
+		if( !mod.contains( "tcp" ) )
+		{
 			if ( mods.contains( "proto_particle_accelerator" ) )
 				attacker.AddSharedEnergy( SPLIT_SHOT_CRITICAL_ENERGY_RESTORE_AMOUNT )
 			else
 				attacker.AddSharedEnergy( CRITICAL_ENERGY_RESTORE_AMOUNT )
+		}
 	}
 }
 #endif
