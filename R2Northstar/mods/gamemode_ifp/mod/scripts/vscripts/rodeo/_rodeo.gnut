@@ -436,9 +436,11 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	    velocity += Vector( 0,0,400 )
 
 	vector angles = player.EyeAngles()
-	vector velocity_form_angles = AnglesToForward( angles )
-	velocity_form_angles.z = 0
-	velocity += velocity_form_angles * -400
+	angles = AnglesToForward( angles )
+	angles.z = 0
+	vector angles_1 = VectorToAngles( angles )
+	vector angles_2 = AnglesToForward( angles_1 )
+	velocity += angles_2 * -400
 
 	//printt( "Setting velocity to: " + velocity ) // for bug 123013
 
