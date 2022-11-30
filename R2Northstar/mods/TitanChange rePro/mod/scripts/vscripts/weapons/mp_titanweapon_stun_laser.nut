@@ -135,7 +135,10 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 			if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
 				shieldRestoreAmount = int( 1.25 * shieldRestoreAmount )
 			if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && ( target.IsPlayer() || ( target.GetClassName() != "npc_titan" && !target.IsNPC() ) ) )
-				ScreenFadeToColor( target, 192, 192, 192, 255, 0.1, 2 )
+			{
+				ScreenFadeToColor( target, 0, 0, 0, 255, 0.1, 2 )
+				SendHudMessage( target, "["+Time()+"] [ SYSTEM ] [ERROR] 视觉系统离线\n["+Time() + 0.024 +"] [ SYSTEM ] [ERROR] 原因:遭受高密度EMP射线攻击\n["+Time() + 0.056 +"] [ SYSTEM ] [ INFO ] 正在恢复中...",  -1, 0.5, 255, 0, 0, 0, 0, 2, 0);
+			}
 			else
 				soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
 		}
