@@ -642,7 +642,7 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 		else
 			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2500
 
-		if( amount <= 0.05 || amount == null )
+		if( amount <= 0.05 )
 		{
 			if ( projectile )
 				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250

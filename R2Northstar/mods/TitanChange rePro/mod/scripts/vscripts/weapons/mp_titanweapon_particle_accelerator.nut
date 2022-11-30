@@ -215,10 +215,7 @@ function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attack
 			return 2
 		}
 	}
-	if( weapon.HasMod("tcp") && inADS )
-		return 3
-	else
-		return 1
+	return 1
 }
 
 void function OnWeaponCooldown_titanweapon_particle_accelerator( entity weapon )
