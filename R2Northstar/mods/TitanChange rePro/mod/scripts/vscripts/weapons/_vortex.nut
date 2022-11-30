@@ -638,9 +638,18 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	if( hasVortexRegen )
 	{
 		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2500
 		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2500
+
+		if( amount <= 0.05 || amount == null )
+		{
+			if ( projectile )
+				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+			else
+				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+		}
+		
 		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
 		{
 			// 离子版: 使用能量系统
