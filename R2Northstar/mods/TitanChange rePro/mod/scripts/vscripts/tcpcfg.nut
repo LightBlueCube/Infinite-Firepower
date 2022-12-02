@@ -248,8 +248,11 @@ void function RestoreKillStreak( entity player )
 	}
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
-	if( player.s.titanTitle != "" )
-		player.SetTitle( player.s.titanTitle )	//设置玩家的小血条上的标题（也就是你瞄准敌人时，顶上会显示泰坦名，玩家名，血量剩余的一个玩意，这里我们改的是泰坦名）
+	entity soul = player.GetTitanSoul()
+	if( IsValid( soul ) )
+		if( "titanTitle" in soul.s )
+			if( soul.s.titanTitle != "" )
+				player.SetTitle( soul.s.titanTitle )	//设置玩家的小血条上的标题（也就是你瞄准敌人时，顶上会显示泰坦名，玩家名，血量剩余的一个玩意，这里我们改的是泰坦名）
 }
 
 
@@ -275,7 +278,7 @@ void function OnTitanfall( entity titan )
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野兽泰坦装备，取消至尊泰坦以使用原版北极星",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
-		player.s.titanTitle <- "野獸"	//众所周知，当玩家上泰坦时不会按照我们的意愿设置标题的，所以这边整个变量让玩家上泰坦时读取这个然后写上
+		soul.s.titanTitle <- "野獸"	//众所周知，当玩家上泰坦时不会按照我们的意愿设置标题的，所以这边整个变量让玩家上泰坦时读取这个然后写上
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -297,7 +300,7 @@ void function OnTitanfall( entity titan )
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用远征装备， 取消\"边境帝王\"战绘以使用原版帝王",  -1, 0.3, 200, 200, 225, 0, 0.15, 12, 1);
-		player.s.titanTitle <- "遠征"
+		soul.s.titanTitle <- "遠征"
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -319,7 +322,7 @@ void function OnTitanfall( entity titan )
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
-		player.s.titanTitle <- "野牛"
+		soul.s.titanTitle <- "野牛"
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -343,7 +346,7 @@ void function OnTitanfall( entity titan )
 
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用能核泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
-		player.s.titanTitle <- "能核"
+		soul.s.titanTitle <- "能核"
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -361,7 +364,6 @@ void function OnTitanfall( entity titan )
 	}
 	else
 	{
-		player.s.titanTitle <- ""		//当玩家不是任何魔改泰坦时，重置他的title防止一直显示上一次用过的魔改泰坦
 		//以下为泰坦使用率检查，做平衡用
 		if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 		{
