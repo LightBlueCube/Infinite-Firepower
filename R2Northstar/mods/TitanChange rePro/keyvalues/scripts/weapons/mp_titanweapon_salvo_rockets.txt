@@ -34,7 +34,7 @@ WeaponData
 			"ammo_per_shot"									"10"
 			"ammo_min_to_fire"								"10"
 			"burst_fire_count"								"12"
-			"regen_ammo_refill_rate"						"15.0"
+			"regen_ammo_refill_rate"						"13.3334"
 		}
 	}
 }
