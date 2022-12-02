@@ -99,29 +99,33 @@ void function StartNuke( entity player )
 void function StartNukeWARN( entity owner )
 {
 	int sec = 200
-	bool HasWARN = false
+	int HasWARN = 0
 	while( sec > 0 )
 	{
 		if(sec == 32)
 		{
 			AddTeamScore( owner.GetTeam(), 2048 )
 		}
-		if(sec == 2)
+		if(sec == 1)
 		{
 			foreach ( player in GetPlayerArray() )
 			{
 				if( IsValid( player ) )
 				{
 					player.FreezeControlsOnServer()
-					ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
+					for (int value = 32; value > 0; value = value - 1)
+					{
+						//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
+						EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
+					}			
 				}
 			}
 		}
 		if( sec <= 100 )
 		{
-			if( HasWARN == true )
+			if( HasWARN >= 1 )
 			{
-				HasWARN = false
+				HasWARN = HasWARN - 1
 			}
 			else
 			{
@@ -132,7 +136,7 @@ void function StartNukeWARN( entity owner )
 						thread playerWARN( player, owner, sec, true )
 					}
 				}
-				HasWARN = true
+				HasWARN = 3
 			}
 
 		}
@@ -146,8 +150,8 @@ void function StartNukeWARN( entity owner )
 				}
 			}
 		}
-		sec = sec - 2
-		wait 0.2
+		sec = sec - 1
+		wait 0.1
 	}
 	foreach ( player in GetPlayerArray() )
 	{
@@ -220,21 +224,12 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 void function explode( entity player )
 {
 	if( IsValid( player ) )
-		StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
-	wait 0.1
-	if( IsValid( player ) )
 	{
-		for (int value = 32; value > 0; value = value - 1)
-		{
-			//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-			EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
-		}
-	}
-	wait 0.4
-	if( IsValid( player ) )
+		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 		if(IsAlive(player))
 			player.Die()
-	wait 1.4
+	}
+	wait 2
 	if( IsValid( player ) )
 		ScreenFadeToBlackForever( player, 0 )
 }
