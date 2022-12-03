@@ -1327,7 +1327,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 	RodeoRiderSequenceStruct dataStruct
 	dataStruct.interiorSound = GetAudioFromAlias( titanType, "rodeo_battery_steal_1p" )
 	dataStruct.exteriorSound = GetAudioFromAlias( titanType, "rodeo_battery_steal_3p" )
-	DisableCloakBeforeRodeoSequence( rodeoPilot, dataStruct )
+	//DisableCloakBeforeRodeoSequence( rodeoPilot, dataStruct )
 
 	entity tempBattery3p
 	tempBattery3p = CreatePropDynamic( RODEO_BATTERY_MODEL_FOR_RODEO_ANIMS )
@@ -1396,7 +1396,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 			StopSoundOnEntity( rodeoPilot, dataStruct.interiorSound )
 			StopSoundOnEntity( rodeoPilot, dataStruct.exteriorSound )
 
-			RestoreCloakAfterRodeoSequence( rodeoPilot, dataStruct )
+			//RestoreCloakAfterRodeoSequence( rodeoPilot, dataStruct )
 		}
 	)
 
@@ -1810,14 +1810,54 @@ void function Rodeo_GiveBatteryToPlayer( entity player )
 void function Burnmeter_AmpedBattery( entity player )
 {
 	#if MP
-	Burnmeter_EmergencyBattery( player )
-	entity battery = GetBatteryOnBack( player )
+	entity battery = Rodeo_CreateBatteryPack()
+	if ( !PlayerHasMaxBatteryCount( player ) )
+	{
+		Rodeo_OnTouchBatteryPack_Internal( player,  battery ) //Just setting the origin to the player's origin also works, but it will parent weirdly to a pilot's back. probably because we end up doing 2 SetOrigins in the same frame
+		
+		entity battery = GetBatteryOnBack( player )
 
-	if ( battery == null ) // not ideal but at least the game won't crash
-		return
+		if ( battery == null ) // not ideal but at least the game won't crash
+			return
+	
+		battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
+		Battery_StartFX( battery )	
+	}
+	else
+	{
+		//Based off ThrowBattery
+		vector ornull thrownSpot = CalculateSpotForThrownBattery( player, battery )
 
-	battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
-	Battery_StartFX( battery )
+		if ( thrownSpot == null )
+			thrownSpot = player.GetOrigin()
+
+		expect vector( thrownSpot )
+
+		vector viewVector = player.GetViewVector()
+
+		//printt( "viewVector: " + viewVector )
+		//battery.SetPhysics( MOVETYPE_FLYGRAVITY )
+
+		battery.SetParent( player ) //HACK: Clear Ground Entity of battery. Not really sure why this is needed
+		battery.ClearParent()
+
+		battery.SetAngles( < 0, 0, 0 > )
+		battery.SetOrigin( thrownSpot )
+
+		vector playerVel = player.GetVelocity()
+		vector verticalAdjustment = < 0, 0, 0 >
+		if ( playerVel.z == 0 )
+			verticalAdjustment = < 0, 0, 100 >
+
+		vector batteryVel = playerVel + viewVector * 50 + verticalAdjustment
+		battery.SetVelocity( batteryVel )
+
+		if ( battery == null ) // not ideal but at least the game won't crash
+			return
+
+		battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
+		Battery_StartFX( battery )
+	}
 	#endif
 }
 
