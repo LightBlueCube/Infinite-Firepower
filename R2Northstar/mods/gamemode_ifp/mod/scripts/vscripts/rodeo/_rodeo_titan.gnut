@@ -1112,7 +1112,7 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 		vector baseVelocity = ent.GetVelocity()
 		baseVelocity.z = 0
 		newBattery.SetVelocity( baseVelocity + direction * 100 + <0, 0, 1> )
-		int random = RandomInt(99)
+		int random = RandomInt(100)
 		if( random <= 59 )	//59+1=60%
 		{
 			newBattery.SetSkin( 2 )
@@ -1814,14 +1814,14 @@ void function Burnmeter_AmpedBattery( entity player )
 	if ( !PlayerHasMaxBatteryCount( player ) )
 	{
 		Rodeo_OnTouchBatteryPack_Internal( player,  battery ) //Just setting the origin to the player's origin also works, but it will parent weirdly to a pilot's back. probably because we end up doing 2 SetOrigins in the same frame
-		
+
 		entity battery = GetBatteryOnBack( player )
 
 		if ( battery == null ) // not ideal but at least the game won't crash
 			return
-	
+
 		battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
-		Battery_StartFX( battery )	
+		Battery_StartFX( battery )
 	}
 	else
 	{

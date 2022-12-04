@@ -5,11 +5,71 @@ void function tcpback()
 {
 	AddSpawnCallback("npc_titan", OnTitanfall )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 	AddCallback_OnPilotBecomesTitan( SetPlayerTitanTitle )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnUpdateDerivedPlayerTitanLoadout( ApplyFDDerviedUpgrades )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
+}
+void function GameStateEnter_Postmatch()
+{
+	thread RandomMap()
+}
+void function RandomMap()
+{
+	wait ( GAME_POSTMATCH_LENGTH - 0.1 )
+	int RandomInt = RandomInt(15)
+	switch( RandomInt )
+	{
+		case 0:
+			ServerCommand( "map mp_black_water_canal" )
+			break
+		case 1:
+			ServerCommand( "map mp_complex3" )
+			break
+		case 2:
+			ServerCommand( "map mp_crashsite3" )
+			break
+		case 3:
+			ServerCommand( "map mp_drydock" )
+			break
+		case 4:
+			ServerCommand( "map mp_eden" )
+			break
+		case 5:
+			ServerCommand( "map mp_forwardbase_kodai" )
+			break
+		case 6:
+			ServerCommand( "map mp_grave" )
+			break
+		case 7:
+			ServerCommand( "map mp_homestead" )
+			break
+		case 8:
+			ServerCommand( "map mp_thaw" )
+			break
+		case 9:
+			ServerCommand( "map mp_angel_city" )
+			break
+		case 10:
+			ServerCommand( "map mp_colony02" )
+			break
+		case 11:
+			ServerCommand( "map mp_relic02" )
+			break
+		case 12:
+			ServerCommand( "map mp_wargames" )
+			break
+		case 13:
+			ServerCommand( "map mp_glitch" )
+			break
+		case 14:
+			ServerCommand( "map mp_rise" )
+			break
+		default:
+			break
+	}
 }
 void function OnWinnerDetermined()	//anti-crash
 {
@@ -117,7 +177,7 @@ void function StartNukeWARN( entity owner )
 					{
 						//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
 						EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
-					}			
+					}
 				}
 			}
 		}
