@@ -176,6 +176,7 @@ void function StartNukeWARN( entity owner )
 					for (int value = 32; value > 0; value = value - 1)
 					{
 						//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
+						StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
 						EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
 					}
 				}
@@ -217,6 +218,7 @@ void function StartNukeWARN( entity owner )
 	{
 		if( IsValid( player ) )
 		{
+			StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
 			thread explode( player )
 		}
 	}
@@ -285,9 +287,9 @@ void function explode( entity player )
 {
 	if( IsValid( player ) )
 	{
-		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 		if(IsAlive(player))
 			player.Die()
+		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 	}
 	wait 2
 	if( IsValid( player ) )
@@ -295,12 +297,12 @@ void function explode( entity player )
 }
 
 void function RestoreKillStreak( entity player )
-	{
+{
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"使用\"键（默认为\"E\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
-	}
+}
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
 	entity soul = player.GetTitanSoul()
