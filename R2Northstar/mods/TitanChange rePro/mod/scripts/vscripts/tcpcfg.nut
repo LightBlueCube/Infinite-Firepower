@@ -98,7 +98,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 			if( attacker.s.KillStreak == 20 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
-				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，按住\"使用\"键（默认为\"E\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
+				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
 			}
 		}
 	}
@@ -107,7 +107,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 void function OnClientConnected( entity player )
 {
 	player.s.KillStreak <- 0
-	AddPlayerHeldButtonEventCallback( player, IN_USE, StartNuke, 1 )
+	AddPlayerHeldButtonEventCallback( player, IN_MELEE, StartNuke, 1 )
 }
 
 void function StartNuke( entity player )
@@ -120,7 +120,7 @@ void function StartNuke( entity player )
 			while( sec > 0 )
 			{
 				if( IsValid( player ) )
-					SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+					SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.2, 0);
 				sec = sec - 1
 				wait 0.1
 			}
@@ -143,7 +143,7 @@ void function StartNuke( entity player )
 		while( sec > 0 )
 		{
 			if( IsValid( player ) )
-				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.1, 0);
+				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.2, 0);
 			sec = sec - 1
 			wait 0.1
 		}
@@ -179,6 +179,8 @@ void function StartNukeWARN( entity owner )
 						StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
 						EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
 					}
+					if(IsAlive(player))
+						player.Die()
 				}
 			}
 		}
@@ -246,18 +248,18 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 	if( Is10sec == false )
 	{
 		if( IsValid( player ) )
-			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.1, 0);
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.2, 0);
 	}
 	else
 	{
 		if( IsValid( player ) )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.27, 255, 0, 0, 0, 0, 0.1, 0);
+			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.27, 255, 0, 0, 0, 0, 0.2, 0);
 		}
 		wait 0.1
 		if( IsValid( player ) )
-			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.27, 255, 0, 0, 0, 0, 0.1, 0);
+			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.27, 255, 0, 0, 0, 0, 0.2, 0);
 	}
 	if( IsValid( player ) )
 	{
@@ -271,24 +273,22 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 	if( Is10sec == true )
 	{
 		if( IsValid( player ) )
-			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 2 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.1, 0);
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 2 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.2, 0);
 		wait 0.1
 		if( IsValid( player ) )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 3 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.1, 0);
+			SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 3 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.2, 0);
 		}
 	}
 	else if( IsValid( player ) )
-		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.1, 0);
+		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.2, 0);
 }
 
 void function explode( entity player )
 {
 	if( IsValid( player ) )
 	{
-		if(IsAlive(player))
-			player.Die()
 		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 	}
 	wait 2
@@ -301,7 +301,7 @@ void function RestoreKillStreak( entity player )
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
-			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"使用\"键（默认为\"E\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
+			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
 }
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
