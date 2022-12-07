@@ -7,8 +7,7 @@ WeaponData
 		}
 		Smart_Core
 		{
-			"damage_near_value"   							"*0.2"
-			"damage_far_value"								"*0.2"
+			"smart_ammo_lock_type"							"large"
 			"damage_near_value_titanarmor"					"*1.5"
 			"damage_far_value_titanarmor" 					"*1.5"
 
