@@ -73,8 +73,6 @@ void function RandomMap()
 }
 void function OnWinnerDetermined()	//anti-crash
 {
-	SetRespawnsEnabled( false )
-	SetKillcamsEnabled( false )
 	foreach( player in GetPlayerArray() )
 	{
 		player.s.KillStreak <- 0
@@ -138,7 +136,7 @@ void function StartNuke( entity player )
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
-		wait 8
+		wait 1
 		int sec = 40
 		while( sec > 0 )
 		{
@@ -159,14 +157,21 @@ void function StartNuke( entity player )
 void function StartNukeWARN( entity owner )
 {
 	int sec = 200
-	float baseRoundEndTime = expect float( GetServerVar( "roundEndTime" ) )
-	SetServerVar( "roundEndTime", baseRoundEndTime + float( sec + 100 ) / 100 )
 	int HasWARN = 0
 	while( sec > 0 )
 	{
-		if(sec == 20)
+		if( sec == 40 )
 		{
-			SetWinner( owner.GetTeam() )
+			foreach( player in GetPlayerArray() )
+			{
+				if( IsValid( player ) )
+				{
+					for (int value = 128; value > 0; value = value - 1)
+					{
+						EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv2")
+					}
+				}
+			}
 		}
 		if( sec <= 100 )
 		{
@@ -205,7 +210,7 @@ void function StartNukeWARN( entity owner )
 		if( IsValid( player ) )
 		{
 			StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
-			thread explode( player )
+			thread explode( player, owner )
 		}
 	}
 	foreach ( entity npc in GetNPCArray() )
@@ -215,7 +220,7 @@ void function StartNukeWARN( entity owner )
 		// kill rather than destroy, as destroying will cause issues with children which is an issue especially for dropships and titans
 		npc.Die( svGlobal.worldspawn, svGlobal.worldspawn, { damageSourceId = eDamageSourceId.round_end } )
 	}
-	wait 1
+	wait 3
 	while( true )
 	{
 		wait 1
@@ -270,18 +275,23 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 		SendHudMessage( player, "玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec - 1 ) / 10 +"秒后被彻底抹除////////",  -1, 0.3, 255, 0, 0, 0, 0, 0.2, 0);
 }
 
-void function explode( entity player )
+void function explode( entity player, entity owner )
 {
 	if( IsValid( player ) )
 	{
-		for (int value = 2; value > 0; value = value - 1)
+		for (int value = 4; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntity( player, "skyway_scripted_titanhill_mortar_explode" )
+			EmitSoundOnEntity( player, "goblin_dropship_explode" )
 		}
-		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 200, 200, 10 )
+		for (int value = 128; value > 0; value = value - 1)
+		{
+			EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv3")
+		}
+		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
 		thread FakeShellShock_Threaded( player, 10 )
 		StatusEffect_AddTimed( player, eStatusEffect.turn_slow, 0.4, 10, 0.5 )
-		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 2.2  )
+		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 3  )
+		SetWinner( owner.GetTeam() )
 	}
 	wait 1.8
 	if( IsValid( player ) )
@@ -289,17 +299,18 @@ void function explode( entity player )
 		if( IsAlive( player ) )
 			player.Die()
 		player.FreezeControlsOnServer()
-		for (int value = 8; value > 0; value = value - 1)
+		for (int value = 2; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntity( player, "titan_nuclear_death_explode" )
+			EmitSoundOnEntity( player, "skyway_scripted_titanhill_mortar_explode" )
 		}
 	}
 	wait 0.2
 	if( IsValid( player ) )
+	{
 		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
+	}
 	wait 2
-	if( IsValid( player ) )
-		ScreenFadeToBlackForever( player, 0 )
+	SetGameState( eGameState.Postmatch )
 }
 
 void function FakeShellShock_Threaded( entity victim, float duration )
