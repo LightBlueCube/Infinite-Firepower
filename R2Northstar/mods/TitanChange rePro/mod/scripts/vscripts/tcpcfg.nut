@@ -162,27 +162,9 @@ void function StartNukeWARN( entity owner )
 	int HasWARN = 0
 	while( sec > 0 )
 	{
-		if(sec == 32)
+		if(sec == 20)
 		{
-			AddTeamScore( owner.GetTeam(), 2048 )
-		}
-		if(sec == 1)
-		{
-			foreach ( player in GetPlayerArray() )
-			{
-				if( IsValid( player ) )
-				{
-					player.FreezeControlsOnServer()
-					for (int value = 32; value > 0; value = value - 1)
-					{
-						//EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-						StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
-						EmitSoundAtPosition( player.GetTeam(), player.GetOrigin(), "titan_nuclear_death_explode" )
-					}
-					if(IsAlive(player))
-						player.Die()
-				}
-			}
+			SetWinner( owner.GetTeam() )
 		}
 		if( sec <= 100 )
 		{
@@ -231,13 +213,14 @@ void function StartNukeWARN( entity owner )
 		// kill rather than destroy, as destroying will cause issues with children which is an issue especially for dropships and titans
 		npc.Die( svGlobal.worldspawn, svGlobal.worldspawn, { damageSourceId = eDamageSourceId.round_end } )
 	}
+	wait 1
 	while( true )
 	{
 		wait 1
 		foreach( player in GetPlayerArray() )
 		{
-			if( IsValid(player) )
-				if(IsAlive(player))
+			if( IsValid( player ) )
+				if( IsAlive( player ) )
 					player.Die()
 		}
 	}
@@ -289,11 +272,50 @@ void function explode( entity player )
 {
 	if( IsValid( player ) )
 	{
-		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
+		for (int value = 2; value > 0; value = value - 1)
+		{
+			EmitSoundOnEntity( player, "skyway_scripted_titanhill_mortar_explode" )
+		}
+		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 200, 200, 10 )
+		thread FakeShellShock_Threaded( player, 10 )
+		StatusEffect_AddTimed( player, eStatusEffect.turn_slow, 0.4, 10, 0.5 )
+		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 2.2  )
 	}
+	wait 1.8
+	if( IsValid( player ) )
+	{
+		if( IsAlive( player ) )
+			player.Die()
+		player.FreezeControlsOnServer()
+		for (int value = 8; value > 0; value = value - 1)
+		{
+			EmitSoundOnEntity( player, "titan_nuclear_death_explode" )
+		}
+	}
+	wait 0.2
+	if( IsValid( player ) )
+		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 	wait 2
 	if( IsValid( player ) )
 		ScreenFadeToBlackForever( player, 0 )
+}
+
+void function FakeShellShock_Threaded( entity victim, float duration )
+{
+	victim.EndSignal( "OnDeath" )
+	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, duration, 0.25 )
+	//StatusEffect_AddTimed( victim, eStatusEffect.turn_slow, 0.25, duration, 0.25 )
+	AddCinematicFlag( victim, CE_FLAG_EXECUTION )
+
+	OnThreadEnd(
+		function(): ( victim )
+		{
+			if( IsValid( victim ) )
+				RemoveCinematicFlag( victim, CE_FLAG_EXECUTION )
+		}
+	)
+
+	wait duration
 }
 
 void function RestoreKillStreak( entity player )
