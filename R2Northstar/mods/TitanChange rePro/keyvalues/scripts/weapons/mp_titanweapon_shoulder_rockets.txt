@@ -1,0 +1,45 @@
+WeaponData
+{
+	Mods
+	{
+		mod_ordnance_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+
+		extended_smart_ammo_range
+		{
+		}
+
+		burn_mod_titan_shoulder_rockets
+		{
+		}
+
+		upgradeCore_Vanguard
+		{
+		}
+
+		upgradeCore_MissileRack_Vanguard
+		{
+		}
+
+		fd_balance
+		{
+		}
+
+		tcp
+		{
+			"smart_ammo_search_angle" 							"30"
+			"smart_ammo_unlock_debounce_time"					"0.2"
+			"smart_ammo_new_target_delay"						"0.3"
+			"smart_ammo_apply_new_target_delay_to_first_target" "1"
+			"smart_ammo_lock_type"								"large"
+
+			"damage_near_value_titanarmor"						"*0.5"
+			"damage_far_value_titanarmor"						"*0.5"
+		}
+	}
+}
