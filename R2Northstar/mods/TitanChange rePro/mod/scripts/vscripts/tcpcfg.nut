@@ -159,6 +159,8 @@ void function StartNuke( entity player )
 void function StartNukeWARN( entity owner )
 {
 	int sec = 200
+	float baseRoundEndTime = expect float( GetServerVar( "roundEndTime" ) )
+	SetServerVar( "roundEndTime", baseRoundEndTime + float( sec + 100 ) / 100 )
 	int HasWARN = 0
 	while( sec > 0 )
 	{
