@@ -92,9 +92,9 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 		{
 			if( attacker.GetClassName() == "npc_titan" )
 				attacker = attacker.GetBossPlayer()
-			if( !"KillStreak" in attacker.s )
+			if( !( "KillStreak" in attacker.s ) )
 				attacker.s.KillStreak <- 0
-			if( !"totalKills" in attacker.s )
+			if( !( "totalKills" in attacker.s ) )
 				attacker.s.totalKills <- 0
 			attacker.s.KillStreak += 1
 			attacker.s.totalKills += 1
@@ -169,7 +169,6 @@ void function StartNuke( entity player )
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
-		wait 2
 		if( !IsValid( player ) )
 			return
 		if( player.IsTitan() )
@@ -185,6 +184,7 @@ void function StartNuke( entity player )
 		PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
 		SendHudMessage(player, "成功交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
 
+		wait 2
 		int sec = 40
 		while( sec > 0 )
 		{
