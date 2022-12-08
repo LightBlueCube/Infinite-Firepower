@@ -10,6 +10,7 @@ void function tcpback()
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnUpdateDerivedPlayerTitanLoadout( ApplyFDDerviedUpgrades )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
+	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
 }
 void function GameStateEnter_Postmatch()
@@ -76,6 +77,7 @@ void function OnWinnerDetermined()	//anti-crash
 	foreach( player in GetPlayerArray() )
 	{
 		player.s.KillStreak <- 0
+		player.s.totalKills <- 0
 		player.s.HaveNuclearBomb <- false
 	}
 }
@@ -84,16 +86,20 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
 	if( IsValid( attacker ) )
 	{
-		if( !( attacker.IsPlayer() || attacker.IsTitan() ) )
+		if( !( attacker.IsPlayer() || attacker.IsTitan() || !attacker.IsNPC() ) )
 			return
-		if( attacker != victim && !victim.IsNPC() )
+		SendHudMessage( attacker, attacker.GetClassName()+"\n"+victim.GetClassName(),  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
+		if( attacker != victim && ( !victim.IsNPC() || victim.GetClassName() == "npc_titan" ) )
 		{
 			if( attacker.GetClassName() == "npc_titan" )
 				attacker = attacker.GetBossPlayer()
 			if( !"KillStreak" in attacker.s )
-				attacker.s.KillStreak <- 1
+				attacker.s.KillStreak <- 0
+			if( !"totalKills" in attacker.s )
+				attacker.s.totalKills <- 0
+			attacker.s.totalKills += 1
 			attacker.s.KillStreak += 1
-			if( attacker.s.KillStreak == 20 )
+			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
 				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
@@ -105,6 +111,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 void function OnClientConnected( entity player )
 {
 	player.s.KillStreak <- 0
+	player.s.totalKills <- 0
 	AddPlayerHeldButtonEventCallback( player, IN_MELEE, StartNuke, 1 )
 }
 
@@ -127,6 +134,7 @@ void function StartNuke( entity player )
 			foreach( arrayPlayer in GetPlayerArray() )
 			{
 				arrayPlayer.s.KillStreak <- 0
+				arrayPlayer.s.totalKills <- 0
 				arrayPlayer.s.HaveNuclearBomb <- 0
 			}
 			thread StartNukeWARN( player )
@@ -148,6 +156,7 @@ void function StartNuke( entity player )
 		foreach( arrayPlayer in GetPlayerArray() )
 		{
 			arrayPlayer.s.KillStreak <- 0
+			arrayPlayer.s.totalKills <- 0
 			arrayPlayer.s.HaveNuclearBomb <- 0
 		}
 		thread StartNukeWARN( player )
@@ -334,6 +343,7 @@ void function RestoreKillStreak( entity player )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
 }
+
 void function SetPlayerTitanTitle( entity player, entity titan )
 {
 	entity soul = player.GetTitanSoul()
