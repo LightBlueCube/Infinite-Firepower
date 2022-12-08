@@ -98,10 +98,13 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				attacker.s.totalKills <- 0
 			attacker.s.KillStreak += 1
 			attacker.s.totalKills += 1
-			if( attacker.s.KillStreak % 4 == 0 )
+			if( attacker.s.totalKills % 4 == 0 )
 			{
-				attacker.s.HaveNukeTitan <- true
-				SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+				if( "HaveNukeTitan" in attacker.s )
+					attacker.s.HaveNukeTitan += 1
+				else
+					attacker.s.HaveNukeTitan <- 1
+				SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
 			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
 			{
@@ -146,7 +149,7 @@ void function StartNuke( entity player )
 	}
 	if( "HaveNukeTitan" in player.s )
 	{
-		if( player.s.HaveNukeTitan == true )
+		if( player.s.HaveNukeTitan > 0 )
 		{
 			if( !IsValid( player ) )
 				return
@@ -160,31 +163,20 @@ void function StartNuke( entity player )
 				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
 				return
 			}
-			PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
-			SendHudMessage(player, "成功交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
-			player.s.HaveNukeTitan <- false
+			SendHudMessage(player, "成功交付所有核武泰坦  请注意您的强化栏位（默认为\"C\"）\n本次交付的数量为:"+player.s.HaveNukeTitan,  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
+			for( var i = player.s.HaveNukeTitan; i > 0; i = i - 1 )
+			{
+				PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
+			}
+			player.s.HaveNukeTitan <- 0
 		}
 	}
 
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
-		if( !IsValid( player ) )
-			return
-		if( player.IsTitan() )
-		{
-			SendHudMessage(player, "你需要先离开泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 4, 0);
-			return
-		}
-		if( !player.IsHuman() )
-		{
-			SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
-			return
-		}
-		PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
-		SendHudMessage(player, "成功交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
-
-		wait 2
+		wait 4
+		player.s.HaveNukeTitan <- 10
 		int sec = 40
 		while( sec > 0 )
 		{
