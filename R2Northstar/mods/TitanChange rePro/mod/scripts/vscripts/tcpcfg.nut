@@ -88,7 +88,6 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	{
 		if( !( attacker.IsPlayer() || attacker.IsTitan() || !attacker.IsNPC() ) )
 			return
-		SendHudMessage( attacker, attacker.GetClassName()+"\n"+victim.GetClassName(),  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
 		if( attacker != victim && ( !victim.IsNPC() || victim.GetClassName() == "npc_titan" ) )
 		{
 			if( attacker.GetClassName() == "npc_titan" )
