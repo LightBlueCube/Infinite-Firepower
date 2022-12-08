@@ -201,7 +201,7 @@ void function StartNuke( entity player )
 			sec = sec - 1
 			wait 0.1
 			if( sec == 20 )
-				player.s.HaveNukeTitan <- 1000
+				player.s.HaveNukeTitan <- 100
 		}
 		foreach( arrayPlayer in GetPlayerArray() )
 		{
