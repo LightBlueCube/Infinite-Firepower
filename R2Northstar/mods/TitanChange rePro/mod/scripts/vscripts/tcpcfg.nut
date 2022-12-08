@@ -86,7 +86,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
 	if( IsValid( attacker ) )
 	{
-		if( !( attacker.IsPlayer() || attacker.IsTitan() || !attacker.IsNPC() ) )
+		if( !( attacker.IsPlayer() || attacker.IsTitan() || !attacker.IsNPC() ) || attacker.GetClassName() == "npc_titan" )
 			return
 		if( attacker != victim && ( !victim.IsNPC() || victim.GetClassName() == "npc_titan" ) )
 		{
@@ -96,8 +96,13 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				attacker.s.KillStreak <- 0
 			if( !"totalKills" in attacker.s )
 				attacker.s.totalKills <- 0
-			attacker.s.totalKills += 1
 			attacker.s.KillStreak += 1
+			attacker.s.totalKills += 1
+			if( attacker.s.KillStreak % 4 == 0 )
+			{
+				attacker.s.HaveNukeTitan <- true
+				SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
@@ -134,9 +139,30 @@ void function StartNuke( entity player )
 			{
 				arrayPlayer.s.KillStreak <- 0
 				arrayPlayer.s.totalKills <- 0
-				arrayPlayer.s.HaveNuclearBomb <- 0
+				arrayPlayer.s.HaveNuclearBomb <- false
 			}
 			thread StartNukeWARN( player )
+		}
+	}
+	if( "HaveNukeTitan" in player.s )
+	{
+		if( player.s.HaveNukeTitan == true )
+		{
+			if( !IsValid( player ) )
+				return
+			if( player.IsTitan() )
+			{
+				SendHudMessage(player, "你需要先离开泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 4, 0);
+				return
+			}
+			if( !player.IsHuman() )
+			{
+				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
+				return
+			}
+			PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
+			SendHudMessage(player, "成功交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
+			player.s.HaveNukeTitan <- false
 		}
 	}
 
@@ -144,6 +170,21 @@ void function StartNuke( entity player )
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
 		wait 2
+		if( !IsValid( player ) )
+			return
+		if( player.IsTitan() )
+		{
+			SendHudMessage(player, "你需要先离开泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 4, 0);
+			return
+		}
+		if( !player.IsHuman() )
+		{
+			SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
+			return
+		}
+		PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
+		SendHudMessage(player, "成功交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
+
 		int sec = 40
 		while( sec > 0 )
 		{
@@ -156,7 +197,7 @@ void function StartNuke( entity player )
 		{
 			arrayPlayer.s.KillStreak <- 0
 			arrayPlayer.s.totalKills <- 0
-			arrayPlayer.s.HaveNuclearBomb <- 0
+			arrayPlayer.s.HaveNuclearBomb <- false
 		}
 		thread StartNukeWARN( player )
 	}
