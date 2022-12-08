@@ -136,7 +136,7 @@ void function StartNuke( entity player )
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
-		wait 1
+		wait 2
 		int sec = 40
 		while( sec > 0 )
 		{
@@ -157,27 +157,21 @@ void function StartNuke( entity player )
 void function StartNukeWARN( entity owner )
 {
 	int sec = 200
-	int HasWARN = 0
+	bool HasWARN = false
 	while( sec > 0 )
 	{
-		if( sec == 40 )
+		if( sec == 20 )
 		{
 			foreach( player in GetPlayerArray() )
 			{
-				if( IsValid( player ) )
-				{
-					for (int value = 128; value > 0; value = value - 1)
-					{
-						EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv2")
-					}
-				}
+				thread explodeSound( player )
 			}
 		}
 		if( sec <= 100 )
 		{
-			if( HasWARN >= 1 )
+			if( HasWARN == true )
 			{
-				HasWARN = HasWARN - 1
+				HasWARN = false
 			}
 			else
 			{
@@ -188,7 +182,7 @@ void function StartNukeWARN( entity owner )
 						thread playerWARN( player, owner, sec, true )
 					}
 				}
-				HasWARN = 3
+				HasWARN = true
 			}
 
 		}
@@ -202,8 +196,8 @@ void function StartNukeWARN( entity owner )
 				}
 			}
 		}
-		sec = sec - 1
-		wait 0.1
+		sec = sec - 2
+		wait 0.2
 	}
 	foreach ( player in GetPlayerArray() )
 	{
@@ -244,7 +238,6 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 	{
 		if( IsValid( player ) )
 		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 			SendHudMessage( player, "//////////////////////////////// WARNING ////////////////////////////////\n玩家 \""+owner.GetPlayerName()+"\" 手动启用了Alpha核弹引爆程序\n////////地表所有设施和生命体都将在T- "+ float( sec ) / 10 +"秒后被彻底抹除////////\n//////////////////////////////// WARNING ////////////////////////////////",  -1, 0.27, 255, 0, 0, 0, 0, 0.2, 0);
 		}
 		wait 0.1
@@ -256,10 +249,6 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
 	}
 	wait 0.1
-	if( IsValid( player ) )
-	{
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_cockpit_missile_close_warning" )
-	}
 	if( Is10sec == true )
 	{
 		if( IsValid( player ) )
@@ -283,10 +272,6 @@ void function explode( entity player, entity owner )
 		{
 			EmitSoundOnEntity( player, "goblin_dropship_explode" )
 		}
-		for (int value = 128; value > 0; value = value - 1)
-		{
-			EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv3")
-		}
 		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
 		thread FakeShellShock_Threaded( player, 10 )
 		StatusEffect_AddTimed( player, eStatusEffect.turn_slow, 0.4, 10, 0.5 )
@@ -302,6 +287,7 @@ void function explode( entity player, entity owner )
 		for (int value = 2; value > 0; value = value - 1)
 		{
 			EmitSoundOnEntity( player, "skyway_scripted_titanhill_mortar_explode" )
+			EmitSoundOnEntity( player, "bt_beacon_controlroom_dish_explosion" )
 		}
 	}
 	wait 0.2
@@ -311,6 +297,16 @@ void function explode( entity player, entity owner )
 	}
 	wait 2
 	SetGameState( eGameState.Postmatch )
+}
+
+void function explodeSound( entity player )
+{
+	for (int value = 50; value > 0; value = value - 1)
+	{
+		if( IsValid( player ) )
+			EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv3")
+		wait 0.1
+	}
 }
 
 void function FakeShellShock_Threaded( entity victim, float duration )
