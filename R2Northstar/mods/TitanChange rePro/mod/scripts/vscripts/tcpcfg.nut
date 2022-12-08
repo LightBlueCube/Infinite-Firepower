@@ -101,15 +101,20 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 			if( attacker.s.totalKills % 4 == 0 )
 			{
 				if( "HaveNukeTitan" in attacker.s )
+				{
 					attacker.s.HaveNukeTitan += 1
+					SendHudMessage( attacker, "////////////////获得核武泰坦////////////////\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+				}
 				else
+				{
 					attacker.s.HaveNukeTitan <- 1
-				SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+					SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////\n交付全部核武泰坦请按住\"近战\"键（默认为\"F\"） + \"使用\"键（默认为\"E\"）\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
+				}
 			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
-				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
+				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
 			}
 		}
 	}
@@ -124,10 +129,45 @@ void function OnClientConnected( entity player )
 
 void function StartNuke( entity player )
 {
+	if( "HaveNukeTitan" in player.s )
+	{
+		if( player.s.HaveNukeTitan > 0 )
+		{
+			if( !IsValid( player ) )
+				return
+			if( player.IsTitan() )
+			{
+				SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				return
+			}
+			if( !player.IsHuman() )
+			{
+				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				return
+			}
+			if( player.IsInputCommandHeld( IN_USE ) )
+			{
+				SendHudMessage(player, "成功交付所有核武泰坦  请注意您的强化栏位（默认为\"C\"）\n本次交付的数量为:"+player.s.HaveNukeTitan, -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1 )
+				{
+					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
+				}
+				player.s.HaveNukeTitan <- 0
+			}
+			else
+			{
+				PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
+				player.s.HaveNukeTitan -= 1
+				SendHudMessage(player, "成功交付一个核武泰坦  请注意您的强化栏位（默认为\"C\"）\n剩余未交付的核武泰坦数量为:"+player.s.HaveNukeTitan, -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+			}
+		}
+	}
+
 	if( "HaveNuclearBomb" in player.s )
 	{
 		if( player.s.HaveNuclearBomb == true )
 		{
+			wait 2
 			int sec = 40
 			while( sec > 0 )
 			{
@@ -147,43 +187,21 @@ void function StartNuke( entity player )
 			thread StartNukeWARN( player )
 		}
 	}
-	if( "HaveNukeTitan" in player.s )
-	{
-		if( player.s.HaveNukeTitan > 0 )
-		{
-			if( !IsValid( player ) )
-				return
-			if( player.IsTitan() )
-			{
-				SendHudMessage(player, "你需要先离开泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 4, 0);
-				return
-			}
-			if( !player.IsHuman() )
-			{
-				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦",  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
-				return
-			}
-			SendHudMessage(player, "成功交付所有核武泰坦  请注意您的强化栏位（默认为\"C\"）\n本次交付的数量为:"+player.s.HaveNukeTitan,  -1, 0.4, 255, 0, 0, 0, 0, 6, 0);
-			for( var i = player.s.HaveNukeTitan; i > 0; i = i - 1 )
-			{
-				PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
-			}
-			player.s.HaveNukeTitan <- 0
-		}
-	}
 
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
 		wait 4
 		player.s.HaveNukeTitan <- 10
-		int sec = 40
+		int sec = 60
 		while( sec > 0 )
 		{
 			if( IsValid( player ) )
 				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.2, 0);
 			sec = sec - 1
 			wait 0.1
+			if( sec == 20 )
+				player.s.HaveNukeTitan <- 1000
 		}
 		foreach( arrayPlayer in GetPlayerArray() )
 		{
@@ -373,7 +391,7 @@ void function RestoreKillStreak( entity player )
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
-			SendHudMessage( player, "////////////////Ahpla核弹已就绪，按住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
+			SendHudMessage( player, "////////////////Ahpla核弹已就绪，长住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
 }
 
 void function SetPlayerTitanTitle( entity player, entity titan )
