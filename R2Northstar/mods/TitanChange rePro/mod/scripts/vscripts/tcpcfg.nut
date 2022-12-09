@@ -91,7 +91,13 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 		if( attacker != victim && ( !victim.IsNPC() || victim.GetClassName() == "npc_titan" ) )
 		{
 			if( attacker.GetClassName() == "npc_titan" )
+			{
 				attacker = attacker.GetBossPlayer()
+				if( !IsValid( attacker ) )
+					return
+				if( !( attacker.IsPlayer() ) )
+					return
+			}
 			if( !( "KillStreak" in attacker.s ) )
 				attacker.s.KillStreak <- 0
 			if( !( "totalKills" in attacker.s ) )
@@ -200,8 +206,19 @@ void function StartNuke( entity player )
 				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.2, 0);
 			sec = sec - 1
 			wait 0.1
-			if( sec == 20 )
+			if( sec == 40 )
 				player.s.HaveNukeTitan <- 100
+			if( sec == 20 )
+			{
+				Burnmeter_EmergencyBattery( player )
+				entity battery = GetBatteryOnBack( player )
+		
+				if ( battery == null ) // not ideal but at least the game won't crash
+					return
+		
+				battery.SetSkin( 1 ) // yellow - CHANGE SKIN TO ORANGE someday
+				Battery_StartFX( battery )		
+			}
 		}
 		foreach( arrayPlayer in GetPlayerArray() )
 		{
