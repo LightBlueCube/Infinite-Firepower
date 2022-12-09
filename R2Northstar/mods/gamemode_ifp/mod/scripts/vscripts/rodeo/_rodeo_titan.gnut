@@ -1138,13 +1138,12 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 			newBattery.SetSkin( 1 )
 			Battery_StartFX( newBattery )
 		}
-		thread BatteryAutoDestroy( newBattery )
 	}
 }
 
 void function BatteryAutoDestroy( entity battery )
 {
-	wait 120
+	wait 240
 	if( IsValid( battery ) )
 		if( !( battery.GetParent() ) )
 			battery.Destroy()
@@ -2083,6 +2082,7 @@ entity function Rodeo_CreateBatteryPack( entity batteryOwner = null, bool isPick
 	}
 
 	//thread MonitorBatteryVelocity( batteryPack )
+	thread BatteryAutoDestroy( batteryPack )
 	return batteryPack
 }
 
