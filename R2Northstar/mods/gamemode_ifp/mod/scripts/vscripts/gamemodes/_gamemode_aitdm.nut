@@ -20,6 +20,8 @@ struct
 
 void function GamemodeAITdm_Init()
 {
+	SetWeaponDropsEnabled( false )
+
 	SetSpawnpointGamemodeOverride( ATTRITION ) // use bounty hunt spawns as vanilla game has no spawns explicitly defined for aitdm
 
 	AddCallback_GameStateEnter( eGameState.Prematch, OnPrematchStart )
