@@ -103,7 +103,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				if( "HaveNukeTitan" in attacker.s )
 				{
 					attacker.s.HaveNukeTitan += 1
-					SendHudMessage( attacker, "////////////////获得核武泰坦////////////////\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage( attacker, "////////////////获得核武泰坦////////////////\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
 				}
 				else
 				{
