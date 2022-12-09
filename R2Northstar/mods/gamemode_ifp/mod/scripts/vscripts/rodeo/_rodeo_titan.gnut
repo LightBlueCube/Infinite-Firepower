@@ -2437,11 +2437,17 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 	}
 	else if ( IsMultiplayer() )
 	{
-		if ( ( ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_DOOM ) ) || ( battery.GetSkin() == 2 ) ) && soul.IsDoomed() )
+		if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_DOOM ) && soul.IsDoomed() )
 		{
 			UndoomTitan( titan, 1 )
 			titan.SetHealth( 1 )
 		}
+		if( IsValid( battery ) && soul.IsDoomed() )
+			if( battery.GetSkin() == 2 )
+			{
+				UndoomTitan( titan, 1 )
+				titan.SetHealth( 1 )	
+			}
 		float coreFrac = GetCurrentPlaylistVarFloat( "battery_core_frac", 0.2 )
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = GetCurrentPlaylistVarFloat( "amped_battery_health_frac", 2.0 )
