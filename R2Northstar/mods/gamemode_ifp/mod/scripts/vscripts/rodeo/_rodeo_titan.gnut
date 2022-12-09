@@ -922,7 +922,7 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 		{
 			if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
 				if( IsValid( rodeoPilot ) )
-					SendHudMessage( rodeoPilot, "按\"近战\"键（默认为\"F\"）给队友电池",  -1, 0.4, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( rodeoPilot, "按\"近战\"键（默认为\"F\"）交付电池",  -1, 0.4, 200, 200, 225, 0, 0, 0.2, 0);
 			if( rodeoPilot.IsInputCommandHeld( IN_MELEE ) )
 			{
 				if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
@@ -1851,7 +1851,7 @@ void function Burnmeter_AmpedBattery( entity player )
 		if ( battery == null ) // not ideal but at least the game won't crash
 			return
 
-		battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
+		battery.SetSkin( RandomInt(3) ) // yellow - CHANGE SKIN TO ORANGE someday
 		Battery_StartFX( battery )
 	}
 	else
@@ -1886,7 +1886,7 @@ void function Burnmeter_AmpedBattery( entity player )
 		if ( battery == null ) // not ideal but at least the game won't crash
 			return
 
-		battery.SetSkin( 2 ) // yellow - CHANGE SKIN TO ORANGE someday
+		battery.SetSkin( RandomInt(3) ) // yellow - CHANGE SKIN TO ORANGE someday
 		Battery_StartFX( battery )
 	}
 	#endif
