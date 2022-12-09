@@ -3,11 +3,11 @@ global function GamemodeAITdm_Init
 
 const SQUADS_PER_TEAM = 4
 
-const REAPERS_PER_TEAM = 4
+const REAPERS_PER_TEAM = 1
 
 const LEVEL_SPECTRES = 0
-const LEVEL_STALKERS = 1
-const LEVEL_REAPERS = 2
+const LEVEL_STALKERS = 0
+const LEVEL_REAPERS = 0
 
 struct
 {
@@ -34,8 +34,8 @@ void function GamemodeAITdm_Init()
 	
 	if ( GetCurrentPlaylistVarInt( "aitdm_archer_grunts", 0 ) == 0 )
 	{
-		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg" ] )
-		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff" ] )
+		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_arc_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
+		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_arc_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
 	}
 	else
 	{
@@ -309,13 +309,13 @@ void function Escalate( int team )
 		case LEVEL_SPECTRES:
 			file.levels[ index ] = LEVEL_STALKERS
 			file.podEntities[ index ].append( "npc_spectre" )
-			SetGlobalNetInt( defcon, 2 )
+			SetGlobalNetInt( defcon, 4 )
 			return
 		
 		case LEVEL_STALKERS:
 			file.levels[ index ] = LEVEL_REAPERS
 			file.podEntities[ index ].append( "npc_stalker" )
-			SetGlobalNetInt( defcon, 3 )
+			SetGlobalNetInt( defcon, 4 )
 			return
 		
 		case LEVEL_REAPERS:
