@@ -1138,7 +1138,16 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 			newBattery.SetSkin( 1 )
 			Battery_StartFX( newBattery )
 		}
+		thread BatteryAutoDestroy( newBattery )
 	}
+}
+
+void function BatteryAutoDestroy( entity battery )
+{
+	wait 120
+	if( IsValid( battery ) )
+		if( !( battery.GetParent() ) )
+			battery.Destroy()
 }
 
 void function ClassicRodeo_UpdateBatteryContainer( entity player, entity titan )
