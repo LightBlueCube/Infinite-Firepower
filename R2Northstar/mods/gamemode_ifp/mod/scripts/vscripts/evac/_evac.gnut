@@ -12,7 +12,7 @@ const float EVAC_ARRIVAL_TIME = 40.0
 const float EVAC_WAIT_TIME = 18.0
 
 const int EVAC_SHIP_HEALTH = 25000
-const int EVAC_SHIP_SHIELDS = 50000
+const int EVAC_SHIP_SHIELDS = 75000
 
 // we don't use these because they're busted, just keeping them
 const array<string> EVAC_EMBARK_ANIMS_1P = [
