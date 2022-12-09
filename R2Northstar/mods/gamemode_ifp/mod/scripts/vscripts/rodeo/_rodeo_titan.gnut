@@ -918,13 +918,16 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 
 		RodeoPilotPullsOutWeapon( rodeoPilot, rodeoTitan, rodeoTitanType )
 
+		entity vortexSphere = CreateIncapShieldForBleedingPlayer( rodeoPilot, titanSoul )
 		while( true )
 		{
 			if( IsValid( titanSoul ) )
 			{
 				if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
+				{
 					if( IsValid( rodeoPilot ) )
-						SendHudMessage( rodeoPilot, "按\"近战\"键（默认为\"F\"）交付电池",  -1, 0.4, 200, 200, 225, 0, 0, 0.2, 0);
+						SendHudMessage( rodeoPilot, "按\"近战\"键（默认为\"F\"）交付电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+				}
 				if( rodeoPilot.IsInputCommandHeld( IN_MELEE ) )
 				{
 					if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
@@ -943,7 +946,7 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 	}
 
 	#if MP
-	if ( PlayerWantsToThrowNukeGrenade( rodeoPilot ) )
+	if ( PlayerWantsToThrowNukeGrenade( rodeoTitan ) )
 	{
 		waitthread PlayerAppliesBatteryPack( rodeoPilot, rodeoTitan, titanSoul, rodeoPackage )
 		return
@@ -975,6 +978,115 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 		waitthread ClassicRodeoThink( rodeoPilot, titanSoul, rodeoPackage )
 	}
 	#endif
+}
+
+const int INCAP_SHIELD_RADIUS = 35
+const int INCAP_SHIELD_HEIGHT = 60
+const int INCAP_SHIELD_FOV = 75
+
+const asset INCAP_SHIELD_EFFECT_NAME = $"P_anti_titan_shield_3P"
+
+entity function CreateIncapShieldForBleedingPlayer( entity player, entity titanSoul )
+{
+	vector angles = VectorToAngles( player.EyeAngles() )
+	int maxHealth = 2500
+	int health = 2500
+
+	// doing hardcode here, guess no need to change( and I cant easily change it
+	// vortexSphere
+	entity vortexSphere = CreateShieldWithSettings( player.GetOrigin(), angles, INCAP_SHIELD_RADIUS, INCAP_SHIELD_HEIGHT, INCAP_SHIELD_FOV, 9999, maxHealth, INCAP_SHIELD_EFFECT_NAME )
+	//file.playerIncapShieldTable[ player ].vortexSphere = vortexSphere // no need to use 1p things
+
+	vortexSphere.SetHealth( health )
+	vortexSphere.SetOwner( player )
+	vortexSphere.SetBlocksRadiusDamage( true )
+	SetTeam( vortexSphere, player.GetTeam() )
+
+	//entity mover = CreateScriptMover()
+	//mover.SetParent( player, "VDU" )
+
+	vortexSphere.SetParent( player, "VDU" )
+	//vortexSphere.e.shieldWallFX.SetAngles( < 20,0,94 > )
+	//vortexSphere.e.shieldWallFX.SetOrigin( < 31,0,32 > )
+	vortexSphere.e.shieldWallFX.SetAngles( < 20,0,94 > )
+	vortexSphere.e.shieldWallFX.SetOrigin( < 21,0,0 > )
+
+
+	vortexSphere.SetDamageNotifications( false ) // no hitmarkers?
+	thread RodeoShieldThink( player, titanSoul, vortexSphere )	//, mover )
+	return vortexSphere
+}
+
+void function RodeoShieldThink( entity player, entity titanSoul, entity vortexSphere )	//, entity mover )
+{
+
+	titanSoul.EndSignal( "OnTitanDeath" )
+	titanSoul.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "RodeoOver" )
+	vortexSphere.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function() : ( vortexSphere )	//, mover )
+		{
+			if( IsValid( vortexSphere ) )
+				vortexSphere.Destroy()
+			//if( IsValid( mover ) )
+			//	mover.Destroy()
+		}
+	)
+
+	while( true )
+	{
+		WaitFrame()
+		EmitSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
+		if( IsValid( vortexSphere.e.shieldWallFX ) )
+			EffectSetControlPointVector( vortexSphere.e.shieldWallFX, 1, GetIncapShieldCurrentColor( 1.0 - GetHealthFrac( vortexSphere ) ) )
+	}
+}
+
+const vector BLEEDOUT_INCAP_SHIELD_COLOR_FULL		 = <115, 247, 255>	// blue
+const vector BLEEDOUT_INCAP_SHIELD_COLOR_MED		 = <200, 128, 80>	// orange
+const vector BLEEDOUT_INCAP_SHIELD_COLOR_EMPTY		 = <200, 80, 80>	// red
+
+vector function GetIncapShieldCurrentColor( float chargeFrac, vector fullHealthColor = BLEEDOUT_INCAP_SHIELD_COLOR_FULL, vector medHealthColor = BLEEDOUT_INCAP_SHIELD_COLOR_MED, vector emptyHealthColor = BLEEDOUT_INCAP_SHIELD_COLOR_EMPTY )
+{
+	return GetTriLerpColor( chargeFrac, fullHealthColor, medHealthColor, emptyHealthColor )
+}
+
+// Copied from vortex, since it's not a global func
+vector function GetTriLerpColor( float fraction, vector color1, vector color2, vector color3 )
+{
+	float crossover1 = 0.55  // from zero to this fraction, fade between color1 and color2
+	float crossover2 = 0.75 // from crossover1 to this fraction, fade between color2 and color3
+
+	float r, g, b
+
+	// 0 = full charge, 1 = no charge remaining
+	if ( fraction < crossover1 )
+	{
+		r = Graph( fraction, 0, crossover1, color1.x, color2.x )
+		g = Graph( fraction, 0, crossover1, color1.y, color2.y )
+		b = Graph( fraction, 0, crossover1, color1.z, color2.z )
+		return <r, g, b>
+	}
+	else if ( fraction < crossover2 )
+	{
+		r = Graph( fraction, crossover1, crossover2, color2.x, color3.x )
+		g = Graph( fraction, crossover1, crossover2, color2.y, color3.y )
+		b = Graph( fraction, crossover1, crossover2, color2.z, color3.z )
+		return <r, g, b>
+	}
+	else
+	{
+		// for the last bit of overload timer, keep it max danger color
+		r = color3.x
+		g = color3.y
+		b = color3.z
+		return <r, g, b>
+	}
+
+	unreachable
 }
 
 ///// CLASSIC RODEO UTILITY START /////
@@ -2800,7 +2912,8 @@ bool function PilotCanApplyBattery( entity rodeoPilot, entity rodeoTitan )
 	entity titanSoul = rodeoTitan.GetTitanSoul()
 	Assert( IsValid( titanSoul ) )
 
-	string titanType = GetSoulTitanSubClass( titanSoul )
+	if( IsValid( titanSoul ) )
+		string titanType = GetSoulTitanSubClass( titanSoul )
 
 	return true
 }
