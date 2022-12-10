@@ -20,8 +20,6 @@ struct
 
 void function GamemodeAITdm_Init()
 {
-	SetWeaponDropsEnabled( false )
-
 	SetSpawnpointGamemodeOverride( ATTRITION ) // use bounty hunt spawns as vanilla game has no spawns explicitly defined for aitdm
 
 	AddCallback_GameStateEnter( eGameState.Prematch, OnPrematchStart )
@@ -36,8 +34,8 @@ void function GamemodeAITdm_Init()
 
 	if ( GetCurrentPlaylistVarInt( "aitdm_archer_grunts", 0 ) == 0 )
 	{
-		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_arc_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
-		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_arc_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
+		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )	//"mp_weapon_arc_launcher",
+		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
 	}
 	else
 	{
