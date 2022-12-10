@@ -208,7 +208,7 @@ void function StartNuke( entity player )
 
 				vector viewVector = player.GetViewVector()
 				vector playerVel = player.GetVelocity()
-				vector batteryVel = playerVel + viewVector * 150 + < 0, 0, 200 >
+				vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 
 				battery.SetVelocity( batteryVel )
 

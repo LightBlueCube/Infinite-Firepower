@@ -193,6 +193,7 @@ void function RodeoTitan_Init()
 	//}
 
 	///// modified /////
+	RegisterSignal( "RodeoDefensiveSequence" )
 	RegisterSignal( "RodeoBatteryRemoval" )
 	RegisterSignal( "ApplyBatteryToTitan" )
 	AddCallback_OnPilotBecomesTitan( ClassicRodeo_UpdateBatteryContainer )
@@ -893,6 +894,85 @@ void function RodeoPilotPullsOutWeapon( entity rodeoPilot, entity rodeoTitan, st
 	rodeoPilot.Signal( "FriendlyRodeoDeployWeapon" )
 }
 
+void function PlayerInput( entity player, entity rodeoTitan, entity titanSoul )
+{
+	titanSoul.EndSignal( "OnTitanDeath" )
+	titanSoul.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "RodeoOver" )
+
+	AddButtonPressedPlayerInputCallback( player, IN_MELEE, ClassicRodeo_TrySignalDefensiveSequence )
+
+	OnThreadEnd(
+		function() : ( player )
+		{
+			RemoveButtonPressedPlayerInputCallback( player, IN_MELEE, ClassicRodeo_TrySignalDefensiveSequence )
+		}
+	)
+
+	while( true )
+	{
+		WaitFrame()
+		if( IsValid( player ) )
+		{
+			if ( PilotCanApplyBattery( player, rodeoTitan ) )
+			{
+				entity battery = GetBatteryOnBack( player )
+				if ( battery == null ) // not ideal but at least the game won't crash
+				{
+					SendHudMessage( player, "按\"近战\"键（默认为\"F\"）交付电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+				}
+				if( battery.GetSkin() == 0 )
+					SendHudMessage( player, "按\"近战\"键（默认为\"F\"）交付绿电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+				if( battery.GetSkin() == 1 )
+					SendHudMessage( player, "按\"近战\"键（默认为\"F\"）交付红电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+				if( battery.GetSkin() == 2 )
+					SendHudMessage( player, "按\"近战\"键（默认为\"F\"）交付黄电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);				
+			}
+		}
+	}
+}
+
+void function ClassicRodeo_TrySignalDefensiveSequence( entity player )
+{
+	if( !IsValid( player.GetTitanSoulBeingRodeoed() ) )
+		return
+
+	player.Signal( "RodeoDefensiveSequence" )
+}
+
+void function StopIncapShieldWallFX( entity vortexSphere )
+{
+	entity shieldWallFX = vortexSphere.e.shieldWallFX
+	if( !IsValid( shieldWallFX ) )
+		return
+
+	entity cpoint = shieldWallFX.e.cpoint
+	shieldWallFX.e.cpoint = null
+	if( IsValid( cpoint ) )
+		cpoint.Destroy()
+
+	StopShieldWallFX( vortexSphere )
+}
+
+entity function CreateIncapShieldWallFX( entity vortexSphere )
+{
+	// Shield wall fx control point
+	entity cpoint = CreateEntity( "info_placement_helper" )
+	SetTargetName( cpoint, UniqueString( "shield_wall_controlpoint" ) )
+	DispatchSpawn( cpoint )
+
+	// Shield wall fx
+	entity shieldWallFX = PlayFXWithControlPoint( INCAP_SHIELD_EFFECT_NAME, < 0,0,0 >, cpoint, -1, null, < 0,0,0 >, C_PLAYFX_LOOP )
+	vortexSphere.e.shieldWallFX = shieldWallFX
+	shieldWallFX.e.cpoint = cpoint
+	shieldWallFX.SetParent( vortexSphere )
+	shieldWallFX.SetAngles( < 20,0,94 > )
+	shieldWallFX.SetOrigin( < 21,10,0 > )
+
+	return shieldWallFX
+}
+
 void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity titanSoul, RodeoPackageStruct rodeoPackage )
 {
 	titanSoul.EndSignal( "OnTitanDeath" )
@@ -919,34 +999,31 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 		RodeoPilotPullsOutWeapon( rodeoPilot, rodeoTitan, rodeoTitanType )
 
 		entity vortexSphere = CreateIncapShieldForBleedingPlayer( rodeoPilot, titanSoul )
+
+		thread PlayerInput( rodeoPilot, rodeoTitan, titanSoul )
+
 		while( true )
 		{
+			rodeoPilot.WaitSignal( "RodeoDefensiveSequence" )
 			if( IsValid( titanSoul ) )
 			{
 				if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
 				{
-					if( IsValid( rodeoPilot ) )
-						SendHudMessage( rodeoPilot, "按\"近战\"键（默认为\"F\"）交付电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
-				}
-				if( rodeoPilot.IsInputCommandHeld( IN_MELEE ) )
-				{
-					if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
-					{
-						vortexSphere.ClearParent()
-						vortexSphere.SetOrigin( < -9999, -9999, -9999 > ) // so player can never hit it
-					
-						thread ManagePlayerWeaponDeployment( rodeoPilot, titanSoul )
-						waitthread PlayerAppliesBatteryPack( rodeoPilot, rodeoTitan, titanSoul, rodeoPackage )
-						rodeoPilot.Anim_Stop()
-						ClassicRodeo_GrabEnemyTitan( rodeoPilot, titanSoul, rodeoPackage ) // grab titan again
-						ClassicRodeoViewCone( rodeoPilot ) // restore viewcone
-						rodeoPilot.Signal( "FriendlyRodeoDeployWeapon" )
+					StopIncapShieldWallFX( vortexSphere )
+					vortexSphere.ClearParent()
+					vortexSphere.SetOrigin( < -9999, -9999, -9999 > ) // so player can never hit it
+				
+					thread ManagePlayerWeaponDeployment( rodeoPilot, titanSoul )
+					waitthread PlayerAppliesBatteryPack( rodeoPilot, rodeoTitan, titanSoul, rodeoPackage )
+					rodeoPilot.Anim_Stop()
+					ClassicRodeo_GrabEnemyTitan( rodeoPilot, titanSoul, rodeoPackage ) // grab titan again
+					ClassicRodeoViewCone( rodeoPilot ) // restore viewcone
+					rodeoPilot.Signal( "FriendlyRodeoDeployWeapon" )
 
-						vortexSphere.SetParent( rodeoPilot, "VDU" )
-					}
+					vortexSphere.SetParent( rodeoPilot, "VDU" )
+					CreateIncapShieldWallFX( vortexSphere )
 				}
 			}
-			WaitFrame()
 		}
 	}
 
@@ -2373,7 +2450,7 @@ entity function Rodeo_TakeBatteryAwayFromPilot( entity pilot )
 			}
 		}
 
-		battery.s.touchEnabledTime = Time() + 0.3
+		battery.s.touchEnabledTime = Time() + 1
 
 		Battery_StartFX( battery ) //Needed to properly restore effect when player is killed while cloaked and carrying a battery
 
