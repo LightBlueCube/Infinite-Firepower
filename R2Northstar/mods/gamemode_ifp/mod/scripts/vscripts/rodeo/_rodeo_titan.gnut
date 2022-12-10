@@ -1009,7 +1009,7 @@ entity function CreateIncapShieldForBleedingPlayer( entity player, entity titanS
 	//vortexSphere.e.shieldWallFX.SetAngles( < 20,0,94 > )
 	//vortexSphere.e.shieldWallFX.SetOrigin( < 31,0,32 > )
 	vortexSphere.e.shieldWallFX.SetAngles( < 20,0,94 > )
-	vortexSphere.e.shieldWallFX.SetOrigin( < 21,0,0 > )
+	vortexSphere.e.shieldWallFX.SetOrigin( < 21,10,0 > )
 
 
 	vortexSphere.SetDamageNotifications( false ) // no hitmarkers?
@@ -1027,10 +1027,12 @@ void function RodeoShieldThink( entity player, entity titanSoul, entity vortexSp
 	vortexSphere.EndSignal( "OnDestroy" )
 
 	OnThreadEnd(
-		function() : ( vortexSphere )	//, mover )
+		function() : ( vortexSphere, player )	//, mover )
 		{
 			if( IsValid( vortexSphere ) )
 				vortexSphere.Destroy()
+			if( IsValid( player ) )
+				EmitSoundOnEntity( player, "ShieldWall_Destroyed" )
 			//if( IsValid( mover ) )
 			//	mover.Destroy()
 		}
@@ -2572,11 +2574,13 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 			titan.SetHealth( 1 )
 		}
 		if( IsValid( battery ) && soul.IsDoomed() )
-			if( battery.GetSkin() == 2 )
+		{
+			if( battery.GetSkin() == 1 )
 			{
 				UndoomTitan( titan, 1 )
 				titan.SetHealth( 1 )
 			}
+		}
 		float coreFrac = GetCurrentPlaylistVarFloat( "battery_core_frac", 0.2 )
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = GetCurrentPlaylistVarFloat( "amped_battery_health_frac", 2.0 )
