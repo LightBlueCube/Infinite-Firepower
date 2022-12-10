@@ -422,7 +422,12 @@ function __PlayAnim( guy, animation_name, reference = null, optionalTag = null, 
 			else
 			{
 				local attachIndex = reference.LookupAttachment( optionalTag )
-				local origin = reference.GetAttachmentOrigin( attachIndex )
+
+				local origin
+				if( reference.GetAttachmentOrigin( attachIndex ) == 0 )
+					origin = reference.GetOrigin()
+				else
+					origin = reference.GetAttachmentOrigin( attachIndex )
 				local angles = reference.GetAttachmentAngles( attachIndex )
 				if ( guy.IsNPC() )
 				{
