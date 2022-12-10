@@ -114,7 +114,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				else
 				{
 					attacker.s.HaveNukeTitan <- 1
-					SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"使用\"键（默认为\"E\"）以交付////////////////\n交付全部核武泰坦请按住\"使用\"键（默认为\"E\"） + \"近战\"键（默认为\"F\"）\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
+					SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"跳跃\"键（默认为\"Space\"）以交付////////////////\n交付全部核武泰坦请按住\"跳跃\"键（默认为\"Space\"） + \"近战\"键（默认为\"F\"）\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
 				}
 			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
@@ -131,7 +131,7 @@ void function OnClientConnected( entity player )
 	player.s.KillStreak <- 0
 	player.s.totalKills <- 0
 	AddPlayerHeldButtonEventCallback( player, IN_MELEE, StartNuke, 1 )
-	AddPlayerHeldButtonEventCallback( player, IN_USE, ApplyNukeTitan, 2 )
+	AddPlayerHeldButtonEventCallback( player, IN_JUMP, ApplyNukeTitan, 1 )
 }
 
 void function ApplyNukeTitan( entity player )
@@ -152,7 +152,7 @@ void function ApplyNukeTitan( entity player )
 				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
 				return
 			}
-			if( player.IsInputCommandHeld( IN_USE ) )
+			if( player.IsInputCommandHeld( IN_MELEE ) )
 			{
 				SendHudMessage(player, "成功交付所有核武泰坦  请注意您的强化栏位（默认为\"C\"）\n本次交付的数量为:"+player.s.HaveNukeTitan, -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
 				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1 )
