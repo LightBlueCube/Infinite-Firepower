@@ -114,7 +114,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				else
 				{
 					attacker.s.HaveNukeTitan <- 1
-					SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"近战\"键（默认为\"F\"）以交付////////////////\n交付全部核武泰坦请按住\"近战\"键（默认为\"F\"） + \"使用\"键（默认为\"E\"）\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
+					SendHudMessage( attacker, "////////////////核武泰坦已就绪，按住\"使用\"键（默认为\"E\"）以交付////////////////\n交付全部核武泰坦请按住\"使用\"键（默认为\"E\"） + \"近战\"键（默认为\"F\"）\n目前未交付的核武泰坦总数:"+attacker.s.HaveNukeTitan,  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
 				}
 			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
@@ -131,9 +131,10 @@ void function OnClientConnected( entity player )
 	player.s.KillStreak <- 0
 	player.s.totalKills <- 0
 	AddPlayerHeldButtonEventCallback( player, IN_MELEE, StartNuke, 1 )
+	AddPlayerHeldButtonEventCallback( player, IN_USE, ApplyNukeTitan, 2 )
 }
 
-void function StartNuke( entity player )
+void function ApplyNukeTitan( entity player )
 {
 	if( "HaveNukeTitan" in player.s )
 	{
@@ -168,7 +169,10 @@ void function StartNuke( entity player )
 			}
 		}
 	}
+}
 
+void function StartNuke( entity player )
+{
 	if( "HaveNuclearBomb" in player.s )
 	{
 		if( player.s.HaveNuclearBomb == true )
@@ -194,6 +198,29 @@ void function StartNuke( entity player )
 		}
 	}
 
+	if( IsValid( player ) )
+	{
+		if( player.IsHuman() && IsAlive( player ) )
+		{
+			if( PlayerHasMaxBatteryCount( player ) )
+			{
+				Rodeo_TakeBatteryAwayFromPilot( player )
+				SendHudMessage(player, "您已丢出电池", -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+			}
+			else
+			{
+				SendHudMessage(player, "你需要有电池才可丢出电池", -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+			}
+		}
+		else
+		{
+			if( !IsAlive( player ) )
+				SendHudMessage(player, "你需要处于存活状态才可丢出电池", -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+			if( !player.IsHuman() )
+				SendHudMessage(player, "你需要以铁驭状态才可丢出电池", -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		}
+	}
+
 
 	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
 	{
@@ -208,17 +235,6 @@ void function StartNuke( entity player )
 			wait 0.1
 			if( sec == 40 )
 				player.s.HaveNukeTitan <- 100
-			if( sec == 20 )
-			{
-				Burnmeter_EmergencyBattery( player )
-				entity battery = GetBatteryOnBack( player )
-		
-				if ( battery == null ) // not ideal but at least the game won't crash
-					return
-		
-				battery.SetSkin( 1 ) // yellow - CHANGE SKIN TO ORANGE someday
-				Battery_StartFX( battery )		
-			}
 		}
 		foreach( arrayPlayer in GetPlayerArray() )
 		{
@@ -568,3 +584,31 @@ void function OnTitanfall( entity titan )
 	}
 }
 
+
+
+///////////////////////////////
+////	从外面"借"来的函数	////
+//////////////////////////////
+
+vector ornull function CalculateSpotForThrownBattery( entity pilot, entity battery )
+{
+	vector viewVector = pilot.GetViewVector()
+	vector eyePos = pilot.EyePosition()
+	vector batteryMins = battery.GetBoundingMins()
+	vector batteryMaxs = battery.GetBoundingMaxs()
+	vector endPos = eyePos + viewVector * 100
+	TraceResults hullResult = TraceHull( eyePos, endPos, batteryMins, batteryMaxs, pilot, TRACE_MASK_SOLID | TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+
+	//PrintTraceResults( hullResult )
+
+	if ( hullResult.startSolid )
+		return null
+
+	if ( hullResult.hitEnt == pilot )
+		return null
+
+	if ( hullResult.fraction == 1.0 )
+		return endPos
+
+	return hullResult.endPos
+}

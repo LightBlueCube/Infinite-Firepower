@@ -932,12 +932,17 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 				{
 					if ( PilotCanApplyBattery( rodeoPilot, rodeoTitan ) )
 					{
+						vortexSphere.ClearParent()
+						vortexSphere.SetOrigin( < -9999, -9999, -9999 > ) // so player can never hit it
+					
 						thread ManagePlayerWeaponDeployment( rodeoPilot, titanSoul )
 						waitthread PlayerAppliesBatteryPack( rodeoPilot, rodeoTitan, titanSoul, rodeoPackage )
 						rodeoPilot.Anim_Stop()
 						ClassicRodeo_GrabEnemyTitan( rodeoPilot, titanSoul, rodeoPackage ) // grab titan again
 						ClassicRodeoViewCone( rodeoPilot ) // restore viewcone
 						rodeoPilot.Signal( "FriendlyRodeoDeployWeapon" )
+
+						vortexSphere.SetParent( rodeoPilot, "VDU" )
 					}
 				}
 			}
@@ -1038,10 +1043,10 @@ void function RodeoShieldThink( entity player, entity titanSoul, entity vortexSp
 		}
 	)
 
+	EmitSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
 	while( true )
 	{
 		WaitFrame()
-		EmitSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
 		if( IsValid( vortexSphere.e.shieldWallFX ) )
 			EffectSetControlPointVector( vortexSphere.e.shieldWallFX, 1, GetIncapShieldCurrentColor( 1.0 - GetHealthFrac( vortexSphere ) ) )
 	}
@@ -2199,7 +2204,7 @@ entity function Rodeo_CreateBatteryPack( entity batteryOwner = null, bool isPick
 	}
 
 	//thread MonitorBatteryVelocity( batteryPack )
-	thread BatteryAutoDestroy( batteryPack )
+	//thread BatteryAutoDestroy( batteryPack )
 	return batteryPack
 }
 
@@ -2573,19 +2578,26 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 			UndoomTitan( titan, 1 )
 			titan.SetHealth( 1 )
 		}
+
+		float RedBatteryHealthSegmentFrac
+
 		if( IsValid( battery ) && soul.IsDoomed() )
 		{
 			if( battery.GetSkin() == 1 )
 			{
 				UndoomTitan( titan, 1 )
 				titan.SetHealth( 1 )
+				RedBatteryHealthSegmentFrac = 3.0
 			}
+		}
+		else
+		{
+			RedBatteryHealthSegmentFrac = 0.5
 		}
 		float coreFrac = GetCurrentPlaylistVarFloat( "battery_core_frac", 0.2 )
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = GetCurrentPlaylistVarFloat( "amped_battery_health_frac", 2.0 )
 		float healthSegmentFrac = GetCurrentPlaylistVarFloat( "battery_health_frac", 0.5 )
-		float RedBatteryHealthSegmentFrac = 0.5
 
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 

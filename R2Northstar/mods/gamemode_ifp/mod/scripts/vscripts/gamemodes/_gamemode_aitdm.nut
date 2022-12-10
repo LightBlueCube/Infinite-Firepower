@@ -3,7 +3,7 @@ global function GamemodeAITdm_Init
 
 const SQUADS_PER_TEAM = 4
 
-const REAPERS_PER_TEAM = 1
+const REAPERS_PER_TEAM = 2
 
 const LEVEL_SPECTRES = 0
 const LEVEL_STALKERS = 0

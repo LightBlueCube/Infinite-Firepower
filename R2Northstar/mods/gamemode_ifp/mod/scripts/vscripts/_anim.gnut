@@ -424,7 +424,7 @@ function __PlayAnim( guy, animation_name, reference = null, optionalTag = null, 
 				local attachIndex = reference.LookupAttachment( optionalTag )
 
 				local origin
-				if( reference.GetAttachmentOrigin( attachIndex ) == 0 )
+				if( !IsValid( reference.GetAttachmentOrigin( attachIndex ) ) )
 					origin = reference.GetOrigin()
 				else
 					origin = reference.GetAttachmentOrigin( attachIndex )
