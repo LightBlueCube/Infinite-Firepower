@@ -1025,6 +1025,7 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 				}
 			}
 		}
+		WaitForever()
 	}
 
 	#if MP
