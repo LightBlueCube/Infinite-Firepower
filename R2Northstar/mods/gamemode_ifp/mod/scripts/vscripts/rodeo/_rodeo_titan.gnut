@@ -2579,7 +2579,7 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 			titan.SetHealth( 1 )
 		}
 
-		float RedBatteryHealthSegmentFrac
+		float RedBatteryHealthSegmentFrac = 0.5
 
 		if( IsValid( battery ) && soul.IsDoomed() )
 		{
@@ -2589,10 +2589,6 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan )
 				titan.SetHealth( 1 )
 				RedBatteryHealthSegmentFrac = 3.0
 			}
-		}
-		else
-		{
-			RedBatteryHealthSegmentFrac = 0.5
 		}
 		float coreFrac = GetCurrentPlaylistVarFloat( "battery_core_frac", 0.2 )
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )

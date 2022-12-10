@@ -207,11 +207,9 @@ void function StartNuke( entity player )
 				entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
 
 				vector viewVector = player.GetViewVector()
-				vector verticalAdjustment = < 0, 0, 0 >
-				if ( playerVel.z == 0 )
-					verticalAdjustment = < 0, 0, 100 >
-		
-				vector batteryVel = playerVel + viewVector * 50 + verticalAdjustment
+				vector playerVel = player.GetVelocity()
+				vector batteryVel = playerVel + viewVector * 150 + < 0, 0, 200 >
+
 				battery.SetVelocity( batteryVel )
 
 				SendHudMessage(player, "您已丢出电池", -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
