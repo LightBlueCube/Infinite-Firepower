@@ -15,6 +15,7 @@ void function tcpback()
 	AddClientCommandCallback( "hw", NukeTitan );
 	AddClientCommandCallback( "shelp", simpelhelp );
 	AddClientCommandCallback( "shelp2", simpelhelp2 );
+	AddClientCommandCallback( "shelp3", simpelhelp3 );
 }
 
 bool function simpelhelp( entity player, array<string> args )
@@ -27,7 +28,14 @@ bool function simpelhelp( entity player, array<string> args )
 bool function simpelhelp2( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n红电池回血0.5格，但是如果是黄血吃到那么拉出黄血且回血3格\n能核Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "控制台输入\"shelp3\"看第三页\n绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n红电池回血0.5格，但是如果是黄血吃到那么拉出黄血且回血3格\n能核Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+	return	true
+}
+
+bool function simpelhelp3( entity player, array<string> args )
+{
+	if( IsValid( player ) )
+		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦\nNPC的刷新数量和伤害都有大幅提升",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
@@ -134,7 +142,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				{
 					attacker.s.HaveNukeTitan <- 1
 				}
-				SendHudMessage( attacker, "获得一个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 30, 1);
+				SendHudMessage( attacker, "获得一个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
 			}
 			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
 			{
@@ -197,7 +205,7 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 					return
 				}
 				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
-				for( int i = player.s.HaveNukeTitan; i > 0; i -= 1)
+				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
 				{
 					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
 				}
@@ -453,6 +461,7 @@ void function explode( entity player, entity owner )
 	wait 1.8
 	if( IsValid( player ) )
 	{
+		StopSoundOnEntity( player, "goblin_dropship_explode" )
 		if( IsAlive( player ) )
 			player.Die()
 		player.FreezeControlsOnServer()
@@ -504,7 +513,7 @@ void function RestoreKillStreak( entity player )
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
-			SendHudMessage( player, "////////////////Ahpla核弹已就绪，长住\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
+			SendHudMessage( player, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
 }
 
 void function SetPlayerTitanTitle( entity player, entity titan )

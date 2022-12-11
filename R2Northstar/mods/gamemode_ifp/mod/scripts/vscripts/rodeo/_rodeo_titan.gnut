@@ -920,14 +920,14 @@ void function PlayerInput( entity player, entity rodeoTitan, entity titanSoul )
 				entity battery = GetBatteryOnBack( player )
 				if ( battery == null ) // not ideal but at least the game won't crash
 				{
-					SendHudMessage( player, "按\"使用\"键（默认为\"E\"）交付电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( player, "点按\"使用\"键（默认为\"E\"）交付电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
 				}
 				if( battery.GetSkin() == 0 )
-					SendHudMessage( player, "按\"使用\"键（默认为\"E\"）交付绿电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( player, "点按\"使用\"键（默认为\"E\"）交付绿电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
 				if( battery.GetSkin() == 1 )
-					SendHudMessage( player, "按\"使用\"键（默认为\"E\"）交付红电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( player, "点按\"使用\"键（默认为\"E\"）交付红电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
 				if( battery.GetSkin() == 2 )
-					SendHudMessage( player, "按\"使用\"键（默认为\"E\"）交付黄电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( player, "点按\"使用\"键（默认为\"E\"）交付黄电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
 			}
 		}
 	}
