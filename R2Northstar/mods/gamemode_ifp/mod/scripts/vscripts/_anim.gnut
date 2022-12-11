@@ -424,11 +424,17 @@ function __PlayAnim( guy, animation_name, reference = null, optionalTag = null, 
 				local attachIndex = reference.LookupAttachment( optionalTag )
 
 				local origin
-				if( !IsValid( reference.GetAttachmentOrigin( attachIndex ) ) )
+				local angles
+				if( attachIndex == 0 )
+				{
 					origin = reference.GetOrigin()
+					angles = reference.GetAngles()
+				}
 				else
+				{
 					origin = reference.GetAttachmentOrigin( attachIndex )
-				local angles = reference.GetAttachmentAngles( attachIndex )
+					angles = reference.GetAttachmentAngles( attachIndex )
+				}
 				if ( guy.IsNPC() )
 				{
 					//local origin = reference.GetOrigin()
@@ -440,7 +446,8 @@ function __PlayAnim( guy, animation_name, reference = null, optionalTag = null, 
 					//local animStartPos = guy.Anim_GetStartForRefEntity_Old( animation, reference, optionalTag )
 					//local origin = animStartPos.origin
 					//local angles = animStartPos.angles
-					guy.Anim_PlayWithRefPoint( animation, origin, angles, blendTime )
+					if( !( guy.GetParent() ) )
+						guy.Anim_PlayWithRefPoint( animation, origin, angles, blendTime )
 				}
 			}
 			return
