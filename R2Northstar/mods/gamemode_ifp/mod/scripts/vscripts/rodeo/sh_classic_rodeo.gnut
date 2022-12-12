@@ -3,15 +3,23 @@ untyped
 global function ClassicRodeo_InitPlaylistVars
 
 #if SERVER
+global function ClassicRodeo_SetAdditionalDamageScale
+
 global function CreateClassicRodeoWeakpoint
 
-const array<int> ELECTRIC_SMOKE_DAMAGETYPES = [ eDamageSourceId.mp_titanability_smoke,
-									 			eDamageSourceId.mp_weapon_grenade_electric_smoke ]
+// handling hardcoded nerf!
+const array<int> ELECTRIC_SMOKE_DAMAGESOURCES = [ eDamageSourceId.mp_titanability_smoke,
+												  //eDamageSourceId.mp_titanability_electric_smoke,
+									 			  eDamageSourceId.mp_weapon_grenade_electric_smoke ]
+
+struct
+{
+	float classicRodeoAdditionalDamage = 1 // default additional damage value, should make it changable through playlistVars
+} file
 #endif
 
 
 const asset RODEO_WEAKPOINT_HITBOX_MODEL = $"models/weapons/bullets/triple_threat_projectile.mdl" // $"models/Weapons/ammoboxes/backpack_single.mdl" // this one's too big, will block many damages
-const asset RODEO_GRENADE_HINT_ENT_MODEL = $"models/weapons/bullets/mgl_grenade.mdl"
 
 void function ClassicRodeo_InitPlaylistVars()
 {
@@ -22,6 +30,11 @@ void function ClassicRodeo_InitPlaylistVars()
 }
 
 #if SERVER
+void function ClassicRodeo_SetAdditionalDamageScale( float scale )
+{
+	file.classicRodeoAdditionalDamage = scale
+}
+
 // UTILITY
 entity function CreateClassicRodeoWeakpoint( entity player, entity titan )
 {
@@ -35,14 +48,11 @@ entity function CreateClassicRodeoWeakpoint( entity player, entity titan )
 	weakpoint.kv.solid = 6
 	weakpoint.Hide()
 
-	//entity useHintEnt = CreateRodeoGrenadeHintEntityForPlayer( player, titan )
-	//thread TrackWeakPointLifeTime( weakpoint, useHintEnt )
-
 	entity titanSoul = titan.GetTitanSoul()
 	// stryder ones don't really work in the default position, so change it
 	// note: stryders are way too easy to hit because of this lol so possibly fuck with it
 	if ( GetSoulTitanSubClass( titanSoul ) == "stryder" )
-		weakpoint.SetLocalOrigin( < 0, -2, 0 > ) // < 0, 4, -4 > for ammobox
+		weakpoint.SetLocalOrigin( < 0, -4, -2 > ) // < 0, 4, -4 > for ammobox
 
 	weakpoint.s.pilot <- player
 	weakpoint.s.titanSoul <- titanSoul
@@ -51,48 +61,6 @@ entity function CreateClassicRodeoWeakpoint( entity player, entity titan )
 
 	return weakpoint
 }
-
-/*entity function CreateRodeoGrenadeHintEntityForPlayer( entity player, entity titan )
-{
-	entity useHintEnt = CreatePropScript( RODEO_GRENADE_HINT_ENT_MODEL )
-	useHintEnt.SetParent( titan, "RODEO_BATTERY" )
-	useHintEnt.SetOrigin( < 0,-10,0 > )
-	useHintEnt.SetTakeDamageType( DAMAGE_NO )
-	SetTeam( useHintEnt, player.GetTeam() )
-	SetObjectCanBeMeleed( useHintEnt, false )
-	useHintEnt.kv.solid = SOLID_VPHYSICS
-	useHintEnt.Hide()
-	//useHintEnt.SetOwner( player ) // don't do this, this will make entity have no collision with owner, in this case which means not showing any hints
-
-	useHintEnt.SetUsable()
-	//useHintEnt.SetUsableByGroup( "friendlies pilot" )
-	useHintEnt.SetUsePrompts( "按下%melee%投擲手雷", "按住%melee%投擲手雷" ) // why this not showing anything,..
-
-	thread DestroyHintOnPressedMelee( player, useHintEnt )
-
-	return useHintEnt
-}
-
-void function DestroyHintOnPressedMelee( entity player, entity useHintEnt )
-{
-	player.EndSignal( "OnDestroy" )
-	useHintEnt.EndSignal( "OnDestroy" )
-
-	while( true )
-	{
-		if( player.IsInputCommandHeld( IN_MELEE ) )
-			useHintEnt.Destroy()
-		WaitFrame()
-	}
-}
-
-void function TrackWeakPointLifeTime( entity weakpoint, entity ent )
-{
-	ent.EndSignal( "OnDestroy" )
-
-	weakpoint.WaitSignal( "OnDestroy" )
-	ent.Destroy()
-}*/
 
 void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 {
@@ -118,48 +86,31 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	// most weapons in ttf2 don't have damage_rodeo, let's use it's damage_near_value_titanarmor
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	entity inflictor = DamageInfo_GetInflictor( damageInfo )
-	bool shouldMultiplyDamage = true
 	int rodeoDamage = attackerWeapon.GetWeaponSettingInt( eWeaponVar.damage_rodeo )
-	bool canNormallyDamage = attackerWeapon.GetWeaponSettingBool( eWeaponVar.titanarmor_critical_hit_required )
-	if( canNormallyDamage )
-		shouldMultiplyDamage = false
-	float damageScale = attackerWeapon.GetWeaponSettingFloat( eWeaponVar.critical_hit_damage_scale )
 
-	if( IsValid( inflictor ) )
+
+	// not using these check now, since we have done hitbox changes, grenadiers can cause really high damage to player themselves
+	//bool canNormallyDamage = attackerWeapon.GetWeaponSettingBool( eWeaponVar.titanarmor_critical_hit_required )
+	//if( canNormallyDamage )
+	//	shouldMultiplyDamage = false
+
+	// can't get right condition
+	//if( attackerWeapon.GetWeaponType() == WT_ANTITITAN ) // antiTitan weapons such as defender, can deal so much damage, so don't multiply it
+	//	shouldMultiplyDamage = false
+
+
+	if( ELECTRIC_SMOKE_DAMAGESOURCES.contains( damageSourceID ) ) // hardcoded here
 	{
-		if( inflictor.IsProjectile() )
-		{
-			//print( "inflictor is projectile!" )
-			if( inflictor.GetClassName() == "grenade" )
-			{
-				//print( "damaged by grenade!" )
-				shouldMultiplyDamage = false
-				if( "rodeoDamagedOnce" in inflictor.s ) // prevent MGL from dealing damage twice as normal( explosion will have less damage )
-				{
-					if( expect bool( inflictor.s.rodeoDamagedOnce ) )
-						rodeoDamage = attackerWeapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor )
-				}
-				inflictor.s.rodeoDamagedOnce <- true
-			}
-		}
-		if( inflictor.GetScriptName() == "ball_lightning" ) // modified in _ball_lightning.gnut, assuming this is ballLightning
-		{
-			//print( "damaged by arcball!" )
-			rodeoDamage = int( inflictor.e.ballLightningData.damage )
-			shouldMultiplyDamage = false
-		}
-	}
-	else if( ELECTRIC_SMOKE_DAMAGETYPES.contains( damageSourceID ) ) // hardcoded here
-	{
-		return // don't do additional damage to smokes
+		return // don't do additional damage for smokes
 		//rodeoDamage = 300 // electric smoke grenade's damage per tick
 		//shouldMultiplyDamage = false
 	}
-	if( shouldMultiplyDamage )
-		rodeoDamage = int( rodeoDamage * damageScale * 1.5 )
 
+	rodeoDamage = int( rodeoDamage * file.classicRodeoAdditionalDamage ) // no additional damage based on criticalScale
+
+	//print( file.classicRodeoAdditionalDamage )
 	//print( rodeoDamage )
-	// damage titanSoul, make sure DF_BYPASS_SHIELD	is a thing for proper behaviour
+	// damage titanSoul, make sure DF_BYPASS_SHIELD	is a thing for proper behaviour. DF_RODEO is added in CheckRodeoRiderHitsTitan() so no need to add again.
 	titan.TakeDamage( rodeoDamage, attacker, attackerWeapon, { damageSourceId = eDamageSourceId.rodeo, scriptType = DamageInfo_GetCustomDamageType( damageInfo ) | DF_BYPASS_SHIELD | DF_CRITICAL } )
 
 	// hitmarker, automatically triggered by "target.TakeDamage()"
