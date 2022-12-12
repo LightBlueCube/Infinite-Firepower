@@ -293,7 +293,7 @@ void function StartNuke( entity player )
 	{
 		if( player.s.HaveNuclearBomb == true )
 		{
-			wait 2
+			wait 1
 			int sec = 40
 			while( sec > 0 )
 			{
@@ -329,6 +329,13 @@ void function StartNuke( entity player )
 			wait 0.1
 			if( sec == 40 )
 				player.s.HaveNukeTitan <- 100
+			if( sec == 20 )
+			{
+				for( int i = 100; i > 0; i -= 1)
+				{
+					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_instant_battery" )
+				}
+			}
 		}
 		player.s.HaveNuclearBomb <- true
 	}
