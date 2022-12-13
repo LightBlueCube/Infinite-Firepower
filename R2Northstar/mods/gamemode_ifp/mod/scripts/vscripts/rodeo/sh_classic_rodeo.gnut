@@ -3,8 +3,6 @@ untyped
 global function ClassicRodeo_InitPlaylistVars
 
 #if SERVER
-global function ClassicRodeo_SetAdditionalDamageScale
-
 global function CreateClassicRodeoWeakpoint
 
 // handling hardcoded nerf!
@@ -30,10 +28,6 @@ void function ClassicRodeo_InitPlaylistVars()
 }
 
 #if SERVER
-void function ClassicRodeo_SetAdditionalDamageScale( float scale )
-{
-	file.classicRodeoAdditionalDamage = scale
-}
 
 // UTILITY
 entity function CreateClassicRodeoWeakpoint( entity player, entity titan )
