@@ -132,19 +132,34 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				attacker.s.totalKills <- 0
 			attacker.s.KillStreak += 1
 			attacker.s.totalKills += 1
-			if( attacker.s.totalKills % 4 == 0 )
+			if( attacker.s.totalKills % 4 == 0 || attacker.s.KillStreak % 4 == 0 )
 			{
-				if( "HaveNukeTitan" in attacker.s )
+				if( attacker.s.totalKills % 4 == 0 && attacker.s.KillStreak % 4 == 0 )
 				{
-					attacker.s.HaveNukeTitan += 1
+					if( "HaveNukeTitan" in attacker.s )
+					{
+						attacker.s.HaveNukeTitan += 2
+					}
+					else
+					{
+						attacker.s.HaveNukeTitan <- 2
+					}
+					SendHudMessage( attacker, "获得 2 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
 				}
 				else
 				{
-					attacker.s.HaveNukeTitan <- 1
+					if( "HaveNukeTitan" in attacker.s )
+					{
+						attacker.s.HaveNukeTitan += 1
+					}
+					else
+					{
+						attacker.s.HaveNukeTitan <- 1
+					}
+					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
 				}
-				SendHudMessage( attacker, "获得一个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
 			}
-			if( attacker.s.KillStreak == 24 || attacker.s.totalKills == 48 )
+			if( attacker.s.KillStreak == 24 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
 				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
