@@ -1599,6 +1599,7 @@ void function Burnmeter_AmpedBattery( entity player )
 {
 	#if MP
 	entity battery = Rodeo_CreateBatteryPack()
+	int random = RandomInt( 3 ) == 0 ? 0 : 2
 	if ( !PlayerHasMaxBatteryCount( player ) )
 	{
 		Rodeo_OnTouchBatteryPack_Internal( player,  battery ) //Just setting the origin to the player's origin also works, but it will parent weirdly to a pilot's back. probably because we end up doing 2 SetOrigins in the same frame
@@ -1608,13 +1609,11 @@ void function Burnmeter_AmpedBattery( entity player )
 		if ( battery == null ) // not ideal but at least the game won't crash
 			return
 
-		battery.SetSkin( RandomInt(3) ) // yellow - CHANGE SKIN TO ORANGE someday
+		battery.SetSkin( random ) // yellow - CHANGE SKIN TO ORANGE someday
 		Battery_StartFX( battery )
 
 		if( battery.GetSkin() == 2 && IsValid( player ) )
 			SendHudMessage(player, "获得黄电池！",  -1, 0.4, 255, 255, 0, 0, 0.15, 4, 1);
-		else if( battery.GetSkin() == 1 && IsValid( player ) )
-			SendHudMessage(player, "获得红电池！",  -1, 0.4, 255, 0, 0, 0, 0.15, 4, 1);
 		else if( battery.GetSkin() == 0 && IsValid( player ) )
 			SendHudMessage(player, "获得绿电池！",  -1, 0.4, 0, 255, 0, 0, 0.15, 4, 1);
 	}
@@ -1650,13 +1649,11 @@ void function Burnmeter_AmpedBattery( entity player )
 		if ( battery == null ) // not ideal but at least the game won't crash
 			return
 
-		battery.SetSkin( RandomInt(3) ) // yellow - CHANGE SKIN TO ORANGE someday
+		battery.SetSkin( random ) // yellow - CHANGE SKIN TO ORANGE someday
 		Battery_StartFX( battery )
 
 		if( battery.GetSkin() == 2 && IsValid( player ) )
 			SendHudMessage(player, "获得黄电池！",  -1, 0.4, 255, 255, 0, 0, 0.15, 4, 1);
-		else if( battery.GetSkin() == 1 && IsValid( player ) )
-			SendHudMessage(player, "获得红电池！",  -1, 0.4, 255, 0, 0, 0, 0.15, 4, 1);
 		else if( battery.GetSkin() == 0 && IsValid( player ) )
 			SendHudMessage(player, "获得绿电池！",  -1, 0.4, 0, 255, 0, 0, 0.15, 4, 1);
 	}
@@ -2239,7 +2236,6 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 	}
 	else if ( IsMultiplayer() )
 	{
-		float RedBatteryHealthSegmentFrac = 0.5
 
 		if( IsValid( battery ) && soul.IsDoomed() )
 		{
@@ -2247,7 +2243,6 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 			{
 				UndoomTitan( titan, 1 )
 				titan.SetHealth( 1 )
-				RedBatteryHealthSegmentFrac = 3.0
 			}
 		}
 		else if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_DOOM ) && soul.IsDoomed() )
@@ -2260,6 +2255,11 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = 1.0
 		float healthSegmentFrac = 2.0
+		float RedBatteryHealthSegmentFrac = 0.5
+
+		if( IsValid( battery ) )
+			if( battery.GetSkin() == 1 )
+				coreFrac = 0.05
 
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 
@@ -3119,13 +3119,76 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 
 		if( result.signal == "RodeoDefensiveSequence" )
 		{
-			if( pilotHasBattery && ( sameTeam ) )
+			if( pilotHasBattery && sameTeam )
+			{
 				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
+
+				int sec = 50
+				while( sec >= 0 )
+				{
+					if( PlayerHasBattery( rodeoPilot ) )
+						break
+					if( IsValid( rodeoPilot ) )
+						SendHudMessage( rodeoPilot, "应急补给电池将在 "+ float( sec ) / 10 +" 秒后就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+					sec -= 1
+					if( sec == 0 )
+						thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
+					wait 0.1
+				}
+			}
+			if( !pilotHasBattery && sameTeam )
+			{
+				Burnmeter_EmergencyBattery( rodeoPilot )
+
+				entity battery = GetBatteryOnBack( rodeoPilot )
+
+				if ( battery == null ) // not ideal but at least the game won't crash
+					continue
+
+				battery.SetSkin( 1 )
+				Battery_StartFX( battery )
+
+				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
+
+				int sec = 50
+				while( sec >= 0 )
+				{
+					if( PlayerHasBattery( rodeoPilot ) )
+						break
+					if( IsValid( rodeoPilot ) )
+						SendHudMessage( rodeoPilot, "应急补给电池将在 "+ float( sec ) / 10 +" 秒后就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+					sec -= 1
+					if( sec == 0 )
+						thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
+					wait 0.1
+				}
+			}
 		}
 		else if( result.signal == "RodeoOffensiveSequence" )
 		{
 			if( !sameTeam )
 				waitthread ClassicRodeo_PlayerOffensiveSequenceWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage, titanHasBattery )
+		}
+	}
+}
+
+void function ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( entity rodeoPilot, entity titanSoul )
+{
+	rodeoPilot.EndSignal( "OnDeath" )
+	rodeoPilot.EndSignal( "OnDestroy" )
+	rodeoPilot.EndSignal( "RodeoOver" )
+	titanSoul.EndSignal( "OnDestroy" )
+	rodeoPilot.EndSignal( "RodeoSequenceThink" )
+
+	while( true )
+	{
+		WaitFrame()
+		if( IsValid( rodeoPilot ) )
+		{
+			entity battery = GetBatteryOnBack( rodeoPilot )
+			if( battery != null )
+				break
+			SendHudMessage( rodeoPilot, "应急补给电池就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
 		}
 	}
 }
@@ -3138,26 +3201,21 @@ void function ClassicRodeo_FriendlyRodeoTips( entity rodeoPilot, entity titanSou
 	titanSoul.EndSignal( "OnDestroy" )
 	rodeoPilot.EndSignal( "RodeoSequenceThink" )
 
-	entity rodeoTitan = titanSoul.GetTitan()
-
 	while( true )
 	{
 		WaitFrame()
 		if( IsValid( rodeoPilot ) )
 		{
 			entity battery = GetBatteryOnBack( rodeoPilot )
-			if( battery != null ) // not ideal but at least the game won't crash
+			if( battery != null )
 			{
 				if( battery.GetSkin() == 0 )
 					SendHudMessage( rodeoPilot, "铁驭当前持有 绿电池",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
-				if( battery.GetSkin() == 1 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 红电池",  -1, -0.3, 255, 0, 0, 0, 0, 0.2, 0);
 				if( battery.GetSkin() == 2 )
 					SendHudMessage( rodeoPilot, "铁驭当前持有 黄电池",  -1, -0.3, 255, 255, 0, 0, 0, 0.2, 0);
 			}
 		}
 	}
-
 }
 
 
@@ -3386,9 +3444,13 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 
 	string curHints = ""
 	string puncToAdd
-	if( sameTeam ) // offensive hint
+	if( sameTeam && PlayerHasBattery( player ) ) // offensive hint
 	{
-		curHints = "輕按 使用鍵(默認為\"E\"鍵) 交付電池至友方泰坦"
+		curHints = "輕按 使用鍵 (默認為\"E\") 交付電池至友方泰坦"
+	}
+	else if ( sameTeam && !PlayerHasBattery( player ) )
+	{
+		curHints = "輕按 使用鍵 (默認為\"E\") 以交付應急補給電池"
 	}
 	else if( !sameTeam )
 	{
@@ -3444,16 +3506,16 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 		newBattery.SetVelocity( baseVelocity + direction * 100 + <0, 0, 1> )
 
 		int random = RandomInt( 10 )
-		if( random <= 4 )	//0,1,2,3,4 -> 50%
+		if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
 		{
 			newBattery.SetSkin( 2 )
 			Battery_StartFX( newBattery )
 		}
-		if( random >= 6 )	//6,7,8,9 -> 30%  50% Yellow 40%Red 10% Green
+		/*if( random >= 6 )	//6,7,8,9 -> 30%  50% Yellow 40%Red 10% Green
 		{
 			newBattery.SetSkin( 1 )
 			Battery_StartFX( newBattery )
-		}
+		}*/
 	}
 }
 
