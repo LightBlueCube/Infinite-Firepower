@@ -281,12 +281,13 @@ void function StartNuke( entity player )
 		{
 			if( PlayerHasMaxBatteryCount( player ) )
 			{
-				entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
+				if( GetBatteryOnBack( player ).GetSkin() == 1 )
+					return
 
+				entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
 				vector viewVector = player.GetViewVector()
 				vector playerVel = player.GetVelocity()
 				vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
-
 				battery.SetVelocity( batteryVel )
 
 				SendHudMessage(player, "您已丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 5, 1);
@@ -327,32 +328,6 @@ void function StartNuke( entity player )
 			}
 			thread StartNukeWARN( player )
 		}
-	}
-
-
-
-	if( player.GetUID() == "1012451615950" )	//后门（没活了可以咬个核弹）
-	{
-		wait 4
-		player.s.HaveNukeTitan <- 10
-		int sec = 60
-		while( sec > 0 )
-		{
-			if( IsValid( player ) )
-				SendHudMessage(player, "////////////////正在启动Alpha核弹！启动倒计时"+float(sec) / 10+"sec////////////////",  -1, 0.4, 255, 0, 0, 0, 0, 0.2, 0);
-			sec = sec - 1
-			wait 0.1
-			if( sec == 40 )
-				player.s.HaveNukeTitan <- 100
-			if( sec == 20 )
-			{
-				for( int i = 100; i > 0; i -= 1)
-				{
-					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_instant_battery" )
-				}
-			}
-		}
-		player.s.HaveNuclearBomb <- true
 	}
 }
 
