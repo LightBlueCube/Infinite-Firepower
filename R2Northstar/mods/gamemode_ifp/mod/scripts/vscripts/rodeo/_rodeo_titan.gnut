@@ -3149,11 +3149,11 @@ void function ClassicRodeo_FriendlyRodeoTips( entity rodeoPilot, entity titanSou
 			if( battery != null ) // not ideal but at least the game won't crash
 			{
 				if( battery.GetSkin() == 0 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 绿电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( rodeoPilot, "铁驭当前持有 绿电池",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
 				if( battery.GetSkin() == 1 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 红电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( rodeoPilot, "铁驭当前持有 红电池",  -1, -0.3, 255, 0, 0, 0, 0, 0.2, 0);
 				if( battery.GetSkin() == 2 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 黄电池",  -1, -0.3, 200, 200, 225, 0, 0, 0.2, 0);
+					SendHudMessage( rodeoPilot, "铁驭当前持有 黄电池",  -1, -0.3, 255, 255, 0, 0, 0, 0.2, 0);
 			}
 		}
 	}
