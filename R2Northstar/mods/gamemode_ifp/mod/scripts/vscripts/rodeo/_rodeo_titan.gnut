@@ -1047,7 +1047,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 	RodeoRiderSequenceStruct dataStruct
 	dataStruct.interiorSound = GetAudioFromAlias( titanType, "rodeo_battery_steal_1p" )
 	dataStruct.exteriorSound = GetAudioFromAlias( titanType, "rodeo_battery_steal_3p" )
-	DisableCloakBeforeRodeoSequence( rodeoPilot, dataStruct )
+	//DisableCloakBeforeRodeoSequence( rodeoPilot, dataStruct )
 
 	entity tempBattery3p
 	tempBattery3p = CreatePropDynamic( RODEO_BATTERY_MODEL_FOR_RODEO_ANIMS )
@@ -1121,7 +1121,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 			StopSoundOnEntity( rodeoPilot, dataStruct.interiorSound )
 			StopSoundOnEntity( rodeoPilot, dataStruct.exteriorSound )
 
-			RestoreCloakAfterRodeoSequence( rodeoPilot, dataStruct )
+			//RestoreCloakAfterRodeoSequence( rodeoPilot, dataStruct )
 		}
 	)
 
@@ -1455,11 +1455,12 @@ void function RodeoBatteryPackRemovalDamage( entity attacker, entity victim, ent
 
 	int damageScriptType = damageTypes.rodeoBatteryRemoval
 
-	if ( GetDoomedState( victim ) )
+	/*if ( GetDoomedState( victim ) )
 	{
 		damageAmount = victim.GetHealth() + 1
 	}
-	else if ( IsHardcoreGameMode() )
+	else */
+	if ( IsHardcoreGameMode() )
 	{
 		damageAmount = victim.GetHealth()
 	}
@@ -1474,7 +1475,7 @@ void function RodeoBatteryPackRemovalDamage( entity attacker, entity victim, ent
 	}
 
 	//print( !isGrenadeDamage && ClassicRodeo_IsEnabled() )
-	if( !isGrenadeDamage && classicRodeo ) // confirm it's batteryStyle damage
+	/*if( !isGrenadeDamage && classicRodeo ) // confirm it's batteryStyle damage
 	{
 		// take additional damage to remove all shields. victim.GetShieldHealth() won't work for titans! have to track soul's shield amount
 		if( file.batteryRemovalDamageAmped ) // if damageAmped, will also remove all shields from victim, means it will always deal 2500 damage to titan's health
@@ -1495,7 +1496,7 @@ void function RodeoBatteryPackRemovalDamage( entity attacker, entity victim, ent
 		}
 	}
 	if( classicRodeo ) // classic rodeo behavior: bypass shields, works both for batteryRemoval and grenadeThrow
-		damageTable.scriptType = damageScriptType | DF_BYPASS_SHIELD
+		damageTable.scriptType = damageScriptType | DF_BYPASS_SHIELD*/
 	//print( "RodeoBatteryRemoval dealing damage!" )
 	victim.TakeDamage( damageAmount, attacker, attacker, damageTable )
 	if ( victim.IsNPC() )
@@ -3387,7 +3388,7 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 	string puncToAdd
 	if( sameTeam ) // offensive hint
 	{
-		curHints = "按下 使用鍵(默認為\"E\"鍵) 交付電池至友方泰坦"
+		curHints = "轻按 使用鍵(默認為\"E\"鍵) 交付電池至友方泰坦"
 	}
 	else if( !sameTeam )
 	{
