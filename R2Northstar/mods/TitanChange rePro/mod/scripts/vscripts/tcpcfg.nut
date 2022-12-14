@@ -46,7 +46,7 @@ void function GameStateEnter_Postmatch()
 void function RandomMap()
 {
 	wait ( GAME_POSTMATCH_LENGTH - 0.1 )
-	int RandomInt = RandomInt(15)
+	int RandomInt = RandomInt( 15 )
 	switch( RandomInt )
 	{
 		case 0:
