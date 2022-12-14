@@ -140,7 +140,7 @@ struct
 	// classic rodeo
 	bool classicRodeoEnabled = true
 	int classicRodeoStarterBatteryCount = 1 // titans start with this battery count
-	bool continouslyRemoveBattery = false
+	bool continouslyRemoveBattery = true
 	bool batteryRemovalDamageAmped = false
 	bool batteryContainerOnlyProtectsOnce = false
 	//bool ownerApplyBatteryAllowed = true
@@ -2251,15 +2251,15 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 			titan.SetHealth( 1 )
 		}
 
-		float coreFrac = GetCurrentPlaylistVarFloat( "battery_core_frac", 0.2 )
+		float coreFrac = 0.4
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = 1.0
 		float healthSegmentFrac = 2.0
 		float RedBatteryHealthSegmentFrac = 0.5
 
-		if( IsValid( battery ) )
-			if( battery.GetSkin() == 1 )
-				coreFrac = 0.05
+		bool batteryIsAmped = IsAmpedBattery( battery )
+		if( batteryIsAmped )
+			coreFrac = 0.2
 
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 
@@ -2268,7 +2268,6 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 
 		int shieldDifference = shieldMaxHealth - shieldHealth
 
-		bool batteryIsAmped = IsAmpedBattery( battery )
 		float frac = batteryIsAmped ? ampedHealthSegmentFrac : healthSegmentFrac
 		if( IsValid( battery ) )
 			if( battery.GetSkin() == 1 )
@@ -3103,11 +3102,28 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 		}
 	)
 
-	if( rodeoPilot.GetTeam() == titanSoul.GetTeam() )
-		thread ClassicRodeo_FriendlyRodeoTips( rodeoPilot, titanSoul )
 
+	/*if( !PlayerHasBattery( rodeoPilot ) && rodeoPilot.GetTeam() == titanSoul.GetTeam() && ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 )
+	{
+		int sec = 60
+		while( sec >= 0 )
+		{
+			if( PlayerHasBattery( rodeoPilot ) )
+				break
+			if( IsValid( rodeoPilot ) )
+				SendHudMessage( rodeoPilot, "准备重新补给中... "+ float( sec ) / 10 +" s",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+			sec -= 1
+			if( sec == 0 )
+				thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
+			wait 0.1
+		}
+	}*/
 	while( true )
 	{
+		if( rodeoPilot.GetTeam() == titanSoul.GetTeam() )
+			thread ClassicRodeo_FriendlyRodeoTips( rodeoPilot, titanSoul )
+		//if( rodeoPilot.GetTeam() == titanSoul.GetTeam() && !PlayerHasBattery( rodeoPilot ) && ClassicRodeo_GetSoulBatteryCount( titanSoul ) < 1 )
+		//	thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
 		table result = rodeoPilot.WaitSignal( "RodeoDefensiveSequence", "RodeoOffensiveSequence" )
 
 		bool didSequence = false
@@ -3123,46 +3139,43 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 			{
 				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
 
-				int sec = 50
+				/*int sec = 60
 				while( sec >= 0 )
 				{
 					if( PlayerHasBattery( rodeoPilot ) )
 						break
 					if( IsValid( rodeoPilot ) )
-						SendHudMessage( rodeoPilot, "应急补给电池将在 "+ float( sec ) / 10 +" 秒后就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+						SendHudMessage( rodeoPilot, "重新补给冷却中... "+ float( sec ) / 10 +" s",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
 					sec -= 1
 					if( sec == 0 )
 						thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
 					wait 0.1
-				}
+				}*/
 			}
-			if( !pilotHasBattery && sameTeam )
+			/*if( !pilotHasBattery && sameTeam && titanHasBattery )
 			{
-				Burnmeter_EmergencyBattery( rodeoPilot )
+				waitthread ClassicRodeo_PlayerOffensiveSequenceWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage, titanHasBattery )
 
 				entity battery = GetBatteryOnBack( rodeoPilot )
 
 				if ( battery == null ) // not ideal but at least the game won't crash
 					continue
 
-				battery.SetSkin( 1 )
-				Battery_StartFX( battery )
-
 				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
 
-				int sec = 50
+				int sec = 60
 				while( sec >= 0 )
 				{
 					if( PlayerHasBattery( rodeoPilot ) )
 						break
 					if( IsValid( rodeoPilot ) )
-						SendHudMessage( rodeoPilot, "应急补给电池将在 "+ float( sec ) / 10 +" 秒后就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+						SendHudMessage( rodeoPilot, "重新补给冷却中... "+ float( sec ) / 10 +" s",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
 					sec -= 1
 					if( sec == 0 )
 						thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
 					wait 0.1
 				}
-			}
+			}*/
 		}
 		else if( result.signal == "RodeoOffensiveSequence" )
 		{
@@ -3179,6 +3192,7 @@ void function ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( entity rodeoPilot, e
 	rodeoPilot.EndSignal( "RodeoOver" )
 	titanSoul.EndSignal( "OnDestroy" )
 	rodeoPilot.EndSignal( "RodeoSequenceThink" )
+	rodeoPilot.EndSignal( "RodeoDefensiveSequence" )
 
 	while( true )
 	{
@@ -3188,7 +3202,10 @@ void function ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( entity rodeoPilot, e
 			entity battery = GetBatteryOnBack( rodeoPilot )
 			if( battery != null )
 				break
-			SendHudMessage( rodeoPilot, "应急补给电池就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+			if( ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 )
+				SendHudMessage( rodeoPilot, "重新补给已就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
+			else
+				SendHudMessage( rodeoPilot, "泰坦无电池 无法重新补给",  -1, -0.3, 255, 0, 0, 0, 0, 0.2, 0);
 		}
 	}
 }
@@ -3200,6 +3217,7 @@ void function ClassicRodeo_FriendlyRodeoTips( entity rodeoPilot, entity titanSou
 	rodeoPilot.EndSignal( "RodeoOver" )
 	titanSoul.EndSignal( "OnDestroy" )
 	rodeoPilot.EndSignal( "RodeoSequenceThink" )
+	rodeoPilot.EndSignal( "RodeoDefensiveSequence" )
 
 	while( true )
 	{
@@ -3448,10 +3466,14 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 	{
 		curHints = "輕按 使用鍵 (默認為\"E\") 交付電池至友方泰坦"
 	}
-	else if ( sameTeam && !PlayerHasBattery( player ) )
+	/*else if ( sameTeam && !PlayerHasBattery( player ) && titanHasBattery )
 	{
-		curHints = "輕按 使用鍵 (默認為\"E\") 以交付應急補給電池"
+		curHints = "輕按 使用鍵 (默認為\"E\") 以重新補給"
 	}
+	else if ( sameTeam && !PlayerHasBattery( player ) && !titanHasBattery )
+	{
+		curHints = "oops..! 你和泰坦都沒有電池 去找一塊"
+	}*/
 	else if( !sameTeam )
 	{
 		curHints = "拔取電池后可通過攻擊電池倉快速毀減敵方泰坦"
