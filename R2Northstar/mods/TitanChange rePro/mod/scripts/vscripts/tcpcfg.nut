@@ -35,7 +35,7 @@ bool function simpelhelp2( entity player, array<string> args )
 bool function simpelhelp3( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦\nNPC的刷新数量和伤害都有大幅提升",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦，控制台输入hw查看详情\nNPC的刷新数量和伤害都有大幅提升",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
