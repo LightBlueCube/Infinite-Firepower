@@ -140,7 +140,7 @@ struct
 	// classic rodeo
 	bool classicRodeoEnabled = true
 	int classicRodeoStarterBatteryCount = 1 // titans start with this battery count
-	bool continouslyRemoveBattery = true
+	bool continouslyRemoveBattery = false
 	bool batteryRemovalDamageAmped = false
 	bool batteryContainerOnlyProtectsOnce = false
 	//bool ownerApplyBatteryAllowed = true
@@ -3462,9 +3462,9 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 
 	string curHints = ""
 	string puncToAdd
-	if( sameTeam && PlayerHasBattery( player ) ) // offensive hint
+	if( sameTeam )//&& PlayerHasBattery( player ) ) // offensive hint
 	{
-		curHints = "輕按 使用鍵 (默認為\"E\") 交付電池至友方泰坦"
+		curHints = "輕按 使用鍵 (默認為\"E\") 給予電池"
 	}
 	/*else if ( sameTeam && !PlayerHasBattery( player ) && titanHasBattery )
 	{
@@ -3476,7 +3476,7 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 	}*/
 	else if( !sameTeam )
 	{
-		curHints = "拔取電池后可通過攻擊電池倉快速毀減敵方泰坦"
+		curHints = "射擊電池倉以快速毀減敵方泰坦"
 	}
 
 	if( curHints == "" )

@@ -708,8 +708,13 @@ void function ApplyTitanWeaponPassives( entity titan, TitanLoadoutDef loadout )
 		}
 	}
 
-	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" || 
+	  ( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 ) || 
+		titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" || 
+		titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
+	{
 		return
+	}
 
 	foreach ( passive, value in soul.passives )
 	{

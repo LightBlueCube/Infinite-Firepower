@@ -144,7 +144,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					{
 						attacker.s.HaveNukeTitan <- 2
 					}
-					SendHudMessage( attacker, "获得 2 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage( attacker, "获得 2 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 				}
 				else
 				{
@@ -156,7 +156,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					{
 						attacker.s.HaveNukeTitan <- 1
 					}
-					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 				}
 			}
 			if( attacker.s.KillStreak == 24 )
@@ -188,12 +188,12 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 	{
 		if( "HaveNukeTitan" in player.s )
 		{
-			SendHudMessage( player, "当前拥有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "当前拥有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 		else
 		{
-			SendHudMessage( player, "当前拥有 0 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "当前拥有 0 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 	}
@@ -206,20 +206,20 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 			{
 				if( player.s.HaveNukeTitan <= 0 )
 				{
-					SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
 				if( player.IsTitan() )
 				{
-					SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
 				if( !player.IsHuman() )
 				{
-					SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
-				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
 				{
 					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
@@ -227,40 +227,40 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 				player.s.HaveNukeTitan = 0
 			}
 			else
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 		else
 			i = args[0].tointeger()
 		if( i == 0 )
 		{
-			SendHudMessage( player, "ERROR: 填入了非法参数", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "ERROR: 填入了非法参数", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 		if( "HaveNukeTitan" in player.s )
 		{
 			if( player.s.HaveNukeTitan <= 0 )
 			{
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			if( i > player.s.HaveNukeTitan )
 			{
-				SendHudMessage( player, "你只有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n但你填入的值 "+ i +" 明显大于你所拥有的量", -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+				SendHudMessage( player, "你只有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n但你填入的值 "+ i +" 明显大于你所拥有的值", -1, 0.4, 255, 0, 0, 255, 0.15, 3, 1);
 				return
 			}
 			if( player.IsTitan() )
 			{
-				SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			if( !player.IsHuman() )
 			{
-				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			player.s.HaveNukeTitan -= i
-			SendHudMessage( player, "成功交付了 "+ i +" 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.4, 255, 0, 0, 255, 0.15, 6, 1);
+			SendHudMessage( player, "成功交付了 "+ i +" 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 			while( i > 0 )
 			{
 				PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
@@ -268,7 +268,7 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 			}
 		}
 		else
-			SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 		return
 	}
 }
@@ -290,19 +290,19 @@ void function StartNuke( entity player )
 				vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 				battery.SetVelocity( batteryVel )
 
-				SendHudMessage(player, "您已丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 5, 1);
+				SendHudMessage(player, "您已丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			}
 			else
 			{
-				SendHudMessage(player, "你需要有电池才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 5, 1);
+				SendHudMessage(player, "你需要有电池才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			}
 		}
 		else
 		{
 			if( !IsAlive( player ) )
-				SendHudMessage(player, "你需要处于存活状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 5, 1);
+				SendHudMessage(player, "你需要处于存活状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			if( !player.IsHuman() )
-				SendHudMessage(player, "你需要以铁驭状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 5, 1);
+				SendHudMessage(player, "你需要以铁驭状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 		}
 	}
 	if( "HaveNuclearBomb" in player.s )
