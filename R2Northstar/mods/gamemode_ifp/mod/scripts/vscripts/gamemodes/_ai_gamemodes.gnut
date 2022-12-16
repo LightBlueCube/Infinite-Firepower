@@ -2,6 +2,7 @@ global function AiGameModes_Init
 
 global function AiGameModes_SetGruntWeapons
 global function AiGameModes_SetSpectreWeapons
+global function AiGameModes_SetStalkerWeapons
 
 global function AiGameModes_SpawnDropShip
 global function AiGameModes_SpawnDropPod
@@ -17,6 +18,7 @@ struct
 {
 	array< string > gruntWeapons = [ "mp_weapon_rspn101" ]
 	array< string > spectreWeapons = [ "mp_weapon_hemlok_smg" ]
+	array< string > stalkerWeapons = [ "mp_weapon_lstar" ]
 } file
 
 void function AiGameModes_Init()
@@ -34,6 +36,11 @@ void function AiGameModes_SetGruntWeapons( array< string > weapons )
 void function AiGameModes_SetSpectreWeapons( array< string > weapons )
 {
 	file.spectreWeapons = weapons
+}
+
+void function AiGameModes_SetStalkerWeapons( array< string > weapons )
+{
+	file.stalkerWeapons = weapons
 }
 
 //------------------------------------------------------
@@ -91,6 +98,10 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 				
 			case "npc_spectre":
 				ReplaceWeapon( npc, file.spectreWeapons[ RandomInt( file.spectreWeapons.len() ) ], [] )
+				break
+
+			case "npc_stalker":
+				ReplaceWeapon( npc, file.stalkerWeapons[ RandomInt( file.stalkerWeapons.len() ) ], [] )
 				break
 		}
 		
