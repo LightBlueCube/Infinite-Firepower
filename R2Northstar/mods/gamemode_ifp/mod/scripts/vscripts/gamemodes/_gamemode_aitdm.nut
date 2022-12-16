@@ -3,7 +3,7 @@ global function GamemodeAITdm_Init
 
 const SQUADS_PER_TEAM = 4
 
-const REAPERS_PER_TEAM = 1
+const REAPERS_PER_TEAM = 2
 
 const LEVEL_SPECTRES = 0
 const LEVEL_STALKERS = 0
@@ -34,8 +34,9 @@ void function GamemodeAITdm_Init()
 
 	if ( GetCurrentPlaylistVarInt( "aitdm_archer_grunts", 0 ) == 0 )
 	{
-		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )	//"mp_weapon_arc_launcher", "mp_weapon_mgl"
+		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )	//"mp_weapon_arc_launcher"
 		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
+		AiGameModes_SetStalkerWeapons( [ "mp_weapon_lstar", "mp_weapon_lstar", "mp_weapon_lstar", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
 	}
 	else
 	{
