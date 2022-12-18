@@ -32,18 +32,19 @@ WeaponData
 
 		tcp
 		{
-			"fire_rate"   										"30"
-			"damage_near_value"   								"150"
-			"damage_far_value"									"150"
-			"damage_near_value_titanarmor"						"200"
-			"damage_far_value_titanarmor"						"200"
-			"explosion_damage_heavy_armor"						"150"
+			"fire_rate"   									"30"	
+			"damage_near_distance"							"800"
+			"damage_far_distance" 							"1200"
+			"damage_near_value"   							"280"
+			"damage_far_value"								"280"
+			"damage_near_value_titanarmor"					"150"
+			"damage_far_value_titanarmor"					"150"
+			"explosion_damage"								"100"
+			"explosion_damage_heavy_armor"					"100"
+			"explosionradius" 								"200"
+			"enable_highlight_networking_on_creation"		"1"
 
-			"smart_ammo_search_angle" 							"30"
-			"smart_ammo_unlock_debounce_time"					"0.5"
-			"smart_ammo_new_target_delay"						"0.2"
-			"smart_ammo_apply_new_target_delay_to_first_target" "1"
-			"smart_ammo_lock_type"								"large"
+			"smart_ammo_lock_type"							"large"
 		}
 	}
 }
