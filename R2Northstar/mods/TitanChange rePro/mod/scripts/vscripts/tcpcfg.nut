@@ -144,7 +144,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					{
 						attacker.s.HaveNukeTitan <- 2
 					}
-					SendHudMessage( attacker, "获得 2 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
+					SendHudMessage( attacker, "获得 2 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 				}
 				else
 				{
@@ -156,7 +156,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					{
 						attacker.s.HaveNukeTitan <- 1
 					}
-					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付\n控制台输入指令\"hw\"以查看详情",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
+					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
 				}
 			}
 			if( attacker.s.KillStreak == 24 )
