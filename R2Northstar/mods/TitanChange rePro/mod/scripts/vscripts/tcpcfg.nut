@@ -1,9 +1,9 @@
-untyped //.s. need this
+untyped //entity.s need this
 global function tcpback;
 
 void function tcpback()
 {
-	AddSpawnCallback("npc_titan", OnTitanfall )
+	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 	AddCallback_OnPilotBecomesTitan( SetPlayerTitanTitle )
@@ -302,7 +302,7 @@ void function StartNuke( entity player )
 			if( !IsAlive( player ) )
 				SendHudMessage(player, "你需要处于存活状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			if( !player.IsHuman() )
-				SendHudMessage(player, "你需要以铁驭状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
+				SendHudMessage(player, "你需要处于铁驭状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 		}
 	}
 	if( "HaveNuclearBomb" in player.s )
@@ -335,6 +335,7 @@ void function StartNukeWARN( entity owner )
 {
 	int sec = 200
 	bool HasWARN = false
+	SetServerVar( "gameEndTime", Time() + 60.0 )
 	while( sec > 0 )
 	{
 		if( sec == 20 )
@@ -485,24 +486,6 @@ void function explodeSound( entity player )
 			EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv3")
 		wait 0.1
 	}
-}
-
-void function FakeShellShock_Threaded( entity victim, float duration )
-{
-	victim.EndSignal( "OnDeath" )
-	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, duration, 0.25 )
-	//StatusEffect_AddTimed( victim, eStatusEffect.turn_slow, 0.25, duration, 0.25 )
-	AddCinematicFlag( victim, CE_FLAG_EXECUTION )
-
-	OnThreadEnd(
-		function(): ( victim )
-		{
-			if( IsValid( victim ) )
-				RemoveCinematicFlag( victim, CE_FLAG_EXECUTION )
-		}
-	)
-
-	wait duration
 }
 
 void function RestoreKillStreak( entity player )
@@ -672,29 +655,24 @@ void function OnTitanfall( entity titan )
 
 
 
-///////////////////////////////
-////	从外面"借"来的函数	////
-//////////////////////////////
+//////////////////////////////////
+////	从其他地方借来的函数	////
+//////////////////////////////////
 
-vector ornull function CalculateSpotForThrownBattery( entity pilot, entity battery )
+void function FakeShellShock_Threaded( entity victim, float duration )
 {
-	vector viewVector = pilot.GetViewVector()
-	vector eyePos = pilot.EyePosition()
-	vector batteryMins = battery.GetBoundingMins()
-	vector batteryMaxs = battery.GetBoundingMaxs()
-	vector endPos = eyePos + viewVector * 100
-	TraceResults hullResult = TraceHull( eyePos, endPos, batteryMins, batteryMaxs, pilot, TRACE_MASK_SOLID | TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE )
+	victim.EndSignal( "OnDeath" )
+	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, duration, 0.25 )
+	//StatusEffect_AddTimed( victim, eStatusEffect.turn_slow, 0.25, duration, 0.25 )
+	AddCinematicFlag( victim, CE_FLAG_EXECUTION )
 
-	//PrintTraceResults( hullResult )
+	OnThreadEnd(
+		function(): ( victim )
+		{
+			if( IsValid( victim ) )
+				RemoveCinematicFlag( victim, CE_FLAG_EXECUTION )
+		}
+	)
 
-	if ( hullResult.startSolid )
-		return null
-
-	if ( hullResult.hitEnt == pilot )
-		return null
-
-	if ( hullResult.fraction == 1.0 )
-		return endPos
-
-	return hullResult.endPos
+	wait duration
 }
