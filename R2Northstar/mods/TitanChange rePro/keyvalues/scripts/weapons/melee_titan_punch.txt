@@ -11,8 +11,8 @@ WeaponData
 			"melee_lunge_target_range"					"500"
 			"melee_lunge_target_angle"					"15"
 
-			"melee_damage_heavyarmor"					"2000"
-			"fire_rate"									"0.6"
+			"melee_damage_heavyarmor"					"1750"
+			"fire_rate"									"0.8"
 			"melee_range"								"300"
 			"melee_anim_1p_number"						"3"			// ACT_VM_MELEE_ATTACK1, 2, or 3
 			"melee_anim_3p"								"ACT_GESTURE_MELEE_ATTACK3"

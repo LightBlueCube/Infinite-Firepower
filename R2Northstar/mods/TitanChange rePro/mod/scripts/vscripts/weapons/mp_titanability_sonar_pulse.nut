@@ -100,7 +100,7 @@ void function EmpSonar( entity projectile )
 		thread EMPSonarThinkConstant( inflictor )
 		++val
 	}
-	wait 3
+	wait 7
 	inflictor.Destroy()
 }
 
@@ -256,7 +256,7 @@ struct
 void function timeoutcheck( entity titan, bool EMPSonar )
 {
 	if( EMPSonar )
-		wait 3
+		wait 7
 	else
 		wait 0.5
 	titan.Signal("empistimeout")
