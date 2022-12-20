@@ -44,6 +44,7 @@ WeaponData
 			"explosionradius" 								"200"
 			"enable_highlight_networking_on_creation"		"1"
 
+			"smart_ammo_search_angle" 						"30"
 			"smart_ammo_lock_type"							"large"
 		}
 	}

@@ -448,7 +448,7 @@ void function explode( entity player, entity owner )
 	{
 		for (int value = 4; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntity( player, "goblin_dropship_explode" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode" )
 		}
 		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
 		thread FakeShellShock_Threaded( player, 10 )
@@ -456,17 +456,23 @@ void function explode( entity player, entity owner )
 		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 3  )
 		SetWinner( owner.GetTeam() )
 	}
-	wait 1.8
+	wait 1.7
 	if( IsValid( player ) )
 	{
 		StopSoundOnEntity( player, "goblin_dropship_explode" )
+		StopSoundOnEntity( player, "pilot_geigercounter_warning_lv3" )
+	}
+	wait 0.1
+	if( IsValid( player ) )
+	{
 		if( IsAlive( player ) )
 			player.Die()
 		player.FreezeControlsOnServer()
 		for (int value = 2; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntity( player, "skyway_scripted_titanhill_mortar_explode" )
-			EmitSoundOnEntity( player, "bt_beacon_controlroom_dish_explosion" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_death_explode" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "skyway_scripted_titanhill_mortar_explode" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
 		}
 	}
 	wait 0.2
@@ -480,10 +486,10 @@ void function explode( entity player, entity owner )
 
 void function explodeSound( entity player )
 {
-	for (int value = 50; value > 0; value = value - 1)
+	for (int value = 20; value > 0; value = value - 1)
 	{
 		if( IsValid( player ) )
-			EmitSoundOnEntity( player, "pilot_geigercounter_warning_lv3")
+			EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_geigercounter_warning_lv3" )
 		wait 0.1
 	}
 }

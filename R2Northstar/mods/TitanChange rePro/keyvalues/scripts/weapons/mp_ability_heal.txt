@@ -50,7 +50,7 @@ WeaponData
 
 		tcp
 		{
-			"regen_ammo_refill_rate"						"*2.5"
+			"regen_ammo_refill_rate"						"*2"
 		}
 	}
 }

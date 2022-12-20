@@ -402,7 +402,7 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_vortex_shield( entity wea
 			if ( weapon.HasMod( "tcp_vortex" ) )
 				allowSwitch = weapon.GetWeaponChargeFraction() < 0.1
 			else
-				allowSwitch = weapon.GetWeaponChargeFraction() < 1
+				allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
 		}
 		else
 		{
