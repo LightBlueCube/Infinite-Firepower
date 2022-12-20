@@ -1582,7 +1582,7 @@ void function Rodeo_ApplyBatteryDelayed( entity player, table<string,bool> e )
 
 void function Rodeo_GiveExecutingTitanABattery( entity attacker )
 {
-	Rodeo_ApplyBatteryToTitan( null, attacker )
+	Rodeo_ApplyBatteryToTitan( null, attacker, false )
 	MessagePlayerGivingBatteryToTitan( attacker, attacker, eEventNotifications.Rodeo_TitanPickedUpBattery, -1, false )
 }
 
@@ -2366,7 +2366,7 @@ void function Rodeo_OnTouchBatteryPack_Internal( entity player, entity batteryPa
 			}
 			bool amped = IsAmpedBattery( batteryPack )
 
-			Rodeo_ApplyBatteryToTitan( batteryPack, player )
+			Rodeo_ApplyBatteryToTitan( batteryPack, player, false )
 			MessagePlayerGivingBatteryToTitan( player, player, eEventNotifications.Rodeo_TitanPickedUpBattery, -1, amped )
 		}
 		return
@@ -3062,16 +3062,12 @@ void function ClassicRodeoThink( entity rodeoPilot, entity titanSoul, RodeoPacka
 
 	while( true )
 	{
-		if( file.automaticallyDoRodeoSequence )
-		{
-			rodeoTitan = titanSoul.GetTitan()
+		rodeoTitan = titanSoul.GetTitan()
 
-			/*if( ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 &&
-				( !sameTeam || ( IsFriendlyFireOn() && sameTeam && rodeoPilot.IsInputCommandHeld( IN_MELEE ) ) )
-			) // modified condition: titan's bossplayer applied a battery to their titan, friendly rider will try to remove if holding melee
-			{ // remove new-applied battery!
-				waitthread ClassicRodeo_TryRemoveNewAppliedBattery( rodeoPilot, titanSoul, rodeoPackage )
-			}*/
+		if( ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 && !sameTeam )
+		{	// modified condition: titan's bossplayer applied a battery to their titan, friendly rider will try to remove if holding melee
+			// remove new-applied battery!
+			waitthread ClassicRodeo_TryRemoveNewAppliedBattery( rodeoPilot, titanSoul, rodeoPackage )
 		}
 
 		if( rodeoPilot.GetTitanSoulBeingRodeoed() == titanSoul ) // pilot still rodeoing
@@ -3697,7 +3693,7 @@ void function ClassicRodeo_RemoveSoulBattery( entity titanSoul )
 		return
 
 	if( ClassicRodeo_GetSoulBatteryCount( titanSoul ) >= 1 )
-		titanSoul.s.classicRodeoBatteryCount -= 1
+		titanSoul.s.classicRodeoBatteryCount = 0
 }
 
 int function ClassicRodeo_GetSoulBatteryCount( entity titanSoul )
