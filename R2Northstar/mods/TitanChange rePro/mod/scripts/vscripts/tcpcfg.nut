@@ -450,7 +450,10 @@ void function explode( entity player, entity owner )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode" )
 		}
-		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
+		for (int value = 12; value > 0; value = value - 1)
+		{
+			Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
+		}
 		thread FakeShellShock_Threaded( player, 10 )
 		StatusEffect_AddTimed( player, eStatusEffect.turn_slow, 0.4, 10, 0.5 )
 		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 3  )
