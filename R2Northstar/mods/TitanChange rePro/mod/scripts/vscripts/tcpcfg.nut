@@ -35,7 +35,7 @@ bool function simpelhelp2( entity player, array<string> args )
 bool function simpelhelp3( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦，控制台输入hw查看详情\nNPC的刷新数量和伤害都有大幅提升",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦，控制台输入hw查看详情\nNPC的刷新数量和伤害都有大幅提升\n帝王可以升到9级，顺序为先升三个一级升级然后三个二级再然后三个三级",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
@@ -449,9 +449,6 @@ void function explode( entity player, entity owner )
 		for (int value = 4; value > 0; value = value - 1)
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode" )
-		}
-		for (int value = 12; value > 0; value = value - 1)
-		{
 			Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
 		}
 		thread FakeShellShock_Threaded( player, 10 )
@@ -514,7 +511,6 @@ void function SetPlayerTitanTitle( entity player, entity titan )
 				player.SetTitle( soul.s.titanTitle )	//设置玩家的小血条上的标题（也就是你瞄准敌人时，顶上会显示泰坦名，玩家名，血量剩余的一个玩意，这里我们改的是泰坦名）
 }
 
-
 void function OnTitanfall( entity titan )
 {
 	entity player = titan
@@ -552,6 +548,16 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER )
         titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_flight_core", OFFHAND_EQUIPMENT )
+
+		array<int> passives = [ ePassives.PAS_NORTHSTAR_WEAPON,
+								ePassives.PAS_NORTHSTAR_CLUSTER,
+								ePassives.PAS_NORTHSTAR_TRAP,
+								ePassives.PAS_NORTHSTAR_FLIGHTCORE,
+								ePassives.PAS_NORTHSTAR_OPTICS ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
@@ -574,6 +580,24 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER )
 		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
+
+		array<int> passives = [ ePassives.PAS_VANGUARD_COREMETER,
+								ePassives.PAS_VANGUARD_SHIELD,
+								ePassives.PAS_VANGUARD_REARM,
+								ePassives.PAS_VANGUARD_DOOM,
+								ePassives.PAS_VANGUARD_CORE1,
+								ePassives.PAS_VANGUARD_CORE2,
+								ePassives.PAS_VANGUARD_CORE3,
+								ePassives.PAS_VANGUARD_CORE4,
+								ePassives.PAS_VANGUARD_CORE5,
+								ePassives.PAS_VANGUARD_CORE6,
+								ePassives.PAS_VANGUARD_CORE7,
+								ePassives.PAS_VANGUARD_CORE8,
+								ePassives.PAS_VANGUARD_CORE9 ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
 	}
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
@@ -594,10 +618,20 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveOffhandWeapon( "mp_ability_cloak", OFFHAND_SPECIAL )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER, ["tcp"] )
-		titan.GiveOffhandWeapon( "mp_ability_heal", OFFHAND_ORDNANCE, ["tcp"] )
+		titan.GiveOffhandWeapon( "mp_ability_heal", OFFHAND_ORDNANCE, ["bc_super_stim", "tcp"] )
 		titan.GiveOffhandWeapon( "mp_titancore_flame_wave", OFFHAND_EQUIPMENT, ["ground_slam"] )
 		titan.GiveOffhandWeapon( "melee_titan_punch_fighter", OFFHAND_MELEE, ["berserker", "allow_as_primary"] )
 		titan.SetActiveWeaponByName( "melee_titan_punch_fighter" )
+
+		array<int> passives = [ ePassives.PAS_SCORCH_WEAPON,
+								ePassives.PAS_SCORCH_FIREWALL,
+								ePassives.PAS_SCORCH_SHIELD,
+								ePassives.PAS_SCORCH_SELFDMG,
+								ePassives.PAS_SCORCH_FLAMECORE ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
 	{
@@ -620,6 +654,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER,["tcp_fast_emp"] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE, ["tcp_flash","energy_field_energy_transfer"] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )	//shield_core"] )
+
+		array<int> passives = [ ePassives.PAS_ION_WEAPON,
+								ePassives.PAS_ION_TRIPWIRE,
+								ePassives.PAS_ION_VORTEX,
+								ePassives.PAS_ION_LASERCANNON,
+								ePassives.PAS_ION_WEAPON_ADS ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
+
 	}
 	else
 	{
@@ -658,6 +703,20 @@ void function OnTitanfall( entity titan )
 		{
 			printt("TitanUseChecker-----017")
 			soul.s.TitanHasBeenChange <- true
+
+			array<int> passives = [ ePassives.PAS_VANGUARD_CORE1,
+									ePassives.PAS_VANGUARD_CORE2,
+									ePassives.PAS_VANGUARD_CORE3,
+									ePassives.PAS_VANGUARD_CORE4,
+									ePassives.PAS_VANGUARD_CORE5,
+									ePassives.PAS_VANGUARD_CORE6,
+									ePassives.PAS_VANGUARD_CORE7,
+									ePassives.PAS_VANGUARD_CORE8,
+									ePassives.PAS_VANGUARD_CORE9 ]
+			foreach( passive in passives )
+			{
+				TakePassive( soul, passive )
+			}
 		}
 	}
 }
