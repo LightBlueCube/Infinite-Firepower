@@ -238,13 +238,10 @@ array<entity> function GetNearbyEnemiesForSonarPulse( int team, vector origin )
 const DAMAGE_AGAINST_TITANS_EMPBOMB 			= 25
 const DAMAGE_AGAINST_PILOTS_EMPBOMB 			= 1
 
-const EMP_DAMAGE_TICK_RATE_EMPBOMB = 0.1
+const DAMAGE_AGAINST_TITANS 			= 15
+const DAMAGE_AGAINST_PILOTS 			= 1
 
-
-const DAMAGE_AGAINST_TITANS 			= 20
-const DAMAGE_AGAINST_PILOTS 			= 2
-
-const EMP_DAMAGE_TICK_RATE = 0.3
+const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
 const FX_EMP_FIELD_1P					= $"P_body_emp_1P"
 
@@ -379,7 +376,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 	}
 	else
 	{
-		wait RandomFloat( EMP_DAMAGE_TICK_RATE_EMPBOMB )
+		wait RandomFloat( EMP_DAMAGE_TICK_RATE )
 
 		while ( true )
 		{
@@ -399,7 +396,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
    				DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,	// scriptDamageFlags
 	   			eDamageSourceId.mp_weapon_grenade_emp )			// scriptDamageSourceIdentifier
 
-			wait EMP_DAMAGE_TICK_RATE_EMPBOMB
+			wait EMP_DAMAGE_TICK_RATE
 		}
 	}
 }

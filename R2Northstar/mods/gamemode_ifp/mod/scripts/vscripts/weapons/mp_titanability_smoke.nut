@@ -86,7 +86,7 @@ void function TitanSmokescreen( entity ent, entity weapon )
 	if ( weapon.HasMod( "maelstrom" ) )
 	{
 		smokescreen.dpsPilot = 35
-		smokescreen.dpsTitan = 650
+		smokescreen.dpsTitan = 850
 		smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
 		smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P
 	}
