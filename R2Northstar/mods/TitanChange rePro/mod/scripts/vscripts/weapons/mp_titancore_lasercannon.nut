@@ -333,8 +333,8 @@ void function Laser_DamagedTargetInternal( entity target, var damageInfo )
 #endif
 
 
-const DAMAGE_AGAINST_TITANS 			= 150
-const DAMAGE_AGAINST_PILOTS 			= 40
+const DAMAGE_AGAINST_TITANS 			= 125
+const DAMAGE_AGAINST_PILOTS 			= 20
 
 const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
