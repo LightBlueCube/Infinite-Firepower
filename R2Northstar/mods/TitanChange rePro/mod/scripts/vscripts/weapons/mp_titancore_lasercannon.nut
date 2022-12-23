@@ -197,8 +197,8 @@ bool function OnAbilityStart_LaserCannon( entity weapon )
 
 	if( weapon.HasMod( "tcp_arc_core" ) )
 	{
-		float duration = weapon.GetWeaponSettingFloat( eWeaponVar.core_duration )
-		thread ArcCoreThinkConstant( player, duration )
+		float duration = weapon.GetWeaponSettingFloat( eWeaponVar.core_duration ) - 0.1
+		thread ArcCoreThinkConstant( player, duration, weapon )
 		return true
 	}
 
@@ -333,14 +333,14 @@ void function Laser_DamagedTargetInternal( entity target, var damageInfo )
 #endif
 
 
-const DAMAGE_AGAINST_TITANS 			= 125
-const DAMAGE_AGAINST_PILOTS 			= 20
+const DAMAGE_AGAINST_TITANS 			= 250
+const DAMAGE_AGAINST_PILOTS 			= 25
 
 const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
 const FX_EMP_FIELD_1P					= $"P_body_emp_1P"
 
-void function ArcCoreThinkConstant( entity titan, float duration )
+void function ArcCoreThinkConstant( entity titan, float duration, entity weapon )
 {
 	RegisterSignal( "StopArcCoreEffect" )
 
@@ -349,6 +349,8 @@ void function ArcCoreThinkConstant( entity titan, float duration )
 	//titan.EndSignal( "Doomed" )
 	titan.EndSignal( "StopEMPField" )
 	titan.EndSignal( "StopArcCoreEffect" )
+	titan.EndSignal( "TitanEjectionStarted" )
+	titan.EndSignal( "DisembarkingTitan" )
 
 	//We don't want pilots accidently rodeoing an electrified titan.
 	//DisableTitanRodeo( titan )
@@ -369,7 +371,6 @@ void function ArcCoreThinkConstant( entity titan, float duration )
 
 	local attachID = titan.LookupAttachment( attachment )
 
-	EmitSoundOnEntity( titan, "EMP_Titan_Electrical_Field" )
 
 	array<entity> particles = []
 
@@ -401,25 +402,24 @@ void function ArcCoreThinkConstant( entity titan, float duration )
 	DispatchSpawn( particleSystem )
 	particleSystem.SetParent( titan, "hijack" )
 	particles.append( particleSystem )
+	EmitSoundOnEntity( particleSystem, "EMP_Titan_Electrical_Field" )
 
 	//titan.SetDangerousAreaRadius( ARC_TITAN_EMP_FIELD_RADIUS )
 
 	OnThreadEnd(
-		function () : ( titan, particles )
+		function () : ( particles, weapon )
 		{
-			if ( IsValid( titan ) )
-			{
-				StopSoundOnEntity( titan, "EMP_Titan_Electrical_Field" )
-			}
-
 			foreach ( particleSystem in particles )
 			{
 				if ( IsValid_ThisFrame( particleSystem ) )
 				{
+					StopSoundOnEntity( particleSystem, "EMP_Titan_Electrical_Field" )
 					particleSystem.ClearParent()
 					particleSystem.Fire( "StopPlayEndCap" )
 					particleSystem.Kill_Deprecated_UseDestroyInstead( 1.0 )
+					particleSystem.Destroy()
 				}
+				OnAbilityEnd_LaserCannon( weapon )
 			}
 		}
 	)
@@ -452,7 +452,18 @@ void function ArcCoreThinkConstant( entity titan, float duration )
 
 void function waitDuration( duration, titan )
 {
+	titan.EndSignal( "OnDeath" )
+	titan.EndSignal( "OnDestroy" )
+	titan.EndSignal( "TitanEjectionStarted" )
+	titan.EndSignal( "DisembarkingTitan" )
+
+	OnThreadEnd(
+		function () : ( titan )
+		{
+			if( IsValid( titan ) )
+				titan.Signal( "StopArcCoreEffect" )
+		}
+	)
+
 	wait duration
-	if( IsValid( titan ) )
-		titan.Signal( "StopArcCoreEffect" )
 }
