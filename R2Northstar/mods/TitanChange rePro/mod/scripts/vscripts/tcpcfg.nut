@@ -21,7 +21,7 @@ void function tcpback()
 bool function simpelhelp( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "因为摆寄星EN把BroadCast写寄了所以我只能做个简单介绍\n控制台输入\"shelp2\"看第二页\n按住F可以扔电池\n有一代训牛，拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n能核:至尊离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "因为摆寄星EN把BroadCast写寄了所以我只能做个简单介绍\n控制台输入\"shelp2\"看第二页\n按住F可以扔电池\n有一代训牛，拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n能核:至尊离子\n游侠:至尊浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return true
 }
 
@@ -720,12 +720,12 @@ void function OnTitanfall( entity titan )
 			printt("TitanUseChecker-----014")
 			soul.s.TitanHasBeenChange <- true
 		}
-		if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
+		if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" || titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )	//强力
 		{
 			printt("TitanUseChecker-----015")
 			soul.s.TitanHasBeenChange <- true
 		}
-		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
+		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" || titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )	//军团
 		{
 			printt("TitanUseChecker-----016")
 			soul.s.TitanHasBeenChange <- true
