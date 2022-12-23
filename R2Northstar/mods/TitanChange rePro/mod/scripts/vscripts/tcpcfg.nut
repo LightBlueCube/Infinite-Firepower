@@ -638,8 +638,8 @@ void function OnTitanfall( entity titan )
 		printt("TitanUseChecker----4")
 
 		soul.s.TitanHasBeenChange <- true
-		SendHudMessage(player, "已启用能核泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
-		soul.s.titanTitle <- "能核"
+		SendHudMessage(player, "已启用执政官泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		soul.s.titanTitle <- "執政官"
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -665,6 +665,37 @@ void function OnTitanfall( entity titan )
 			TakePassive( soul, passive )
 		}
 
+	}
+	else if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	{
+		printt("TitanUseChecker----5")
+
+		soul.s.TitanHasBeenChange <- true
+		SendHudMessage(player, "已启用游侠泰坦装备，取消至尊泰坦以使用原版浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		soul.s.titanTitle <- "游俠"
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "rolling_rounds" ] )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_ability_swordblock", OFFHAND_SPECIAL )
+		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE )
+		titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tcp_arc_core" ] )
+
+		array<int> passives = [ ePassives.PAS_RONIN_WEAPON, 
+								ePassives.PAS_RONIN_ARCWAVE, 
+								ePassives.PAS_RONIN_PHASE, 
+								ePassives.PAS_RONIN_SWORDCORE, 
+								ePassives.PAS_RONIN_AUTOSHIFT ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
 	}
 	else
 	{
