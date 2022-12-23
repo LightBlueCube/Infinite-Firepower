@@ -1,0 +1,24 @@
+WeaponData
+{
+	Mods
+	{
+		pas_ion_lasercannon
+		{
+		}
+		fd_laser_cannon
+		{
+
+		}
+		fd_balance
+		{
+		}
+
+		tcp_arc_core
+		{															// 电弧部分在nut
+			"sustained_laser_enabled"						"0"		// 关闭激光伤害
+			"core_duration"									"24.0"	// 核心时间
+			"sustained_discharge_duration"					"0.1"	// 激光发射时间，不能调为0.0因为需要有1tick来执行代码
+			"charge_time" 									"0.1"	// 激光前摇动画时间，不能调为0.0因为需要有1tick来执行代码
+		}
+	}
+}
