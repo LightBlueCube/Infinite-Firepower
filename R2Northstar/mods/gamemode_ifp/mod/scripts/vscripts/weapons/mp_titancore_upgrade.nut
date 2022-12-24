@@ -41,23 +41,6 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 		int currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
 		if ( currentUpgradeCount == 0 )
 		{
-			//Missile Racks
-			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_RIGHT )
-			if ( IsValid( offhandWeapon ) )
-			{
-				array<string> mods = offhandWeapon.GetMods()
-				mods.append( "missile_racks" )
-				offhandWeapon.SetMods( mods )
-			}
-			if ( owner.IsPlayer() )
-			{
-				int conversationID = GetConversationIndex( "upgradeTo1" )
-				Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
-				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 2 )
-			}
-		}
-		else if ( currentUpgradeCount == 1 )
-		{
 			//Energy Transfer
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_LEFT )
 			if ( IsValid( offhandWeapon ) )
@@ -71,6 +54,23 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				int conversationID = GetConversationIndex( "upgradeTo1" )
 				Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 3 )
+			}
+		}
+		else if ( currentUpgradeCount == 1 )
+		{
+			//Missile Racks
+			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_RIGHT )
+			if ( IsValid( offhandWeapon ) )
+			{
+				array<string> mods = offhandWeapon.GetMods()
+				mods.append( "missile_racks" )
+				offhandWeapon.SetMods( mods )
+			}
+			if ( owner.IsPlayer() )
+			{
+				int conversationID = GetConversationIndex( "upgradeTo1" )
+				Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
+				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 2 )
 			}
 		}
 		else if ( currentUpgradeCount == 2 )
