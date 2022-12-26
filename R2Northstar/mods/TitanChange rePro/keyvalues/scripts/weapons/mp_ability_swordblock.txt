@@ -2,6 +2,5 @@ WeaponData
 {
 	// Ammo
 	"regen_ammo_refill_start_delay"					"0.0"
-	"regen_ammo_refill_rate"						"5.0"
-	"regen_ammo_stockpile_drain_rate_when_charging"	"5.0"
+	"regen_ammo_refill_rate"						"4.0"
 }
