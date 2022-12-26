@@ -1037,7 +1037,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 		rodeoPilot.Anim_Stop() // clean up last?
 		rodeoPilot.s.removingBatteryPack = true
 		rodeoPilot.EndSignal( "RodeoOver" ) // this is also needed to let player jump off rodeo any time
-		titanSoul.EndSignal( "ApplyBatteryToTitan" ) // modified condition, player applied a new battery to their titan
+		//titanSoul.EndSignal( "ApplyBatteryToTitan" ) // modified condition, player applied a new battery to their titan
 		rodeoPilot.Signal( "PlayerRemovesBatteryPack" ) // defensive fix
 		rodeoPilot.EndSignal( "PlayerRemovesBatteryPack" )
 	}
