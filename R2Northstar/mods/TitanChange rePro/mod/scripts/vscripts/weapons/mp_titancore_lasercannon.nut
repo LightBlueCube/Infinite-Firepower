@@ -1,6 +1,8 @@
 untyped
 global function LaserCannon_Init
 
+global function OnWeaponPrimaryAttack_LaserCannon // modified function
+
 global function OnAbilityStart_LaserCannon
 global function OnAbilityEnd_LaserCannon
 global function OnAbilityCharge_LaserCannon
@@ -85,15 +87,19 @@ void function LaserCore_OnPlayedOrNPCKilled( entity victim, entity attacker, var
 }
 #endif
 
+// modified function
+var function OnWeaponPrimaryAttack_LaserCannon( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	if ( weapon.HasMod( "tesla_core" ) )
+		return OnAbilityStart_Tesla_Core( weapon, attackParams )
+}
+
 bool function OnAbilityCharge_LaserCannon( entity weapon )
 {
-	OnAbilityCharge_TitanCore( weapon )
+	if ( weapon.HasMod( "tesla_core" ) )
+		return OnCoreCharge_Tesla_Core( weapon )
 
-	if( weapon.HasMod( "tcp_arc_core" ) )
-	{
-		weapon.EmitWeaponSound_1p3p( "Titan_Core_Laser_ChargeUp_1P", "Titan_Core_Laser_ChargeUp_3P" )
-		return true
-	}
+	OnAbilityCharge_TitanCore( weapon )
 
 #if CLIENT
 	if ( !InPrediction() || IsFirstTimePredicted() )
@@ -139,8 +145,11 @@ bool function OnAbilityCharge_LaserCannon( entity weapon )
 
 	if ( player.IsNPC() )
 	{
-		player.SetVelocity( <0,0,0> )
-		player.Anim_ScriptedPlayActivityByName( "ACT_SPECIAL_ATTACK_START", true, 0.0 )
+		if( !player.ContextAction_IsActive() ) // check for npc executions to work!
+		{
+			player.SetVelocity( <0,0,0> )
+			player.Anim_ScriptedPlayActivityByName( "ACT_SPECIAL_ATTACK_START", true, 0.0 )
+		}
 	}
 #endif // #if SERVER
 
@@ -151,6 +160,9 @@ bool function OnAbilityCharge_LaserCannon( entity weapon )
 
 void function OnAbilityChargeEnd_LaserCannon( entity weapon )
 {
+	if ( weapon.HasMod( "tesla_core" ) )
+		return OnCoreChargeEnd_Tesla_Core( weapon )
+
 	#if SERVER
 	OnAbilityChargeEnd_TitanCore( weapon )
 	#endif
@@ -183,6 +195,9 @@ void function OnAbilityChargeEnd_LaserCannon( entity weapon )
 
 bool function OnAbilityStart_LaserCannon( entity weapon )
 {
+	if ( weapon.HasMod( "tesla_core" ) ) // tesla core don't have a sustained laser
+		return true
+
 	OnAbilityStart_TitanCore( weapon )
 
 #if SERVER
@@ -194,13 +209,6 @@ bool function OnAbilityStart_LaserCannon( entity weapon )
 	entity soul = player.GetTitanSoul()
 	if ( soul == null )
 		soul = player
-
-	if( weapon.HasMod( "tcp_arc_core" ) )
-	{
-		float duration = weapon.GetWeaponSettingFloat( eWeaponVar.core_duration ) - 0.1
-		thread ArcCoreThinkConstant( player, duration, weapon )
-		return true
-	}
 
 	if ( !player.ContextAction_IsMeleeExecution() ) //don't do this during executions
 	{
@@ -232,8 +240,6 @@ bool function OnAbilityStart_LaserCannon( entity weapon )
 	// thread LaserEndingWarningSound( weapon, player )
 
 	SetCoreEffect( player, CreateCoreEffect, FX_LASERCANNON_CORE )
-
-
 #endif
 
 	#if CLIENT
@@ -245,6 +251,9 @@ bool function OnAbilityStart_LaserCannon( entity weapon )
 
 void function OnAbilityEnd_LaserCannon( entity weapon )
 {
+	if ( weapon.HasMod( "tesla_core" ) ) // tesla core don't have a sustained laser
+		return
+
 	weapon.Signal( "OnSustainedDischargeEnd" )
 	weapon.StopWeaponEffect( FX_LASERCANNON_MUZZLEFLASH, FX_LASERCANNON_MUZZLEFLASH )
 
@@ -333,6 +342,112 @@ void function Laser_DamagedTargetInternal( entity target, var damageInfo )
 #endif
 
 
+
+
+bool function OnCoreCharge_Tesla_Core( entity weapon )
+{
+	if ( !OnAbilityCharge_TitanCore( weapon ) )
+		return false
+
+	return true
+}
+
+void function OnCoreChargeEnd_Tesla_Core( entity weapon )
+{
+#if SERVER
+	OnAbilityChargeEnd_TitanCore( weapon )
+#endif
+}
+
+var function OnAbilityStart_Tesla_Core( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	entity owner = weapon.GetWeaponOwner()
+	if ( !owner.IsTitan() )
+		return 0
+	entity soul = owner.GetTitanSoul()
+	#if SERVER
+	float duration = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
+	thread TeslaCoreThink( weapon, duration )
+
+	OnAbilityStart_TitanCore( weapon )
+	#endif
+
+	return 1
+}
+
+void function TeslaCoreThink( entity weapon, float coreDuration )
+{
+	#if SERVER
+	weapon.EndSignal( "OnDestroy" )
+	entity owner = weapon.GetWeaponOwner()
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "DisembarkingTitan" )
+	owner.EndSignal( "TitanEjectionStarted" )
+
+	if( !owner.IsTitan() )
+		return
+
+    if ( owner.IsPlayer() )
+    {
+        EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Ronin_Sword_Core_Activated_Upgraded_1P" )
+        EmitSoundOnEntityExceptToPlayer( owner, owner, "Titan_Ronin_Sword_Core_Activated_Upgraded_3P" )
+    }
+    else // npc
+    {
+        EmitSoundOnEntity( owner, "Titan_Ronin_Sword_Core_Activated_Upgraded_3P" )
+    }
+
+
+	entity soul = owner.GetTitanSoul()
+	int statusEffect = StatusEffect_AddEndless( soul, eStatusEffect.damageAmpFXOnly, 1.0 ) // add a visual effect
+
+    thread ArcCoreThinkConstant( owner ) // start empField
+
+	OnThreadEnd(
+	function() : ( weapon, soul, owner, statusEffect )
+		{
+			if ( IsValid( owner ) )
+			{
+				StopSoundOnEntity( owner, "Titan_Ronin_Sword_Core_Activated_Upgraded_1P" )
+                StopSoundOnEntity( owner, "Titan_Ronin_Sword_Core_Activated_Upgraded_3P" )
+
+                if ( owner.IsPlayer() )
+                {
+				    EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Ronin_Sword_Core_Deactivated_1P" )
+                    EmitSoundOnEntityExceptToPlayer( owner, owner, "Titan_Ronin_Sword_Core_Deactivated_3P" )
+                }
+                else // npc
+                {
+                    EmitSoundOnEntity( owner, "Titan_Ronin_Sword_Core_Deactivated_3P" )
+                }
+                
+                if ( owner.IsPlayer() )
+				{
+					owner.Signal( "StopEMPField" ) // the signal to stop empField
+					StatusEffect_Stop( owner, statusEffect )
+				}
+			}
+
+			if ( IsValid( weapon ) )
+			{
+				if ( IsValid( owner ) )
+					CoreDeactivate( owner, weapon )
+				OnAbilityEnd_TitanCore( weapon )
+			}
+
+			if ( IsValid( soul ) )
+			{
+				CleanupCoreEffect( soul )
+				StatusEffect_Stop( soul, statusEffect )
+			}
+		}
+	)
+
+	wait coreDuration
+	#endif
+}
+
 const DAMAGE_AGAINST_TITANS 			= 64
 const DAMAGE_AGAINST_PILOTS 			= 10
 
@@ -340,15 +455,13 @@ const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
 const FX_EMP_FIELD_1P					= $"P_body_emp_1P"
 
-void function ArcCoreThinkConstant( entity titan, float duration, entity weapon )
+void function ArcCoreThinkConstant( entity titan )
 {
-	RegisterSignal( "StopArcCoreEffect" )
 
 	titan.EndSignal( "OnDeath" )
 	titan.EndSignal( "OnDestroy" )
 	//titan.EndSignal( "Doomed" )
 	titan.EndSignal( "StopEMPField" )
-	titan.EndSignal( "StopArcCoreEffect" )
 	titan.EndSignal( "TitanEjectionStarted" )
 	titan.EndSignal( "DisembarkingTitan" )
 
@@ -407,7 +520,7 @@ void function ArcCoreThinkConstant( entity titan, float duration, entity weapon 
 	//titan.SetDangerousAreaRadius( ARC_TITAN_EMP_FIELD_RADIUS )
 
 	OnThreadEnd(
-		function () : ( particles, weapon )
+		function () : ( particles )
 		{
 			foreach ( particleSystem in particles )
 			{
@@ -419,12 +532,9 @@ void function ArcCoreThinkConstant( entity titan, float duration, entity weapon 
 					particleSystem.Kill_Deprecated_UseDestroyInstead( 1.0 )
 					particleSystem.Destroy()
 				}
-				OnAbilityEnd_LaserCannon( weapon )
 			}
 		}
 	)
-
-	thread waitDuration( duration, titan )
 
 	wait RandomFloat( EMP_DAMAGE_TICK_RATE )
 
@@ -448,22 +558,4 @@ void function ArcCoreThinkConstant( entity titan, float duration, entity weapon 
 
 		wait EMP_DAMAGE_TICK_RATE
 	}
-}
-
-void function waitDuration( duration, titan )
-{
-	titan.EndSignal( "OnDeath" )
-	titan.EndSignal( "OnDestroy" )
-	titan.EndSignal( "TitanEjectionStarted" )
-	titan.EndSignal( "DisembarkingTitan" )
-
-	OnThreadEnd(
-		function () : ( titan )
-		{
-			if( IsValid( titan ) )
-				titan.Signal( "StopArcCoreEffect" )
-		}
-	)
-
-	wait duration
 }
