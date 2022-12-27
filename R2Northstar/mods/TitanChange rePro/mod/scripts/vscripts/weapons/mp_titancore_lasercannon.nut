@@ -198,10 +198,7 @@ bool function OnAbilityStart_LaserCannon( entity weapon )
 	if( weapon.HasMod( "tcp_arc_core" ) )
 	{
 		float duration = weapon.GetWeaponSettingFloat( eWeaponVar.core_duration ) - 0.1
-		for( int i = 4; i > 0; i -= 1 )
-		{
-			thread ArcCoreThinkConstant( player, duration, weapon )
-		}
+		thread ArcCoreThinkConstant( player, duration, weapon )
 		return true
 	}
 
@@ -336,8 +333,8 @@ void function Laser_DamagedTargetInternal( entity target, var damageInfo )
 #endif
 
 
-const DAMAGE_AGAINST_TITANS 			= 125
-const DAMAGE_AGAINST_PILOTS 			= 25
+const DAMAGE_AGAINST_TITANS 			= 64
+const DAMAGE_AGAINST_PILOTS 			= 10
 
 const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"

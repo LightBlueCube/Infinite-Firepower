@@ -13,22 +13,22 @@ void function tcpback()
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddClientCommandCallback( "hw", NukeTitan );
-	AddClientCommandCallback( "shelp", simpelhelp );
-	AddClientCommandCallback( "shelp2", simpelhelp2 );
-	AddClientCommandCallback( "shelp3", simpelhelp3 );
+	AddClientCommandCallback( "help1", simpelhelp );
+	AddClientCommandCallback( "help2", simpelhelp2 );
+	AddClientCommandCallback( "help3", simpelhelp3 );
 }
 
 bool function simpelhelp( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "因为摆寄星EN把BroadCast写寄了所以我只能做个简单介绍\n控制台输入\"shelp2\"看第二页\n按住F可以扔电池\n有一代训牛，拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n能核:至尊离子\n游侠:至尊浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "因为摆寄星EN把BroadCast写寄了所以我只能做个简单介绍\n控制台输入\"help2\"看第二页\n按住F可以扔电池\n有一代训牛，拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n能核:至尊离子\n游侠:至尊浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return true
 }
 
 bool function simpelhelp2( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "控制台输入\"shelp3\"看第三页\n绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n红电池回血0.5格，但是如果是黄血吃到那么拉出黄血且回血3格\n能核Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "控制台输入\"help3\"看第三页\n绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n红电池回血0.5格，但是如果是黄血吃到那么拉出黄血且回血3格\n能核Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
