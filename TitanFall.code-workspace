@@ -11,6 +11,9 @@
 		{
 			"name": "Infinite-Firepower",
 			"path": "."
+		},
+		{
+			"path": "../THYLORD_SANDBOX/data/mods/Icepick.Framework"
 		}
 	]
 }
