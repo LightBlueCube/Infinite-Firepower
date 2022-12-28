@@ -429,8 +429,8 @@ bool function CreateEmpWaveSegment( entity projectile, int projectileCount, enti
 		pos,
 		projectile.GetOwner(), //attacker
 		inflictor, //inflictor
-		1250,
-		1250,
+		1000,
+		1000,
 		112, // inner radius
 		112, // outer radius
 		SF_ENVEXPLOSION_NO_DAMAGEOWNER | SF_ENVEXPLOSION_MASK_BRUSHONLY | SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,

@@ -3,7 +3,7 @@ WeaponData
 	"projectilemodel" 								"models/dev/empty_model.mdl"
 
 	"projectile_ignores_vortex"						"mirror"
-	"vortex_drain"									"1.0"
+	"vortex_drain"									"0.0"
 	"vortex_refire_behavior"  						"absorb"
 
 	"wave_max_count"								"15"
