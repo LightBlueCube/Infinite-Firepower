@@ -70,6 +70,11 @@ bool function OnCoreCharge_Shift_Core( entity weapon )
 		swordCoreSound_1p = "Titan_Ronin_Sword_Core_Activated_1P"
 		swordCoreSound_3p = "Titan_Ronin_Sword_Core_Activated_3P"
 	}
+	if( weapon.HasMod( "tcp_arc_wave" ) )
+	{
+		swordCoreSound_1p = "flamewave_start_1p"
+		swordCoreSound_3p = "flamewave_start_3p"
+	}
 	if ( owner.IsPlayer() )
 	{
 		owner.HolsterWeapon() //TODO: Look into rewriting this so it works with HolsterAndDisableWeapons()
@@ -129,8 +134,14 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	if ( !IsValid( offhandWeapon ) )
 		return 0
 
-	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && !weapon.HasMod( "tcp_shield_core" ) && !weapon.HasMod( "tcp_dash_core" ) )
+	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && !weapon.HasMod( "tcp_shield_core" ) && !weapon.HasMod( "tcp_dash_core" ) && !weapon.HasMod( "tcp_arc_wave" ) )
 		return 0
+
+	if( weapon.HasMod( "tcp_arc_wave" ) )
+	{
+		thread tcp_arc_wave( weapon, attackParams, owner )
+		return
+	}
 
 #if SERVER
 	if ( owner.IsPlayer() )
@@ -150,36 +161,6 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	}
 
 	entity soul = owner.GetTitanSoul()
-
-	if( weapon.HasMod("tcp_shield_core") )
-	{
-		// JFS the weapon owner should always have a soul, at least on the server
-		if ( !IsValid( soul ) )
-			return
-
-		vector dir = owner.CameraAngles()
-		dir.x = 0
-		dir = AnglesToForward( dir )
-		vector origin = owner.GetOrigin()
-		vector safeSpot = origin
-		vector angles = VectorToAngles( dir )
-
-		if ( owner.IsNPC() )
-		{
-			// spawn in front of npc a bit
-			origin += dir * 100
-		}
-
-		float duration = 120.0
-
-		float endTime = Time() + duration
-		soul.SetDefensivePlacement( endTime, SHIELD_WALL_WIDTH, 0, true, safeSpot, dir )
-
-		int health = 2500
-		entity vortexSphere = CreateShieldWithSettings( origin + < 0, 0, -64 >, angles, SHIELD_WALL_RADIUS, SHIELD_WALL_RADIUS * 2, SHIELD_WALL_FOV, duration, health, SHIELD_WALL_FX )
-		vortexSphere.SetParent( owner )
-		thread ShieldCoreDrainHealthOverTime( vortexSphere,  vortexSphere.e.shieldWallFX, duration, owner )
-	}
 
 	if ( soul != null )
 	{
@@ -213,77 +194,6 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	return 1
 }
 
-void function ShieldCoreDrainHealthOverTime( entity vortexSphere, entity shieldWallFX, float duration, entity owner )
-{
-	vortexSphere.EndSignal( "OnDestroy" )
-	shieldWallFX.EndSignal( "OnDestroy" )
-
-	float startTime = Time()
-	float endTime = startTime + duration
-
-	float tickRate = 0.1
-	float dps = vortexSphere.GetMaxHealth() / duration
-	float dmgAmount = dps * tickRate
-
-	EmitSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
-
-	float endSoundTime = endTime - 3.0
-	bool playedEndSound = false
-	vector vortexOrigin = vortexSphere.GetOrigin()
-
-	OnThreadEnd(
-		function() : ( vortexSphere, vortexOrigin, endTime )
-		{
-			if ( endTime - Time() < 1.0 )
-				return
-
-			int teamNum = TEAM_UNASSIGNED
-
-			if ( IsValid( vortexSphere ) )
-			{
-				StopSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
-				StopSoundOnEntity( vortexSphere, "ShieldWall_End" )
-
-				teamNum = vortexSphere.GetTeam()
-			}
-
-			EmitSoundAtPosition( teamNum, vortexOrigin, "ShieldWall_Destroyed" )
-		}
-	)
-
-	while ( Time() < endTime )
-	{
-		if ( Time() > endSoundTime && !playedEndSound )
-		{
-			EmitSoundOnEntity( vortexSphere, "ShieldWall_End" )
-			playedEndSound = true
-		}
-
-		//vortexSphere.SetHealth( vortexSphere.GetHealth() - dmgAmount )
-		UpdateShieldWallColorForFrac( shieldWallFX, GetHealthFrac( vortexSphere ) )
-
-		if( owner.IsInputCommandHeld( IN_ZOOM ) || owner.IsInputCommandHeld( IN_ZOOM_TOGGLE ) )
-		{
-			vector dir = owner.CameraAngles()
-			dir.x = 0
-			dir = AnglesToForward( dir )
-			vector origin = owner.GetOrigin()
-			vector safeSpot = origin
-			vector angles = VectorToAngles( dir )
-
-			if ( owner.IsNPC() )
-			{
-				// spawn in front of npc a bit
-				origin += dir * 100
-			}
-			entity vortexSphere = CreateShieldWithSettings( origin + < 0, 0, -64 >, angles, SHIELD_WALL_RADIUS, SHIELD_WALL_RADIUS * 2, SHIELD_WALL_FOV, endTime - Time(), vortexSphere.GetHealth(), SHIELD_WALL_FX )
-		}
-
-		wait tickRate
-	}
-
-	StopSoundOnEntity( vortexSphere, "ShieldWall_Loop" )
-}
 
 #if SERVER
 void function Shift_Core_End( entity weapon, entity player, float delay )
@@ -431,3 +341,103 @@ void function Shift_Core_UseMeter_NPC( entity npc )
 	Shift_Core_UseMeter( npc )
 }
 #endif
+
+//// mod functions ////
+
+void function tcp_arc_wave( entity weapon, WeaponPrimaryAttackParams attackParams, entity owner )
+{
+	CreateHighlanderArcWave( weapon, attackParams, 0.0 )
+	CreateHighlanderArcWave( weapon, attackParams, 0.1 )
+	CreateHighlanderArcWave( weapon, attackParams, -0.1 )
+	CreateHighlanderArcWave( weapon, attackParams, 0.4 )
+	CreateHighlanderArcWave( weapon, attackParams, -0.4 )
+	float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
+	thread Shift_Core_End( weapon, owner, delay )
+}
+
+void function CreateHighlanderArcWave( entity weapon, WeaponPrimaryAttackParams attackParams, float angleoffset )
+{
+	entity weaponOwner = weapon.GetWeaponOwner()
+	if ( weaponOwner.IsPhaseShifted() )
+		return
+
+	bool shouldPredict = weapon.ShouldPredictProjectiles()
+	#if CLIENT
+		if ( !shouldPredict )
+			return
+	#endif
+
+	vector rightVec = AnglesToRight(VectorToAngles(attackParams.dir))
+
+	const float FUSE_TIME = 99.0
+	entity projectile = weapon.FireWeaponGrenade( attackParams.pos, attackParams.dir + rightVec * angleoffset, < 0,0,0 >, FUSE_TIME, damageTypes.projectileImpact, damageTypes.explosive, shouldPredict, true, true )
+	if ( IsValid( projectile ) )
+	{
+		entity owner = weapon.GetWeaponOwner()
+		#if SERVER
+			projectile.proj.isChargedShot = true
+		#endif
+ 
+		if ( owner.IsPlayer() )
+			PlayerUsedOffhand( owner, weapon )
+
+		#if SERVER
+			thread BeginEmpWaveAng( projectile, attackParams, angleoffset )
+		#endif
+	}
+}
+
+void function BeginEmpWaveAng( entity projectile, WeaponPrimaryAttackParams attackParams, float angleoffset )
+{
+
+	vector rightVec = AnglesToRight(VectorToAngles(attackParams.dir))
+
+	projectile.EndSignal( "OnDestroy" )
+	projectile.SetAbsOrigin( projectile.GetOrigin() )
+	projectile.SetAbsAngles( projectile.GetAngles() )
+	projectile.SetVelocity( Vector( 0, 0, 0 ) )
+	projectile.StopPhysics()
+	projectile.SetTakeDamageType( DAMAGE_NO )
+	projectile.Hide()
+	projectile.NotSolid()
+	projectile.e.onlyDamageEntitiesOnce = true
+	EmitSoundOnEntity( projectile, "arcwave_tail_3p" )
+	waitthread WeaponAttackWave( projectile, 0, projectile, attackParams.pos, attackParams.dir + rightVec * angleoffset, CreateEmpWaveSegment )
+	StopSoundOnEntity( projectile, "arcwave_tail_3p" )
+	projectile.Destroy()
+}
+
+bool function CreateEmpWaveSegment( entity projectile, int projectileCount, entity inflictor, entity movingGeo, vector pos, vector angles, int waveCount )
+{
+	projectile.SetOrigin( pos )
+
+	float damageScalar
+	int fxId
+	if ( !projectile.proj.isChargedShot )
+	{
+		damageScalar = 1.0
+		fxId = GetParticleSystemIndex( $"P_arcwave_exp" )
+	}
+	else
+	{
+		damageScalar = 1.5
+		fxId = GetParticleSystemIndex( $"P_arcwave_exp_charged" )
+	}
+	StartParticleEffectInWorld( fxId, pos, angles )
+
+	RadiusDamage(
+		pos,
+		projectile.GetOwner(), //attacker
+		inflictor, //inflictor
+		1250,
+		1250,
+		112, // inner radius
+		112, // outer radius
+		SF_ENVEXPLOSION_NO_DAMAGEOWNER | SF_ENVEXPLOSION_MASK_BRUSHONLY | SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,
+		0, // distanceFromAttacker
+		0, // explosionForce
+		DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,
+		eDamageSourceId.mp_titanweapon_arc_wave )
+
+	return true
+}
