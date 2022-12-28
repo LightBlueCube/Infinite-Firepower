@@ -126,6 +126,8 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 			}
 			if( !( attacker.IsPlayer() ) )
 				return
+			if( attacker.GetTeam() == victim.GetTeam() )
+				return
 			if( !( "KillStreak" in attacker.s ) )
 				attacker.s.KillStreak <- 0
 			if( !( "totalKills" in attacker.s ) )
