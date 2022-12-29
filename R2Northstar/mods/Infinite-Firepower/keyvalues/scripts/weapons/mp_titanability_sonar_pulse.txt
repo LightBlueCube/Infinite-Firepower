@@ -1,0 +1,27 @@
+WeaponData
+{
+	Mods
+	{
+		pas_tone_sonar
+		{
+
+		}
+		fd_sonar_duration
+		{
+
+		}
+		fd_sonar_damage_amp
+		{
+		}
+
+		tcp
+		{
+			//给nut做识别用
+		}
+
+		tcp_fast_emp
+		{
+			//给nut做识别用
+		}
+	}
+}
