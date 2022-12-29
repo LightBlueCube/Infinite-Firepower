@@ -1,8 +1,0 @@
-WeaponData
-{
-	MP_BASE
-	{
-		"core_duration"								"6.0" //Needs to match charge_cooldown_delay
-		"charge_cooldown_delay"   					"6.0"
-	}
-}

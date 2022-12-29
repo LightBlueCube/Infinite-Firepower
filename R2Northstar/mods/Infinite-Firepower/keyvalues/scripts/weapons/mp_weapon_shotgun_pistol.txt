@@ -1,0 +1,13 @@
+WeaponData
+{
+	MP_BASE
+	{
+		// Damage - When Used by Players
+		"damage_rodeo" 									"375"	//750
+		// Damage - When Used by NPCs
+		"npc_damage_near_value"   						"60"
+		"npc_damage_far_value"							"50"
+		"npc_damage_near_value_titanarmor"				"60"
+		"npc_damage_far_value_titanarmor" 				"50"
+	}
+}

@@ -1,4 +1,0 @@
-WeaponData
-{
-	"core_duration"									"8"
-}
