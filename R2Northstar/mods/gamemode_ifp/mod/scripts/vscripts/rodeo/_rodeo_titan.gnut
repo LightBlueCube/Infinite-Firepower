@@ -2245,7 +2245,7 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 				titan.SetHealth( 1 )
 			}
 		}
-		else if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_DOOM ) && soul.IsDoomed() )
+		if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_DOOM ) && soul.IsDoomed() )
 		{
 			UndoomTitan( titan, 1 )
 			titan.SetHealth( 1 )
