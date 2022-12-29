@@ -2,7 +2,7 @@
     "Name": "titanchangepro",
     "Description": "change titan but is pro version",
     "Authors": ["VoyageDB, LightBlueCube(feiwu)"],
-    "LoadPriority": 101,
+    "LoadPriority": 102,
     "RequiredOnClient": false,
     "Scripts": [
         {
