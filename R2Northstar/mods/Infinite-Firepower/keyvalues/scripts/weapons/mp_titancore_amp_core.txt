@@ -1,4 +1,5 @@
 WeaponData
 {
-	"core_duration"									"8"
+	"chargeup_time"									"0.0"
+	"core_duration"									"8.0"
 }
