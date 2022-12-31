@@ -1,6 +1,23 @@
 untyped //entity.s need this
 global function TitanChangePro_Callbacks;
 
+int UseTime_1 = 0
+int UseTime_2 = 0
+int UseTime_3 = 0
+int UseTime_4 = 0
+int UseTime_5 = 0
+int UseTime_6 = 0
+int UseTime_7 = 0
+
+int UseTime_ModTitan_1 = 0
+int UseTime_ModTitan_2 = 0
+int UseTime_ModTitan_3 = 0
+int UseTime_ModTitan_4 = 0
+int UseTime_ModTitan_5 = 0
+int UseTime_ModTitan_6 = 0
+int UseTime_ModTitan_7 = 0
+
+
 void function TitanChangePro_Callbacks()
 {
 	AddSpawnCallback( "npc_titan", OnTitanfall )
@@ -16,6 +33,134 @@ void function TitanChangePro_Callbacks()
 	AddClientCommandCallback( "help1", simpelhelp );
 	AddClientCommandCallback( "help2", simpelhelp2 );
 	AddClientCommandCallback( "help3", simpelhelp3 );
+	thread UseTimeCheck()
+}
+
+void function UseTimeCheck()
+{
+	while( true )
+	{
+		wait 10
+		foreach( player in GetPlayerArray() )
+		{
+			if( !IsValid( player ) )
+				continue
+			if( !IsValid( player.GetModelName() ) )
+				continue
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
+			{
+				UseTime_1 += 10
+			}
+			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
+			{
+				UseTime_2 += 10
+			}
+			if( player.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
+			{
+				UseTime_3 += 10
+			}
+			if( player.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
+			{
+				UseTime_4 += 10
+			}
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" || player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )	//强力
+			{
+				UseTime_5 += 10
+			}
+			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" || player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )	//军团
+			{
+				UseTime_6 += 10
+			}
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( player.GetCamo() != -1 || player.GetSkin() != 3 ) )	//帝王
+			{
+				UseTime_7 += 10
+			}
+			//// ModTitan ////
+			if( player.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//野兽
+			{
+				UseTime_ModTitan_1 += 10
+			}
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && player.GetCamo() == -1 && player.GetSkin() == 3 )	//远征
+			{
+				UseTime_ModTitan_2 += 10
+			}
+			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )		//野牛
+			{
+				UseTime_ModTitan_3 += 10
+			}
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )		//执政官
+			{
+				UseTime_ModTitan_4 += 10
+			}
+			if( player.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )		//游侠
+			{
+				UseTime_ModTitan_5 += 10
+			}
+
+
+			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_1 add 1 min" )
+				UseTime_1 = 0
+			}
+			if( UseTime_2 % 60 == 0	&& UseTime_2 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_2 add 1 min" )
+				UseTime_2 = 0
+			}
+			if( UseTime_3 % 60 == 0	&& UseTime_3 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_3 add 1 min" )
+				UseTime_3 = 0
+			}
+			if( UseTime_4 % 60 == 0	&& UseTime_4 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_4 add 1 min" )
+				UseTime_4 = 0
+			}
+			if( UseTime_5 % 60 == 0	&& UseTime_5 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_5 add 1 min" )
+				UseTime_5 = 0
+			}
+			if( UseTime_6 % 60 == 0	&& UseTime_6 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_6 add 1 min" )
+				UseTime_6 = 0
+			}
+			if( UseTime_7 % 60 == 0	&& UseTime_7 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_7 add 1 min" )
+				UseTime_7 = 0
+			}
+			//// ModTitan ////
+			if( UseTime_ModTitan_1 % 60 == 0 && UseTime_ModTitan_1 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_1 add 1 min" )
+				UseTime_ModTitan_1 = 0
+			}
+			if( UseTime_ModTitan_2 % 60 == 0 && UseTime_ModTitan_2 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_2 add 1 min" )
+				UseTime_ModTitan_2 = 0
+			}
+			if( UseTime_ModTitan_3 % 60 == 0 && UseTime_ModTitan_3 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_3 add 1 min" )
+				UseTime_ModTitan_3 = 0
+			}
+			if( UseTime_ModTitan_4 % 60 == 0 && UseTime_ModTitan_4 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_4 add 1 min" )
+				UseTime_ModTitan_4 = 0
+			}
+			if( UseTime_ModTitan_5 % 60 == 0 && UseTime_ModTitan_5 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_5 add 1 min" )
+				UseTime_ModTitan_5 = 0
+			}
+		}
+	}
 }
 
 bool function simpelhelp( entity player, array<string> args )
@@ -46,6 +191,7 @@ void function GameStateEnter_Postmatch()
 void function RandomMap()
 {
 	wait ( GAME_POSTMATCH_LENGTH - 0.1 )
+	printt( "UseTimeCheck: "+ UseTime_1 +","+ UseTime_2 +","+ UseTime_3 +","+ UseTime_4 +","+ UseTime_5 +","+ UseTime_6 +","+ UseTime_7 +",|ModTitan|,"+ UseTime_ModTitan_1 +","+ UseTime_ModTitan_2 +","+ UseTime_ModTitan_3 +","+ UseTime_ModTitan_4 +","+ UseTime_ModTitan_5 )
 	int RandomInt = RandomInt( 15 )
 	switch( RandomInt )
 	{
@@ -158,10 +304,10 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					{
 						attacker.s.HaveNukeTitan <- 1
 					}
-					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付",  -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1);
+					SendHudMessage( attacker, "获得 1 个核武泰坦\n剩余 "+ attacker.s.HaveNukeTitan +" 个核武泰坦未交付",  -1, 0.3, 255, 0, 0, 255, 0.15, 3, 1);
 				}
 			}
-			if( attacker.s.KillStreak == 24 )
+			if( attacker.s.KillStreak == 30 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
 				SendHudMessage( attacker, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 30, 1);
@@ -190,12 +336,12 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 	{
 		if( "HaveNukeTitan" in player.s )
 		{
-			SendHudMessage( player, "当前拥有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "当前拥有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 3, 1);
 			return
 		}
 		else
 		{
-			SendHudMessage( player, "当前拥有 0 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "当前拥有 0 个核武泰坦\n控制台输入\"hw 数量\"以交付核武泰坦\n控制台输入\"hw all\"以交付全部核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 3, 1);
 			return
 		}
 	}
@@ -208,20 +354,20 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 			{
 				if( player.s.HaveNukeTitan <= 0 )
 				{
-					SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
 				if( player.IsTitan() )
 				{
-					SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
 				if( !player.IsHuman() )
 				{
-					SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+					SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 					return
 				}
-				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
 				{
 					PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
@@ -229,40 +375,40 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 				player.s.HaveNukeTitan = 0
 			}
 			else
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 		else
 			i = args[0].tointeger()
-		if( i == 0 )
+		if( i <= 0 )
 		{
-			SendHudMessage( player, "ERROR: 填入了非法参数", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "填入了非法参数", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 			return
 		}
 		if( "HaveNukeTitan" in player.s )
 		{
 			if( player.s.HaveNukeTitan <= 0 )
 			{
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			if( i > player.s.HaveNukeTitan )
 			{
-				SendHudMessage( player, "你只有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n但你填入的值 "+ i +" 明显大于你所拥有的值", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage( player, "你只有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n但你填入的值 "+ i +" 明显大于你所拥有的值", -1, 0.4, 255, 0, 0, 255, 0.15, 3, 1);
 				return
 			}
 			if( player.IsTitan() )
 			{
-				SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage(player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			if( !player.IsHuman() )
 			{
-				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+				SendHudMessage(player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 				return
 			}
 			player.s.HaveNukeTitan -= i
-			SendHudMessage( player, "成功交付了 "+ i +" 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "成功交付了 "+ i +" 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.4, 255, 0, 0, 255, 0.15, 3, 1);
 			while( i > 0 )
 			{
 				PlayerInventory_PushInventoryItemByBurnRef( player, "burnmeter_nuke_titan" )
@@ -270,7 +416,7 @@ void function NukeTitan_Threaded( entity player, array<string> args )
 			}
 		}
 		else
-			SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 4, 1);
+			SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0.15, 2, 1);
 		return
 	}
 }
@@ -294,10 +440,6 @@ void function StartNuke( entity player )
 
 				SendHudMessage(player, "您已丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			}
-			else
-			{
-				SendHudMessage(player, "你需要有电池才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
-			}
 		}
 		else
 		{
@@ -311,7 +453,7 @@ void function StartNuke( entity player )
 	{
 		if( player.s.HaveNuclearBomb == true )
 		{
-			wait 1
+			wait 2
 			int sec = 40
 			while( sec > 0 )
 			{
@@ -531,8 +673,6 @@ void function OnTitanfall( entity titan )
 
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//检查玩家的模型
 	{
-		printt("TitanUseChecker----1")
-
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野兽泰坦装备，取消至尊泰坦以使用原版北极星",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "野獸"	//众所周知，当玩家上泰坦时不会按照我们的意愿设置标题的，所以这边整个变量让玩家上泰坦时读取这个然后写上
@@ -563,8 +703,6 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
-		printt("TitanUseChecker----2")
-
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用远征装备， 取消\"边境帝王\"战绘以使用原版帝王",  -1, 0.3, 200, 200, 225, 0, 0.15, 12, 1);
 		soul.s.titanTitle <- "遠征"
@@ -603,8 +741,6 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
-		printt("TitanUseChecker----3")
-
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "野牛"
@@ -637,8 +773,6 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
 	{
-		printt("TitanUseChecker----4")
-
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用执政官泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "執政官"
@@ -670,8 +804,6 @@ void function OnTitanfall( entity titan )
 	}
 	else if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
 	{
-		printt("TitanUseChecker----5")
-
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用游侠泰坦装备，取消至尊泰坦以使用原版浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "游俠"
@@ -701,57 +833,24 @@ void function OnTitanfall( entity titan )
 			TakePassive( soul, passive )
 		}
 	}
-	else
-	{
-		//以下为泰坦使用率检查，做平衡用
-		if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
-		{
-			printt("TitanUseChecker-----011")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )	//烈焰
-		{
-			printt("TitanUseChecker-----012")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
-		{
-			printt("TitanUseChecker-----013")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
-		{
-			printt("TitanUseChecker-----014")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" || titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )	//强力
-		{
-			printt("TitanUseChecker-----015")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" || titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )	//军团
-		{
-			printt("TitanUseChecker-----016")
-			soul.s.TitanHasBeenChange <- true
-		}
-		if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王
-		{
-			printt("TitanUseChecker-----017")
-			soul.s.TitanHasBeenChange <- true
 
-			array<int> passives = [ ePassives.PAS_VANGUARD_CORE1,
-									ePassives.PAS_VANGUARD_CORE2,
-									ePassives.PAS_VANGUARD_CORE3,
-									ePassives.PAS_VANGUARD_CORE4,
-									ePassives.PAS_VANGUARD_CORE5,
-									ePassives.PAS_VANGUARD_CORE6,
-									ePassives.PAS_VANGUARD_CORE7,
-									ePassives.PAS_VANGUARD_CORE8,
-									ePassives.PAS_VANGUARD_CORE9 ]
-			foreach( passive in passives )
-			{
-				TakePassive( soul, passive )
-			}
+
+	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王
+	{
+		soul.s.TitanHasBeenChange <- true
+
+		array<int> passives = [ ePassives.PAS_VANGUARD_CORE1,
+								ePassives.PAS_VANGUARD_CORE2,
+								ePassives.PAS_VANGUARD_CORE3,
+								ePassives.PAS_VANGUARD_CORE4,
+								ePassives.PAS_VANGUARD_CORE5,
+								ePassives.PAS_VANGUARD_CORE6,
+								ePassives.PAS_VANGUARD_CORE7,
+								ePassives.PAS_VANGUARD_CORE8,
+								ePassives.PAS_VANGUARD_CORE9 ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
 		}
 	}
 }
