@@ -155,8 +155,8 @@ void function PulseLocation( entity owner, int team, vector pos, bool hasIncreas
 void function SonarPulseThink( entity enemy, vector position, int team, entity sonarOwner, bool hasIncreasedDuration, bool hasDamageAmp )
 {
 	if( IsValid( sonarOwner ) )
-		if( IsValid( sonarOwner.GetOffhandWeapon( OFFHAND_SPECIAL ) ) )
-			if( sonarOwner.GetOffhandWeapon( OFFHAND_SPECIAL ).HasMod( "tcp" ) )
+		if( IsValid( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ) ) )
+			if( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_fast_emp" ) )
 				return
 
 	enemy.EndSignal( "OnDeath" )

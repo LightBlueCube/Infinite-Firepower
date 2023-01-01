@@ -3042,9 +3042,9 @@ void function ClassicRodeoThink( entity rodeoPilot, entity titanSoul, RodeoPacka
 				thread ClassicRodeo_PlayerContinouslyRemoveBatteries( rodeoPilot, titanSoul, rodeoPackage )
 
 			// waitthread will mess wait up, so we wait manually
-			wait CLASSIC_RODEO_SEQUENCE_INTERVAL // do a wait here, make ripping slower
+			/*wait CLASSIC_RODEO_SEQUENCE_INTERVAL // do a wait here, make ripping slower
 			if( rodeoTitanType == "stryder" )
-				wait CLASSIC_RODEO_SEQUENCE_ADDITIONAL_INTERVAL_STRYDER // stryders wait 0.2s more, or ripping their batteries will be too fast
+				wait CLASSIC_RODEO_SEQUENCE_ADDITIONAL_INTERVAL_STRYDER // stryders wait 0.2s more, or ripping their batteries will be too fast*/
 		}
 	//}
 

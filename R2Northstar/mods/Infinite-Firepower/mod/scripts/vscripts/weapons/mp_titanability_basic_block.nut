@@ -59,6 +59,16 @@ bool function OnWeaponChargeBegin_ability_swordblock( entity weapon )
 }
 void function OnWeaponActivate_ability_swordblock( entity weapon )
 {
+	entity player = weapon.GetWeaponOwner()
+	int ammo = player.GetWeaponAmmoStockpile( weapon )
+	if ( ammo - 10 >= 0 )
+	{
+	    weapon.SetWeaponPrimaryAmmoCount( ammo - 10 )
+	}
+	else
+	{
+	    weapon.SetWeaponPrimaryAmmoCount( 0 )
+	}
 	OnActivate( weapon, PILOT_BLOCK )
 }
 void function OnWeaponDeactivate_ability_swordblock( entity weapon )
