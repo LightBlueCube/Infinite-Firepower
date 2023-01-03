@@ -1,5 +1,74 @@
 untyped //entity.s need this
-global function TitanChangePro_Callbacks;
+global function TitanChangePro_Callbacks
+global function MacroCheck_Threaded
+
+
+array<string> KickedPlayerUID = []
+
+void function MacroCheck_Threaded( entity player )
+{
+	if( !IsValid( player ) )
+		return
+	if( !player.IsTitan() )
+		return
+
+	player.EndSignal( "MacroCheck" )
+	table result = {}
+	result.NotMacro <- false
+	OnThreadEnd(
+		function():( player, result )
+		{
+			if( !IsValid( player ) )
+				return
+			if( !result.NotMacro )
+				thread IsMacro( player )
+		}
+	)
+	WaitFrame()
+	WaitFrame()
+	result.NotMacro = true
+}
+void function IsMacro( entity player )
+{
+	if( "PlayerUseMacro" in player.s )
+	{
+		player.s.PlayerUseMacro += 1
+		printt( "AntiCheats: PlayerUseMacro PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" Times: "+ player.s.PlayerUseMacro +" EndMessage" )
+		if( player.s.PlayerUseMacro == 6 )
+		{
+			for( int i = 300; i > 0; i-- )
+			{
+				WaitFrame()
+				if( IsValid( player ) )
+					SendHudMessage( player, "侦测到您多次使用宏进行弹射操作，我们不推荐也不建议这么做\n如果您依旧多次使用宏，可能会进行封号操作", -1, 0.4, 200, 200, 225, 0, 0.0, 0.0, 1);
+			}
+		}
+		/*if( player.s.PlayerUseMacro == 6 )
+		{
+			printt( "AntiCheats: PlayerUseMacroAndLastWARN PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
+			for( int i = 600; i > 0; i-- )
+			{
+				WaitFrame()
+				if( IsValid( player ) )
+					SendHudMessage( player, "侦测到您依旧多次使用宏进行弹射操作，这是针对您的最后一次警告\n你已经被警告过了", -1, 0.4, 255, 0, 0, 0, 0.0, 0.0, 1);
+			}
+		}
+		if( player.s.PlayerUseMacro > 6 )
+		{
+			if( !IsValid( player ) )
+				return
+			KickedPlayerUID.append( player.GetUID() )
+			printt( "AntiCheats: PlayerUseMacroAndKicked PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
+			ServerCommand( "kickid "+ player.GetUID() )
+		}*/
+	}
+	else
+	{
+		player.s.PlayerUseMacro <- 1
+		printt( "AntiCheats: PlayerUseMacro PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
+	}
+}
+
 
 int UseTime_1 = 0
 int UseTime_2 = 0
@@ -16,7 +85,6 @@ int UseTime_ModTitan_4 = 0
 int UseTime_ModTitan_5 = 0
 int UseTime_ModTitan_6 = 0
 int UseTime_ModTitan_7 = 0
-
 
 void function TitanChangePro_Callbacks()
 {
@@ -641,6 +709,8 @@ void function explodeSound( entity player )
 void function RestoreKillStreak( entity player )
 {
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
+	if( KickedPlayerUID.contains( player.GetUID() ) )	//踢掉被踢后想重进的宏孩儿
+		ServerCommand( "kickid "+ player.GetUID() )
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
@@ -824,16 +894,44 @@ void function OnTitanfall( entity titan )
 		//titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tesla_core" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
 
-		array<int> passives = [ ePassives.PAS_RONIN_WEAPON, 
-								ePassives.PAS_RONIN_ARCWAVE, 
-								ePassives.PAS_RONIN_PHASE, 
-								ePassives.PAS_RONIN_SWORDCORE, 
+		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
+								ePassives.PAS_RONIN_ARCWAVE,
+								ePassives.PAS_RONIN_PHASE,
+								ePassives.PAS_RONIN_SWORDCORE,
 								ePassives.PAS_RONIN_AUTOSHIFT ]
 		foreach( passive in passives )
 		{
 			TakePassive( soul, passive )
 		}
 	}
+	/*else if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
+	{
+		soul.s.TitanHasBeenChange <- true
+		SendHudMessage(player, "已启用天图泰坦装备，取消至尊泰坦以使用原版强力",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		soul.s.titanTitle <- "天圖"
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+		titan.GiveWeapon( "mp_titanweapon_sniper", [ "arc_cannon", "capacitor", "arc_cannon_charge_sound", "power_shot" ] )
+		titan.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
+		titan.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		//titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+
+		array<int> passives = [ ePassives.PAS_TONE_WEAPON,
+								ePassives.PAS_TONE_ROCKETS,
+								ePassives.PAS_TONE_SONAR,
+								ePassives.PAS_TONE_WALL,
+								ePassives.PAS_TONE_BURST ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
+	}*/
 
 
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王

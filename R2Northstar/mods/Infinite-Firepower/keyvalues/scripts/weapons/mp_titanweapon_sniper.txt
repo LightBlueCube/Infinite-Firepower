@@ -1,0 +1,221 @@
+WeaponData
+{
+
+	"OnWeaponDeactivate"							"OnWeaponDeactivate_titanweapon_arc_cannon"
+	"OnWeaponReload"							"OnWeaponReload_titanweapon_arc_cannon"
+	"OnWeaponChargeBegin"							"OnWeaponChargeBegin_titanweapon_arc_cannon"
+	"OnWeaponChargeEnd"							"OnWeaponChargeEnd_titanweapon_arc_cannon"
+
+	//arc cannon stuff
+	"impact_sound" 							"MegaTurret_Laser_Fire_3P"
+	"tracer_effect"   							"P_wpn_arcball_beam"
+	"tracer_effect_first_person"  						"P_wpn_arcball_beam"
+
+	Mods
+	{
+		stryder_sniper
+		{
+
+		}
+
+		fast_reload
+		{
+		}
+		extended_ammo
+		{
+		}
+		power_shot
+		{
+		}
+		quick_shot
+		{
+		}
+		instant_shot
+		{
+		}
+		burn_mod_titan_sniper
+		{
+		}
+		BossTitanViper
+		{
+		}
+		BossTitanViperAgro
+		{
+		}
+		pas_northstar_weapon
+		{
+		}
+		pas_northstar_optics
+		{
+		}
+		fd_upgrade_charge
+		{
+		}
+		fd_upgrade_crit
+		{
+		}
+
+		arc_cannon	//from Super.Mixed.Game ,thx u db
+		{
+			"active_crosshair_count"				"2"
+			"rui_crosshair_index"					"1"
+			//"rui_crosshair_index"					"2"
+
+			"printname"										"#WPN_TITAN_ARC_CANNON"
+			"shortprintname"								"#WPN_TITAN_ARC_CANNON_SHORT"
+			"description" 									"#WPN_TITAN_ARC_CANNON_DESC"
+			//"longdesc"										"#WPN_TITAN_ARC_CANNON_LONGDESC"
+
+			// how to Disable zoom-toggle?
+			//"zoom_toggle_lerp_time"						"0.0"
+			//"zoom_toggle_fov"							"50"
+
+			"impact_effect_table" 							"exp_arc_cannon"
+			//"impact_sound" 								"weapon_batterygun_firestart_1p"
+			//"adjust_to_gun_barrel"							"1"
+			"fx_muzzle_flash_view"							"P_wpn_mflash_arcball_FP"
+			"fx_muzzle_flash_world"							"wpn_arc_cannon_electricity"
+			"fx_muzzle_flash_attach"						"muzzle_flash"
+
+			// Damage - When Used by Players
+
+			//"damage_type" 									"bullet"
+			"damage_flags"									"DF_STOPS_TITAN_REGEN | DF_BULLET | DF_NO_SELF_DAMAGE | DF_KNOCK_BACK"
+
+			"damage_near_distance"							"800"		//Start of Falloff
+			"damage_far_distance" 							"2300" //Max Range / End of Falloff
+
+			"damage_near_value"   							"300" //Max Damage
+			"damage_far_value"								"170" //Min Damage
+
+			"damage_near_value_titanarmor"					"1500" //Max Damage
+			"damage_far_value_titanarmor" 					"1200" //Min Damage
+
+			"damage_very_far_value"							"0"
+			"damage_very_far_distance"						"2300" //For the jank arc cannon shooting stickies workaround
+
+			"damage_heavyarmor_nontitan_scale"				"0.5"
+
+			"ammo_clip_size"								"1"
+
+			// Charge up sound, using mods for more changes
+			"charge_sound_seek_to_charge_fraction"			"1"
+			"charge_sound_stop_when_full"					"1"
+
+			// overwrite railgun sound with a empty one, or use charge rifle's?
+			"charge_drain_sound_1p"							"Weapon_ChargeRifle_WindDown_1P" //
+			"charge_drain_sound_3p"							"Weapon_ChargeRifle_WindDown_3P" //
+			"charge_drain_sound_stop_when_empty"			"1"
+			"charge_drain_sound_seek_to_charge_fraction"	"1"
+
+			// Behavior
+			"fire_rate"   									"1"
+			//"rechamber_time"								"0.25"
+			"cooldown_time"									"0.3"
+			"charge_time" 									"--1.5" // 3.7 in ttf1, maybe respawn make it reverted with capacitor?
+			"charge_cooldown_time"							"1.0"
+			"charge_end_forces_fire"						"0"
+			"charge_is_triggered_by_ADS"					"0"
+			"allow_empty_fire"								"1"
+			"reload_enabled"  								"0"
+			//"allow_empty_click"   							"1"
+			//"empty_reload_only"   							"0"
+			//"trigger_snipercam"   							"1"
+			//"allow_headshots" 								"0"
+			//"bypass_semiauto_hold_protection"				"1"
+			"vortex_drain"									".15"
+			"charge_effect_1p"								"wpn_arc_cannon_charge_fp"
+			"charge_effect_3p"								"wpn_arc_cannon_charge"
+			"charge_effect_attachment"						"muzzle_flash"
+
+			// Spread
+			"spread_stand_hip"  							"10"
+
+			//"ammo_suck_behavior"							"primary_weapons"
+
+			//NPC
+			"npc_damage_near_value"   						"80"
+			"npc_damage_far_value"							"80"
+			"npc_damage_near_distance"						"800"
+			"npc_damage_far_distance" 						"2300"
+			"npc_damage_near_value_titanarmor"					"700"
+			"npc_damage_far_value_titanarmor" 					"700"
+
+			// NPC
+			"npc_min_engage_range_heavy_armor"				"500"
+			"npc_max_engage_range_heavy_armor"				"2300"
+			"npc_min_range"   								"0"
+			"npc_max_range"   								"4000"
+
+			"npc_min_burst"   								"1"
+			"npc_max_burst"   								"1"
+			"npc_rest_time_between_bursts_min"				"3.5"
+			"npc_rest_time_between_bursts_max"				"4"
+		}
+		capacitor
+		{
+			"charge_time" 									"++1.5" // 2.5 in ttf1, maybe respawn make it reverted with capacitor?
+			"charge_cooldown_delay"   						"0.0"
+			//"crosshair_index"								"1"
+			"spread_stand_hip"  							"++5"
+			"damage_near_distance" 							"++700" // 1500
+			"damage_near_value_titanarmor"					"++800" // 2300
+		}
+		arc_cannon_charge_sound
+		{
+			// Charge up sound
+			"charge_sound_1p"								"Weapon_EnergySyphon_Charge_1P" // sound duration is 3s
+			"charge_sound_3p"								"Weapon_EnergySyphon_Charge_3P"
+		}
+	}
+
+	active_crosshair_count				"1"
+	rui_crosshair_index					"0"
+
+	RUI_CrosshairData
+	{
+		DefaultArgs
+		{
+			adjustedSpread				weapon_spread
+			adsFrac 					player_zoomFrac
+			isSprinting					player_is_sprinting
+			isReloading					weapon_is_reloading
+			readyFrac                   progress_ready_to_fire_frac
+			teamColor					crosshair_team_color
+			isAmped						weapon_is_amped
+			chargeFrac                  player_chargeFrac
+			crosshairMovementX          crosshair_movement_x
+			crosshairMovementY          crosshair_movement_y
+		}
+
+		Crosshair_1
+		{
+			"ui"						"ui/crosshair_titan_sniper"
+			"base_spread"				"10.0"
+			Args
+			{
+				isFiring				weapon_is_firing
+			}
+		}
+
+		Crosshair_2
+		{
+			"ui"						"ui/crosshair_charge_rifle"
+			"base_spread"				"10.0"
+			Args
+			{
+				isFiring				weapon_is_firing
+			}
+		}
+
+		Crosshair_3
+		{
+			"ui"						"ui/crosshair_circle2"
+			"base_spread"				"0.0"
+			Args
+			{
+				isFiring				weapon_is_firing
+			}
+		}
+	}
+}
