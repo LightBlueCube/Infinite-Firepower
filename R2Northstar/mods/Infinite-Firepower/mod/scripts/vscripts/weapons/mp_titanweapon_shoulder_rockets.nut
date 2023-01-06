@@ -62,11 +62,11 @@ void function Init_titanweapon_shoulder_rockets( entity weapon )
 	if ( !weapon.w.initialized )
 	{
 		float missileSpeed = IsMultiplayer() ? VANGUARD_SHOULDER_MISSILE_SPEED : SHOULDERROCKETS_MISSILE_SPEED
-		if( weapon.HasMod( "tcp" ) )
+		if( weapon.HasMod( "tcp_sp_base" ) )
 			missileSpeed = SHOULDERROCKETS_MISSILE_SPEED
 		SmartAmmo_SetMissileSpeed( weapon, missileSpeed )
 		float homingSpeed = IsMultiplayer() ? ( VANGUARD_SHOULDER_MISSILE_SPEED / SHOULDERROCKETS_MISSILE_SPEED * 250 ) : 250.0
-		if( weapon.HasMod( "tcp" ) )
+		if( weapon.HasMod( "tcp_sp_base" ) )
 			homingSpeed = 250.0
 		SmartAmmo_SetMissileHomingSpeed( weapon, homingSpeed )
 		SmartAmmo_SetUnlockAfterBurst( weapon, true )
@@ -99,7 +99,7 @@ var function OnWeaponPrimaryAttack_titanweapon_shoulder_rockets( entity weapon, 
 
 	if ( smartAmmoFired == 0 )
 	{
-		if ( IsMultiplayer() && !( weapon.HasMod( "tcp" ) ) )
+		if ( IsMultiplayer() && !( weapon.HasMod( "tcp_sp_base" ) ) )
 		{
 			weapon.SetWeaponBurstFireCount( maxTargetedBurst - int( (weapon.GetWeaponChargeFraction() + shotFrac ) * maxTargetedBurst ) )
 			OnWeaponPrimaryAttack_titanweapon_salvo_rockets( weapon, attackParams )
