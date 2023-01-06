@@ -679,6 +679,7 @@ void function explode( entity player, entity owner )
 		for (int value = 2; value > 0; value = value - 1)
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_death_explode" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "skyway_scripted_titanhill_mortar_explode" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
 		}
@@ -887,7 +888,7 @@ void function OnTitanfall( entity titan )
         {
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
         }
-		titan.GiveWeapon( "mp_titanweapon_triplethreat" )
+		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "spread_increase_ttt", "rolling_rounds" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
