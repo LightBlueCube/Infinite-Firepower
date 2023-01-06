@@ -17,6 +17,16 @@ bool function OnWeaponAttemptOffhandSwitch_titanability_sonar_pulse( entity weap
 {
 	bool allowSwitch
 	allowSwitch = weapon.GetWeaponChargeFraction() == 0.0
+
+	if( weapon.HasMod( "tcp_fast_emp" ) )
+	{
+		entity weaponOwner = weapon.GetWeaponOwner()
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.5 )
+		int currentEnergy = weaponOwner.GetSharedEnergyCount()
+		if( currentEnergy - removeEnergy < 0 )
+			return false
+	}
+
 	return allowSwitch
 }
 
@@ -69,7 +79,9 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 		{
 			entity inflictor = CreateScriptMover( projectile.GetOrigin() )
 			if( IsValid( owner ) )
-				owner.TakeSharedEnergy( int( float( owner.GetSharedEnergyCount() ) / 2 ) )
+			{
+				owner.TakeSharedEnergy( min( owner.GetSharedEnergyCount(), int( float( owner.GetSharedEnergyTotal() ) * 0.5 ) ) )
+			}
 			thread FastEmpSonar( projectile, inflictor )
 			return
 		}
