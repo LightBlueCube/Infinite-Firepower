@@ -20,7 +20,7 @@
 
 [VoyageDB][VoyageDB]
 
-[Wolf109909][Wolf109909]
+[wolf109909][wolf109909]
 
 [zxcPandora][zxcPandora]
 
@@ -236,4 +236,4 @@ MK5智障手枪对非装甲单位伤害 40 -> 20  射击模式 semi -> auto
 [Pan-da32767]:https://github.com/Pan-da32767
 [zxcPandora]:https://github.com/zxcPandora
 [DZ]:https://inchaos.icu/
-[Wolf109909]:https://github.com/wolf109909
+[wolf109909]:https://github.com/wolf109909
