@@ -43,6 +43,16 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_stun_laser( entity weapon
 		if ( !canUse )
 			FlashEnergyNeeded_Bar( curCost )
 	#endif
+
+	entity weaponOwner = weapon.GetWeaponOwner()
+	if( weapon.HasMod("tcp_flash") )
+	{
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.75 )
+		int currentEnergy = weaponOwner.GetSharedEnergyCount()
+		if( currentEnergy - removeEnergy < 0 )
+			return false
+	}
+
 	return canUse
 }
 
@@ -58,7 +68,11 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 		PlayerUsedOffhand( weaponOwner, weapon )
 
 	if( weapon.HasMod("tcp_flash") )
-		weaponOwner.TakeSharedEnergy( int( float( weaponOwner.GetSharedEnergyCount() ) / 2 ) )
+	{
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.75 )
+		int currentEnergy = weaponOwner.GetSharedEnergyCount()
+		weaponOwner.TakeSharedEnergy( min( currentEnergy, removeEnergy ) )
+	}
 
 	ShotgunBlast( weapon, attackParams.pos, attackParams.dir, 1, DF_GIB | DF_EXPLOSION )
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
