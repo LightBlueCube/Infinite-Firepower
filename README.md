@@ -8,9 +8,9 @@
 
 ## 特别鸣谢（名字按首字母顺序排列）：
 
-[AnsonSkywalker][AnsonSkywalker]
-
 [cmggy][cmggy]
+
+[D3-3109][D3-3109]
 
 [DZ][DZ][^1]
 
@@ -18,11 +18,9 @@
 
 [Pan-da32767][Pan-da32767]
 
-[RycXEpd][RycXEpd]
-
 [VoyageDB][VoyageDB]
 
-[Wolf109909][Wolf109909]
+[wolf109909][wolf109909]
 
 [zxcPandora][zxcPandora]
 
@@ -231,11 +229,11 @@ MK5智障手枪对非装甲单位伤害 40 -> 20  射击模式 semi -> auto
 
 [^19]:表现为开启后，朝视角前方释放五道（0°,±10°,±40°各一道）电弧波，单道伤害为1000，可以被盾挡住，不会扣除盾的血量或耐久
 
-[RycXEpd]:https://github.com/RycXEpd
+
 [VoyageDB]:https://github.com/DBmaoha
+[D3-3109]:https://github.com/D3-3109
 [cmggy]:https://github.com/cmggy
 [Pan-da32767]:https://github.com/Pan-da32767
 [zxcPandora]:https://github.com/zxcPandora
 [DZ]:https://inchaos.icu/
-[AnsonSkywalker]:https://github.com/AnsonSkywalker
-[Wolf109909]:https://github.com/wolf109909
+[wolf109909]:https://github.com/wolf109909
