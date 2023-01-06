@@ -8,8 +8,6 @@
 
 ## 特别鸣谢（名字按首字母顺序排列）：
 
-[AnsonSkywalker][AnsonSkywalker]
-
 [cmggy][cmggy]
 
 [D3-3109][D3-3109]
@@ -238,5 +236,4 @@ MK5智障手枪对非装甲单位伤害 40 -> 20  射击模式 semi -> auto
 [Pan-da32767]:https://github.com/Pan-da32767
 [zxcPandora]:https://github.com/zxcPandora
 [DZ]:https://inchaos.icu/
-[AnsonSkywalker]:https://github.com/AnsonSkywalker
 [Wolf109909]:https://github.com/wolf109909
