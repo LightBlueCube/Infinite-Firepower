@@ -1,0 +1,33 @@
+WeaponData
+{
+	Mods
+	{
+		tcp_sp_base
+		{
+			"damage_near_value"   							"90"
+			"damage_far_value"								"90"
+			"damage_near_value_titanarmor"					"200"	// 150
+			"damage_far_value_titanarmor" 					"200"	// 150
+			"explosion_damage"								"80"
+			"explosion_damage_heavy_armor"					"200"
+
+			// Damage - When Used by NPCs
+			"npc_damage_near_value"   							"70"
+			"npc_damage_far_value"								"70"
+			"npc_damage_near_value_titanarmor"					"130"
+			"npc_damage_far_value_titanarmor" 					"130"
+			"npc_explosion_damage"								"80"
+			"npc_explosion_damage_heavy_armor"					"130"	// 150
+
+			"enable_highlight_networking_on_creation"		"1"
+
+			"explosion_inner_radius"						"200"	// 150
+			"explosionradius" 								"300" // 150
+
+			// Behavior
+			"projectile_launch_speed"						"3000"
+			"projectile_drift_windiness"					"1"
+			"projectile_drift_intensity"					"1"
+		}
+	}
+}

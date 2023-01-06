@@ -31,11 +31,6 @@ WeaponData
 			"core_duration"								"12.0" //Needs to match charge_cooldown_delay
 			"charge_cooldown_delay"   					"12.0"
 		}
-		tcp_shield_core
-		{
-			"core_duration"								"1.0" //Needs to match charge_cooldown_delay
-			"charge_cooldown_delay"   					"1.0"
-		}
 		tcp_arc_wave
 		{
 			"core_duration"								"0.6" //Needs to match charge_cooldown_delay

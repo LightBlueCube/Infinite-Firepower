@@ -53,6 +53,11 @@ WeaponData
 		{
 		}
 
+		tcp_sp_base
+		{
+			"explosion_damage"								"300"
+			"explosion_damage_heavy_armor"					"300"
+		}
 		tcp_vortex
 		{
 			//给nut做检测用

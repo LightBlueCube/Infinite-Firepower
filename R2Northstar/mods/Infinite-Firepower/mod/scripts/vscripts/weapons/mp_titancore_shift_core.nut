@@ -134,7 +134,7 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	if ( !IsValid( offhandWeapon ) )
 		return 0
 
-	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && !weapon.HasMod( "tcp_shield_core" ) && !weapon.HasMod( "tcp_dash_core" ) && !weapon.HasMod( "tcp_arc_wave" ) )
+	if ( offhandWeapon.GetWeaponClassName() != "melee_titan_sword" && !weapon.HasMod( "tcp_dash_core" ) && !weapon.HasMod( "tcp_arc_wave" ) )
 		return 0
 
 	if( weapon.HasMod( "tcp_arc_wave" ) )

@@ -1,0 +1,40 @@
+WeaponData
+{
+	Mods
+	{
+		rocketstream_fast
+		{
+		}
+
+		coop_mortar_titan
+		{
+		}
+
+		RocketCore_RocketStream
+		{
+		}
+
+		burn_mod_titan_rocket_launcher
+		{
+		}
+
+		sp_s2s_settings
+		{
+		}
+
+		sp_s2s_settings_npc
+		{
+		}
+
+		tcp_sp_base
+		{
+			"damage_near_value"   							"200"
+			"damage_far_value"								"200"
+			"damage_near_value_titanarmor"					"350"
+			"damage_far_value_titanarmor" 					"300"
+			"explosionradius" 								"200"
+
+			"deploy_time" 									"1.75"
+		}
+	}
+}
