@@ -34,7 +34,7 @@ void function IsMacro( entity player )
 	{
 		player.s.PlayerUseMacro += 1
 		printt( "AntiCheats: PlayerUseMacro PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" Times: "+ player.s.PlayerUseMacro +" EndMessage" )
-		if( player.s.PlayerUseMacro == 6 )
+		if( player.s.PlayerUseMacro == 4 )
 		{
 			for( int i = 300; i > 0; i-- )
 			{
@@ -88,6 +88,9 @@ int UseTime_ModTitan_7 = 0
 
 void function TitanChangePro_Callbacks()
 {
+	PrecacheParticleSystem( $"P_BT_eye_SM" )				//这两条是让我们可以使用战役bt的模型和一些其他的七七八八的
+	PrecacheModel( $"models/titans/buddy/titan_buddy.mdl" )	//model
+
 	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
@@ -509,13 +512,6 @@ void function StartNuke( entity player )
 				SendHudMessage(player, "您已丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
 			}
 		}
-		else
-		{
-			if( !IsAlive( player ) )
-				SendHudMessage(player, "你需要处于存活状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
-			if( !player.IsHuman() )
-				SendHudMessage(player, "你需要处于铁驭状态才可丢出电池", -1, 0.4, 200, 200, 225, 0, 0.15, 2, 1);
-		}
 	}
 	if( "HaveNuclearBomb" in player.s )
 	{
@@ -746,6 +742,8 @@ void function OnTitanfall( entity titan )
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野兽泰坦装备，取消至尊泰坦以使用原版北极星",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "野獸"	//众所周知，当玩家上泰坦时不会按照我们的意愿设置标题的，所以这边整个变量让玩家上泰坦时读取这个然后写上
+		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -755,11 +753,11 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-        titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream" )
-	  	titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread"] )
+        titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_sp_base" ] )
+	  	titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","tcp_sp_base"] )
 		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER )
-        titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp"] )
-		titan.GiveOffhandWeapon( "mp_titancore_flight_core", OFFHAND_EQUIPMENT )
+        titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp_sp_base"] )
+		titan.GiveOffhandWeapon( "mp_titancore_flight_core", OFFHAND_EQUIPMENT, [ "tcp_sp_base" ] )
 
 		array<int> passives = [ ePassives.PAS_NORTHSTAR_WEAPON,
 								ePassives.PAS_NORTHSTAR_CLUSTER,
@@ -770,13 +768,13 @@ void function OnTitanfall( entity titan )
 		{
 			TakePassive( soul, passive )
 		}
-		GivePassive( soul, ePassives.PAS_NORTHSTAR_FLIGHTCORE )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用远征装备， 取消\"边境帝王\"战绘以使用原版帝王",  -1, 0.3, 200, 200, 225, 0, 0.15, 12, 1);
 		soul.s.titanTitle <- "遠征"
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -786,10 +784,10 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-		titan.GiveWeapon( "mp_titanweapon_xo16_shorty" )
-		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread"] )
+		titan.GiveWeapon( "mp_titanweapon_xo16_shorty", [ "tcp_sp_base" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield", OFFHAND_SPECIAL,["slow_recovery_vortex","sp_wider_return_spread","tcp_sp_base"] )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER )
-		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp_sp_base"] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
 
 		array<int> passives = [ ePassives.PAS_VANGUARD_COREMETER,
@@ -815,6 +813,8 @@ void function OnTitanfall( entity titan )
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用野牛泰坦装备，取消至尊泰坦以使用原版烈焰",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "野牛"
+		soul.soul.titanLoadout.titanExecution = "execution_scorch_prime"
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -846,7 +846,8 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用执政官泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
-		soul.s.titanTitle <- "執政官"
+		soul.soul.titanLoadout.titanExecution = "execution_ion"
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
@@ -878,6 +879,9 @@ void function OnTitanfall( entity titan )
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用游侠泰坦装备，取消至尊泰坦以使用原版浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "游俠"
+		soul.s.shouldFPEmbark <- true
+		soul.s.classicExecution <- true
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
