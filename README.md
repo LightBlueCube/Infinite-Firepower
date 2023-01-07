@@ -2,7 +2,7 @@
 
 这里放的是无限火力的配置
 
-当然，拿去开服也可以，只需要标注一下下原作者就行！
+如需使用本仓库请遵循[GPLv3][GPLv3]协议
 
 有啥服务器的问题和bug反馈也可以发这
 
@@ -230,6 +230,7 @@ MK5智障手枪对非装甲单位伤害 40 -> 20  射击模式 semi -> auto
 [^19]:表现为开启后，朝视角前方释放五道（0°,±10°,±40°各一道）电弧波，单道伤害为1000，可以被盾挡住，不会扣除盾的血量或耐久
 
 
+[GPLv3]:https://www.gnu.org/licenses/gpl-3.0.en.html
 [VoyageDB]:https://github.com/DBmaoha
 [D3-3109]:https://github.com/D3-3109
 [cmggy]:https://github.com/cmggy
