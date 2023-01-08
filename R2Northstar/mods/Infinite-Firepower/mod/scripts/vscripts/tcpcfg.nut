@@ -3,8 +3,6 @@ global function TitanChangePro_Callbacks
 global function MacroCheck_Threaded
 
 
-array<string> KickedPlayerUID = []
-
 void function MacroCheck_Threaded( entity player )
 {
 	if( !IsValid( player ) )
@@ -134,7 +132,7 @@ void function UseTimeCheck()
 			{
 				UseTime_4 += 10
 			}
-			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" || player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )	//强力
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 			{
 				UseTime_5 += 10
 			}
@@ -167,7 +165,10 @@ void function UseTimeCheck()
 			{
 				UseTime_ModTitan_5 += 10
 			}
-
+			if( player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
+			{
+				UseTime_ModTitan_6 += 10
+			}
 
 			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )
 			{
@@ -229,6 +230,11 @@ void function UseTimeCheck()
 			{
 				printt( "UseTimeCheck: ModTitan_5 add 1 min" )
 				UseTime_ModTitan_5 = 0
+			}
+			if( UseTime_ModTitan_6 % 60 == 0 && UseTime_ModTitan_6 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_6 add 1 min" )
+				UseTime_ModTitan_6 = 0
 			}
 		}
 	}
@@ -706,8 +712,6 @@ void function explodeSound( entity player )
 void function RestoreKillStreak( entity player )
 {
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
-	if( KickedPlayerUID.contains( player.GetUID() ) )	//踢掉被踢后想重进的宏孩儿
-		ServerCommand( "kickid "+ player.GetUID() )
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////////////Ahpla核弹已就绪，长按\"近战\"键（默认为\"F\"）以启用////////////////",  -1, 0.4, 255, 0, 0, 255, 0.15, 8, 1);
@@ -896,7 +900,6 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_ability_swordblock", OFFHAND_SPECIAL )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER, [ "tcp_emp" ])
 		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE )
-		//titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tesla_core" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
 
 		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
@@ -909,23 +912,29 @@ void function OnTitanfall( entity titan )
 			TakePassive( soul, passive )
 		}
 	}
-	/*else if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
+	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
 	{
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用天图泰坦装备，取消至尊泰坦以使用原版强力",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "天圖"
+		soul.s.shouldFPEmbark <- true
+		soul.s.classicExecution <- true
+		soul.SetTitanSoulNetInt( "upgradeCount", 4 )
+
 		array<entity> weapons = titan.GetMainWeapons()
         foreach( entity weapon in weapons )
         {
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
         }
-		titan.GiveWeapon( "mp_titanweapon_sniper", [ "arc_cannon", "capacitor", "arc_cannon_charge_sound", "power_shot" ] )
-		titan.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
-		titan.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
+		titan.GiveWeapon( "mp_titanweapon_xo16_shorty", [ "accelerator" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
-		//titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "brute4_bubble_shield" ] )
+		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER, [ "tcp_smoke" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE, [ "tcp_tracker_rockets" ] )
+		titan.GiveOffhandWeapon( "mp_titancore_upgrade", OFFHAND_EQUIPMENT, [ "tcp_ammo_core" ] )
 
 		array<int> passives = [ ePassives.PAS_TONE_WEAPON,
 								ePassives.PAS_TONE_ROCKETS,
@@ -936,7 +945,7 @@ void function OnTitanfall( entity titan )
 		{
 			TakePassive( soul, passive )
 		}
-	}*/
+	}
 
 
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王

@@ -1,0 +1,52 @@
+WeaponData
+{
+	Mods
+	{
+		pas_defensive_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+		burn_mod_titan_particle_wall
+		{
+		}
+
+		npc_normal_difficulty
+		{
+		}
+
+		amped_wall
+		{
+
+		}
+		sur_level_0
+		{
+
+		}
+		sur_level_1
+		{
+
+		}
+		sur_level_2
+		{
+
+		}
+		sur_level_3
+		{
+
+		}
+
+		tcp_bubble_shield
+		{
+			//给nut做识别
+		}
+        brute4_bubble_shield
+		{
+			"fire_rate"   									"1.0"
+			"fire_duration"                                 "6.0"
+			//"regen_ammo_refill_rate"						"*2.3"
+		}
+	}
+}

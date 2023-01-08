@@ -21,7 +21,7 @@ bool function OnWeaponAttemptOffhandSwitch_titanability_sonar_pulse( entity weap
 	if( weapon.HasMod( "tcp_fast_emp" ) )
 	{
 		entity weaponOwner = weapon.GetWeaponOwner()
-		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.5 )
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.45 )
 		int currentEnergy = weaponOwner.GetSharedEnergyCount()
 		if( currentEnergy - removeEnergy < 0 )
 			return false
@@ -73,16 +73,21 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 		array<string> mods = projectile.ProjectileGetMods()
 		if( mods.contains( "tcp" ) )
 		{
-			thread EmpSonar( projectile )
+			thread EmpSonar( projectile, owner )
 		}
 		if( mods.contains( "tcp_fast_emp" ) )
 		{
 			entity inflictor = CreateScriptMover( projectile.GetOrigin() )
 			if( IsValid( owner ) )
 			{
-				owner.TakeSharedEnergy( min( owner.GetSharedEnergyCount(), int( float( owner.GetSharedEnergyTotal() ) * 0.5 ) ) )
+				owner.TakeSharedEnergy( min( owner.GetSharedEnergyCount(), int( float( owner.GetSharedEnergyTotal() ) * 0.45 ) ) )
 			}
-			thread FastEmpSonar( projectile, inflictor )
+			thread FastEmpSonar( projectile, inflictor, owner )
+			return
+		}
+		if( mods.contains( "tcp_smoke" ) )
+		{
+			thread SonarSmoke( projectile, owner )
 			return
 		}
 
@@ -100,7 +105,17 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 	#endif
 }
 
-void function EmpSonar( entity projectile )
+void function SonarSmoke( entity projectile, entity owner )
+{
+	entity inflictor = CreateScriptMover( projectile.GetOrigin() )
+	SetTeam( inflictor, owner.GetTeam() )
+	inflictor.SetOwner( owner )
+	thread TitanSonarSmokescreen( inflictor, owner )
+	wait 5
+	inflictor.Destroy()
+}
+
+void function EmpSonar( entity projectile, entity owner )
 {
 	entity inflictor = CreateScriptMover( projectile.GetOrigin() )
 	SetTeam( inflictor, projectile.GetTeam() )
@@ -109,21 +124,21 @@ void function EmpSonar( entity projectile )
 	int val = 0
 	while( val <= 8 )
 	{
-		thread EMPSonarThinkConstant( inflictor )
+		thread EMPSonarThinkConstant( inflictor, true, owner )
 		++val
 	}
 	wait 5
 	inflictor.Destroy()
 }
 
-void function FastEmpSonar( entity projectile, entity inflictor )
+void function FastEmpSonar( entity projectile, entity inflictor, entity owner )
 {
 	SetTeam( inflictor, projectile.GetTeam() )
 	inflictor.SetOwner( projectile.GetOwner() )
 	int val = 0
 	while( val <= 8 )
 	{
-		thread EMPSonarThinkConstant( inflictor, false )
+		thread EMPSonarThinkConstant( inflictor, false, owner )
 		++val
 	}
 	wait 0.5
@@ -168,7 +183,7 @@ void function SonarPulseThink( entity enemy, vector position, int team, entity s
 {
 	if( IsValid( sonarOwner ) )
 		if( IsValid( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ) ) )
-			if( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_fast_emp" ) )
+			if( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_fast_emp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_smoke" ) )
 				return
 
 	enemy.EndSignal( "OnDeath" )
@@ -271,7 +286,7 @@ void function timeoutcheck( entity titan, bool EMPSonar )
 	titan.Signal("empistimeout")
 }
 
-void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
+void function EMPSonarThinkConstant( entity titan, bool EMPSonar, entity owner )
 {
 	RegisterSignal( "empistimeout" )
 	thread timeoutcheck( titan, EMPSonar )
@@ -316,7 +331,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 		particleSystem.SetValueForEffectNameKey( FX_EMP_FIELD_1P )
 
 		particleSystem.SetOrigin( origin )
-		particleSystem.SetOwner( titan.GetOwner() )
+		particleSystem.SetOwner( owner )
 		DispatchSpawn( particleSystem )
 		//particleSystem.SetParent( titan, "" )
 		particles.append( particleSystem )
@@ -329,7 +344,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 	else
 		particleSystem.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 	particleSystem.SetValueForEffectNameKey( FX_EMP_FIELD )
-	particleSystem.SetOwner( titan.GetOwner() )
+	particleSystem.SetOwner( owner )
 	particleSystem.SetOrigin( origin )
 	DispatchSpawn( particleSystem )
 	//particleSystem.SetParent( titan, "" )
@@ -371,7 +386,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 
 			RadiusDamage(
    				origin,									// center
-   				titan,									// attacker
+   				owner,									// attacker
    				titan,									// inflictor
    				DAMAGE_AGAINST_PILOTS,					// damage
    				DAMAGE_AGAINST_TITANS,					// damageHeavyArmor
@@ -396,7 +411,7 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 
 			RadiusDamage(
    				origin,									// center
-   				titan,									// attacker
+   				owner,									// attacker
    				titan,									// inflictor
    				DAMAGE_AGAINST_PILOTS_EMPBOMB,					// damage
    				DAMAGE_AGAINST_TITANS_EMPBOMB,					// damageHeavyArmor
@@ -411,4 +426,45 @@ void function EMPSonarThinkConstant( entity titan, bool EMPSonar = true )
 			wait EMP_DAMAGE_TICK_RATE
 		}
 	}
+}
+
+void function TitanSonarSmokescreen( entity ent, entity owner )
+{
+	SmokescreenStruct smokescreen
+	smokescreen.isElectric = true
+	smokescreen.ownerTeam = ent.GetTeam()
+	smokescreen.attacker = owner
+	smokescreen.inflictor = ent
+	smokescreen.weaponOrProjectile = ent
+	smokescreen.damageInnerRadius = 320.0
+	smokescreen.damageOuterRadius = 375.0
+	smokescreen.dpsPilot = 10
+	smokescreen.dpsTitan = 1250
+	smokescreen.damageDelay = 1.0
+	smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
+	smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P
+
+	vector eyeAngles = <0.0, ent.EyeAngles().y, 0.0>
+	smokescreen.angles = eyeAngles
+
+	vector forward = AnglesToForward( eyeAngles )
+	vector testPos = ent.GetOrigin() + forward * 240.0
+	vector basePos = testPos
+
+	float trace = TraceLineSimple( ent.EyePosition(), testPos, ent )
+	if ( trace != 1.0 )
+		basePos = ent.GetOrigin()
+
+	float fxOffset = 200.0
+	float fxHeightOffset = 148.0
+
+	smokescreen.origin = basePos
+
+	smokescreen.fxOffsets = [ < -fxOffset, 0.0, 20.0>,
+							  <0.0, fxOffset, 20.0>,
+							  <0.0, -fxOffset, 20.0>,
+							  <0.0, 0.0, fxHeightOffset>,
+							  < -fxOffset, 0.0, fxHeightOffset> ]
+
+	Smokescreen( smokescreen )
 }

@@ -4,6 +4,61 @@ WeaponData
 	{
 		accelerator
 		{
+			"fire_rate"						"--7"
+			"fire_rate_max"					"20"
+			"fire_rate_max_time_speedup"	"5.0"
+			"fire_rate_max_time_cooldown"	"2.15"
+			"ammo_clip_size"   				"60"
+			"ammo_stockpile_max"			"1200"
+			"ammo_default_total"			"1200"
+
+			"damage_near_value"   							"49"
+			"damage_far_value"								"34"
+			"damage_near_value_titanarmor"					"80"
+			"damage_far_value_titanarmor" 					"60"
+
+			"reload_time" 									"4.6"
+			"reload_time_late1"								"3.65"
+			"reload_time_late2"								"1.68"
+			"reload_time_late3"								"0.7"
+			"reloadempty_time"								"4.6"
+			"reloadempty_time_late1"						"3.65"
+			"reloadempty_time_late2"						"1.68"
+			"reload_time_late3"								"0.7"
+
+			"viewkick_scale_min_hipfire"  					"1.5"//0.6
+			"viewkick_scale_max_hipfire"  					"2.0"//1.0
+			"viewkick_scale_min_ads"  						"0.6"//0.3
+			"viewkick_scale_max_ads"  						"1.6"//0.8
+			"viewkick_scale_valuePerShot" 					"1"
+			"viewkick_scale_valueLerpStart"   				"50"
+			"viewkick_scale_valueLerpEnd" 					"150"
+
+			"viewkick_pitch_base" 							"-0.05"
+			"viewkick_pitch_random"   						"0.65"
+			"viewkick_pitch_hardScale"						"*1.5"
+
+			"viewkick_yaw_base"   							"0.05"
+			"viewkick_yaw_random" 							"0.30"
+			"viewkick_yaw_hardScale"  						"*1.5"
+
+			"spread_stand_hip"								"2.4"
+			"spread_stand_hip_run"							"2.4"
+			"spread_stand_hip_sprint"                       "2.4"
+			"spread_crouch_hip"   							"2.4"
+			"spread_air_hip"  								"6.0"
+			"spread_stand_ads"								"2.4"
+			"spread_crouch_ads"   							"2.4"
+			"spread_air_ads"  								"6.0"
+			"spread_max_kick_stand_hip"						"16"
+			"spread_max_kick_stand_ads"						"16"
+			"spread_max_kick_crouch_hip"  					"10"
+			"spread_max_kick_crouch_ads"  					"10"
+			"spread_max_kick_air_hip" 						"18"
+			"spread_max_kick_air_ads" 						"18"
+
+			"fire_sound_1_player_1p"						"Weapon_XO16_SingleAccel_1P"
+			"fire_sound_1_player_3p"						"Weapon_XO16_SingleAccel_3P"
 		}
 		electric_rounds
 		{
@@ -59,6 +114,14 @@ WeaponData
 			"spread_max_kick_crouch_ads"  					"1.0"
 			"spread_max_kick_air_hip" 						"9.0"
 			"spread_max_kick_air_ads" 						"5.0"
+		}
+
+		tcp_ammo_core
+		{
+			"ammo_clip_size"   				"++969"
+			"fire_rate_max"   				"++30"
+			"damage_near_value_titanarmor"					"--20"
+			"damage_far_value_titanarmor" 					"--10"
 		}
 	}
 }

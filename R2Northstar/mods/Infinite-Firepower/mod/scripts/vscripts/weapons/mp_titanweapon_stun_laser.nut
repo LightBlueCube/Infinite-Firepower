@@ -47,7 +47,7 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_stun_laser( entity weapon
 	entity weaponOwner = weapon.GetWeaponOwner()
 	if( weapon.HasMod("tcp_flash") )
 	{
-		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.75 )
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.45 )
 		int currentEnergy = weaponOwner.GetSharedEnergyCount()
 		if( currentEnergy - removeEnergy < 0 )
 			return false
@@ -69,7 +69,7 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 
 	if( weapon.HasMod("tcp_flash") )
 	{
-		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.75 )
+		int removeEnergy = int( float( weaponOwner.GetSharedEnergyTotal() ) * 0.45 )
 		int currentEnergy = weaponOwner.GetSharedEnergyCount()
 		weaponOwner.TakeSharedEnergy( min( currentEnergy, removeEnergy ) )
 	}

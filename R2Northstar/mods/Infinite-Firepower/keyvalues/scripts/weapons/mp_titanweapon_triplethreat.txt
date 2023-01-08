@@ -1,4 +1,0 @@
-WeaponData
-{
-	"explosion_damage_heavy_armor"					"400"		// 550
-}

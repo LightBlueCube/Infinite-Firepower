@@ -83,10 +83,13 @@ void function ApplyFDDerviedUpgrades( entity player, TitanLoadoutDef loadout )
 			ApplyDerivedIonFDUpgrades( upgradeRefs, loadout )
 	}
 	else if ( loadout.titanClass == "tone" )
-		ApplyDerivedToneFDUpgrades( upgradeRefs, loadout )
-	else if ( loadout.titanClass == "scorch" )
 	{
 		if( loadout.isPrime == "titan_is_not_prime" )
+			ApplyDerivedToneFDUpgrades( upgradeRefs, loadout )
+	}
+	else if ( loadout.titanClass == "scorch" )
+	{
+		//if( loadout.isPrime == "titan_is_not_prime" )
 			ApplyDerivedScorchFDUpgrades( upgradeRefs, loadout )
 	}
 	else if ( loadout.titanClass == "legion" )
@@ -404,9 +407,9 @@ void function ApplyDerivedIonFDUpgrades( array<string> upgradeRefs, TitanLoadout
 	{
 		switch ( upgrade )
 		{
-			case "fd_upgrade_ion_utility_tier_1":
-				loadout.setFileMods.append( "fd_energy_regen" )
-				break
+			//case "fd_upgrade_ion_utility_tier_1":
+			//	loadout.setFileMods.append( "fd_energy_regen" )
+			//	break
 			//case "fd_upgrade_ion_utility_tier_2":
 			//	loadout.setFileMods.append( "fd_energy_max" )
 			//	break
@@ -711,11 +714,12 @@ void function ApplyTitanWeaponPassives( entity titan, TitanLoadoutDef loadout )
 		}
 	}*/
 
-	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" || 
-	  ( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 ) || 
-		titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" || 
-		titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" || 
-		titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" ||
+	  ( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 ) ||
+		titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" ||
+		titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" ||
+		titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" ||
+		titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
 	{
 		return
 	}
