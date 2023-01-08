@@ -1,0 +1,11 @@
+WeaponData
+{
+	Mods
+	{
+		tcp_ammo_core
+		{
+			//给nut做识别
+		}
+	}
+}
+

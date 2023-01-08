@@ -141,6 +141,8 @@ void function ElectricSmoke_DamagedTarget( entity target, var damageInfo )
 	if ( !IsValid( attacker ) )
 		return
 
+	if( attacker.GetClassName() == "script_mover_lightweight" )
+		return
 	array<entity> weapons = attacker.GetMainWeapons()
 	if ( weapons.len() < 1 )
 		return

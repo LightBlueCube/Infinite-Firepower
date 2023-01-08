@@ -14,6 +14,7 @@ const FX_SHIELD_GAIN_SCREEN		= $"P_xo_shield_up"
 void function UpgradeCore_Init()
 {
 	RegisterSignal( "OnSustainedDischargeEnd" )
+	RegisterSignal( "AmmoCoreStart" )
 
 	PrecacheParticleSystem( FX_SHIELD_GAIN_SCREEN )
 	PrecacheParticleSystem( LASER_CHAGE_FX_1P )
@@ -23,6 +24,10 @@ void function UpgradeCore_Init()
 #if SERVER
 var function OnWeaponNpcPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
+	if( weapon.HasMod( "tcp_ammo_core" ) )
+	{
+		weapon.GetWeaponOwner().Signal( "AmmoCoreStart" )
+	}
 	OnWeaponPrimaryAttack_UpgradeCore( weapon, attackParams )
 	return 1
 }
@@ -38,7 +43,11 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 	#if SERVER
 		float coreDuration = weapon.GetCoreDuration()
 		thread UpgradeCoreThink( weapon, coreDuration )
-		int currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
+		int currentUpgradeCount
+		if( weapon.HasMod( "tcp_ammo_core" ) )
+			currentUpgradeCount = 9
+		else
+			currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
 		if ( currentUpgradeCount == 0 )
 		{
 			//Energy Transfer
@@ -274,9 +283,20 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
 			}
 		}
-		soul.SetTitanSoulNetInt( "upgradeCount", currentUpgradeCount + 1 )
-		int statesIndex = owner.FindBodyGroup( "states" )
-		owner.SetBodygroup( statesIndex, 1 )
+		if( weapon.HasMod( "tcp_ammo_core" ) )
+		{
+			if( IsValid( owner.GetMainWeapons()[0] ) )
+			{
+				owner.GetMainWeapons()[0].AddMod( "tcp_ammo_core" )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 100, 900 ) )
+			}
+		}
+		if( !weapon.HasMod( "tcp_ammo_core" ) )
+		{
+			soul.SetTitanSoulNetInt( "upgradeCount", currentUpgradeCount + 1 )
+			int statesIndex = owner.FindBodyGroup( "states" )
+			owner.SetBodygroup( statesIndex, 1 )
+		}
 	#endif
 
 	#if CLIENT
@@ -307,7 +327,10 @@ void function UpgradeCoreThink( entity weapon, float coreDuration )
 	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Monarch_Smart_Core_ActiveLoop_1P" )
 	EmitSoundOnEntityExceptToPlayer( owner, owner, "Titan_Monarch_Smart_Core_Activated_3P" )
 	entity soul = owner.GetTitanSoul()
-	soul.SetShieldHealth( soul.GetShieldHealthMax() )
+	if( !weapon.HasMod( "tcp_ammo_core" ) )
+		soul.SetShieldHealth( soul.GetShieldHealthMax() )
+
+	thread PressReloadCheck( owner, weapon )
 
 	OnThreadEnd(
 	function() : ( weapon, owner, soul )
@@ -330,10 +353,59 @@ void function UpgradeCoreThink( entity weapon, float coreDuration )
 			}
 		}
 	)
-
 	wait coreDuration
 }
 #endif
+
+void function PressReloadCheck( entity owner, entity weapon )
+{
+	weapon.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "DisembarkingTitan" )
+	owner.EndSignal( "TitanEjectionStarted" )
+	owner.EndSignal( "AmmoCoreStart" )
+
+	OnThreadEnd(
+		function() : ( weapon, owner )
+		{
+			if( !IsValid( owner ) )
+				return
+			if( owner.GetMainWeapons().len() == 0 )
+				return
+			if( IsValid( owner.GetMainWeapons()[0] ) )
+			{
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
+				owner.GetMainWeapons()[0].RemoveMod( "tcp_ammo_core" )
+			}
+		}
+	)
+
+	float ammo = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 100, 900 )
+	while( true )
+	{
+		WaitFrame()
+		if( !IsValid( owner ) )
+			return
+		if( owner.GetMainWeapons().len() == 0 )
+			return
+		if( owner.IsInputCommandHeld( IN_RELOAD ) )
+		{
+			return
+		}
+		if( IsValid( owner.GetMainWeapons()[0] ) )
+		{
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) <= 5 )
+			{
+				return
+			}
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 900  )
+			{
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( ammo )
+			}
+		}
+	}
+}
 
 
 #if CLIENT
