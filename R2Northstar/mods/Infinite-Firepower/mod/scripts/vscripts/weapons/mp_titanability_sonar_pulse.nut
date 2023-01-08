@@ -439,7 +439,7 @@ void function TitanSonarSmokescreen( entity ent, entity owner )
 	smokescreen.damageInnerRadius = 320.0
 	smokescreen.damageOuterRadius = 375.0
 	smokescreen.dpsPilot = 10
-	smokescreen.dpsTitan = 1250
+	smokescreen.dpsTitan = 1600
 	smokescreen.damageDelay = 1.0
 	smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
 	smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P

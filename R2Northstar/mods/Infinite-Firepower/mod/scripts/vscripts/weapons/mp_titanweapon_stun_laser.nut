@@ -142,6 +142,8 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 	}
 	else if ( target.IsNPC() || target.IsPlayer() )
 	{
+		if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && attacker.GetTeam() == target.GetTeam() )
+			return
 		int shieldRestoreAmount = target.GetArmorType() == ARMOR_TYPE_HEAVY ? 750 : 250
 		entity soul = attacker.GetTitanSoul()
 		if ( IsValid( soul ) )

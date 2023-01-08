@@ -45,7 +45,7 @@ WeaponData
         brute4_bubble_shield
 		{
 			"fire_rate"   									"1.0"
-			"fire_duration"                                 "6.0"
+			//"fire_duration"                                 "6.0"
 			//"regen_ammo_refill_rate"						"*2.3"
 		}
 	}

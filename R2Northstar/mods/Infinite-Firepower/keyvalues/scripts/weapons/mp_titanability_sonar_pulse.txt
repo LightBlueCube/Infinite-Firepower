@@ -25,7 +25,6 @@ WeaponData
 
 		tcp_smoke
 		{
-			"regen_ammo_refill_rate"						"10"
 		}
 	}
 }

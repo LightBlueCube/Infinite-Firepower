@@ -851,6 +851,7 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.TitanHasBeenChange <- true
 		SendHudMessage(player, "已启用执政官泰坦装备，取消至尊泰坦以使用原版离子",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		soul.s.titanTitle <- "執政官"
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
 
 		array<entity> weapons = titan.GetMainWeapons()
