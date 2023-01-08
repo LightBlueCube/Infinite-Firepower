@@ -496,7 +496,7 @@ var function OnWeaponPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryAtta
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	float duration = weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -510,7 +510,7 @@ var function OnWeaponNpcPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryA
 	if ( IsValid( soul ) && IsValid( soul.soul.bubbleShield ))
 		return 0
 
-	float duration = weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -553,7 +553,7 @@ void function Brute4GiveShortDomeShield( entity weapon, entity owner, float dura
 		{
 			if ( rechargeDash && IsValid( weapon ) && IsValid( owner ) )
 			{
-				float fireDuration = weapon.GetWeaponSettingFloat( eWeaponVar.fire_duration )
+				float fireDuration = 6
 				float remainingUseTime = float( weapon.GetWeaponPrimaryClipCount() ) / float( weapon.GetWeaponPrimaryClipCountMax() ) * fireDuration
 				float remainingShieldTime = expect float( owner.s.bubbleShieldHealthFrac ) * fireDuration
 				int refundAmmo = int( min( BRUTE4_MOLTING_SHELL_MAX_REFUND, remainingShieldTime ) * weapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate ) )

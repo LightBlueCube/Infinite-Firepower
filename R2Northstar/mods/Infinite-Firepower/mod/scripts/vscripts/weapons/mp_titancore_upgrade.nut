@@ -376,12 +376,14 @@ void function PressReloadCheck( entity owner, entity weapon )
 			if( IsValid( owner.GetMainWeapons()[0] ) )
 			{
 				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 1140 )
 				owner.GetMainWeapons()[0].RemoveMod( "tcp_ammo_core" )
 			}
 		}
 	)
 
-	float ammo = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 100, 900 )
+	owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
+	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 140, 900 )
 	while( true )
 	{
 		WaitFrame()
@@ -389,10 +391,6 @@ void function PressReloadCheck( entity owner, entity weapon )
 			return
 		if( owner.GetMainWeapons().len() == 0 )
 			return
-		if( owner.IsInputCommandHeld( IN_RELOAD ) )
-		{
-			return
-		}
 		if( IsValid( owner.GetMainWeapons()[0] ) )
 		{
 			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) <= 5 )
@@ -401,7 +399,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 			}
 			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 900  )
 			{
-				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( ammo )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( clip )
 			}
 		}
 	}
