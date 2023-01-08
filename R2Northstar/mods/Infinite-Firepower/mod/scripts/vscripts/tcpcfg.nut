@@ -243,21 +243,21 @@ void function UseTimeCheck()
 bool function simpelhelp( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "因为摆寄星EN把BroadCast写寄了所以我只能做个简单介绍\n控制台输入\"help2\"看第二页\n按住F可以扔电池\n有一代训牛，拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n能核:至尊离子\n游侠:至尊浪人",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "因为BroadCast寄了所以只能做个简单介绍\n控制台输入\"help2\"看第2页\n按住F可以扔电池\n有一代训牛 拔下电池后往电池仓打\n新泰坦可以通过以下涂装获得\n远征:边境帝王涂装\n野兽:至尊北极星\n野牛:至尊烈焰\n执政官:至尊离子\n游侠:至尊浪人\n天图:至尊强力",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return true
 }
 
 bool function simpelhelp2( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "控制台输入\"help3\"看第三页\n绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n红电池回血0.5格，但是如果是黄血吃到那么拉出黄血且回血3格\n能核Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "控制台输入\"help3\"看第3页\n绿电池回血2格\n黄电池回血1格，不能从黄血拉出\n执政官Q的作用是致盲敌方泰坦\n电池被拔过后除非友方铁驭补给否则再次被训牛敌方铁驭不需要拔电池就能掏枪射击",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
 bool function simpelhelp3( entity player, array<string> args )
 {
 	if( IsValid( player ) )
-		SendHudMessage(player, "能核的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦，控制台输入hw查看详情\nNPC的刷新数量和伤害都有大幅提升\n帝王可以升到9级，顺序为先升三个一级升级然后三个二级再然后三个三级",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
+		SendHudMessage(player, "执政官的盾接到子弹会恢复能量\n每杀四个人就会获得一个核武泰坦，表现为召唤一个落地就核爆的泰坦，控制台输入hw查看详情\nNPC的刷新数量和伤害都有大幅提升\n帝王可以升到9级，顺序为先升三个一级升级然后三个二级再然后三个三级",  -1, 0.3, 200, 200, 225, 0, 0.15, 50, 1);
 	return	true
 }
 
