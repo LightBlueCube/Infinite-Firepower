@@ -773,6 +773,7 @@ void function OnTitanfall( entity titan )
 		{
 			TakePassive( soul, passive )
 		}
+		GivePassive( soul, ePassives.PAS_NORTHSTAR_FLIGHTCORE )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
