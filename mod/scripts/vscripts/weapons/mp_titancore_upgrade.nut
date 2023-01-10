@@ -396,7 +396,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 			return
 		if( IsValid( owner.GetMainWeapons()[0] ) )
 		{
-			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) <= 5 )
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) < 1 )
 			{
 				return
 			}
