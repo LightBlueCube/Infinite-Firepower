@@ -604,12 +604,13 @@ void function StartNukeWARN( entity owner )
 		if ( !IsValid( npc ) || !IsAlive( npc ) )
 			continue
 		// kill rather than destroy, as destroying will cause issues with children which is an issue especially for dropships and titans
-		npc.Die( svGlobal.worldspawn, svGlobal.worldspawn, { damageSourceId = eDamageSourceId.round_end } )
+		npc.Die()
 	}
-	wait 3
+	wait 5
+	SetGameState( eGameState.Postmatch )
 	while( true )
 	{
-		wait 1
+		WaitFrame()
 		foreach( player in GetPlayerArray() )
 		{
 			if( IsValid( player ) )
@@ -667,7 +668,7 @@ void function explode( entity player, entity owner )
 		}
 		thread FakeShellShock_Threaded( player, 10 )
 		StatusEffect_AddTimed( player, eStatusEffect.turn_slow, 0.4, 10, 0.5 )
-		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 3  )
+		ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 6  )
 		SetWinner( owner.GetTeam() )
 	}
 	wait 1.7
@@ -675,6 +676,8 @@ void function explode( entity player, entity owner )
 	{
 		StopSoundOnEntity( player, "goblin_dropship_explode" )
 		StopSoundOnEntity( player, "pilot_geigercounter_warning_lv3" )
+		if( player == owner )
+			thread OwnerKillSound( player )
 	}
 	wait 0.1
 	if( IsValid( player ) )
@@ -695,8 +698,19 @@ void function explode( entity player, entity owner )
 	{
 		ScreenFadeToColor( player, 192, 192, 192, 255, 0.1, 4  )
 	}
-	wait 2
-	SetGameState( eGameState.Postmatch )
+}
+
+void function OwnerKillSound( entity player )
+{
+	for (int value = GetPlayerArray().len(); value > 0; value = value - 1)
+	{
+		if( IsValid( player ) )
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_killed_indicator" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_killed_indicator" )
+		}
+		WaitFrame()
+	}
 }
 
 void function explodeSound( entity player )
