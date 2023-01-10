@@ -4,10 +4,10 @@ WeaponData
 	{
 		accelerator
 		{
-			"fire_rate"						"--7"
+			"fire_rate"						"2"
 			"fire_rate_max"					"20"
 			"fire_rate_max_time_speedup"	"5.0"
-			"fire_rate_max_time_cooldown"	"2.15"
+			"fire_rate_max_time_cooldown"	"0.1"
 			"ammo_clip_size"   				"60"
 			"ammo_stockpile_max"			"1200"
 			"ammo_default_total"			"1200"
@@ -15,8 +15,8 @@ WeaponData
 
 			"damage_near_value"   							"49"
 			"damage_far_value"								"34"
-			"damage_near_value_titanarmor"					"80"
-			"damage_far_value_titanarmor" 					"60"
+			"damage_near_value_titanarmor"					"100"
+			"damage_far_value_titanarmor" 					"80"
 
 			"reload_time" 									"4.6"
 			"reload_time_late1"								"3.65"
@@ -120,7 +120,6 @@ WeaponData
 		tcp_ammo_core
 		{
 			"ammo_clip_size"   				"++969"
-			"fire_rate_max"   				"++30"
 			"vortex_drain"									"++0.04"
 			//"damage_near_value_titanarmor"					"--20"
 			//"damage_far_value_titanarmor" 					"--10"

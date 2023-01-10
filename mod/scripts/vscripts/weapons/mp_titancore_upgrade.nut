@@ -329,8 +329,8 @@ void function UpgradeCoreThink( entity weapon, float coreDuration )
 	entity soul = owner.GetTitanSoul()
 	if( !weapon.HasMod( "tcp_ammo_core" ) )
 		soul.SetShieldHealth( soul.GetShieldHealthMax() )
-
-	thread PressReloadCheck( owner, weapon )
+	if( weapon.HasMod( "tcp_ammo_core" ) )
+		thread PressReloadCheck( owner, weapon )
 
 	OnThreadEnd(
 	function() : ( weapon, owner, soul )
@@ -373,12 +373,15 @@ void function PressReloadCheck( entity owner, entity weapon )
 				return
 			if( owner.GetMainWeapons().len() == 0 )
 				return
-			if( IsValid( owner.GetMainWeapons()[0] ) )
-			{
-				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
-				owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 1140 )
-				owner.GetMainWeapons()[0].RemoveMod( "tcp_ammo_core" )
-			}
+			if( !owner.IsTitan() )
+				return
+			if( !IsValid( owner.GetMainWeapons()[0] ) )
+				return
+			if( owner.GetMainWeapons()[0].GetWeaponClassName() != "mp_titanweapon_xo16_shorty" )
+				return
+			owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
+			owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 1140 )
+			owner.GetMainWeapons()[0].RemoveMod( "tcp_ammo_core" )
 		}
 	)
 
