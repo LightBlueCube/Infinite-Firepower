@@ -638,16 +638,16 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	if( hasVortexRegen )
 	{
 		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2500
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 1250
 		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2500
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 1250
 
 		if( amount <= 0.1 )
 		{
 			if ( projectile )
-				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 625
 			else
-				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 1250
+				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 625
 		}
 
 		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
@@ -679,7 +679,7 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 		}
 		else
 		{
-			if( vortexWeapon.HasMod( "slow_recovery_vortex" ) )
+			if( vortexWeapon.HasMod( "tcp_sp_base" ) )
 				amount = amount * 2
 			float frac = min ( vortexWeapon.GetWeaponChargeFraction() + amount, 1.0 )
 			vortexWeapon.SetWeaponChargeFraction( frac )
