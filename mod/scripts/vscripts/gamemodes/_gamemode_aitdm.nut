@@ -9,6 +9,10 @@ const LEVEL_SPECTRES = 0
 const LEVEL_STALKERS = 0
 const LEVEL_REAPERS = 0
 
+bool ShouldHideTeamScore = true
+int TEAM_MILITIA_HideScore = 0
+int TEAM_IMC_HideScore = 0
+
 struct
 {
 	// Due to team based escalation everything is an array
@@ -54,8 +58,35 @@ void function OnPrematchStart()
 	thread StratonHornetDogfightsIntense()
 }
 
+void function HideTeamScore()
+{
+	svGlobal.levelEnt.EndSignal( "NukeStart" )
+
+	OnThreadEnd(
+		function():()
+		{
+			ShouldHideTeamScore = false
+			AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
+			AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
+		}
+	)
+
+	wait 1380
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "最後一分鐘！", <255,255,0>, 255, 1 )
+	}
+	ShouldHideTeamScore = false
+	AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
+	AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
+	WaitForever()
+}
+
 void function OnPlaying()
 {
+	thread HideTeamScore()
 	// don't run spawning code if ains and nms aren't up to date
 	if ( GetAINScriptVersion() == AIN_REV && GetNodeCount() != 0 )
 	{
@@ -140,7 +171,15 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( attacker.GetTeam(), teamScore )
+	if( ShouldHideTeamScore )
+	{
+		if( attacker.GetTeam() == TEAM_MILITIA )
+			TEAM_MILITIA_HideScore += teamScore
+		else if( attacker.GetTeam() == TEAM_IMC )
+			TEAM_IMC_HideScore += teamScore
+	}
+	else
+		AddTeamScore( attacker.GetTeam(), teamScore )
 	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
 	attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
@@ -420,7 +459,15 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( player.GetTeam(), 1 )
+	if( ShouldHideTeamScore )
+	{
+		if( player.GetTeam() == TEAM_MILITIA )
+			TEAM_MILITIA_HideScore += 1
+		else if( player.GetTeam() == TEAM_IMC )
+			TEAM_IMC_HideScore += 1
+	}
+	else
+		AddTeamScore( player.GetTeam(), 1 )
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
 	player.SetPlayerNetInt("AT_bonusPoints", player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
