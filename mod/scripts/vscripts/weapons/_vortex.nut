@@ -673,14 +673,14 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	{
 		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
 		{
+			if( vortexWeapon.HasMod( "tcp_sp_base" ) )
+				amount = amount * 2
 			entity owner = vortexWeapon.GetWeaponOwner()
 			int totalEnergy = owner.GetSharedEnergyTotal()
 			owner.TakeSharedEnergy( int( float( totalEnergy ) * amount ) )
 		}
 		else
 		{
-			if( vortexWeapon.HasMod( "tcp_sp_base" ) )
-				amount = amount * 2
 			float frac = min ( vortexWeapon.GetWeaponChargeFraction() + amount, 1.0 )
 			vortexWeapon.SetWeaponChargeFraction( frac )
 		}
