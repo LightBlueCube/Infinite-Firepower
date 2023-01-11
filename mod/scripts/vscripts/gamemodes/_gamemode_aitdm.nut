@@ -76,7 +76,7 @@ void function HideTeamScore()
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "最後一分鐘！", <255,255,0>, 255, 1 )
+		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "最後一分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
 	ShouldHideTeamScore = false
 	AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
