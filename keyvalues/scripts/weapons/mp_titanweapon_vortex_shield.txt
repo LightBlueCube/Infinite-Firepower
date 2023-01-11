@@ -57,10 +57,11 @@ WeaponData
 		{
 			"explosion_damage"								"300"
 			"explosion_damage_heavy_armor"					"300"
+			"shared_energy_charge_cost"						"5.55"
 		}
 		tcp_vortex
 		{
-			//给nut做检测用
+			"shared_energy_charge_cost"						"4"
 		}
 	}
 }
