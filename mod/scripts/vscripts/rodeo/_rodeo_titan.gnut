@@ -738,13 +738,19 @@ function PlayerBeginsTitanRodeo( entity player, RodeoPackageStruct rodeoPackage,
 
 				if ( IsAlive( player ) )
 				{
-					int attachIndex = newRodeoTitan.LookupAttachment( rodeoPackage.attachPoint )
-					vector startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
-
-					if ( !PlayerCanTeleportHere( player, startPos, newRodeoTitan ) )
+					vector startPos = player.GetOrigin()
+					entity entToTeleport = player
+					if ( IsValid( newRodeoTitan ) )
 					{
-						startPos = newRodeoTitan.GetOrigin()
-						if ( !PlayerCanTeleportHere( player, startPos, newRodeoTitan ) )
+						entToTeleport = newRodeoTitan
+						int attachIndex = newRodeoTitan.LookupAttachment( rodeoPackage.attachPoint )
+						startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
+					}
+
+					if ( !PlayerCanTeleportHere( player, startPos, entToTeleport ) )
+					{
+						startPos = entToTeleport.GetOrigin()
+						if ( !PlayerCanTeleportHere( player, startPos, entToTeleport ) )
 							startPos = player.GetOrigin()
 					}
 

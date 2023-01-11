@@ -88,6 +88,7 @@ void function TitanChangePro_Callbacks()
 {
 	PrecacheParticleSystem( $"P_BT_eye_SM" )				//这两条是让我们可以使用战役bt的模型和一些其他的七七八八的
 	PrecacheModel( $"models/titans/buddy/titan_buddy.mdl" )	//model
+	RegisterSignal( "NukeStart" )
 
 	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
@@ -547,6 +548,7 @@ void function StartNuke( entity player )
 
 void function StartNukeWARN( entity owner )
 {
+	svGlobal.levelEnt.Signal( "NukeStart" )
 	int sec = 200
 	bool HasWARN = false
 	SetServerVar( "gameEndTime", Time() + 60.0 )
