@@ -2,12 +2,15 @@ WeaponData
 {
 	MP_BASE
 	{
-		// Damage - When Used by Players
-		"damage_rodeo" 									"625"
-		// Damage - When Used by NPCs
-		"npc_damage_near_value"   						"50"
-		"npc_damage_far_value"							"34"
-		"npc_damage_near_value_titanarmor"				"50"
-		"npc_damage_far_value_titanarmor" 				"34"
+		// NPC
+		"npc_damage_near_value"   						"25"
+		"npc_damage_far_value"							"17"
+		"npc_damage_near_value_titanarmor"				"70"
+		"npc_damage_far_value_titanarmor" 				"50"
 	}
+
+	"npc_min_burst"   								"24"
+	"npc_max_burst"   								"24"
+	"npc_rest_time_between_bursts_min"				"0.1"
+	"npc_rest_time_between_bursts_max"				"0.1"
 }
