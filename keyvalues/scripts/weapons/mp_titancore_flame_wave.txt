@@ -4,10 +4,10 @@ WeaponData
 	{
 		"damage_near_value"   							"200"
 		"damage_far_value"								"200"
-		"damage_near_value_titanarmor"					"2500"
-		"damage_far_value_titanarmor"					"2500"
+		"damage_near_value_titanarmor"					"3200"
+		"damage_far_value_titanarmor"					"3200"
 	}
-	
+
 	Mods
 	{
 		pas_scorch_flamecore

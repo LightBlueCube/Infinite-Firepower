@@ -12,7 +12,7 @@ const array<int> ELECTRIC_SMOKE_DAMAGESOURCES = [ eDamageSourceId.mp_titanabilit
 
 struct
 {
-	float classicRodeoAdditionalDamage = 1 // default additional damage value, should make it changable through playlistVars
+	float classicRodeoAdditionalDamage = 16 // default additional damage value, should make it changable through playlistVars
 } file
 #endif
 
@@ -80,8 +80,9 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	// most weapons in ttf2 don't have damage_rodeo, let's use it's damage_near_value_titanarmor
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	entity inflictor = DamageInfo_GetInflictor( damageInfo )
-	int rodeoDamage = attackerWeapon.GetWeaponSettingInt( eWeaponVar.damage_rodeo )
+	int rodeoDamage = attackerWeapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor )
 
+	float classicRodeoAdditionalDamage = file.classicRodeoAdditionalDamage
 
 	// not using these check now, since we have done hitbox changes, grenadiers can cause really high damage to player themselves
 	//bool canNormallyDamage = attackerWeapon.GetWeaponSettingBool( eWeaponVar.titanarmor_critical_hit_required )
@@ -93,6 +94,27 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	//	shouldMultiplyDamage = false
 
 
+	string weaponName
+	if( IsValid( attackerWeapon ) )
+		weaponName = attackerWeapon.GetWeaponClassName()
+
+	if( weaponName == "mp_weapon_arc_launcher" )
+		classicRodeoAdditionalDamage = 2
+	else if( weaponName == "mp_weapon_epg" || weaponName == "mp_weapon_dmr" )
+		classicRodeoAdditionalDamage = 6
+	else if( weaponName == "mp_weapon_defender" || weaponName == "mp_weapon_mgl" || weaponName == "mp_weapon_pulse_lmg" )
+		classicRodeoAdditionalDamage = 8
+	else if( weaponName == "mp_weapon_wingman_n" || weaponName == "mp_weapon_shotgun" || weaponName == "mp_weapon_wingman")
+		classicRodeoAdditionalDamage = 12
+	else if( weaponName == "mp_weapon_doubletake" )
+		classicRodeoAdditionalDamage = 20
+	else if( weaponName == "mp_weapon_smart_pistol" )
+		classicRodeoAdditionalDamage = 24
+	else if( weaponName == "mp_weapon_shotgun_pistol" )
+		classicRodeoAdditionalDamage = 80
+	else if( weaponName == "mp_weapon_mastiff" )
+		classicRodeoAdditionalDamage = 160
+
 	if( ELECTRIC_SMOKE_DAMAGESOURCES.contains( damageSourceID ) ) // hardcoded here
 	{
 		return // don't do additional damage for smokes
@@ -100,7 +122,10 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 		//shouldMultiplyDamage = false
 	}
 
-	rodeoDamage = int( rodeoDamage * file.classicRodeoAdditionalDamage ) // no additional damage based on criticalScale
+	if( IsValid( titanSoul ) )
+		if( titanSoul.IsDoomed() )
+			classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 2
+	rodeoDamage = int( rodeoDamage * classicRodeoAdditionalDamage ) // no additional damage based on criticalScale
 
 	//print( file.classicRodeoAdditionalDamage )
 	//print( rodeoDamage )
