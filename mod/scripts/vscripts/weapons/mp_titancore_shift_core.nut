@@ -146,7 +146,6 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 #if SERVER
 	if ( owner.IsPlayer() )
 	{
-		owner.Server_SetDodgePower( 100.0 )
 		if( weapon.HasMod("tcp_dash_core") )
 		{
 			owner.SetPowerRegenRateScale( 40 )
@@ -154,8 +153,8 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 			thread Shift_Core_End( weapon, owner, delay )
 			return
 		}
-		else
-			owner.SetPowerRegenRateScale( 6.5 )
+		owner.Server_SetDodgePower( 100.0 )
+		owner.SetPowerRegenRateScale( 6.5 )
 		GivePassive( owner, ePassives.PAS_FUSION_CORE )
 		GivePassive( owner, ePassives.PAS_SHIFT_CORE )
 	}
@@ -243,7 +242,8 @@ void function OnAbilityEnd_Shift_Core( entity weapon, entity player )
 
 	if ( player.IsPlayer() )
 	{
-		player.SetPowerRegenRateScale( 1.0 )
+		if( !weapon.HasMod( "tcp_arc_wave" ) )
+			player.SetPowerRegenRateScale( 1.0 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "Titan_Ronin_Sword_Core_Deactivated_1P" )
 		EmitSoundOnEntityExceptToPlayer( player, player, "Titan_Ronin_Sword_Core_Deactivated_3P" )
 		int conversationID = GetConversationIndex( "swordCoreOffline" )
@@ -377,7 +377,7 @@ void function CreateHighlanderArcWave( entity weapon, WeaponPrimaryAttackParams 
 		#if SERVER
 			projectile.proj.isChargedShot = true
 		#endif
- 
+
 		if ( owner.IsPlayer() )
 			PlayerUsedOffhand( owner, weapon )
 
