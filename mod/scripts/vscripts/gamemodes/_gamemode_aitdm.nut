@@ -1,7 +1,7 @@
 untyped
 global function GamemodeAITdm_Init
 
-const SQUADS_PER_TEAM = 6
+const SQUADS_PER_TEAM = 4
 
 const REAPERS_PER_TEAM = 2
 
@@ -9,9 +9,7 @@ const LEVEL_SPECTRES = 0
 const LEVEL_STALKERS = 0
 const LEVEL_REAPERS = 0
 
-bool ShouldHideTeamScore = true
-int TEAM_MILITIA_HideScore = 0
-int TEAM_IMC_HideScore = 0
+bool Should_10x_TeamScore = false
 
 struct
 {
@@ -62,25 +60,14 @@ void function HideTeamScore()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
-	OnThreadEnd(
-		function():()
-		{
-			ShouldHideTeamScore = false
-			AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
-			AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
-		}
-	)
-
-	wait 1380
+	wait 540//1380
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "最後一分鐘！", < 50, 50, 225 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( player, "十倍分數獲取！", "最後一分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
-	ShouldHideTeamScore = false
-	AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
-	AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
+	Should_10x_TeamScore = true
 	WaitForever()
 }
 
@@ -171,13 +158,8 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	if( ShouldHideTeamScore )
-	{
-		if( attacker.GetTeam() == TEAM_MILITIA )
-			TEAM_MILITIA_HideScore += teamScore
-		else if( attacker.GetTeam() == TEAM_IMC )
-			TEAM_IMC_HideScore += teamScore
-	}
+	if( Should_10x_TeamScore )
+		AddTeamScore( attacker.GetTeam(), teamScore * 10 )
 	else
 		AddTeamScore( attacker.GetTeam(), teamScore )
 	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
@@ -459,13 +441,8 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	if( ShouldHideTeamScore )
-	{
-		if( player.GetTeam() == TEAM_MILITIA )
-			TEAM_MILITIA_HideScore += 1
-		else if( player.GetTeam() == TEAM_IMC )
-			TEAM_IMC_HideScore += 1
-	}
+	if( Should_10x_TeamScore )
+		AddTeamScore( player.GetTeam(), 10 )
 	else
 		AddTeamScore( player.GetTeam(), 1 )
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
