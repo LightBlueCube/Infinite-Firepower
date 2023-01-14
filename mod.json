@@ -11,13 +11,6 @@
             "ServerCallback": {
                 "After": "TitanChangePro_Callbacks"
             }
-        },
-        {
-			"Path": "teamshuffle.nut",
-			"RunOn": "SERVER && MP",
-			"ServerCallback": {
-				"After": "TeamShuffle_Init"
-			}
-		}
+        }
     ]
 }
