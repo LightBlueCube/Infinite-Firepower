@@ -60,12 +60,12 @@ void function HideTeamScore()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
-	wait 540//1380
+	wait 1380
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "十倍分數獲取！", "最後一分鐘！", < 50, 50, 225 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( player, "無! 限! 火! 力!", "10倍分數獲取！最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
 	Should_10x_TeamScore = true
 	WaitForever()
