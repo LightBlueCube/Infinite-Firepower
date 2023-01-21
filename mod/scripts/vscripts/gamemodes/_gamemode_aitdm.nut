@@ -9,7 +9,11 @@ const LEVEL_SPECTRES = 0
 const LEVEL_STALKERS = 0
 const LEVEL_REAPERS = 0
 
+bool ShouldHideTeamScore = true
 bool Should_10x_TeamScore = false
+
+int TEAM_MILITIA_HideScore = 0
+int TEAM_IMC_HideScore = 0
 
 struct
 {
@@ -60,12 +64,53 @@ void function HideTeamScore()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
-	wait 1380
+	table result = {}
+	result.TimeOut <- false
+
+	OnThreadEnd(
+		function():( result )
+		{
+			if( result.TimeOut )
+				return
+			ShouldHideTeamScore = false
+			AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
+			AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
+			foreach( player in GetPlayerArray() )
+			{
+				if( !IsValid( player ) )
+					continue
+				if( "HideScore" in player.s )
+					player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, player.s.HideScore )
+			}
+		}
+	)
+
+	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
+
+	wait timeLimit - 70
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "無! 限! 火! 力!", "10倍分數獲取！最後1分鐘！", < 50, 50, 225 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "", < 50, 50, 225 >, 255, 6 )
+	}
+	result.TimeOut <- true
+	ShouldHideTeamScore = false
+	AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
+	AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		if( "HideScore" in player.s )
+			player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, player.s.HideScore )
+	}
+	wait 10
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "十倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
 	Should_10x_TeamScore = true
 	WaitForever()
@@ -85,6 +130,7 @@ void function OnPlaying()
 // Sets up mode specific hud on client
 void function OnPlayerConnected( entity player )
 {
+	player.s.HideScore <- 0
 	Remote_CallFunction_NonReplay( player, "ServerCallback_AITDM_OnPlayerConnected" )
 }
 
@@ -103,7 +149,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 
 
 	// Basic checks
-	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
+	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() || attacker.IsNPC() ) || GetGameState() != eGameState.Playing )
 		return
 
 	// Hacked spectre filter
@@ -119,6 +165,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 	int teamScore
 	int playerScore
 	string eventName
+	bool IsNPC = attacker.IsNPC()
 
 	// Handle AI, marvins aren't setup so we check for them to prevent crash
 	if ( victim.IsNPC() && victim.GetClassName() != "npc_marvin" )
@@ -158,12 +205,29 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	if( Should_10x_TeamScore )
+	if( ShouldHideTeamScore )
+	{
+		if( attacker.GetTeam() == TEAM_MILITIA )
+			TEAM_MILITIA_HideScore += teamScore
+		else if( attacker.GetTeam() == TEAM_IMC )
+			TEAM_IMC_HideScore += teamScore
+		if( !IsNPC )
+			attacker.s.HideScore += playerScore
+	}
+	else if( Should_10x_TeamScore )
+	{
 		AddTeamScore( attacker.GetTeam(), teamScore * 10 )
+		if( !IsNPC )
+			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore * 10 )
+	}
 	else
+	{
 		AddTeamScore( attacker.GetTeam(), teamScore )
-	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
-	attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+		if( !IsNPC )
+			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
+	}
+	if( !IsNPC )
+		attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
 
 // When attrition starts both teams spawn ai on preset nodes, after that
@@ -441,11 +505,24 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	if( Should_10x_TeamScore )
+	if( ShouldHideTeamScore )
+	{
+		if( player.GetTeam() == TEAM_MILITIA )
+			TEAM_MILITIA_HideScore += 1
+		else if( player.GetTeam() == TEAM_IMC )
+			TEAM_IMC_HideScore += 1
+		player.s.HideScore += 1
+	}
+	else if( Should_10x_TeamScore )
+	{
 		AddTeamScore( player.GetTeam(), 10 )
+		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 10 )
+	}
 	else
+	{
 		AddTeamScore( player.GetTeam(), 1 )
-	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
+		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
+	}
 	player.SetPlayerNetInt("AT_bonusPoints", player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
 
