@@ -89,8 +89,7 @@ void function ApplyFDDerviedUpgrades( entity player, TitanLoadoutDef loadout )
 	}
 	else if ( loadout.titanClass == "scorch" )
 	{
-		if( loadout.isPrime == "titan_is_not_prime" )
-			ApplyDerivedScorchFDUpgrades( upgradeRefs, loadout )
+		ApplyDerivedScorchFDUpgrades( upgradeRefs, loadout )
 	}
 	else if ( loadout.titanClass == "legion" )
 		ApplyDerivedLegionFDUpgrades( upgradeRefs, loadout )
