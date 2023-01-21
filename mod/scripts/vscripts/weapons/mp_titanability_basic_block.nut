@@ -221,7 +221,7 @@ float function HandleBlockingAndCalcDamageScaleForHit( entity blockingEnt, var d
 			return SWORD_CORE_BLOCK_DAMAGE_REDUCTION
 
 		if( blockingEnt.GetOffhandWeapon( OFFHAND_SPECIAL ).GetWeaponClassName() == "mp_ability_swordblock" )
-			return 0.3
+			return 0.5
 
 		return TITAN_BLOCK_DAMAGE_REDUCTION
 	}
