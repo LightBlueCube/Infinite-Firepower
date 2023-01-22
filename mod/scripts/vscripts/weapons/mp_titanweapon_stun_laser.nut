@@ -97,6 +97,8 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 		DamageInfo_SetDamage( damageInfo, 0 )
 		return
 	}
+	if( target.GetArmorType() != ARMOR_TYPE_HEAVY && attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "charge_ball" ) )
+		return
 
 	if ( attacker.GetTeam() == target.GetTeam() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
 	{
@@ -151,13 +153,13 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 		int shieldRestoreAmount = target.GetArmorType() == ARMOR_TYPE_HEAVY ? 750 : 250
 		entity soul = attacker.GetTitanSoul()
 		entity weapon = attacker.GetOffhandWeapon( OFFHAND_ORDNANCE )
-		if( IsValid( weapon ) )
+		if( IsValid( weapon ) && IsValid( soul ))
 		{
-			if( "NotBall" in weapon.s && weapon.HasMod( "charge_ball" ))
+			if( "NotBall" in weapon.s && weapon.HasMod( "charge_ball" ) )
 			{
 				if( weapon.s.NotBall )
 				{
-					shieldRestoreAmount = 1500
+					shieldRestoreAmount = 2500
 				}
 				else if( soul.GetShieldHealth() == soul.GetShieldHealthMax() )
 				{
@@ -166,7 +168,7 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 				}
 				else
 				{
-					shieldRestoreAmount = 200
+					shieldRestoreAmount = 300
 				}
 			}
 		}
@@ -217,7 +219,7 @@ const CHARGEBALL_CHARGE_FX_1P = $"wpn_arc_cannon_charge_fp"
 const CHARGEBALL_CHARGE_FX_3P = $"wpn_arc_cannon_charge"
 
 const int CHARGEBALL_LIGHTNING_DAMAGE = 250 // uncharged, only fires 1 ball
-const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 125
+const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 100
 const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED_MOD = 85
 
 var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -291,7 +293,7 @@ entity function ChargeBall_FireArcBall( entity weapon, vector pos, vector dir, b
 {
 	entity owner = weapon.GetWeaponOwner()
 
-	float speed = 350.0
+	float speed = 200.0
 
 	if ( owner.IsPlayer() )
 	{
