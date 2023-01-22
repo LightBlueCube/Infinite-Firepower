@@ -65,7 +65,7 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 	if( weapon.HasMod( "charge_ball" ) && weapon.GetWeaponChargeFraction() == 1.0 )
 		return OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( weapon, attackParams )
 	if( weapon.HasMod( "charge_ball" ) )
-		weapon.s.NotBall <- true
+		weapon.s.IsBall <- false
 	#if CLIENT
 		if ( !weapon.ShouldPredictProjectiles() )
 			return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
@@ -81,6 +81,8 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 	ShotgunBlast( weapon, attackParams.pos, attackParams.dir, 1, DF_GIB | DF_EXPLOSION )
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 	weapon.SetWeaponChargeFractionForced(1.0)
+	if( weapon.HasMod( "charge_ball" ) )
+		return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) / 3
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 #if SERVER
@@ -92,13 +94,21 @@ var function OnWeaponNPCPrimaryAttack_titanweapon_stun_laser( entity weapon, Wea
 void function StunLaser_DamagedTarget( entity target, var damageInfo )
 {
 	entity attacker = DamageInfo_GetAttacker( damageInfo )
+	if( !IsValid( attacker ) )
+		return
 	if ( attacker == target )
 	{
 		DamageInfo_SetDamage( damageInfo, 0 )
 		return
 	}
-	if( target.GetArmorType() != ARMOR_TYPE_HEAVY && attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "charge_ball" ) )
+	if( !attacker.IsPlayer() && !attacker.IsNPC() )
 		return
+	if( target.GetArmorType() != ARMOR_TYPE_HEAVY && attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "charge_ball" ) )
+	{
+		if( attacker.GetTeam() == target.GetTeam() )
+			DamageInfo_SetDamage( damageInfo, 0 )
+		return
+	}
 
 	if ( attacker.GetTeam() == target.GetTeam() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
 	{
@@ -148,31 +158,37 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 	}
 	else if ( target.IsNPC() || target.IsPlayer() )
 	{
-		if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && attacker.GetTeam() == target.GetTeam() )
+		if( IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
+			if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && attacker.GetTeam() == target.GetTeam() )
+				return
+		if( !attacker.IsTitan() )
 			return
 		int shieldRestoreAmount = target.GetArmorType() == ARMOR_TYPE_HEAVY ? 750 : 250
 		entity soul = attacker.GetTitanSoul()
 		entity weapon = attacker.GetOffhandWeapon( OFFHAND_ORDNANCE )
 		if( IsValid( weapon ) && IsValid( soul ))
 		{
-			if( "NotBall" in weapon.s && weapon.HasMod( "charge_ball" ) )
+			if( "IsBall" in weapon.s && weapon.HasMod( "charge_ball" ) )
 			{
-				if( weapon.s.NotBall )
+				if( weapon.s.IsBall )
 				{
-					shieldRestoreAmount = 2500
-				}
-				else if( soul.GetShieldHealth() == soul.GetShieldHealthMax() )
-				{
-					attacker.SetHealth( min( attacker.GetMaxHealth(), attacker.GetHealth() + 100 )  )
-					shieldRestoreAmount = 0
+					if( soul.GetShieldHealth() == soul.GetShieldHealthMax() )
+					{
+						attacker.SetHealth( min( attacker.GetMaxHealth(), attacker.GetHealth() + 25 )  )
+						shieldRestoreAmount = 0
+					}
+					else
+					{
+						shieldRestoreAmount = 50
+					}
 				}
 				else
 				{
-					shieldRestoreAmount = 300
+					shieldRestoreAmount = 500
 				}
 			}
 		}
-		if ( IsValid( soul ) )
+		if ( IsValid( soul ) && IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
 		{
 			if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
 				shieldRestoreAmount = int( 1.25 * shieldRestoreAmount )
@@ -183,8 +199,22 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 			else
 				soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
 		}
-		if ( attacker.IsPlayer() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
-			MessageToPlayer( attacker, eEventNotifications.VANGUARD_ShieldGain, attacker )
+		if( IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
+		{
+			if ( attacker.IsPlayer() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
+			{
+				if( weapon.HasMod( "charge_ball" ) )
+				{
+					if( "lastFXTime" in weapon.s )
+					{
+						if( weapon.s.lastFXTime + 0.1 > Time() )
+							return
+					}
+					weapon.s.lastFXTime <- Time()
+				}
+				MessageToPlayer( attacker, eEventNotifications.VANGUARD_ShieldGain, attacker )
+			}
+		}
 	}
 }
 
@@ -219,12 +249,12 @@ const CHARGEBALL_CHARGE_FX_1P = $"wpn_arc_cannon_charge_fp"
 const CHARGEBALL_CHARGE_FX_3P = $"wpn_arc_cannon_charge"
 
 const int CHARGEBALL_LIGHTNING_DAMAGE = 250 // uncharged, only fires 1 ball
-const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 100
+const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 50
 const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED_MOD = 85
 
 var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
-	weapon.s.NotBall <- false
+	weapon.s.IsBall <- true
 	entity weaponOwner = weapon.GetWeaponOwner()
 
 
@@ -276,6 +306,8 @@ var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon
 void function ChargeBallOnDamage( entity ent, var damageInfo )
 {
 	entity weapon = DamageInfo_GetWeapon( damageInfo )
+	if( DamageInfo_GetDamage( damageInfo ) == 0 )
+		return
 	if( !IsValid( weapon ) )
 		return
 	if( !weapon.HasMod( "charge_ball" ) )
@@ -323,7 +355,7 @@ entity function ChargeBall_FireArcBall( entity weapon, vector pos, vector dir, b
 		bolt.kv.gravity = 5
 		SetTeam( bolt, team )
 
-		float lifetime = 12.0
+		float lifetime = 16.0
 
 		if ( isCharged )
 		{
@@ -334,7 +366,7 @@ entity function ChargeBall_FireArcBall( entity weapon, vector pos, vector dir, b
 		bolt.SetProjectileLifetime( lifetime )
 
 		#if SERVER
-			AttachBallLightning( weapon, bolt )
+			ChargeBall_AttachBallLightning( weapon, bolt )
 
 			entity ballLightning = expect entity( bolt.s.ballLightning )
 
@@ -385,3 +417,83 @@ void function DelayedStartParticleSystem( entity bolt )
         StartParticleEffectOnEntity( bolt, GetParticleSystemIndex( $"P_wpn_arcball_trail" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
 }
 #endif
+
+function ChargeBall_AttachBallLightning( entity weapon, entity projectile )
+{
+	Assert( !( "ballLightning" in projectile.s ) )
+
+	int damageSourceId
+	entity owner
+
+	if ( weapon.IsProjectile() )
+	{
+		owner = weapon.GetOwner()
+		damageSourceId = weapon.ProjectileGetDamageSourceID()
+	}
+	else
+	{
+		owner = weapon.GetWeaponOwner()
+		damageSourceId = weapon.GetDamageSourceID()
+	}
+
+
+	entity ball = ChargeBall_CreateBallLightning( owner, damageSourceId, projectile.GetOrigin(), projectile.GetAngles() )
+	ball.SetParent( projectile )
+	projectile.s.ballLightning <- ball
+}
+
+entity function ChargeBall_CreateBallLightning( entity owner, int damageSourceId, vector origin, vector angles )
+{
+	entity ballLightning = CreateScriptMover( origin, angles )
+	ballLightning.SetOwner( owner )
+	SetTeam( ballLightning, owner.GetTeam() )
+
+	thread ChargeBall_BallLightningThink( ballLightning, damageSourceId )
+	return ballLightning
+}
+
+void function ChargeBall_BallLightningThink( entity ballLightning, int damageSourceId )
+{
+	ballLightning.EndSignal( "OnDestroy" )
+
+	EmitSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
+
+	local data = {}
+
+	OnThreadEnd(
+		function() : ( ballLightning, data )
+		{
+			if ( IsValid( ballLightning ) )
+				StopSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
+		}
+	)
+
+	int inflictorTeam = ballLightning.GetTeam()
+	ballLightning.e.ballLightningTargetsIdx = CreateScriptManagedEntArray()
+
+	WaitEndFrame()
+
+	while( 1 )
+	{
+		for( int i=0; i<BALL_LIGHTNING_BURST_NUM; i++ )
+		{
+			vector origin = ballLightning.GetOrigin()
+			BallLightningData fxData = ballLightning.e.ballLightningData
+			RadiusDamage(
+		    	origin,				// origin
+		    	ballLightning.GetOwner(),		// owner
+		    	ballLightning,		 			// inflictor
+		    	fxData.damageToPilots,								// normal damage
+		    	fxData.damage,					// heavy armor damage
+		    	500,							// inner radius
+		    	500,							// outer radius
+		    	SF_ENVEXPLOSION_NO_DAMAGEOWNER,	// explosion flags
+		    	0, 								// distanceFromAttacker
+		    	0, 								// explosionForce
+		    	fxData.deathPackage,				// damage flags
+		    	damageSourceId	// damage source id
+			)
+		}
+		wait 0.1
+	}
+}
