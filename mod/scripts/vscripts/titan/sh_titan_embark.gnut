@@ -639,7 +639,7 @@ function PlayerEmbarksTitan( entity player, entity titan, table embark )
 
 	entity soul = titan.GetTitanSoul()
 	string settings = GetSoulTitanSubClass( soul )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		settings = "buddy"
 	printt( "TitanEmbarkDebug: Player ", player.GetOrigin(), player.GetAngles(), " Titan ", titan.GetOrigin(), titan.GetAngles(), settings, GetMapName() )
 
@@ -732,7 +732,7 @@ bool function ShouldDoRegularEmbark( entity titan )
 	entity soul = titan.GetTitanSoul()
 
 	//if ( IsSingleplayer() && GetSoulPlayerSettings( soul ) == "titan_buddy" )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 	{
 		//return titan.GetNPCState() == "combat" || titan.GetNPCState() == "alert"
 		return false
@@ -745,7 +745,7 @@ bool function TitanHasLeftAndRightEmbarkAnims( entity titan )
 {
 	entity soul = titan.GetTitanSoul()
 	string settings = GetSoulPlayerSettings( soul )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		settings = "titan_buddy"
 	var hasAnims = Dev_GetPlayerSettingByKeyField_Global( settings, "hasLeftRightEmbarks" )
 	if ( hasAnims != null && hasAnims == 1 )
@@ -894,7 +894,7 @@ function TitanEmbark_PlayerEmbarks( entity player, entity titan, table e )
 
 	entity soul = titan.GetTitanSoul()
 	string settings = GetSoulTitanSubClass( soul )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		settings = "buddy"
 
 	local hasViewCone
@@ -1066,7 +1066,7 @@ void function PlayStartupSounds( entity titan )
 	player.EndSignal( "OnDeath" )
 
 	string titanSettings = GetSoulPlayerSettings( soul )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		titanSettings = "titan_buddy"
 	var startupSound = Dev_GetPlayerSettingByKeyField_Global( titanSettings, "startup_sound" )
 
@@ -1529,7 +1529,7 @@ void function PlayerDisembarksTitanWithSequenceFuncs( entity player, FirstPerson
 	TitanBecomesPilot( player, titan )
 
 	string titanSubClass = GetSoulTitanSubClass( titan.GetTitanSoul() )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		titanSubClass = "buddy"
 	switch ( titanSubClass )
 	{
@@ -1608,7 +1608,7 @@ bool function PlayerIsFarOffTheGround( entity player, array<entity> ignoreEnts )
 FirstPersonSequenceStruct function GetDisembarkSequenceForPlayer( entity player, entity titan )
 {
 	string titanSubClass = GetSoulTitanSubClass( titan.GetTitanSoul() )
-	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 		titanSubClass = "buddy"
 
 	string player3pAnim, player1pAnim
@@ -1623,7 +1623,7 @@ FirstPersonSequenceStruct function GetDisembarkSequenceForPlayer( entity player,
 		player1pAnim = "ptpov_dismount_" + titanSubClass + "_crouch"
 	}
 
-	if ( player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 ) )
+	if ( player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" ) )
 	{
 		player1pAnim += "_fast"
 		player3pAnim += "_fast"
@@ -1650,7 +1650,7 @@ FirstPersonSequenceStruct function GetDisembarkSequenceForTitan( entity player, 
 	else
 		titanDisembarkAnim = "at_dismount_crouch"
 
-	if ( player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 ) )
+	if ( player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" ) )
 		titanDisembarkAnim += "_fast"
 
 	vector origin = titan.GetOrigin()
@@ -2023,7 +2023,7 @@ vector function CalculateTitanToPlayerDir( entity titan, entity player )
 
 function GenerateEmbarkActionTable( entity player, entity titan, bestAction, var relTitanToPlayerDir = null )
 {
-	bool useFastAnims = player.IsPlayer() && player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	bool useFastAnims = player.IsPlayer() && player.HasPassive( ePassives.PAS_FAST_EMBARK ) && !( titan.GetModelName() == $"models/titans/buddy/titan_buddy.mdl" )
 
 	if ( relTitanToPlayerDir == null )
 	{
