@@ -312,8 +312,6 @@ void function ChargeBallOnDamage( entity ent, var damageInfo )
 		return
 	if( !weapon.HasMod( "charge_ball" ) )
 		return
-	if( ent.IsNPC() )
-		return
 
 	const ARC_TITAN_EMP_DURATION			= 0.35
 	const ARC_TITAN_EMP_FADEOUT_DURATION	= 0.35
