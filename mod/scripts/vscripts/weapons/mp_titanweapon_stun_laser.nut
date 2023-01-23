@@ -96,12 +96,19 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 	entity attacker = DamageInfo_GetAttacker( damageInfo )
 	if( !IsValid( attacker ) )
 		return
+
+	if( attacker.GetTeam() == target.GetTeam() )
+		DamageInfo_SetDamage( damageInfo, 0 )
+
 	if ( attacker == target )
 	{
 		DamageInfo_SetDamage( damageInfo, 0 )
 		return
 	}
+
 	if( !attacker.IsPlayer() && !attacker.IsNPC() )
+		return
+	if( !IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
 		return
 	if( target.GetArmorType() != ARMOR_TYPE_HEAVY && attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "charge_ball" ) )
 	{
@@ -112,7 +119,6 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 
 	if ( attacker.GetTeam() == target.GetTeam() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
 	{
-		DamageInfo_SetDamage( damageInfo, 0 )
 		entity attackerSoul = attacker.GetTitanSoul()
 		entity weapon = attacker.GetOffhandWeapon( OFFHAND_LEFT )
 		if ( !IsValid( weapon ) )
