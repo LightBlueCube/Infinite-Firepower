@@ -1,0 +1,12 @@
+WeaponData
+{
+	MP_BASE
+	{
+		// Damage - When Used by Players
+		"damage_near_value"   							"185"
+		"damage_far_value"								"185"
+	}
+
+	// Behavior
+	"fire_rate"   									"2"
+}

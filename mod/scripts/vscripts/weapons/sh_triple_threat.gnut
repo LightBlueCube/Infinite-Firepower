@@ -75,6 +75,16 @@ function FireTripleThreat( entity weapon, WeaponPrimaryAttackParams attackParams
 	bool shouldCreateProjectile = false
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
+	#if SERVER
+	if( weaponOwner.IsPlayer() )
+	{
+		if( weaponOwner.GetWeaponAmmoLoaded( weapon ) > 3 )
+			EmitSoundOnEntityOnlyToPlayer( weapon, weaponOwner, "Weapon_MGL_Fire_1P" )
+		EmitSoundOnEntityExceptToPlayer( weapon, weaponOwner, "Weapon_MGL_Fire_3P" )
+	}
+	else
+		EmitSoundOnEntity( weaponOwner, "Weapon_MGL_Fire_3P" )
+	#endif
 	#if CLIENT
 		if ( !playerFired )
 			shouldCreateProjectile = false

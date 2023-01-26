@@ -58,6 +58,8 @@ bool function OnCoreCharge_Shift_Core( entity weapon )
 
 #if SERVER
 	entity owner = weapon.GetWeaponOwner()
+	if( weapon.HasMod( "tcp_dash_core" ) )
+		return true
 	string swordCoreSound_1p
 	string swordCoreSound_3p
 	if ( weapon.HasMod( "fd_duration" ) )
@@ -81,6 +83,8 @@ bool function OnCoreCharge_Shift_Core( entity weapon )
 		thread RestoreWeapon( owner, weapon )
 		EmitSoundOnEntityOnlyToPlayer( owner, owner, swordCoreSound_1p )
 		EmitSoundOnEntityExceptToPlayer( owner, owner, swordCoreSound_3p )
+		if( weapon.HasMod( "tcp_arc_wave" ) )
+			GivePassive( owner, ePassives.PAS_FUSION_CORE )
 	}
 	else
 	{
@@ -142,17 +146,16 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 		thread tcp_arc_wave( weapon, attackParams, owner )
 		return
 	}
+	if( weapon.HasMod("tcp_dash_core") )
+	{
+		thread DashCoreThink( weapon, weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay ) )
+		GivePassive( owner, ePassives.PAS_FUSION_CORE )
+		return
+	}
 
 #if SERVER
 	if ( owner.IsPlayer() )
 	{
-		if( weapon.HasMod("tcp_dash_core") )
-		{
-			owner.SetPowerRegenRateScale( 40 )
-			float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
-			thread Shift_Core_End( weapon, owner, delay )
-			return
-		}
 		owner.Server_SetDodgePower( 100.0 )
 		owner.SetPowerRegenRateScale( 6.5 )
 		GivePassive( owner, ePassives.PAS_FUSION_CORE )
@@ -193,6 +196,77 @@ var function OnAbilityStart_Shift_Core( entity weapon, WeaponPrimaryAttackParams
 	return 1
 }
 
+void function DashCoreThink( entity weapon, float coreDuration )
+{
+	#if SERVER
+	weapon.EndSignal( "OnDestroy" )
+	entity owner = weapon.GetWeaponOwner()
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "DisembarkingTitan" )
+	owner.EndSignal( "TitanEjectionStarted" )
+
+	if( !owner.IsTitan() )
+		return
+
+	if ( owner.IsPlayer() )
+	{
+		EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Legion_Smart_Core_Activated_1P" )
+		EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Legion_Smart_Core_ActiveLoop_1P" )
+		EmitSoundOnEntityExceptToPlayer( owner, owner, "Titan_Legion_Smart_Core_Activated_3P" )
+	}
+	else // npc
+		EmitSoundOnEntity( owner, "Titan_Legion_Smart_Core_Activated_3P" )
+
+	entity soul = owner.GetTitanSoul()
+	if ( owner.IsPlayer() )
+	{
+		owner.Server_SetDodgePower( 100.0 )
+		owner.SetPowerRegenRateScale( 40.0 )
+		//owner.SetPowerRegenRateScale( 16.0 )
+		//owner.SetDodgePowerDelayScale( 0.1 )
+	}
+	if ( owner.IsPlayer() )
+	{
+		ScreenFade( owner, 0, 0, 100, 10, 0.1, coreDuration, FFADE_OUT | FFADE_PURGE )
+	}
+
+	OnThreadEnd(
+	function() : ( weapon, soul, owner )
+		{
+			if ( IsValid( owner ) )
+			{
+				StopSoundOnEntity( owner, "Titan_Legion_Smart_Core_ActiveLoop_1P" )
+
+				if ( owner.IsPlayer() )
+				{
+					EmitSoundOnEntityOnlyToPlayer( owner, owner, "Titan_Legion_Smart_Core_Deactivated_1P" )
+					int conversationID = GetConversationIndex( "swordCoreOffline" )
+					Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
+					ScreenFade( owner, 0, 0, 0, 0, 0.1, 0.1, FFADE_OUT | FFADE_PURGE )
+					TakePassive( owner, ePassives.PAS_FUSION_CORE )
+					owner.SetPowerRegenRateScale( 1.0 )
+		            //owner.SetDodgePowerDelayScale( 1.0 )
+				}
+			}
+
+			if ( IsValid( weapon ) )
+			{
+				if ( IsValid( owner ) )
+					CoreDeactivate( owner, weapon )
+				OnAbilityEnd_TitanCore( weapon )
+			}
+
+			if ( IsValid( soul ) )
+			{
+				CleanupCoreEffect( soul )
+			}
+		}
+	)
+
+	wait coreDuration
+	#endif
+}
 
 #if SERVER
 void function Shift_Core_End( entity weapon, entity player, float delay )
@@ -429,8 +503,8 @@ bool function CreateEmpWaveSegment( entity projectile, int projectileCount, enti
 		pos,
 		projectile.GetOwner(), //attacker
 		inflictor, //inflictor
-		1000,
-		1000,
+		1250,
+		1250,
 		112, // inner radius
 		112, // outer radius
 		SF_ENVEXPLOSION_NO_DAMAGEOWNER | SF_ENVEXPLOSION_MASK_BRUSHONLY | SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,

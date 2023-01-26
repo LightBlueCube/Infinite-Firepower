@@ -1,5 +1,39 @@
 WeaponData
 {
-	"chargeup_time"									"0.0"
-	"core_duration"									"8.0"
+	"core_duration"									"7.35"
+
+	Mods	//绝大部分script都来自DB大佬的Super.Mixed.Game
+	{
+		damage_core
+		{
+			"fire_mode"   									"offhand_instant"
+
+			//prevent burst
+			"fire_rate"										"0.1"
+			"burst_fire_count"								"0"
+			"burst_fire_delay"								"99"
+
+			//disable sounds
+			"looping_sounds"								"0"
+			"fire_sound_1_player_1p"						""
+			"fire_sound_1_player_3p"						""
+			"fire_sound_2"									""
+
+			"burst_or_looping_fire_sound_start_1p"			""
+			"burst_or_looping_fire_sound_middle_1p"			""
+			"burst_or_looping_fire_sound_end_1p"			""
+
+			"burst_or_looping_fire_sound_start_3p"			""
+			"burst_or_looping_fire_sound_middle_3p"			""
+			"burst_or_looping_fire_sound_end_3p"			""
+
+			// Charge settings
+			"charge_time" 									"1.0" // chargeup time
+			"core_duration"									"12.0"
+			"charge_cooldown_delay"							"12.0" // equal as "core_duration"
+			"charge_cooldown_time"   						"14.0" // should be "core_duration" + "charge_time" + 1.0
+			"charge_end_forces_fire"  						"1"
+			"charge_require_input"							"0"
+		}
+	}
 }

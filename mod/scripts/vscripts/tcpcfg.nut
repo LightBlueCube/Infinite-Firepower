@@ -8,7 +8,7 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"\n",
 								"----无限火力都改了什么？----",
 								"泰坦获取速度 * 4，泰坦核心获取速度 * 2，泰坦脱战回盾",
-								"ai单次生成数量 * ( 4 / 3 )，ai伤害取默认[注释2]，视力取战役ai，瞄准精度为最大，取消开火限制",
+								"ai伤害取默认[注释2]，视力取战役ai，瞄准精度为最大，取消开火限制",
 								"[注释2]:原版ai伤害大概为默认的四分之一",
 								"增加步枪兵和幽灵战士还有潜行者能用的武器，分别为：火箭发射器，电能步枪，磁能手榴弹",
 								"死神会投掷炸蛛，阵亡时会核爆（无视黄血和护盾）",
@@ -20,11 +20,11 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"绿电池回血2格 + 满盾，核心恢复80%",
 								"黄电池回血1格 + 满盾（黄电池无法将泰坦从毁减状态拉出），核心恢复40%",
 								"应急电池强化使用后有 2 / 3 的概率给黄电池  1 / 3 的概率给绿电池",
-								"每当玩家击杀4人（包括NPC泰坦）或一命击杀4人（包括NPC泰坦）时，都会获得一个核武泰坦\n表现为召唤一个落地就开始核爆的核武泰坦，服务器内打开控制台输入hw以查看详情",
+								"每当玩家击杀4人（包括NPC泰坦）或一命击杀4人（包括NPC泰坦）时，都会获得一个核武泰坦\n表现为召唤一个落地就开始核爆的核武泰坦，控制台输入hw以查看详情（先关闭文档再输入）",
 								"按住F可以扔出电池，仅在处于铁驭状态且存活且有电池时工作",
 								"撤离阶段可以复活，撤离艇血量 27000（10格 + 2000） -> 60000（24格）",
 								"队伍比分会一直隐藏到最后一分十秒，在最后一分钟会开启十倍分数获取，冲冲冲！",
-								"一代训牛术的逻辑",
+								"----一代训牛术的逻辑----",
 								"当泰坦落地时，默认电池仓内有电池",
 								"当电池被拔出时，电池仓内无电池",
 								"当队友给友方泰坦一个电池时，电池仓内有电池",
@@ -93,13 +93,14 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"[注释13]:表现为帝王的满级能量汲取，启动后消耗 当前能量 / 2，冷却时间为 原版冷却时间 * 2\n击中敌方泰坦后，敌方泰坦获得一个2秒的致盲 + 正常能量汲取伤害，击中不给使用者加盾，击中队友不给队友加盾",
 								"主武器：核裂枪[注释14]",
 								"[注释14]:表现为离子的分裂枪，伤害为 原版分裂枪伤害 * 2 （对非装甲单位伤害 近距离 50 远距离 40  对装甲单位伤害 近距离 160 远距离 120）\n非瞄准射击一发，消耗20能量，瞄准射击三发，消耗80能量，如果能量耗光，非瞄准每射击一次将消耗2发弹药，瞄准每射击一次将消耗6发弹药",
-								"核心：冲刺核心",
+								"核心：雷暴[注释15]",
+								"[注释15]:表现为开启后，朝视角前方释放五道（0°,±10°,±40°）电弧波，单道伤害为1250，可以被任何盾挡住且不会扣除盾的血量或耐久",
 								"其他：消耗能量后需等待2.0秒后才会开始自行恢复（0.5 -> 2.0）",
 								"--游侠--",
 								"启用：浪人，携带至尊涂装",
 								"血量：7500（3格）",
 								"左栏位：剑封[注释15]",
-								"[注释15]:表现为浪人的剑封，减伤50%，有一个充能条，剑封时会消耗，消耗速度为10秒，在消耗殆尽之前会一直拥有双倍移速加成\n消耗殆尽后移速为 正常移速 * 0.4，冷却2.5秒后才会开始恢复充能，恢复速度为8秒",
+								"[注释15]:表现为浪人的剑封，减伤50%，有一个充能条，剑封时会消耗，消耗速度为10秒，在消耗殆尽之前会一直拥有1.5倍移速加成\n消耗殆尽后移速为 正常移速 * 0.4，冷却2.5秒后才会开始恢复充能，恢复速度为8秒",
 								"中栏位：电弧场[注释16]",
 								"[注释16]:表现为按下后，在泰坦上形成一个电弧场，持续16秒，伤害类型为EMP风暴\n对装甲单位伤害为 64，对非装甲单位伤害为 20，当单位进入伤害范围内时，每0.1秒获得一次上述伤害",
 								"右栏位：同步彈頭[注释17]",
@@ -107,26 +108,40 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"近战栏位：浪人剑",
 								"主武器：三連環榴彈[注释18]",
 								"[注释18]:三連環榴彈是同時發射三枚手榴彈的榴彈發射器。特別適用於淨空建築內部，而且榴彈一接觸裝甲即會爆炸，因此近距離對付其他泰坦非常有效。",
-								"核心：雷暴[注释19]",
-								"[注释19]:表现为开启后，朝视角前方释放五道（0°,±10°,±40°各一道）电弧波，单道伤害为1000，可以被盾挡住，不会扣除盾的血量或耐久",
+								"核心：衝刺核心[注释19]",
+								"[注释19]:啟用時衝刺不會耗盡。",
 								"--天图--",
 								"启用：强力，携带至尊涂装",
 								"血量：10000（4格）",
-								"左栏位：穹顶护盾[注释20]",
-								"[注释20]:DB大佬制作的护盾，血量为3000，持续8秒，冲刺会打破护盾，在使用期间泰坦免疫一切伤害（伤害将转移到护盾），护盾会吃到近战伤害",
-								"中栏位：投掷型电子烟幕[注释21]",
-								"[注释21]:表现为强力的声纳突波，在落点生成一个涡旋电子烟幕，对泰坦dps 1600  对铁驭dps 10",
-								"右栏位：球状闪电[注释22]",
-								"[注释22]:表现为帝王的能量汲取，冷却时间为20秒（12 -> 20），拥有两种击发模式，当按住不到2.0秒就松开时为射线模式，当按住超过2.0秒时为电球模式",
+								"左栏位：泡泡护盾[注释20]",
+								"[注释20]:表现为强力的声纳突波，发射后在落点生成一个无伤害且自身无敌的泡泡护盾，持续8秒",
+								"中栏位：幻影[注释21]",
+								"[注释21]:表现为幻影铁驭，使用后表现为生成一个和你一模一样的泰坦幻影，抬头显示的假血量取当前血量，如果黄血则血量取 当前 * 4\n冷却时间为40秒，满充能可使用2次，不可以在仅往左移动或仅往右移动时使用",
+								"右栏位：绊雷[注释22]",
+								"[注释23]:表现为火箭弹群，冷却时间为15秒，发射一个黏性绊雷，落地后存在30秒，如果敌方单位靠近则立刻爆炸\n伤害为 对非装甲单位 1000 对装甲单位 2500，无衰减范围 0-140 衰减范围 140-320 范围超过320无伤害",
+								"主武器：40cm机炮[注释24]",
+								"[注释24]:伤害为 对非装甲单位 200 对装甲单位 600 溅射对非装甲单位 90 溅射对装甲单位 400，无衰减范围 0-100 衰减范围 100-225 范围超过225无伤害\n射速为1.5/s，弹匣容量为6发，核心期间全自动，射速为3/s，换弹速度加快至2秒",
+								"核心：破壞核心[注释25]",
+								"[注释25]:啟用時大幅提升武器殺傷力。（核心期间造成的所有伤害都是1.5倍）",
+								"--巨妖--",
+								"启用：军团，携带至尊涂装",
+								"血量：12500（5格）",
+								"左栏位：穹顶护盾[注释26]",
+								"[注释26]:DB大佬制作的护盾，血量为3000，持续8秒，冲刺会打破护盾，在使用期间泰坦免疫一切伤害（伤害将转移到护盾），护盾会吃到近战伤害",
+								"中栏位：投掷型电子烟幕[注释27]",
+								"[注释27]:表现为强力的声纳突波，在落点生成一个涡旋电子烟幕，对泰坦dps 800  对铁驭dps 10",
+								"右栏位：球状闪电[注释28]",
+								"[注释28]:表现为帝王的能量汲取，冷却时间为20秒（12 -> 20），拥有两种击发模式，当按住不到2.0秒就松开时为射线模式，当按住超过2.0秒时为电球模式",
 								"当射线模式时：发射一道能量汲取，消耗三分之一的武器充能，击中目标时对目标造成 对装甲单位伤害 200 对非装甲单位伤害 20 并自己回盾500点",
 								"当电球模式时：发射一个速度较慢的电球（速度为200），消耗全部武器充能\n在该范围大小为500的范围内会持续收到被电球击中的减益 + EMP减益和每0.1秒的 对装甲单位伤害 50 对非装甲单位伤害 8",
 								"每当且仅当对敌方装甲单位造成一次伤害时都会恢复自己护盾50点，如果护盾已满则恢复25点生命值\n当击中目标时对目标造成 对装甲单位伤害 200 对非装甲单位伤害 20",
-								"主武器：XO16[注释23]",
-								"[注释23]:表现为加装了加速器的远征XO16，最大射速为20，达到最大射速需5秒，伤害为 对非装甲单位 近距离 49 远距离 34  对装甲单位 近距离 80 远距离 60\n换弹速度和一代XO16保持一致(4.6s)，弹容60发，瞄准射击扩散不会减小，在核心开启前如果击中涡旋盾则每发会消耗涡旋盾充能的1%",
+								"主武器：XO16[注释29]",
+								"[注释29]:表现为加装了加速器的远征XO16，最大射速为20，达到最大射速需5秒，伤害为 对非装甲单位 近距离 49 远距离 34  对装甲单位 近距离 80 远距离 60\n换弹速度和一代XO16保持一致(4.6s)，弹容60发，瞄准射击扩散不会减小，在核心开启前如果击中涡旋盾则每发会消耗涡旋盾充能的1%",
 								"核心开启后不可换弹，打光子弹即视为核心结束，会重置武器状态致核心前，在核心开启期间如果击中涡旋盾则每发会消耗涡旋盾充能的4%",
-								"核心：弹容超载[注释24]",
-								"[注释24]:开启后立刻给主武器增加100发子弹，且仅给主武器增加100发子弹，无任何额外效果，可叠加子弹"
-								"什么？这不是巨妖啊，巨妖还没做完，这是压缩重生木琴，你看他，遇水变大变高，平时用他来擦擦鞋擦擦脸非常好用的\n怎么蹭也蹭不坏，什么？在哪买？我怎么可能会卖无中生有的东西" ]
+								"核心：弹容超载[注释30]",
+								"[注释30]:开启后立刻给主武器增加100发子弹，且仅给主武器增加100发子弹，无任何额外效果，可叠加子弹",
+								"想必你一定看完了吧，谢谢你，我尊重每一个有耐心看完文档的人，而不是那种有现成文档不看只会嗯问的人\n实际上，开这个模式四个月以来，遇到的这种人数不胜数，保守估计都得三位数了，总之，还是谢谢你耐心的看完了文档" ]
+
 
 void function MacroCheck_Threaded( entity player )
 {
@@ -259,7 +274,7 @@ void function UseTimeCheck()
 			{
 				UseTime_5 += 10
 			}
-			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" || player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )	//军团
+			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
 			{
 				UseTime_6 += 10
 			}
@@ -291,6 +306,10 @@ void function UseTimeCheck()
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )		//天图
 			{
 				UseTime_ModTitan_6 += 10
+			}
+			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )		//巨妖
+			{
+				UseTime_ModTitan_7 += 10
 			}
 
 			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )
@@ -358,6 +377,11 @@ void function UseTimeCheck()
 			{
 				printt( "UseTimeCheck: ModTitan_6 add 1 min" )
 				UseTime_ModTitan_6 = 0
+			}
+			if( UseTime_ModTitan_7 % 60 == 0 && UseTime_ModTitan_7 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_7 add 1 min" )
+				UseTime_ModTitan_7 = 0
 			}
 		}
 	}
@@ -1063,7 +1087,7 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, ["tcp_vortex"] )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER,["tcp_fast_emp"] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE, ["tcp_flash","energy_field_energy_transfer"] )
-		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )	//shield_core"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
 
 		array<int> passives = [ ePassives.PAS_ION_WEAPON,
 								ePassives.PAS_ION_TRIPWIRE,
@@ -1089,7 +1113,7 @@ void function OnTitanfall( entity titan )
         {
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
         }
-		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "spread_increase_ttt", "rolling_rounds" ] )
+		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "rolling_rounds" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
@@ -1097,7 +1121,7 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_ability_swordblock", OFFHAND_SPECIAL )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER, [ "tcp_emp" ])
 		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE )
-		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )
 
 		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
 								ePassives.PAS_RONIN_ARCWAVE,
@@ -1116,6 +1140,41 @@ void function OnTitanfall( entity titan )
 		soul.s.titanTitle <- "天圖"
 		soul.s.shouldFPEmbark <- true
 		soul.s.classicExecution <- true
+
+		array<entity> weapons = titan.GetMainWeapons()
+        foreach( entity weapon in weapons )
+        {
+            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+        }
+		titan.GiveWeapon( "mp_titanweapon_sticky_40mm", [ "mortar_shots" ] )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
+        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_SPECIAL, [ "tcp_bubble_shield" ] )
+		titan.GiveOffhandWeapon( "mp_ability_holopilot", OFFHAND_TITAN_CENTER, [ "tcp_titan_holo" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_salvo_rockets", OFFHAND_ORDNANCE, [ "tcp_mine" ] )
+		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT, ["damage_core"] )
+
+
+
+		array<int> passives = [ ePassives.PAS_TONE_WEAPON,
+								ePassives.PAS_TONE_ROCKETS,
+								ePassives.PAS_TONE_SONAR,
+								ePassives.PAS_TONE_WALL,
+								ePassives.PAS_TONE_BURST ]
+		foreach( passive in passives )
+		{
+			TakePassive( soul, passive )
+		}
+	}
+	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	{
+		soul.s.TitanHasBeenChange <- true
+		SendHudMessage(player, "已启用巨妖泰坦装备，取消至尊泰坦以使用原版强力",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		soul.s.titanTitle <- "巨妖"
+		soul.s.shouldFPEmbark <- true
+		soul.s.classicExecution <- true
 		soul.SetTitanSoulNetInt( "upgradeCount", 4 )
 
 		array<entity> weapons = titan.GetMainWeapons()
@@ -1128,16 +1187,16 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "brute4_bubble_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER, [ "tcp_smoke" ] )
+		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "brute4_bubble_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE, [ "charge_ball" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_upgrade", OFFHAND_EQUIPMENT, [ "tcp_ammo_core" ] )
 
-		array<int> passives = [ ePassives.PAS_TONE_WEAPON,
-								ePassives.PAS_TONE_ROCKETS,
-								ePassives.PAS_TONE_SONAR,
-								ePassives.PAS_TONE_WALL,
-								ePassives.PAS_TONE_BURST ]
+		array<int> passives = [ ePassives.PAS_LEGION_CHARGESHOT,
+								ePassives.PAS_LEGION_GUNSHIELD,
+								ePassives.PAS_LEGION_SMARTCORE,
+								ePassives.PAS_LEGION_SPINUP,
+								ePassives.PAS_LEGION_WEAPON ]
 		foreach( passive in passives )
 		{
 			TakePassive( soul, passive )

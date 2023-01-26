@@ -81,6 +81,15 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 			thread SonarSmoke( projectile, owner )
 			return
 		}
+		if( mods.contains( "tcp_bubble_shield" ) )
+		{
+			int team = projectile.GetTeam()
+			vector origin = projectile.GetOrigin()
+			vector angles = projectile.GetAngles()
+			projectile.Destroy()	//projectile永远不会出现在穹顶盾中，否则crash!
+			thread CreateSonarBubbleShield( team, origin, angles, 8 )
+			return
+		}
 
 		if ( !IsValid( owner ) )
 			return
@@ -94,6 +103,177 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 			thread DelayedPulseLocation( owner, team, pos, hasIncreasedDuration, hasDamageAmp )
 
 	#endif
+}
+
+void function CreateSonarBubbleShield( int team, vector origin, vector angles, float duration = 9999.0 )
+{
+	entity bubbleShield = CreateSonarBubbleShieldWithSettings( team, origin, angles + < 0, 0, 180 > , null, 9999 )
+	entity SecBubbleShield = CreateSonarBubbleShieldWithSettings( team, origin, angles, null, 9999 )
+	entity friendlyColoredFX = expect entity ( bubbleShield.s.friendlyColoredFX )
+	entity enemyColoredFX = expect entity ( bubbleShield.s.enemyColoredFX )
+	entity SecFriendlyColoredFX = expect entity ( SecBubbleShield.s.friendlyColoredFX )
+	entity SecEnemyColoredFX = expect entity ( SecBubbleShield.s.enemyColoredFX )
+	friendlyColoredFX.SetAngles( angles + < 0, 0, 180 > )
+	enemyColoredFX.SetAngles( angles + < 0, 0, 180 > )
+	SecFriendlyColoredFX.SetAngles( angles )
+	SecEnemyColoredFX.SetAngles( angles )
+
+	OnThreadEnd(
+		function () : ( bubbleShield, SecBubbleShield )
+		{
+			DestroyBubbleShield( bubbleShield )
+			DestroyBubbleShield( SecBubbleShield )
+		}
+	)
+
+	float endTime = duration + Time()
+	int rgb = RandomInt( 30 ) + 1
+	vector color = < 0, 0, 0 >
+	int rgb1 = 0
+	int rgb2 = 0
+	int rgb3 = 0
+	while( endTime > Time() )
+	{
+		WaitFrame()
+		if( rgb / 5 == 0 )
+		{
+			rgb1 = rgb
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, rgb2, 0 >
+		}
+		else if( rgb / 5 == 1 )
+		{
+			rgb1 = rgb - 5
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb3, 250, 0 >
+		}
+		else if( rgb / 5 == 2 )
+		{
+			rgb1 = rgb - 10
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, 250, rgb2 >
+		}
+		else if( rgb / 5 == 3 )
+		{
+			rgb1 = rgb - 15
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, rgb3, 250 >
+		}
+		else if( rgb / 5 == 4 )
+		{
+			rgb1 = rgb - 20
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb2, 0, 250 >
+		}
+		else
+		{
+			rgb1 = rgb - 25
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, 0, rgb3 >
+		}
+
+		if( rgb + 1 > 30 )
+			rgb = 0
+		rgb += 1
+
+		//SendHudMessageToAll( "debuginfo\n"+rgb+"\n"+rgb/10+"\n"+rgb1+"\n"+rgb2+"\nend", -1, 0.3, 200, 200, 225, 0, 0, 5, 1);
+
+
+		EffectSetControlPointVector( friendlyColoredFX, 1, color )
+		EffectSetControlPointVector( enemyColoredFX, 1, color )
+		EffectSetControlPointVector( SecFriendlyColoredFX, 1, color )
+		EffectSetControlPointVector( SecEnemyColoredFX, 1, color )
+	}
+}
+
+entity function CreateSonarBubbleShieldWithSettings( int team, vector origin, vector angles, entity owner = null, float duration = 9999 )
+{
+	entity bubbleShield = CreateEntity( "prop_dynamic" )
+	bubbleShield.SetValueForModelKey( $"models/fx/xo_shield.mdl" )
+	bubbleShield.kv.solid = SOLID_VPHYSICS
+	bubbleShield.kv.rendercolor = "81 130 151"
+	bubbleShield.kv.contents = (int(bubbleShield.kv.contents) | CONTENTS_NOGRAPPLE)
+	bubbleShield.SetOrigin( origin )
+	bubbleShield.SetAngles( angles )
+	 // Blocks bullets, projectiles but not players and not AI
+	bubbleShield.kv.CollisionGroup = TRACE_COLLISION_GROUP_BLOCK_WEAPONS
+	bubbleShield.SetBlocksRadiusDamage( true )
+	DispatchSpawn( bubbleShield )
+	bubbleShield.Hide()
+
+	SetTeam( bubbleShield, team )
+	array<entity> bubbleShieldFXs
+
+	vector coloredFXOrigin = origin + Vector( 0, 0, 25 )
+	table bubbleShieldDotS = expect table( bubbleShield.s )
+	if ( team == TEAM_UNASSIGNED )
+	{
+		entity neutralColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( neutralColoredFX, team )
+		bubbleShieldDotS.neutralColoredFX <- neutralColoredFX
+		bubbleShieldFXs.append( neutralColoredFX )
+	}
+	else
+	{
+		//Create friendly and enemy colored particle systems
+		entity friendlyColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( friendlyColoredFX, team )
+		friendlyColoredFX.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+		EffectSetControlPointVector(  friendlyColoredFX, 1, FRIENDLY_COLOR_FX )
+
+		entity enemyColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( enemyColoredFX, team )
+		enemyColoredFX.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY
+		EffectSetControlPointVector(  enemyColoredFX, 1, ENEMY_COLOR_FX )
+
+		bubbleShieldDotS.friendlyColoredFX <- friendlyColoredFX
+		bubbleShieldDotS.enemyColoredFX <- enemyColoredFX
+		bubbleShieldFXs.append( friendlyColoredFX )
+		bubbleShieldFXs.append( enemyColoredFX )
+	}
+
+	#if MP
+	DisableTitanfallForLifetimeOfEntityNearOrigin( bubbleShield, origin, TITANHOTDROP_DISABLE_ENEMY_TITANFALL_RADIUS )
+	#endif
+
+	EmitSoundOnEntity( bubbleShield, "BubbleShield_Sustain_Loop" )
+
+	thread CleanupBubbleShield( bubbleShield, bubbleShieldFXs, duration )
+
+	return bubbleShield
+}
+
+void function CleanupBubbleShield( entity bubbleShield, array<entity> bubbleShieldFXs, float fadeTime )
+{
+	bubbleShield.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function () : ( bubbleShield, bubbleShieldFXs )
+		{
+			if ( IsValid_ThisFrame( bubbleShield ) )
+			{
+				StopSoundOnEntity( bubbleShield, "BubbleShield_Sustain_Loop" )
+				EmitSoundOnEntity( bubbleShield, "BubbleShield_End" )
+				DestroyBubbleShield( bubbleShield )
+			}
+
+			foreach ( fx in bubbleShieldFXs )
+			{
+				if ( IsValid_ThisFrame( fx ) )
+				{
+					EffectStop( fx )
+				}
+			}
+		}
+	)
+
+	wait fadeTime
 }
 
 void function SonarSmoke( entity projectile, entity owner )
@@ -173,9 +353,14 @@ void function PulseLocation( entity owner, int team, vector pos, bool hasIncreas
 void function SonarPulseThink( entity enemy, vector position, int team, entity sonarOwner, bool hasIncreasedDuration, bool hasDamageAmp )
 {
 	if( IsValid( sonarOwner ) )
+	{
 		if( IsValid( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ) ) )
 			if( sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_fast_emp" ) || sonarOwner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_smoke" ) )
 				return
+		if( IsValid( sonarOwner.GetOffhandWeapon( OFFHAND_SPECIAL ) ) )
+			if( sonarOwner.GetOffhandWeapon( OFFHAND_SPECIAL ).HasMod( "tcp_bubble_shield" ) )
+				return
+	}
 
 	enemy.EndSignal( "OnDeath" )
 	enemy.EndSignal( "OnDestroy" )
@@ -430,7 +615,7 @@ void function TitanSonarSmokescreen( entity ent, entity owner )
 	smokescreen.damageInnerRadius = 320.0
 	smokescreen.damageOuterRadius = 375.0
 	smokescreen.dpsPilot = 10
-	smokescreen.dpsTitan = 1600
+	smokescreen.dpsTitan = 800
 	smokescreen.damageDelay = 1.0
 	smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
 	smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P

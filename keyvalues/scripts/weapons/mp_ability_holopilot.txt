@@ -1,0 +1,21 @@
+WeaponData
+{
+	Mods
+	{
+		pas_power_cell
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+		amped_tacticals
+		{
+		}
+
+		tcp_titan_holo
+		{
+			"regen_ammo_refill_rate"						"5"
+		}
+	}
+}

@@ -1,0 +1,50 @@
+WeaponData
+{
+	"OnProjectileCollision"							"OnProjectileCollision_titanweapon_mine_slavo"
+
+	Mods
+	{
+		mod_ordnance_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+
+		burn_mod_titan_salvo_rockets
+		{
+		}
+		multi_launch_system
+		{
+		}
+		scripted_no_damage
+		{
+		}
+		northstar_prime_execution
+		{
+		}
+		missile_racks
+		{
+		}
+		fd_balance
+		{
+		}
+
+		tcp_mine
+		{
+			"ammo_per_shot"									"120"
+			"burst_fire_count"								"1"
+			"damage_near_distance"							"800"
+			"damage_far_distance" 							"1200"
+			"damage_near_value"   							"0"
+			"damage_far_value"								"0"
+			"explosion_damage"								"1000"
+			"explosion_damage_heavy_armor"					"2500"
+			"explosion_inner_radius"  						"140"
+			"explosionradius" 								"320"
+			"projectile_lifetime"							"30.0"
+			"regen_ammo_refill_rate"						"8.0"
+		}
+	}
+}

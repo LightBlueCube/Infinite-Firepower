@@ -1,7 +1,7 @@
 untyped
 global function GamemodeAITdm_Init
 
-const SQUADS_PER_TEAM = 4
+const SQUADS_PER_TEAM = 3
 
 const REAPERS_PER_TEAM = 2
 
