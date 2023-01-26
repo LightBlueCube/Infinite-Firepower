@@ -26,5 +26,8 @@ WeaponData
 		tcp_smoke
 		{
 		}
+		tcp_bubble_shield
+		{
+		}
 	}
 }

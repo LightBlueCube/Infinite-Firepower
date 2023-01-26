@@ -26,7 +26,7 @@ WeaponData
 		{
 		}
 
-		tcp_dash_core
+		tcp_dash_core	//大部分script来自DB大佬的Super.Mixed.Game
 		{
 			"core_duration"								"12.0" //Needs to match charge_cooldown_delay
 			"charge_cooldown_delay"   					"12.0"

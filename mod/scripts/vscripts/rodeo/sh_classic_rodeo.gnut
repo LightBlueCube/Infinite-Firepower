@@ -102,18 +102,18 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 		classicRodeoAdditionalDamage = 2
 	else if( weaponName == "mp_weapon_epg" || weaponName == "mp_weapon_dmr" )
 		classicRodeoAdditionalDamage = 6
-	else if( weaponName == "mp_weapon_defender" || weaponName == "mp_weapon_mgl" || weaponName == "mp_weapon_pulse_lmg" )
+	else if( weaponName == "mp_weapon_defender" || weaponName == "mp_weapon_mgl" || weaponName == "mp_weapon_pulse_lmg" || weaponName == "mp_weapon_shotgun" )
 		classicRodeoAdditionalDamage = 8
-	else if( weaponName == "mp_weapon_wingman_n" || weaponName == "mp_weapon_shotgun" || weaponName == "mp_weapon_wingman")
+	else if( weaponName == "mp_weapon_wingman_n" || weaponName == "mp_weapon_wingman")
 		classicRodeoAdditionalDamage = 12
 	else if( weaponName == "mp_weapon_doubletake" )
-		classicRodeoAdditionalDamage = 20
+		classicRodeoAdditionalDamage = 18
 	else if( weaponName == "mp_weapon_smart_pistol" )
 		classicRodeoAdditionalDamage = 24
 	else if( weaponName == "mp_weapon_shotgun_pistol" )
-		classicRodeoAdditionalDamage = 80
+		classicRodeoAdditionalDamage = 60
 	else if( weaponName == "mp_weapon_mastiff" )
-		classicRodeoAdditionalDamage = 160
+		classicRodeoAdditionalDamage = 100
 
 	if( ELECTRIC_SMOKE_DAMAGESOURCES.contains( damageSourceID ) ) // hardcoded here
 	{

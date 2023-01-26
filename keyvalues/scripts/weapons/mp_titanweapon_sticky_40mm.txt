@@ -1,0 +1,72 @@
+WeaponData
+{
+	Mods
+	{
+		gunship_gunner
+		{
+		}
+		splasher_rounds
+		{
+		}
+		fast_reload
+		{
+		}
+		extended_ammo
+		{
+		}
+		mortar_shots
+		{
+			"impact_effect_table" 							"40mm_mortar_shots"
+			"explosion_inner_radius"  						"100"
+			"explosionradius" 								"225"
+
+			"damage_near_value"   							"200"
+			"damage_far_value"								"200"
+			"damage_near_value_titanarmor"					"600"
+			"damage_far_value_titanarmor" 					"600"
+			"explosion_damage"								"90"
+			"explosion_damage_heavy_armor"					"400"
+
+			"fire_rate"   									"--0.25"
+			"ammo_clip_size"   								"6"
+		}
+		burn_mod_titan_40mm
+		{
+		}
+		sur_level_0
+		{
+		}
+		sur_level_1
+		{
+		}
+		sur_level_2
+		{
+		}
+		sur_level_3
+		{
+		}
+		pas_tone_weapon
+		{
+
+		}
+		pas_tone_burst
+		{
+		}
+		fd_splasher_rounds
+		{
+		}
+		fd_tone_weapon_2
+		{
+		}
+
+		tcp_40cm_amped
+		{
+			"reload_time"									"2"
+			"reload_time_late1"								"1.5"
+			"reloadempty_time"								"2"
+			"reloadempty_time_late1"						"1.5"
+
+			"fire_rate"   									"++1.25"
+		}
+	}
+}
