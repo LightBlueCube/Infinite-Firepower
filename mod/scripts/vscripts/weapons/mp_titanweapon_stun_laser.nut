@@ -190,7 +190,7 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 				}
 				else
 				{
-					shieldRestoreAmount = 500
+					shieldRestoreAmount = 1000
 				}
 			}
 		}
