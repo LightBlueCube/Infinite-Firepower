@@ -33,7 +33,7 @@ WeaponData
 		{
 			"rui_crosshair_index"							"1"
 
-			"charge_time" 									"1.5"
+			"charge_time" 									"0.7"
 			"charge_cooldown_time"							"0.6"
 			"charge_cooldown_delay"   						"0.1"
 			"charge_end_forces_fire"						"1"

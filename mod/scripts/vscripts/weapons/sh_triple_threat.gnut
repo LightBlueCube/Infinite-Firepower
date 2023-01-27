@@ -157,7 +157,7 @@ function FireTripleThreatGrenade( entity weapon, origin, fwd, velocity, playerFi
 	entity nade = weapon.FireWeaponGrenade( origin, fwd, velocity, 0, damageType, damageType, playerFired, true, true )
 	if ( nade )
 	{
-		//nade.InitMagnetic( 1000.0, "Explo_MGL_MagneticAttract" )
+		nade.InitMagnetic( 400.0, "Explo_TripleThreat_MagneticAttract" )
 
 		nade.kv.CollideWithOwner = false
 
