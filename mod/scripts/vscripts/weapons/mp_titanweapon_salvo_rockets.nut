@@ -86,13 +86,15 @@ function FireTripleThreatGrenade( entity weapon, origin, fwd, velocity, playerFi
 	if ( nade )
 	{
 		//nade.InitMagnetic( 1000.0, "Explo_MGL_MagneticAttract" )
-		nade.SetModel( $"models/weapons/titan_incendiary_trap/w_titan_incendiary_trap.mdl" )
+		nade.SetModel( $"models/weapons/bullets/triple_threat_projectile.mdl" )
 
 		nade.kv.CollideWithOwner = false
 
 		Grenade_Init( nade, weapon )
 		#if SERVER
 			nade.SetOwner( weaponOwner )
+			nade.SetDamageNotifications( true )
+			nade.SetTakeDamageType( DAMAGE_YES )
 			thread EnableCollision( nade )
 			thread AirPop( nade, fuseTime )
 			thread TrapExplodeOnDamage( nade, 50, 0.0, 0.1 )
