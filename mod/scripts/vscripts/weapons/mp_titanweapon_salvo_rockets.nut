@@ -63,7 +63,7 @@ var function OnWeaponPrimaryAttack_titanweapon_mine_rockets( entity weapon, Weap
 	float velocity = TRIPLETHREAT_LAUNCH_VELOCITY * 1.2
 	vector angularVelocity = Vector( RandomFloatRange( -velocity, velocity ), 100, 0 )
 
-	FireTripleThreatGrenade( weapon, attackParams.pos, attackParams.dir * TRIPLETHREAT_LAUNCH_VELOCITY, angularVelocity, true, 30.0, damageTypes.explosive )
+	FireTripleThreatGrenade( weapon, attackParams.pos, attackParams.dir * TRIPLETHREAT_LAUNCH_VELOCITY, angularVelocity, true, 15.0, damageTypes.explosive )
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 var function OnWeaponNPCPrimaryAttack_titanweapon_mine_rockets( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -71,7 +71,7 @@ var function OnWeaponNPCPrimaryAttack_titanweapon_mine_rockets( entity weapon, W
 	float velocity = TRIPLETHREAT_LAUNCH_VELOCITY * 1.2
 	vector angularVelocity = Vector( RandomFloatRange( -velocity, velocity ), 100, 0 )
 
-	FireTripleThreatGrenade( weapon, attackParams.pos, attackParams.dir * TRIPLETHREAT_LAUNCH_VELOCITY, angularVelocity, false, 30.0, damageTypes.explosive )
+	FireTripleThreatGrenade( weapon, attackParams.pos, attackParams.dir * TRIPLETHREAT_LAUNCH_VELOCITY, angularVelocity, false, 15.0, damageTypes.explosive )
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 
@@ -127,7 +127,7 @@ function AirPop( entity grenade, float fuseTime )
 	// Only enter here if the mine stuck to something
 	if ( waitResult != null && waitResult.signal == waitSignal )
 	{
-		fuseTime = 30
+		fuseTime = 15
 		waitSignal = "ProxMineTrigger"
 		waitResult = WaitSignalTimeout( grenade, (fuseTime - (popDelay + 0.2)), waitSignal )
 

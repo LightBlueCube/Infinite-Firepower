@@ -28,7 +28,7 @@ WeaponData
 			"explosion_damage_heavy_armor"					"400"
 
 			"fire_rate"   									"--0.25"
-			"ammo_clip_size"   								"6"
+			"ammo_clip_size"   								"10"
 		}
 		burn_mod_titan_40mm
 		{
@@ -61,12 +61,7 @@ WeaponData
 
 		tcp_40cm_amped
 		{
-			"reload_time"									"2"
-			"reload_time_late1"								"1.5"
-			"reloadempty_time"								"2"
-			"reloadempty_time_late1"						"1.5"
-
-			"fire_rate"   									"++1.25"
+			"fire_rate"   									"++0.25"
 		}
 	}
 }

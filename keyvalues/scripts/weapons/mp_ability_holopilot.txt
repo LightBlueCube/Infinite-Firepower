@@ -15,7 +15,7 @@ WeaponData
 
 		tcp_titan_holo
 		{
-			"regen_ammo_refill_rate"						"5"
+			"regen_ammo_refill_rate"						"10"
 		}
 	}
 }

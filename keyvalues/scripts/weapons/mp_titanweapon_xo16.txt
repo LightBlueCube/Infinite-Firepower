@@ -119,7 +119,7 @@ WeaponData
 
 		tcp_ammo_core
 		{
-			"ammo_clip_size"   				"++969"
+			"ammo_clip_size"   				"++9969"
 			"vortex_drain"									"++0.04"
 			//"damage_near_value_titanarmor"					"--20"
 			//"damage_far_value_titanarmor" 					"--10"

@@ -45,10 +45,10 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 		thread UpgradeCoreThink( weapon, coreDuration )
 		int currentUpgradeCount
 		if( weapon.HasMod( "tcp_ammo_core" ) )
-			currentUpgradeCount = 9
+			currentUpgradeCount = 114514
 		else
 			currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
-		if ( currentUpgradeCount == 0 )
+		if ( currentUpgradeCount == 3 )
 		{
 			//Energy Transfer
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_LEFT )
@@ -65,7 +65,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 3 )
 			}
 		}
-		else if ( currentUpgradeCount == 1 )
+		else if ( currentUpgradeCount == 4 )
 		{
 			//Missile Racks
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_RIGHT )
@@ -82,7 +82,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 2 )
 			}
 		}
-		else if ( currentUpgradeCount == 2 )
+		else if ( currentUpgradeCount == 5 )
 		{
 			// Arc Rounds
 			array<entity> weapons = GetPrimaryWeapons( owner )
@@ -104,7 +104,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 1 )
 			}
 		}
-		else if ( currentUpgradeCount == 3 )
+		else if ( currentUpgradeCount == 6 )
 		{
 			//Energy Field
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_LEFT )
@@ -132,7 +132,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 6 )
 			}
 		}
-		else if ( currentUpgradeCount == 4 )
+		else if ( currentUpgradeCount == 7 )
 		{
 			// Rapid Rearm
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_ANTIRODEO )
@@ -160,7 +160,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 4 )
 			}
 		}
-		else if ( currentUpgradeCount == 5 )
+		else if ( currentUpgradeCount == 8 )
 		{
 			//Maelstrom
 			entity offhandWeapon = owner.GetOffhandWeapon( OFFHAND_INVENTORY )
@@ -177,7 +177,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 				Remote_CallFunction_NonReplay( owner, "ServerCallback_VanguardUpgradeMessage", 5 )
 			}
 		}
-		else if ( currentUpgradeCount == 6 )
+		else if ( currentUpgradeCount == 9 )
 		{
 			// Multi-Target Missiles
 			if ( owner.IsPlayer() )
@@ -204,7 +204,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 			ordnance = owner.GetOffhandWeapon( OFFHAND_RIGHT )
 			ordnance.SetWeaponChargeFractionForced( 1 - ammoFrac )
 		}
-		else if ( currentUpgradeCount == 7 )
+		else if ( currentUpgradeCount == 10 )
 		{
 			//Superior Chassis
 			if ( owner.IsPlayer() )
@@ -241,7 +241,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 			entity soul = owner.GetTitanSoul()
 			soul.SetPreventCrits( true )
 		}
-		else if ( currentUpgradeCount == 8 )
+		else if ( currentUpgradeCount == 11 )
 		{
 			//XO-16 Battle Rifle
 			array<entity> weapons = GetPrimaryWeapons( owner )
@@ -288,7 +288,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 			if( IsValid( owner.GetMainWeapons()[0] ) )
 			{
 				owner.GetMainWeapons()[0].AddMod( "tcp_ammo_core" )
-				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 100, 900 ) )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 9000 ) )
 			}
 		}
 		if( !weapon.HasMod( "tcp_ammo_core" ) )
@@ -386,7 +386,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 	)
 
 	owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
-	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 140, 900 )
+	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 9000 )
 	while( true )
 	{
 		WaitFrame()
@@ -400,7 +400,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 			{
 				return
 			}
-			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 900  )
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 9000  )
 			{
 				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( clip )
 			}
