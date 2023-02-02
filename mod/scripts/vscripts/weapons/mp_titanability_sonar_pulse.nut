@@ -279,8 +279,8 @@ void function CleanupBubbleShield( entity bubbleShield, array<entity> bubbleShie
 void function SonarSmoke( entity projectile, entity owner )
 {
 	entity inflictor = CreateScriptMover( projectile.GetOrigin() )
-	SetTeam( inflictor, owner.GetTeam() )
-	inflictor.SetOwner( owner )
+	SetTeam( inflictor, projectile.GetTeam() )
+	inflictor.SetOwner( projectile.GetOwner() )
 	thread TitanSonarSmokescreen( inflictor, owner )
 	wait 5
 	inflictor.Destroy()
