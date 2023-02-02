@@ -438,7 +438,7 @@ array<entity> function GetNearbyEnemiesForSonarPulse( int team, vector origin )
 
 
 
-const DAMAGE_AGAINST_TITANS_EMPBOMB 			= 25
+const DAMAGE_AGAINST_TITANS_EMPBOMB 			= 5
 const DAMAGE_AGAINST_PILOTS_EMPBOMB 			= 1
 
 const DAMAGE_AGAINST_TITANS 			= 15

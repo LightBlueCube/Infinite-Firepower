@@ -104,7 +104,7 @@ void function OnWeaponActivate_titanweapon_particle_accelerator( entity weapon )
 	#if SERVER
 	entity owner = weapon.GetWeaponOwner()
 	if( weapon.HasMod("tcp") )
-		owner.SetSharedEnergyRegenDelay( 2.0 )
+		owner.SetSharedEnergyRegenDelay( 3.0 )
 	else
 		owner.SetSharedEnergyRegenDelay( 0.5 )
 	#endif
@@ -180,10 +180,10 @@ function FireWeaponPlayerAndNPC( entity weapon, WeaponPrimaryAttackParams attack
 			if( !inADS )
 			{
 				shotCount = 1
-				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 20 >= 0 ) ? 20 : owner.GetSharedEnergyTotal() )
+				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 30 >= 0 ) ? 30 : owner.GetSharedEnergyTotal() )
 			}
 			if( inADS )
-				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 80 >= 0 ) ? 80 : owner.GetSharedEnergyTotal() )
+				owner.TakeSharedEnergy( ( owner.GetSharedEnergyCount() - 90 >= 0 ) ? 90 : owner.GetSharedEnergyTotal() )
 		}
 
 
