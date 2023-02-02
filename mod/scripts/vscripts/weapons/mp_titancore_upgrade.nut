@@ -288,7 +288,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 			if( IsValid( owner.GetMainWeapons()[0] ) )
 			{
 				owner.GetMainWeapons()[0].AddMod( "tcp_ammo_core" )
-				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 9000 ) )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 1000 ) )
 			}
 		}
 		if( !weapon.HasMod( "tcp_ammo_core" ) )
@@ -386,7 +386,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 	)
 
 	owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
-	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 9000 )
+	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 1000 )
 	while( true )
 	{
 		WaitFrame()
@@ -400,7 +400,7 @@ void function PressReloadCheck( entity owner, entity weapon )
 			{
 				return
 			}
-			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 9000  )
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) > 1000  )
 			{
 				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( clip )
 			}
