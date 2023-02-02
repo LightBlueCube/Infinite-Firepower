@@ -104,7 +104,7 @@ WeaponData
 
 	"crosshair"							"crosshair_t"
 	"explosion_damage"								"350"		// 150
-	"explosion_damage_heavy_armor"					"600"		// 150
+	"explosion_damage_heavy_armor"					"400"		// 150
 
 	"explosion_inner_radius"  						"140"
 	"explosionradius" 								"320"

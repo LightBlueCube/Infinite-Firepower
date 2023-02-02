@@ -493,7 +493,7 @@ void function GiveOffhandElectricSmoke( entity titan )
 		{
 			weapon.SetWeaponPrimaryAmmoCount( weapon.GetWeaponPrimaryAmmoCount() + 1 )
 		}
-		if ( soul.GetTitanSoulNetInt( "upgradeCount" ) >= 6 )
+		if ( soul.GetTitanSoulNetInt( "upgradeCount" ) >= 9 )
 		{
 			entity weapon = titan.GetOffhandWeapon( OFFHAND_INVENTORY )
 			array<string> mods = weapon.GetMods()

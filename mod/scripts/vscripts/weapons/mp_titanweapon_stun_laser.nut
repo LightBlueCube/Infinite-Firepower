@@ -180,12 +180,12 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 				{
 					if( soul.GetShieldHealth() == soul.GetShieldHealthMax() )
 					{
-						attacker.SetHealth( min( attacker.GetMaxHealth(), attacker.GetHealth() + 25 )  )
+						attacker.SetHealth( min( attacker.GetMaxHealth(), attacker.GetHealth() + 50 )  )
 						shieldRestoreAmount = 0
 					}
 					else
 					{
-						shieldRestoreAmount = 50
+						shieldRestoreAmount = 100
 					}
 				}
 				else
@@ -304,7 +304,8 @@ var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon
 	ChargeBall_FireArcBall( weapon, attackPos, attackDir, shouldPredict, CHARGEBALL_LIGHTNING_DAMAGE_CHARGED, false, true )
 	weapon.EmitWeaponSound_1p3p( "Weapon_ArcLauncher_Fire_1P", "Weapon_ArcLauncher_Fire_3P" )
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
-	EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_ArcLauncher_Fire_1P" )
+	if( weaponOwner.IsPlayer() )
+		EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_ArcLauncher_Fire_1P" )
 
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }

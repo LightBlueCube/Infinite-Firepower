@@ -18,7 +18,7 @@ const string FLAME_WAVE_MIDDLE_SFX = "flamewave_blast_middle"
 const string FLAME_WAVE_RIGHT_SFX = "flamewave_blast_right"
 
 const int TITAN_GROUND_SLAM_DAMAGE = 500
-const int TITAN_GROUND_SLAM_DAMAGE_HEAVYARMOR = 4000
+const int TITAN_GROUND_SLAM_DAMAGE_HEAVYARMOR = 3500
 const float TITAN_GROUND_SLAM_INNER_RADIUS = 450
 const float TITAN_GROUND_SLAM_RADIUS = 525
 

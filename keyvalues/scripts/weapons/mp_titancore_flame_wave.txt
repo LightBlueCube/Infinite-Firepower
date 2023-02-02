@@ -4,8 +4,8 @@ WeaponData
 	{
 		"damage_near_value"   							"200"
 		"damage_far_value"								"200"
-		"damage_near_value_titanarmor"					"3200"
-		"damage_far_value_titanarmor"					"3200"
+		"damage_near_value_titanarmor"					"3500"
+		"damage_far_value_titanarmor"					"3500"
 	}
 
 	Mods
@@ -15,7 +15,7 @@ WeaponData
 
 		}
 
-		ground_slam	//感谢DB大佬，此处应为调用DB大佬的Super.Mixed.Game中的野牛核心
+		ground_slam	//此处应为调用DB大佬的Super.Mixed.Game中的野牛核心
 		{
 			"instant_swap_to"								"1"
 		}

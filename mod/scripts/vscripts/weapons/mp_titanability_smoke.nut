@@ -230,7 +230,7 @@ void function OnWeaponPrimaryAttack_tcp_emp( entity weapon )
 
 
 const DAMAGE_AGAINST_TITANS 			= 64
-const DAMAGE_AGAINST_PILOTS 			= 20
+const DAMAGE_AGAINST_PILOTS 			= 10
 
 const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
