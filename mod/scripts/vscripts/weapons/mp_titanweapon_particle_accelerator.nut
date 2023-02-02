@@ -104,7 +104,7 @@ void function OnWeaponActivate_titanweapon_particle_accelerator( entity weapon )
 	#if SERVER
 	entity owner = weapon.GetWeaponOwner()
 	if( weapon.HasMod("tcp") )
-		owner.SetSharedEnergyRegenDelay( 3.0 )
+		owner.SetSharedEnergyRegenDelay( 2.0 )
 	else
 		owner.SetSharedEnergyRegenDelay( 0.5 )
 	#endif

@@ -61,7 +61,7 @@ WeaponData
 		}
 		tcp_vortex
 		{
-			"shared_energy_charge_cost"						"4"
+			"shared_energy_charge_cost"						"6"
 		}
 	}
 }
