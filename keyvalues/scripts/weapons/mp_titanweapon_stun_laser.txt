@@ -75,7 +75,7 @@ WeaponData
 			"charge_effect_3p"								"wpn_arc_cannon_charge"
 			"charge_effect_attachment"						"muzzle_flash"
 
-			"regen_ammo_refill_rate"						"6.0"
+			"regen_ammo_refill_rate"						"4.0"
 
 			"fire_rate"   									"10.0"
 			"fire_duration"                                 "0.55"
