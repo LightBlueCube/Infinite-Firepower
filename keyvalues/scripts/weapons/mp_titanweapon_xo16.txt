@@ -5,8 +5,8 @@ WeaponData
 		accelerator
 		{
 			"fire_rate"						"2"
-			"fire_rate_max"					"20"
-			"fire_rate_max_time_speedup"	"5.0"
+			"fire_rate_max"					"30"
+			"fire_rate_max_time_speedup"	"8.0"
 			"fire_rate_max_time_cooldown"	"0.1"
 			"ammo_clip_size"   				"60"
 			"ammo_stockpile_max"			"1200"
@@ -120,9 +120,6 @@ WeaponData
 		tcp_ammo_core
 		{
 			"ammo_clip_size"   				"++9969"
-			"vortex_drain"									"++0.04"
-			//"damage_near_value_titanarmor"					"--20"
-			//"damage_far_value_titanarmor" 					"--10"
 		}
 	}
 }

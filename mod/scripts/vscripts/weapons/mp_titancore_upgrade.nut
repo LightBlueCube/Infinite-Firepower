@@ -24,10 +24,6 @@ void function UpgradeCore_Init()
 #if SERVER
 var function OnWeaponNpcPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
-	if( weapon.HasMod( "tcp_ammo_core" ) )
-	{
-		weapon.GetWeaponOwner().Signal( "AmmoCoreStart" )
-	}
 	OnWeaponPrimaryAttack_UpgradeCore( weapon, attackParams )
 	return 1
 }
@@ -288,7 +284,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 			if( IsValid( owner.GetMainWeapons()[0] ) )
 			{
 				owner.GetMainWeapons()[0].AddMod( "tcp_ammo_core" )
-				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 1000 ) )
+				owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 140, 1000 ) )
 			}
 		}
 		if( !weapon.HasMod( "tcp_ammo_core" ) )
@@ -360,6 +356,7 @@ void function UpgradeCoreThink( entity weapon, float coreDuration )
 void function PressReloadCheck( entity owner, entity weapon )
 {
 	weapon.EndSignal( "OnDestroy" )
+	owner.Signal( "AmmoCoreStart" )
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "DisembarkingTitan" )
@@ -371,6 +368,8 @@ void function PressReloadCheck( entity owner, entity weapon )
 		{
 			if( !IsValid( owner ) )
 				return
+			if( !IsAlive( owner ) )
+				return
 			if( owner.GetMainWeapons().len() == 0 )
 				return
 			if( !owner.IsTitan() )
@@ -379,24 +378,25 @@ void function PressReloadCheck( entity owner, entity weapon )
 				return
 			if( owner.GetMainWeapons()[0].GetWeaponClassName() != "mp_titanweapon_xo16_shorty" )
 				return
-			owner.GetMainWeapons()[0].SetWeaponPrimaryClipCount( 0 )
 			owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 1140 )
 			owner.GetMainWeapons()[0].RemoveMod( "tcp_ammo_core" )
 		}
 	)
 
 	owner.GetMainWeapons()[0].SetWeaponPrimaryAmmoCount( 0 )
-	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 150, 1000 )
+	float clip = min( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) + 140, 1000 )
 	while( true )
 	{
 		WaitFrame()
 		if( !IsValid( owner ) )
 			return
+		if( !IsAlive( owner ) )
+			return
 		if( owner.GetMainWeapons().len() == 0 )
 			return
 		if( IsValid( owner.GetMainWeapons()[0] ) )
 		{
-			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) < 1 )
+			if( owner.GetWeaponAmmoLoaded( owner.GetMainWeapons()[0] ) <= 60 )
 			{
 				return
 			}
