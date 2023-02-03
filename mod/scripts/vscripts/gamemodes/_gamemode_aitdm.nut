@@ -70,6 +70,14 @@ void function HideTeamScore()
 	OnThreadEnd(
 		function():( result )
 		{
+			Should_10x_TeamScore = false
+			foreach( player in GetPlayerArray() )
+			{
+				if( !IsValid( player ) )
+					continue
+				StopSoundOnEntity( player, "music_boomtown_22_embarkbt" )
+				StopSoundOnEntity( player, "music_wilds_17_titanfight" )
+			}
 			if( result.TimeOut )
 				return
 			ShouldHideTeamScore = false
@@ -88,11 +96,23 @@ void function HideTeamScore()
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
 	wait timeLimit - 70
+	bool MusicType = RandomInt( 2 ) == 0 ? true : false
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
 		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "", < 50, 50, 225 >, 255, 6 )
+		if( MusicType )
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "music_boomtown_22_embarkbt" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "music_boomtown_22_embarkbt" )
+		}
+		else
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
+		}
 	}
 	result.TimeOut <- true
 	ShouldHideTeamScore = false
@@ -113,6 +133,14 @@ void function HideTeamScore()
 		NSSendAnnouncementMessageToPlayer( player, "十倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 	}
 	Should_10x_TeamScore = true
+	wait 60
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		StopSoundOnEntity( player, "music_boomtown_22_embarkbt" )
+		StopSoundOnEntity( player, "music_wilds_17_titanfight" )
+	}
 	WaitForever()
 }
 
