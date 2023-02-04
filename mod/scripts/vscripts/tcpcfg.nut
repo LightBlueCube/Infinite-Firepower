@@ -71,7 +71,7 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"其他：野兽拥有北极星装备\"毒蛇推进器\"",
 								"--野牛--",
 								"启用：烈焰，携带至尊涂装",
-								"血量：15000（6格）",
+								"血量：12500（5格）",
 								"左栏位：隐身",
 								"中栏位：EMP陷阱[注释8]",
 								"[注释8]:表现为强力的声纳突波，效果为电弧场，落地后，等待1秒，开启5秒，伤害类型为EMP手雷，对装甲单位伤害为15 * 8，对非装甲单位伤害为1 * 8\n当单位进入伤害范围内时，每0.1秒获得一次上述伤害，且离开该范围前将一直拥有被EMP手雷击中的屏幕特效和减速等效果",
@@ -790,7 +790,7 @@ void function StartNukeWARN( entity owner )
 		if( IsValid( player ) )
 		{
 			StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
-			thread explode( player, owner )
+			thread NukeExplode( player, owner )
 		}
 	}
 	foreach ( entity npc in GetNPCArray() )
@@ -858,13 +858,13 @@ void function playerWARN( entity player, entity owner, int sec, bool Is10sec = f
 	}
 }
 
-void function explode( entity player, entity owner )
+void function NukeExplode( entity player, entity owner )
 {
 	if( IsValid( player ) )
 	{
-		for (int value = 4; value > 0; value = value - 1)
+		for (int value = 2; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "skyway_scripted_risingworld_platform11B_rock6_explo" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode_OLD" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "skyway_scripted_risingworld_platform5_left_explode" )
 			Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 400, 200, 10 )
 		}
@@ -877,7 +877,6 @@ void function explode( entity player, entity owner )
 	if( IsValid( player ) )
 	{
 		StopSoundOnEntity( player, "goblin_dropship_explode_OLD" )
-		StopSoundOnEntity( player, "skyway_scripted_risingworld_platform11B_rock6_explo" )
 		StopSoundOnEntity( player, "skyway_scripted_risingworld_platform5_left_explode" )
 	}
 	wait 0.1
@@ -888,13 +887,8 @@ void function explode( entity player, entity owner )
 		player.FreezeControlsOnServer()
 		for (int value = 2; value > 0; value = value - 1)
 		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode_OLD" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "skyway_scripted_titanhill_mortar_explode" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "corporate_spectre_death_explode" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "Hermes_Explode_Temp" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "incendiary_trap_explode_large" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "s2s_goblin_explode" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
 		}
 	}
@@ -1165,7 +1159,7 @@ void function OnTitanfall( entity titan )
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 	{
 		soul.s.TitanHasBeenChange <- true
-		SendHudMessage(player, "已启用巨妖泰坦装备，取消至尊泰坦以使用原版强力",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
+		SendHudMessage(player, "已启用巨妖泰坦装备，取消至尊泰坦以使用原版军团",  -1, 0.3, 200, 200, 225, 0, 0.15, 5, 1);
 		soul.s.titanTitle <- "巨妖"
 		soul.s.shouldFPEmbark <- true
 		soul.s.classicExecution <- true
