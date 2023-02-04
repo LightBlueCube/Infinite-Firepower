@@ -86,7 +86,7 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"启用：离子，携带至尊涂装",
 								"血量：10000（4格）",
 								"左栏位：自充能涡旋防护罩[注释11]",
-								"[注释11]:涡旋盾消耗速度 2.0 -> 6.0，至少需要剩余的能量 >= 100 才可以开启，当武器击中涡旋盾时，增加能量\n计算公式为 近距离对装甲单位伤害 / 1250 = 要增加的百分比 如果要增加的百分比 <= 10% 那么用该计算公式: near_val / 625 = 要增加的百分比",
+								"[注释11]:涡旋盾消耗速度 2.0 -> 4.0，至少需要剩余的能量 >= 100 才可以开启，当武器击中涡旋盾时，增加能量\n计算公式为 近距离对装甲单位伤害 / 1250 = 要增加的百分比 如果要增加的百分比 <= 10% 那么用该计算公式: near_val / 625 = 要增加的百分比",
 								"中栏位：EMP炸弹[注释12]",
 								"[注释12]:表现为强力的声纳突波，效果为电弧场，启动后消耗 当前能量 / 2，落地后，开启0.5秒，伤害类型为EMP手雷\n对装甲单位伤害为 5 * 8，对非装甲单位伤害为 1 * 8，当单位进入伤害范围内时\n每0.1秒获得一次上述伤害，且离开该范围前将一直拥有被EMP手雷击中的屏幕特效和减速等效果",
 								"右栏位：闪光束[注释13]",
@@ -889,7 +889,6 @@ void function NukeExplode( entity player, entity owner )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "Hermes_Explode_Temp" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
 		}
 	}
 	wait 0.2
