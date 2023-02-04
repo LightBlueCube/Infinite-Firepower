@@ -193,7 +193,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 	int teamScore
 	int playerScore
 	string eventName
-	bool IsNPC = attacker.IsNPC()
+	bool IsPlayer = attacker.IsPlayer()
 
 	// Handle AI, marvins aren't setup so we check for them to prevent crash
 	if ( victim.IsNPC() && victim.GetClassName() != "npc_marvin" )
@@ -239,22 +239,22 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 			TEAM_MILITIA_HideScore += teamScore
 		else if( attacker.GetTeam() == TEAM_IMC )
 			TEAM_IMC_HideScore += teamScore
-		if( !IsNPC )
+		if( IsPlayer )
 			attacker.s.HideScore += playerScore
 	}
 	else if( Should_10x_TeamScore )
 	{
 		AddTeamScore( attacker.GetTeam(), teamScore * 10 )
-		if( !IsNPC )
-			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore * 10 )
+		if( IsPlayer )
+			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
 	}
 	else
 	{
 		AddTeamScore( attacker.GetTeam(), teamScore )
-		if( !IsNPC )
+		if( IsPlayer )
 			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
 	}
-	if( !IsNPC )
+	if( IsPlayer )
 		attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
 
@@ -544,7 +544,7 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	else if( Should_10x_TeamScore )
 	{
 		AddTeamScore( player.GetTeam(), 10 )
-		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 10 )
+		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
 	}
 	else
 	{
