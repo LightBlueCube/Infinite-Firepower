@@ -255,7 +255,7 @@ const CHARGEBALL_CHARGE_FX_1P = $"wpn_arc_cannon_charge_fp"
 const CHARGEBALL_CHARGE_FX_3P = $"wpn_arc_cannon_charge"
 
 const int CHARGEBALL_LIGHTNING_DAMAGE = 250 // uncharged, only fires 1 ball
-const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 50
+const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED = 20
 const int CHARGEBALL_LIGHTNING_DAMAGE_CHARGED_MOD = 85
 
 var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon, WeaponPrimaryAttackParams attackParams )
