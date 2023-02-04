@@ -82,7 +82,7 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 	weapon.SetWeaponChargeFractionForced(1.0)
 	if( weapon.HasMod( "charge_ball" ) )
-		return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) / 3
+		return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) / 2
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 #if SERVER
@@ -190,7 +190,7 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 				}
 				else
 				{
-					shieldRestoreAmount = 1000
+					shieldRestoreAmount = 2500
 				}
 			}
 		}
