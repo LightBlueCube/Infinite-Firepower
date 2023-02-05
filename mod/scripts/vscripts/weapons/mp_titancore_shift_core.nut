@@ -423,8 +423,6 @@ void function tcp_arc_wave( entity weapon, WeaponPrimaryAttackParams attackParam
 	CreateHighlanderArcWave( weapon, attackParams, 0.0 )
 	CreateHighlanderArcWave( weapon, attackParams, 0.1 )
 	CreateHighlanderArcWave( weapon, attackParams, -0.1 )
-	CreateHighlanderArcWave( weapon, attackParams, 0.4 )
-	CreateHighlanderArcWave( weapon, attackParams, -0.4 )
 	float delay = weapon.GetWeaponSettingFloat( eWeaponVar.charge_cooldown_delay )
 	thread Shift_Core_End( weapon, owner, delay )
 }
@@ -503,8 +501,8 @@ bool function CreateEmpWaveSegment( entity projectile, int projectileCount, enti
 		pos,
 		projectile.GetOwner(), //attacker
 		inflictor, //inflictor
-		1250,
-		1250,
+		1000,
+		1000,
 		112, // inner radius
 		112, // outer radius
 		SF_ENVEXPLOSION_NO_DAMAGEOWNER | SF_ENVEXPLOSION_MASK_BRUSHONLY | SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,

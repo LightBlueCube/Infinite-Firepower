@@ -28,7 +28,7 @@ WeaponData
 			"explosion_damage_heavy_armor"					"600"
 
 			"fire_rate"   									"--0.25"
-			"ammo_clip_size"   								"6"
+			"ammo_clip_size"   								"10"
 		}
 		burn_mod_titan_40mm
 		{
