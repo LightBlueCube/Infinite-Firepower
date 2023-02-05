@@ -228,6 +228,22 @@ void function TitanChangePro_Callbacks()
 
 void function UseTimeCheck()
 {
+	int UseTime_1 = 0
+	int UseTime_2 = 0
+	int UseTime_3 = 0
+	int UseTime_4 = 0
+	int UseTime_5 = 0
+	int UseTime_6 = 0
+	int UseTime_7 = 0
+
+	int UseTime_ModTitan_1 = 0
+	int UseTime_ModTitan_2 = 0
+	int UseTime_ModTitan_3 = 0
+	int UseTime_ModTitan_4 = 0
+	int UseTime_ModTitan_5 = 0
+	int UseTime_ModTitan_6 = 0
+	int UseTime_ModTitan_7 = 0
+
 	while( true )
 	{
 		wait 1
@@ -245,60 +261,132 @@ void function UseTimeCheck()
 				continue
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 			{
-				printt( "UseTimeCheck: Titan_1 add 1 sec" )
+				UseTime_1 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
 			{
-				printt( "UseTimeCheck: Titan_2 add 1 sec" )
+				UseTime_2 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
 			{
-				printt( "UseTimeCheck: Titan_3 add 1 sec" )
+				UseTime_3 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
 			{
-				printt( "UseTimeCheck: Titan_4 add 1 sec" )
+				UseTime_4 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 			{
-				printt( "UseTimeCheck: Titan_5 add 1 sec" )
+				UseTime_5 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
 			{
-				printt( "UseTimeCheck: Titan_6 add 1 sec" )
+				UseTime_6 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( player.GetCamo() != -1 || player.GetSkin() != 3 ) )	//帝王
 			{
-				printt( "UseTimeCheck: Titan_7 add 1 sec" )
+				UseTime_7 += 1
 			}
 			//// ModTitan ////
 			if( player.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//野兽
 			{
-				printt( "UseTimeCheck: ModTitan_1 add 1 sec" )
+				UseTime_ModTitan_1 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && player.GetCamo() == -1 && player.GetSkin() == 3 )	//远征
 			{
-				printt( "UseTimeCheck: ModTitan_2 add 1 sec" )
+				UseTime_ModTitan_2 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )		//野牛
 			{
-				printt( "UseTimeCheck: ModTitan_3 add 1 sec" )
+				UseTime_ModTitan_3 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )		//执政官
 			{
-				printt( "UseTimeCheck: ModTitan_4 add 1 sec" )
+				UseTime_ModTitan_4 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )		//游侠
 			{
-				printt( "UseTimeCheck: ModTitan_5 add 1 sec" )
+				UseTime_ModTitan_5 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )		//天图
 			{
-				printt( "UseTimeCheck: ModTitan_6 add 1 sec" )
+				UseTime_ModTitan_6 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )		//巨妖
 			{
-				printt( "UseTimeCheck: ModTitan_7 add 1 sec" )
+				UseTime_ModTitan_7 += 1
+			}
+
+			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_1 add 1 min" )
+				UseTime_1 = 0
+			}
+			if( UseTime_2 % 60 == 0	&& UseTime_2 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_2 add 1 min" )
+				UseTime_2 = 0
+			}
+			if( UseTime_3 % 60 == 0	&& UseTime_3 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_3 add 1 min" )
+				UseTime_3 = 0
+			}
+			if( UseTime_4 % 60 == 0	&& UseTime_4 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_4 add 1 min" )
+				UseTime_4 = 0
+			}
+			if( UseTime_5 % 60 == 0	&& UseTime_5 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_5 add 1 min" )
+				UseTime_5 = 0
+			}
+			if( UseTime_6 % 60 == 0	&& UseTime_6 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_6 add 1 min" )
+				UseTime_6 = 0
+			}
+			if( UseTime_7 % 60 == 0	&& UseTime_7 != 0 )
+			{
+				printt( "UseTimeCheck: Titan_7 add 1 min" )
+				UseTime_7 = 0
+			}
+			//// ModTitan ////
+			if( UseTime_ModTitan_1 % 60 == 0 && UseTime_ModTitan_1 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_1 add 1 min" )
+				UseTime_ModTitan_1 = 0
+			}
+			if( UseTime_ModTitan_2 % 60 == 0 && UseTime_ModTitan_2 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_2 add 1 min" )
+				UseTime_ModTitan_2 = 0
+			}
+			if( UseTime_ModTitan_3 % 60 == 0 && UseTime_ModTitan_3 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_3 add 1 min" )
+				UseTime_ModTitan_3 = 0
+			}
+			if( UseTime_ModTitan_4 % 60 == 0 && UseTime_ModTitan_4 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_4 add 1 min" )
+				UseTime_ModTitan_4 = 0
+			}
+			if( UseTime_ModTitan_5 % 60 == 0 && UseTime_ModTitan_5 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_5 add 1 min" )
+				UseTime_ModTitan_5 = 0
+			}
+			if( UseTime_ModTitan_6 % 60 == 0 && UseTime_ModTitan_6 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_6 add 1 min" )
+				UseTime_ModTitan_6 = 0
+			}
+			if( UseTime_ModTitan_7 % 60 == 0 && UseTime_ModTitan_7 != 0 )
+			{
+				printt( "UseTimeCheck: ModTitan_7 add 1 min" )
+				UseTime_ModTitan_7 = 0
 			}
 		}
 	}
