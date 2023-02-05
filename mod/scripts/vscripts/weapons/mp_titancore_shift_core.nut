@@ -389,6 +389,7 @@ void function RestorePlayerWeapons( entity player, entity weapon = null )
 
 void function Shift_Core_UseMeter( entity player )
 {
+	entity weapon = player.GetOffhandWeapon( OFFHAND_EQUIPMENT )
 	if ( weapon.HasMod( "tcp_dash_core" ) || weapon.HasMod( "tcp_arc_wave" ) )
 		return
 
