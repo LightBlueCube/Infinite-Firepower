@@ -94,7 +94,7 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"主武器：核裂枪[注释14]",
 								"[注释14]:表现为离子的分裂枪，伤害为 原版分裂枪伤害 * 2 （对非装甲单位伤害 近距离 50 远距离 40  对装甲单位伤害 近距离 160 远距离 120）\n非瞄准射击一发，消耗30能量，瞄准射击三发，消耗90能量，如果能量耗光，非瞄准每射击一次将消耗2发弹药，瞄准每射击一次将消耗6发弹药",
 								"核心：雷暴[注释15]",
-								"[注释15]:表现为开启后，朝视角前方释放五道（0°,±10°,±40°）电弧波，单道伤害为1250，可以被任何盾挡住且不会扣除盾的血量或耐久",
+								"[注释15]:表现为开启后，朝视角前方释放3道（0°,±10°）电弧波，单道伤害为1000，可以被任何盾挡住且不会扣除盾的血量或耐久",
 								"其他：消耗能量后需等待2.0秒后才会开始自行恢复（0.5 -> 2.0）",
 								"--游侠--",
 								"启用：浪人，携带至尊涂装",
@@ -118,9 +118,9 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"中栏位：幻影[注释21]",
 								"[注释21]:表现为幻影铁驭，使用后表现为生成一个和你一模一样的泰坦幻影，抬头显示的假血量取当前血量，如果黄血则血量取 当前 * 4\n冷却时间为20秒，满充能可使用2次，不可以在仅往左移动或仅往右移动时使用",
 								"右栏位：绊雷[注释22]",
-								"[注释22]:表现为火箭弹群，发射3个黏性绊雷，落地后存在30秒，如果敌方单位靠近则立刻爆炸\n伤害为 对非装甲单位 1000 对装甲单位 500，无衰减范围 0-140 衰减范围 140-320 范围超过320无伤害",
+								"[注释22]:表现为火箭弹群，发射1个黏性绊雷，落地后存在30秒，如果敌方单位靠近则立刻爆炸\n伤害为 对非装甲单位 1500 对装甲单位 500，无衰减范围 0-140 衰减范围 140-320 范围超过320无伤害",
 								"主武器：40cm机炮[注释24]",
-								"[注释24]:伤害为  200 对装甲单位 900 溅射对非装甲单位 99 溅射对装甲单位 600，无衰减范围 0-100 衰减范围 100-225 范围超过225无伤害\n射速为1.5/s，弹匣容量为6发，核心期间全自动，射速为2/s",
+								"[注释24]:伤害为  200 对装甲单位 900 溅射对非装甲单位 99 溅射对装甲单位 600，无衰减范围 0-100 衰减范围 100-225 范围超过225无伤害\n射速为1.5/s，弹匣容量为10发，核心期间全自动，射速为2/s",
 								"核心：破壞核心[注释25]",
 								"[注释25]:啟用時大幅提升武器殺傷力。",
 								"--巨妖--",
@@ -207,23 +207,6 @@ void function IsMacro( entity player )
 	}
 }
 
-
-int UseTime_1 = 0
-int UseTime_2 = 0
-int UseTime_3 = 0
-int UseTime_4 = 0
-int UseTime_5 = 0
-int UseTime_6 = 0
-int UseTime_7 = 0
-
-int UseTime_ModTitan_1 = 0
-int UseTime_ModTitan_2 = 0
-int UseTime_ModTitan_3 = 0
-int UseTime_ModTitan_4 = 0
-int UseTime_ModTitan_5 = 0
-int UseTime_ModTitan_6 = 0
-int UseTime_ModTitan_7 = 0
-
 void function TitanChangePro_Callbacks()
 {
 	RegisterSignal( "NukeStart" )
@@ -245,9 +228,25 @@ void function TitanChangePro_Callbacks()
 
 void function UseTimeCheck()
 {
+	int UseTime_1 = 0
+	int UseTime_2 = 0
+	int UseTime_3 = 0
+	int UseTime_4 = 0
+	int UseTime_5 = 0
+	int UseTime_6 = 0
+	int UseTime_7 = 0
+
+	int UseTime_ModTitan_1 = 0
+	int UseTime_ModTitan_2 = 0
+	int UseTime_ModTitan_3 = 0
+	int UseTime_ModTitan_4 = 0
+	int UseTime_ModTitan_5 = 0
+	int UseTime_ModTitan_6 = 0
+	int UseTime_ModTitan_7 = 0
+
 	while( true )
 	{
-		wait 10
+		wait 1
 		foreach( player in GetPlayerArray() )
 		{
 			if( !IsValid( player ) )
@@ -256,60 +255,60 @@ void function UseTimeCheck()
 				continue
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 			{
-				UseTime_1 += 10
+				UseTime_1 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
 			{
-				UseTime_2 += 10
+				UseTime_2 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
 			{
-				UseTime_3 += 10
+				UseTime_3 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
 			{
-				UseTime_4 += 10
+				UseTime_4 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 			{
-				UseTime_5 += 10
+				UseTime_5 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
 			{
-				UseTime_6 += 10
+				UseTime_6 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( player.GetCamo() != -1 || player.GetSkin() != 3 ) )	//帝王
 			{
-				UseTime_7 += 10
+				UseTime_7 += 1
 			}
 			//// ModTitan ////
 			if( player.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//野兽
 			{
-				UseTime_ModTitan_1 += 10
+				UseTime_ModTitan_1 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && player.GetCamo() == -1 && player.GetSkin() == 3 )	//远征
 			{
-				UseTime_ModTitan_2 += 10
+				UseTime_ModTitan_2 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )		//野牛
 			{
-				UseTime_ModTitan_3 += 10
+				UseTime_ModTitan_3 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )		//执政官
 			{
-				UseTime_ModTitan_4 += 10
+				UseTime_ModTitan_4 += 1
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )		//游侠
 			{
-				UseTime_ModTitan_5 += 10
+				UseTime_ModTitan_5 += 1
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )		//天图
 			{
-				UseTime_ModTitan_6 += 10
+				UseTime_ModTitan_6 += 1
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )		//巨妖
 			{
-				UseTime_ModTitan_7 += 10
+				UseTime_ModTitan_7 += 1
 			}
 
 			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )

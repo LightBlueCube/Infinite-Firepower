@@ -33,15 +33,15 @@ WeaponData
 
 		tcp_mine
 		{
-			"ammo_per_shot"									"40"
-			"burst_fire_count"								"3"
-			"fire_rate"   									"3"
+			"ammo_per_shot"									"120"
+			"burst_fire_count"								"1"
+			//"fire_rate"   									"3"
 			"damage_near_distance"							"800"
 			"damage_far_distance" 							"1200"
 			"damage_near_value"   							"0"
 			"damage_far_value"								"0"
 			"explosion_damage"								"1000"
-			"explosion_damage_heavy_armor"					"500"
+			"explosion_damage_heavy_armor"					"1500"
 			"explosion_inner_radius"  						"140"
 			"explosionradius" 								"320"
 			"projectile_lifetime"							"15.0"
