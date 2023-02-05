@@ -389,7 +389,7 @@ void function RestorePlayerWeapons( entity player, entity weapon = null )
 
 void function Shift_Core_UseMeter( entity player )
 {
-	if ( IsMultiplayer() )
+	if ( weapon.HasMod( "tcp_dash_core" ) || weapon.HasMod( "tcp_arc_wave" ) )
 		return
 
 	entity soul = player.GetTitanSoul()
