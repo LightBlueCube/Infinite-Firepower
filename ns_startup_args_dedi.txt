@@ -1,4 +1,0 @@
-+setplaylist aitdm
-+mp_gamemode aitdm
-+setplaylistvaroverrides "max_players 12 scorelimit 2048 timelimit 24 earn_meter_pilot_multiplier 4 earn_meter_titan_multiplier 2 titan_shield_regen 1 classic_rodeo 1"
-+map mp_glitch
