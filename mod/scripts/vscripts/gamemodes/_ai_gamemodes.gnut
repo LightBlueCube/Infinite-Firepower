@@ -123,16 +123,16 @@ void function AiGameModes_SpawnDropPod( vector pos, vector rot, int team, string
 	ActivateFireteamDropPod( pod, guys )
 }
 
+const float REAPER_WARPFALL_DELAY = 6.0
 void function AiGameModes_SpawnReaper( vector pos, vector rot, int team, string aiSettings = "", void functionref( entity reaper ) reaperHandler = null )
 {
-	// nessie fix
-	thread Reaper_Spawnpoint( pos, team, 11.2 )
+	thread Reaper_Spawnpoint( pos, team, REAPER_WARPFALL_DELAY + 1.2 ) // reaper takes 1.2s to warpfall
 
-	wait 10
+	wait REAPER_WARPFALL_DELAY
 	entity reaper = CreateSuperSpectre( team, pos, rot )
 	// reaper highlight
 	Highlight_SetFriendlyHighlight( reaper, "sp_enemy_pilot" )
-	reaper.Highlight_SetParam( 1, 0, < 3,3,3 > )
+	reaper.Highlight_SetParam( 1, 0, < 1,1,1 > )
 	Highlight_SetEnemyHighlight( reaper, "enemy_titan" )
 
 	SetSpawnOption_Titanfall( reaper )
@@ -162,6 +162,7 @@ void function Reaper_Spawnpoint( vector origin, int team, float impactTime, bool
 		SetTeam( effectFriendly, team )
 		EffectSetControlPointVector( effectFriendly, 1, < 128,188,255 > )
 		effectFriendly.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+		effectFriendly.DisableHibernation() // prevent it from fading out
 		targetEffects.append( effectFriendly )
 	}
 
@@ -169,6 +170,7 @@ void function Reaper_Spawnpoint( vector origin, int team, float impactTime, bool
 	SetTeam( effectEnemy, team )
 	EffectSetControlPointVector( effectEnemy, 1, < 255,99,0 > )
 	effectEnemy.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY
+	effectEnemy.DisableHibernation() // prevent it from fading out
 	targetEffects.append( effectEnemy )
 
 	wait impactTime

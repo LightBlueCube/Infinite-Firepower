@@ -240,6 +240,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	entity effectFriendly = StartParticleEffectInWorld_ReturnEntity( index, evacNode.GetOrigin(), < 0,0,0 > )
 	SetTeam( effectFriendly, evacTeam )
 	effectFriendly.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+	effectFriendly.DisableHibernation() // prevent it from fading out
 
 	wait 0.5 // need to wait here, or the target won't appear on clients for some reason
 	// eta until arrive
@@ -252,7 +253,6 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	entity dropship = CreateDropship( evacTeam, evacNode.GetOrigin(), evacNode.GetAngles() )
 
 	thread DropShipTempHide( dropship ) // prevent showing model and health bar on spawn
-	dropship.SetModel( evacShip.shipModel )
 	dropship.SetValueForModelKey( evacShip.shipModel )
 
 	dropship.SetMaxHealth( EVAC_SHIP_HEALTH )
@@ -260,6 +260,9 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	dropship.SetShieldHealth( EVAC_SHIP_SHIELDS )
 	SetTargetName( dropship, "#NPC_EVAC_DROPSHIP" )
 	DispatchSpawn( dropship )
+
+	// required to make player shoot through ship
+	dropship.SetModel( evacShip.shipModel )
 
 	// reduce nuclear core's damage
 	AddEntityCallback_OnDamaged( dropship, EvacDropshipDamaged )
@@ -326,7 +329,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 
 	// setup evac trigger
 	entity trigger = CreateEntity( "trigger_cylinder" )
-	trigger.SetRadius( 150 )
+	trigger.SetRadius( 200 ) // was 150, vanilla's is surly bigger
 	trigger.SetAboveHeight( 100 )
 	trigger.SetBelowHeight( 100 )
 	trigger.SetOrigin( dropship.GetOrigin() )
@@ -359,7 +362,10 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	// holster all weapons
 	foreach ( entity player in dropship.s.evacSlots )
 		if ( IsValid( player ) )
+		{
+			Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" ) // hud should be disabled here
 			player.HolsterWeapon()
+		}
 
 	// fly away
 	dropship.Signal( "EvacShipLeaves" )
@@ -373,8 +379,10 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	wait dropship.GetSequenceDuration( "cd_dropship_rescue_side_end" ) - WARPINFXTIME
 
 	foreach ( entity player in dropship.s.evacSlots )
+	{
 		if ( IsValid( player ) )
 			Remote_CallFunction_NonReplay( player, "ServerCallback_PlayScreenFXWarpJump" )
+	}
 
 	wait WARPINFXTIME
 
@@ -414,7 +422,6 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 
 		// skybox
 		player.SetSkyCamera( GetEnt( SKYBOXSPACE ) )
-		Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" )
 		Remote_CallFunction_NonReplay( player, "ServerCallback_SetClassicSkyScale", dropship.GetEncodedEHandle(), 0.7 )
 		Remote_CallFunction_NonReplay( player, "ServerCallback_SetMapSettings", 4.0, false, 0.4, 0.125 )
 
@@ -504,11 +511,15 @@ void function CheckIfAnyPlayerLeft( int evacTeam )
 	OnThreadEnd(
 		function() : ( evacTeam )
 		{
+			if( GetPlayerArrayOfTeam_Alive( evacTeam ).len() == 0 ) // only call these if team wiped
+			{
 			SetTeamActiveObjective( evacTeam, "EG_DropshipExtractEvacPlayersKilled" )
 			SetTeamActiveObjective( GetOtherTeam( evacTeam ), "EG_StopExtractEvacPlayersKilled" )
 			thread EvacEpilogueCompleted( null )
+			}
 		}
 	)
+
 	while( true )
 	{
 		if( GetPlayerArrayOfTeam_Alive( evacTeam ).len() == 0 )

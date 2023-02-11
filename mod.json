@@ -1,7 +1,7 @@
 {
     "Name": "Infinite-Firepower",
     "Description": "Infinite-Firepower",
-    "Authors": ["VoyageDB","LightBlueCube(feiwu)"],
+    "Authors": ["VoyageDB","LightBlueCube"],
     "LoadPriority": 101,
     "RequiredOnClient": false,
     "Scripts": [
@@ -9,7 +9,7 @@
             "Path": "tcpcfg.nut",
             "RunOn": "SERVER && MP",
             "ServerCallback": {
-                "After": "TitanChangePro_Callbacks"
+                "After": "InfiniteFirepower_Init"
             }
         }
     ]
