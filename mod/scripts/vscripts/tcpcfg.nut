@@ -1,6 +1,12 @@
 untyped //entity.s need this
-global function TitanChangePro_Callbacks
-global function MacroCheck_Threaded
+global function InfiniteFirepower_Init
+
+void function InfiniteFirepower_Init()
+{
+	RegisterSignal( "NukeStart" )
+	RegisterSignal( "StartReadingDocs" )
+
+}
 
 const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chathook 还有logsystem都是被整寄了\n所以现版本几乎没有什么能发送大量文字的方法\n所以想了这个分页法，所以阅读体验会比较差，因为一次只能显示不几行\n任何更新都会同步更新文档，常来看看！",
 								"特别鸣谢（名字按首字母顺序排列）\n[cmggy]\n[D3-3109]\n[DZ]\n[Pan-da32767]\n[VoyageDB]\n[wolf109909]\n[zxcPandora]",
@@ -143,87 +149,33 @@ const array<string> docs =    [ "前言\n因为Emma稳定发挥，broadcast chat
 								"想必你一定看完了吧，谢谢你，我尊重每一个有耐心看完文档的人，而不是那种有现成文档不看只会嗯问的人\n实际上，开这个模式四个月以来，遇到的这种人数不胜数，保守估计都得三位数了，总之，还是谢谢你耐心的看完了文档" ]
 
 
-void function MacroCheck_Threaded( entity player )
-{
-	if( !IsValid( player ) )
-		return
-	if( !player.IsTitan() )
-		return
 
-	player.EndSignal( "MacroCheck" )
-	table result = {}
-	result.NotMacro <- false
-	OnThreadEnd(
-		function():( player, result )
-		{
-			if( !IsValid( player ) )
-				return
-			if( !result.NotMacro )
-				thread IsMacro( player )
-		}
-	)
-	WaitFrame()
-	WaitFrame()
-	result.NotMacro = true
-}
-void function IsMacro( entity player )
-{
-	if( "PlayerUseMacro" in player.s )
-	{
-		player.s.PlayerUseMacro += 1
-		printt( "AntiCheats: PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" Times: "+ player.s.PlayerUseMacro +" EndMessage" )
-		if( player.s.PlayerUseMacro == 4 )
-		{
-			for( int i = 300; i > 0; i-- )
-			{
-				WaitFrame()
-				if( IsValid( player ) )
-					SendHudMessage( player, "侦测到您多次使用宏进行弹射操作，我们不推荐也不建议这么做\n如果您依旧多次使用宏，可能会进行封号操作", -1, 0.4, 200, 200, 225, 0, 0.0, 0.0, 1);
-			}
-		}
-		/*if( player.s.PlayerUseMacro == 6 )
-		{
-			printt( "AntiCheats: PlayerUseMacroAndLastWARN PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
-			for( int i = 600; i > 0; i-- )
-			{
-				WaitFrame()
-				if( IsValid( player ) )
-					SendHudMessage( player, "侦测到您依旧多次使用宏进行弹射操作，这是针对您的最后一次警告\n你已经被警告过了", -1, 0.4, 255, 0, 0, 0, 0.0, 0.0, 1);
-			}
-		}
-		if( player.s.PlayerUseMacro > 6 )
-		{
-			if( !IsValid( player ) )
-				return
-			KickedPlayerUID.append( player.GetUID() )
-			printt( "AntiCheats: PlayerUseMacroAndKicked PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
-			ServerCommand( "kickid "+ player.GetUID() )
-		}*/
-	}
-	else
-	{
-		player.s.PlayerUseMacro <- 1
-		printt( "AntiCheats: PlayerName:"+ player.GetPlayerName() +" PlayerUID: "+ player.GetUID() +" EndMessage" )
-	}
-}
 
-void function TitanChangePro_Callbacks()
+void function RandomMap_Init()
 {
-	RegisterSignal( "NukeStart" )
-	RegisterSignal( "StartReadingDocs" )
-
-	AddSpawnCallback( "npc_titan", OnTitanfall )
-	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+}
+
+void function TitanChange_Init()
+{
+	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_OnPilotBecomesTitan( SetPlayerTitanTitle )
-	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnUpdateDerivedPlayerTitanLoadout( ApplyFDDerviedUpgrades )
+}
+
+void function DocsSystem_Init()
+{
+	AddClientCommandCallback( "docs", ClientCommand_docs );
+}
+
+void function NukeTitanAndNuclearBomb_Init()
+{
+	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddClientCommandCallback( "hw", NukeTitan );
-	AddClientCommandCallback( "docs", ClientCommand_docs );
-	thread UseTimeCheck()
 }
 
 void function UseTimeCheck()
@@ -246,7 +198,7 @@ void function UseTimeCheck()
 
 	while( true )
 	{
-		wait 1
+		wait 10
 		foreach( player in GetPlayerArray() )
 		{
 			if( !IsValid( player ) )
@@ -261,60 +213,60 @@ void function UseTimeCheck()
 				continue
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 			{
-				UseTime_1 += 1
+				UseTime_1 += 10
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
 			{
-				UseTime_2 += 1
+				UseTime_2 += 10
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
 			{
-				UseTime_3 += 1
+				UseTime_3 += 10
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
 			{
-				UseTime_4 += 1
+				UseTime_4 += 10
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 			{
-				UseTime_5 += 1
+				UseTime_5 += 10
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
 			{
-				UseTime_6 += 1
+				UseTime_6 += 10
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( player.GetCamo() != -1 || player.GetSkin() != 3 ) )	//帝王
 			{
-				UseTime_7 += 1
+				UseTime_7 += 10
 			}
 			//// ModTitan ////
 			if( player.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//野兽
 			{
-				UseTime_ModTitan_1 += 1
+				UseTime_ModTitan_1 += 10
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && player.GetCamo() == -1 && player.GetSkin() == 3 )	//远征
 			{
-				UseTime_ModTitan_2 += 1
+				UseTime_ModTitan_2 += 10
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )		//野牛
 			{
-				UseTime_ModTitan_3 += 1
+				UseTime_ModTitan_3 += 10
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )		//执政官
 			{
-				UseTime_ModTitan_4 += 1
+				UseTime_ModTitan_4 += 10
 			}
 			if( player.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )		//游侠
 			{
-				UseTime_ModTitan_5 += 1
+				UseTime_ModTitan_5 += 10
 			}
 			if( player.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )		//天图
 			{
-				UseTime_ModTitan_6 += 1
+				UseTime_ModTitan_6 += 10
 			}
 			if( player.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )		//巨妖
 			{
-				UseTime_ModTitan_7 += 1
+				UseTime_ModTitan_7 += 10
 			}
 
 			if( UseTime_1 % 60 == 0 && UseTime_1 != 0 )

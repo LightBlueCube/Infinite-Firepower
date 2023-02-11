@@ -4,6 +4,20 @@
 
 如需使用本仓库请遵循[GPLv3][GPLv3]协议
 
+# 代码建议别看，全是屎山（
+
+默认提供了4个Init，可以按照自行需求搭配，默认只有2倍核心的平衡更新
+
+void function RandomMap_Init()    //对局结束后换图
+
+void function TitanChange_Init()    //至尊泰坦替换，神盾血
+
+void function DocsSystem_Init()    //文档系统
+
+void function NukeTitanAndNuclearBomb_Init()    //核武泰坦和核弹
+
+----
+
 有啥服务器的问题和bug反馈也可以发这
 
 ## 特别鸣谢（名字按首字母顺序排列）：
@@ -12,9 +26,7 @@
 
 [D3-3109][D3-3109]
 
-[DZ][DZ][^1]
-
-[^1]:没找到DZ的GitHub账户，先用他个人主页代替
+[DZ][DZ]
 
 [Pan-da32767][Pan-da32767]
 
@@ -28,9 +40,10 @@
 
 泰坦获取速度 \* 4，泰坦核心获取速度 \* 2，泰坦脱战回盾
 
-ai伤害取默认[^2]，视力取战役ai，瞄准精度为最大，取消开火限制
+ai伤害取默认[^1]，视力取战役ai，瞄准精度为最大，取消开火限制[^2]
 
-[^2]:原版ai伤害大概为默认的四分之一
+[^1]:原版ai伤害大概为默认的四分之一
+[^2]:原版ai只能每次打几发子弹点射泼水，现在解除限制后只要ai允许，可以直接打空弹匣
 
 增加步枪兵和幽灵战士还有潜行者能用的武器，分别为：火箭发射器，电能步枪，磁能手榴弹
 
@@ -292,5 +305,5 @@ MK5智障手枪对非装甲单位伤害 40 -> 20  射击模式 semi -> auto
 [cmggy]:https://github.com/cmggy
 [Pan-da32767]:https://github.com/Pan-da32767
 [zxcPandora]:https://github.com/zxcPandora
-[DZ]:https://inchaos.icu/
+[DZ]:https://github.com/Ghroth-follower
 [wolf109909]:https://github.com/wolf109909
