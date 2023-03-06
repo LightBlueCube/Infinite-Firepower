@@ -399,7 +399,7 @@ void function Shift_Core_UseMeter( entity player )
 
 	if ( remainingTime > 0 )
 	{
-		const float USE_TIME = 5
+		const float USE_TIME = 4
 
 		remainingTime = max( remainingTime - USE_TIME, 0 )
 		float startTime = soul.GetCoreChargeStartTime()

@@ -14,13 +14,6 @@ WeaponData
 	"charge_sound_3p"								"ronin_sword_draw_02_3p"
 	"critical_hit"									"0"
 
-	MP_BASE
-	{
-		"core_duration"								"20.0" //Needs to match charge_cooldown_delay
-		"charge_cooldown_delay"   					"20.0"
-		"charge_cooldown_time"						"21.0"
-	}
-
 	Mods
 	{
 		fd_duration
