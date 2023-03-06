@@ -1,28 +1,19 @@
 {
 	"folders": [
 		{
-			"name": "TitanFall's VPK ALL",
-			"path": "D:/TitanFall's VPK ALL"
-		},
-		{
-			"name": "mods",
-			"path": "D:/SteamLibrary/steamapps/common/Titanfall2/R2Northstar/mods"
-		},
-		{
-			"name": "Infinite-Firepower",
 			"path": "."
 		},
 		{
-			"path": "../THYLORD_SANDBOX/data/mods"
+			"path": "C:/Users/LightBlueCube/Desktop/Titanfall work-space/englishclient_frontend.bsp.pak000_dir"
 		},
 		{
-			"path": "../Super.Mixed.Game"
+			"path": "C:/Users/LightBlueCube/Desktop/Titanfall work-space/englishclient_mp_common.bsp.pak000_dir"
 		},
 		{
-			"path": "../NorthStarCN.FD"
+			"path": "C:/Users/LightBlueCube/Desktop/Titanfall work-space/NorthStarCN.FD"
 		},
 		{
-			"path": "../1.12.5"
+			"path": "C:/Users/LightBlueCube/Desktop/Titanfall work-space/R2Northstar"
 		}
 	]
 }

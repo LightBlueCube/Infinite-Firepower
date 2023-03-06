@@ -5,6 +5,17 @@ void function InfiniteFirepower_Init()
 {
 	RegisterSignal( "NukeStart" )
 	RegisterSignal( "StartReadingDocs" )
+
+	RandomMap_Init()    //对局结束后换图
+
+	TitanChange_Init()    //至尊泰坦替换，神盾血
+
+	DocsSystem_Init()    //文档系统
+
+	NukeTitanAndNuclearBomb_Init()    //核武泰坦和核弹
+
+	thread UseTimeCheck()
+
 }
 
 const array<string> docs =    [ "我们的QQ群：150381961",
@@ -52,7 +63,7 @@ const array<string> docs =    [ "我们的QQ群：150381961",
 								"帝王可以一直升级到9级，升级顺序为从3个一级升级到3个二级升级再到3个三级升级",
 								"帝王涡旋升级电烟对装甲单位dps 1350 -> 850",
 								"帝王没有神盾血量升级，血量为10000（4格），如果升级了高级崽种那么血量为15000（6格）",
-								"浪人剑核心持续时间 12 -> 20  开启时每当挥剑一次都减少5秒剩余时间",
+								"浪人剑核心开启时每当挥剑一次都减少4秒剩余时间",
 								"浪人剑封减伤 70% -> 50%  核心期间剑封减伤 85% -> 70%",
 								"离子镭射核心所有伤害 325 -> 300  持续时间 4.5 -> 5.0",
 								"火焰核心对装甲单位伤害 4500 -> 3500  对非装甲单位伤害 300 -> 200",
@@ -400,49 +411,64 @@ void function RandomMap()
 	switch( RandomInt )
 	{
 		case 0:
-			ServerCommand( "map mp_black_water_canal" )
+			if( GetMapName() != "mp_black_water_canal" )
+				ServerCommand( "map mp_black_water_canal" )
 			break
 		case 1:
-			ServerCommand( "map mp_complex3" )
+			if( GetMapName() != "mp_complex3" )
+				ServerCommand( "map mp_complex3" )
 			break
 		case 2:
-			ServerCommand( "map mp_crashsite3" )
+			if( GetMapName() != "mp_crashsite3" )
+				ServerCommand( "map mp_crashsite3" )
 			break
 		case 3:
-			ServerCommand( "map mp_drydock" )
+			if( GetMapName() != "mp_drydock" )
+				ServerCommand( "map mp_drydock" )
 			break
 		case 4:
-			ServerCommand( "map mp_eden" )
+			if( GetMapName() != "mp_eden" )
+				ServerCommand( "map mp_eden" )
 			break
 		case 5:
-			ServerCommand( "map mp_forwardbase_kodai" )
+			if( GetMapName() != "mp_forwardbase_kodai" )
+				ServerCommand( "map mp_forwardbase_kodai" )
 			break
 		case 6:
-			ServerCommand( "map mp_grave" )
+			if( GetMapName() != "mp_grave" )
+				ServerCommand( "map mp_grave" )
 			break
 		case 7:
-			ServerCommand( "map mp_homestead" )
+			if( GetMapName() != "mp_homestead" )
+				ServerCommand( "map mp_homestead" )
 			break
 		case 8:
-			ServerCommand( "map mp_thaw" )
+			if( GetMapName() != "mp_thaw" )
+				ServerCommand( "map mp_thaw" )
 			break
 		case 9:
-			ServerCommand( "map mp_angel_city" )
+			if( GetMapName() != "mp_angel_city" )
+				ServerCommand( "map mp_angel_city" )
 			break
 		case 10:
-			ServerCommand( "map mp_colony02" )
+			if( GetMapName() != "mp_colony02" )
+				ServerCommand( "map mp_colony02" )
 			break
 		case 11:
-			ServerCommand( "map mp_relic02" )
+			if( GetMapName() != "mp_relic02" )
+				ServerCommand( "map mp_relic02" )
 			break
 		case 12:
-			ServerCommand( "map mp_wargames" )
+			if( GetMapName() != "mp_wargames" )
+				ServerCommand( "map mp_wargames" )
 			break
 		case 13:
-			ServerCommand( "map mp_glitch" )
+			if( GetMapName() != "mp_glitch" )
+				ServerCommand( "map mp_glitch" )
 			break
 		case 14:
-			ServerCommand( "map mp_rise" )
+			if( GetMapName() != "mp_rise" )
+				ServerCommand( "map mp_rise" )
 			break
 		default:
 			break
