@@ -5,17 +5,6 @@ void function InfiniteFirepower_Init()
 {
 	RegisterSignal( "NukeStart" )
 	RegisterSignal( "StartReadingDocs" )
-
-	RandomMap_Init()    //对局结束后换图
-
-	TitanChange_Init()    //至尊泰坦替换，神盾血
-
-	DocsSystem_Init()    //文档系统
-
-	NukeTitanAndNuclearBomb_Init()    //核武泰坦和核弹
-
-	thread UseTimeCheck()
-
 }
 
 const array<string> docs =    [ "我们的QQ群：150381961",
