@@ -14,13 +14,9 @@ WeaponData
 		{
 		}
 
-		tcp
+		tcp_grapple
 		{
-			//给nut做识别用
-		}
-		tcp_fast_emp
-		{
-			//给nut做识别用
+			"regen_ammo_refill_rate"						"10"
 		}
 
 		tcp_smoke

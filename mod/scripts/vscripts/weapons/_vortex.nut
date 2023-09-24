@@ -573,6 +573,9 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 	VortexDrainedByImpact( vortexWeapon, weapon, projectile, damageType )
 	Vortex_NotifyAttackerDidDamage( expect entity( impactData.attacker ), owner, impactData.origin )
 
+	if ( vortexWeapon.HasMod( "shield_only" ) )
+		return true
+
 	if ( impactData.refireBehavior == VORTEX_REFIRE_ABSORB )
 		return true
 
@@ -638,43 +641,33 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	if( hasVortexRegen )
 	{
 		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 1250
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2
 		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 1250
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2
 
-		if( amount <= 0.1 )
+		if( amount == 0 )
 		{
 			if ( projectile )
-				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 625
+				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) ) / 2
 			else
-				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) ) / 625
+				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) ) / 2
 		}
 
-		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
 		{
 			// 离子版: 使用能量系统
 			entity owner = vortexWeapon.GetWeaponOwner()
 			int totalEnergy = owner.GetSharedEnergyTotal()		//最大
 			int currentEnergy = owner.GetSharedEnergyCount()	//当前
-			int AddEnergy = int( min( float( currentEnergy ) + float( totalEnergy ) * amount , float( totalEnergy ) ) ) - currentEnergy	//min( 当前 + 最大 * 增加量 , 最大 ) - 当前	= 需要增加的量
-			if( AddEnergy >= 0 )	//我tm也想不明白是b玩意是怎么算出0以下的值的
-				owner.AddSharedEnergy( AddEnergy )
-		}
-		else
-		{
-			// 普通版：使用充能条
-			// 对于涡旋盾和火盾这类充能武器来说，他们"充满"为不可用，所以要往0设置才算一直回复
-			//也就是状态为"1"，盾是用完的，状态为"0"，盾是满的，狗重生我真的爱死你了！
-			vortexWeapon.SetWeaponChargeFraction( max( vortexWeapon.GetWeaponChargeFraction() - amount, 0.0 ) )	//max( 当前 - 增加量, 0 ) = 增加后量，如果难以理解看这个 min( 当前 + 增加量, 最大 ) = 增加后量
+			int val = int( amount )
+			if( currentEnergy - val < 0 )
+				val = currentEnergy
+			owner.TakeSharedEnergy( val )
 		}
 	}
-
-	else // 原版涡旋盾行为，由于重生只考虑了减少的情况所以我们在上面开个if来写增加的
+	else
 	{
 		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
 		{
-			if( vortexWeapon.HasMod( "tcp_sp_base" ) )
-				amount = amount * 2
 			entity owner = vortexWeapon.GetWeaponOwner()
 			int totalEnergy = owner.GetSharedEnergyTotal()
 			owner.TakeSharedEnergy( int( float( totalEnergy ) * amount ) )

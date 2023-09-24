@@ -112,20 +112,19 @@ var function OnWeaponPrimaryAttack_AmpCore( entity weapon, WeaponPrimaryAttackPa
 		CleanupCoreEffect( soul )
 #endif
 
-	// OnWeaponPrimaryAttack_titanweapon_predator_cannon( weapon, attackParams )
-	weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageTypes.largeCaliber | DF_STOPS_TITAN_REGEN )
+weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageTypes.largeCaliber | DF_STOPS_TITAN_REGEN )
 
-	float stunDuration = weapon.GetCoreDuration()
-	stunDuration += expect float( weapon.GetWeaponInfoFileKeyField( "chargeup_time" ) )
-	float endTime = stunDuration + Time()
-
-	if ( endTime < Time() || attackParams.burstIndex == 99 )
-	{
+if ( attackParams.burstIndex == 99 )
+{
 		weapon.StopWeaponEffect( FX_AMPED_XO16, FX_AMPED_XO16_3P )
 		#if SERVER
 			weapon.w.initialized = false
 			OnAbilityEnd_TitanCore( weapon )
 		#endif
+
+		if( IsValid( soul ) )
+			foreach ( effect in weapon.w.statusEffects )
+				StatusEffect_Stop( soul, effect )
 	}
 
 	return 1
@@ -185,7 +184,7 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 		EmitSoundOnEntity( owner, "Titan_Legion_Smart_Core_Activated_3P" )
 
 	entity soul = owner.GetTitanSoul()
-	int statusEffect = StatusEffect_AddEndless( soul, eStatusEffect.titan_damage_amp, 0.5 )
+	int statusEffect = StatusEffect_AddEndless( soul, eStatusEffect.titan_damage_amp, 0.4 )
 	if ( owner.IsPlayer() )
 	{
 		ScreenFade( owner, 100, 0, 0, 10, 0.1, coreDuration, FFADE_OUT | FFADE_PURGE )
@@ -199,7 +198,6 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 		{
 			weapon.AddMod( mod )
 		}
-		weapon.AddMod( "tcp_40cm_amped" )
 	}
 
 	OnThreadEnd(
@@ -223,7 +221,6 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 					{
 						weapon.RemoveMod( mod )
 					}
-					weapon.RemoveMod( "tcp_40cm_amped" )
 				}
 			}
 

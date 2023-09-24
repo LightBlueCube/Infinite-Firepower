@@ -2,18 +2,15 @@ WeaponData
 {
 	Mods
 	{
-		pas_power_cell
+		pas_vanguard_rearm
 		{
 		}
 
-		dev_mod_low_recharge
-		{
-		}
-		amped_tacticals
+		rapid_rearm
 		{
 		}
 
-		tcp_titan_holo
+		tcp_no_gravity
 		{
 			"regen_ammo_refill_rate"						"10"
 		}

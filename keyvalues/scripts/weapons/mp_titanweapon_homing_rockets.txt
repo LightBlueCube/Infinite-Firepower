@@ -9,4 +9,29 @@ WeaponData
 
 	// Behavior
 	"fire_rate"   									"2"
+
+	"smart_ammo_targeting_time_min"					"2"
+	"smart_ammo_targeting_time_max"					"2"
+
+	Mods
+	{
+		mod_ordnance_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+		burn_mod_titan_homing_rockets
+		{
+		}
+
+		tcp_push_back
+		{
+			"burst_fire_delay"   									"16"
+			"smart_ammo_max_targeted_burst"					"1"
+			"smart_ammo_targeting_time_min"					"1.0"
+			"smart_ammo_targeting_time_max"					"1.0"
+		}
+	}
 }

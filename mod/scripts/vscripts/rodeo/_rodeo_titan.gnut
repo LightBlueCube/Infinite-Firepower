@@ -111,7 +111,7 @@ global float ANTI_RODEO_DEFAULT_WINDOW_START = 0.55
 
 //nessie modify
 const int PILOT_BATTERY_BUGGED_LIMIT = 1
-const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 32
+const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 64
 
 struct AntiRodeoPlayerData
 {
@@ -1143,6 +1143,23 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 
 	EmitDifferentSoundsOnEntityForPlayerAndWorld( dataStruct.interiorSound, dataStruct.exteriorSound, rodeoPilot, rodeoTitan ) //Play sound on rodeoPilot instead of panel
 	FirstPersonSequence( sequence, rodeoPilot, rodeoTitan )
+	ChangeTitanTitleWhenBatteryMoved( rodeoTitan, false )
+}
+
+void function ChangeTitanTitleWhenBatteryMoved( entity titan, bool battery )
+{
+	if( !IsValid( titan ) )
+		return
+	entity soul = titan.GetTitanSoul()
+	if( !IsValid( soul ) )
+		return
+	printt( titan +"-"+ soul )
+	if( battery )
+	{
+		titan.SetTitle( soul.s.titanTitle )
+		return
+	}
+	titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
 }
 
 void function MonitorRodeoPastPointOfNoReturn( entity rodeoPilot, entity titanSoul )
@@ -1426,6 +1443,7 @@ void function PlayerAppliesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 		Rodeo_PilotAddsBatteryToFriendlyTitan( rodeoPilot, rodeoTitan )
 	#endif
 
+	ChangeTitanTitleWhenBatteryMoved( rodeoTitan, true )
 }
 
 void function ClearRodeoAnimTempProps( entity player )
@@ -2245,7 +2263,7 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 
 		if( IsValid( battery ) && soul.IsDoomed() )
 		{
-			if( battery.GetSkin() == 1 )
+			if( battery.GetSkin() == 2 )
 			{
 				UndoomTitan( titan, 1 )
 				titan.SetHealth( 1 )
@@ -2257,16 +2275,24 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 			titan.SetHealth( 1 )
 		}
 
-		float coreFrac = 0.4
+		float coreFrac = 0.8
 		float shieldFrac = GetCurrentPlaylistVarFloat( "battery_shield_frac", 1.0 )
 		float ampedHealthSegmentFrac = 1.0
-		float healthSegmentFrac = 2.0
+		float healthSegmentFrac = 1.0
 		float RedBatteryHealthSegmentFrac = 0.5
 
 		bool batteryIsAmped = IsAmpedBattery( battery )
 		if( batteryIsAmped )
-			coreFrac = 0.2
-
+			coreFrac = 0.4
+		if( IsValid( battery ) )
+		{
+			if( battery.GetSkin() == 1 )
+			{
+				coreFrac = 0.2
+			}
+		}
+		if( battery == null && SoulHasPassive( soul, ePassives.PAS_VANGUARD_COREMETER ) )
+			coreFrac = 0.1
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 
 		int shieldHealth = soul.GetShieldHealth()
@@ -2276,22 +2302,18 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 
 		float frac = batteryIsAmped ? ampedHealthSegmentFrac : healthSegmentFrac
 		if( IsValid( battery ) )
+		{
 			if( battery.GetSkin() == 1 )
+			{
 				frac = RedBatteryHealthSegmentFrac
+			}
+		}
 
 		int addHealth = int( healingAmount * frac )
 
 		int totalHealth = minint( titan.GetMaxHealth(), titan.GetHealth() + addHealth )
-		if ( battery == null && SoulHasPassive( soul, ePassives.PAS_VANGUARD_COREMETER ) )
-		{
-			titan.SetHealth( minint( titan.GetMaxHealth(), titan.GetHealth() + 2500 ) )
-			soul.SetShieldHealth( soul.GetShieldHealthMax() )
-		}
-		else
-		{
-			titan.SetHealth( totalHealth )
-			soul.SetShieldHealth( soul.GetShieldHealthMax() )
-		}
+		titan.SetHealth( totalHealth )
+		soul.SetShieldHealth( soul.GetShieldHealthMax() )
 	}
 
 	if ( battery != null )
@@ -3122,8 +3144,6 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 	}*/
 	while( true )
 	{
-		if( rodeoPilot.GetTeam() == titanSoul.GetTeam() )
-			thread ClassicRodeo_FriendlyRodeoTips( rodeoPilot, titanSoul )
 		//if( rodeoPilot.GetTeam() == titanSoul.GetTeam() && !PlayerHasBattery( rodeoPilot ) && ClassicRodeo_GetSoulBatteryCount( titanSoul ) < 1 )
 		//	thread ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( rodeoPilot, titanSoul )
 		table result = rodeoPilot.WaitSignal( "RodeoDefensiveSequence", "RodeoOffensiveSequence" )
@@ -3208,32 +3228,6 @@ void function ClassicRodeo_FriendlyRodeoOnBatteryReadyTips( entity rodeoPilot, e
 				SendHudMessage( rodeoPilot, "重新补给已就绪",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
 			else
 				SendHudMessage( rodeoPilot, "泰坦无电池 无法重新补给",  -1, -0.3, 255, 0, 0, 0, 0, 0.2, 0);
-		}
-	}
-}
-
-void function ClassicRodeo_FriendlyRodeoTips( entity rodeoPilot, entity titanSoul )
-{
-	rodeoPilot.EndSignal( "OnDeath" )
-	rodeoPilot.EndSignal( "OnDestroy" )
-	rodeoPilot.EndSignal( "RodeoOver" )
-	titanSoul.EndSignal( "OnDestroy" )
-	rodeoPilot.EndSignal( "RodeoSequenceThink" )
-	rodeoPilot.EndSignal( "RodeoDefensiveSequence" )
-
-	while( true )
-	{
-		WaitFrame()
-		if( IsValid( rodeoPilot ) )
-		{
-			entity battery = GetBatteryOnBack( rodeoPilot )
-			if( battery != null )
-			{
-				if( battery.GetSkin() == 0 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 绿电池",  -1, -0.3, 0, 255, 0, 0, 0, 0.2, 0);
-				if( battery.GetSkin() == 2 )
-					SendHudMessage( rodeoPilot, "铁驭当前持有 黄电池",  -1, -0.3, 255, 255, 0, 0, 0, 0.2, 0);
-			}
 		}
 	}
 }
@@ -3540,7 +3534,41 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 			newBattery.SetSkin( 1 )
 			Battery_StartFX( newBattery )
 		}*/
+		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery )
 	}
+}
+
+void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery, bool justDestroyIt = false , float time = 60, float destroyTime = 60 )
+{
+	float endTime = Time() + time
+	if( justDestroyIt )
+		endTime = Time() + destroyTime
+	while( Time() < endTime )
+	{
+		if( !IsValid( battery ) )
+			return
+		if( battery.GetParent() )
+			return
+		WaitFrame()
+	}
+
+	if( justDestroyIt )
+		battery.Destroy()
+
+	battery.SetSkin( 1 )
+	Battery_StartFX( battery )
+
+	endTime = Time() + destroyTime
+	while( Time() < endTime )
+	{
+		if( !IsValid( battery ) )
+			return
+		if( battery.GetParent() )
+			return
+		WaitFrame()
+	}
+
+	battery.Destroy()
 }
 
 void function ClassicRodeo_UpdateBatteryContainer( entity player, entity titan )

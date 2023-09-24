@@ -1,33 +1,42 @@
 untyped
 global function GamemodeAITdm_Init
 
-const SQUADS_PER_TEAM = 3
+// these are now default settings
+const int SQUADS_PER_TEAM = 0
 
-const REAPERS_PER_TEAM = 2
+const int REAPERS_PER_TEAM = 0
 
-const LEVEL_SPECTRES = 0
-const LEVEL_STALKERS = 0
-const LEVEL_REAPERS = 0
+const int LEVEL_SPECTRES = 125
+const int LEVEL_STALKERS = 380
+const int LEVEL_REAPERS = 500
 
-bool ShouldHideTeamScore = true
-bool Should_10x_TeamScore = false
+int teamScoreAddition = 1
 
-int TEAM_MILITIA_HideScore = 0
-int TEAM_IMC_HideScore = 0
+// add settings
+global function AITdm_SetSquadsPerTeam
+global function AITdm_SetReapersPerTeam
+global function AITdm_SetLevelSpectres
+global function AITdm_SetLevelStalkers
+global function AITdm_SetLevelReapers
 
 struct
 {
 	// Due to team based escalation everything is an array
-	array< int > levels = [ LEVEL_SPECTRES, LEVEL_SPECTRES ]
+	array< int > levels = [] // Initilazed in `Spawner_Threaded`
 	array< array< string > > podEntities = [ [ "npc_soldier" ], [ "npc_soldier" ] ]
 	array< bool > reapers = [ false, false ]
-} file
 
+	// default settings
+	int squadsPerTeam = SQUADS_PER_TEAM
+	int reapersPerTeam = REAPERS_PER_TEAM
+	int levelSpectres = LEVEL_SPECTRES
+	int levelStalkers = LEVEL_STALKERS
+	int levelReapers = LEVEL_REAPERS
+} file
 
 void function GamemodeAITdm_Init()
 {
 	SetSpawnpointGamemodeOverride( ATTRITION ) // use bounty hunt spawns as vanilla game has no spawns explicitly defined for aitdm
-	 //SetKillcamsEnabled( false )
 
 	AddCallback_GameStateEnter( eGameState.Prematch, OnPrematchStart )
 	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
@@ -41,36 +50,28 @@ void function GamemodeAITdm_Init()
 
 	if ( GetCurrentPlaylistVarInt( "aitdm_archer_grunts", 0 ) == 0 )
 	{
-		AiGameModes_SetGruntWeapons( [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )	//"mp_weapon_arc_launcher"
-		AiGameModes_SetSpectreWeapons( [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
-		AiGameModes_SetStalkerWeapons( [ "mp_weapon_lstar", "mp_weapon_lstar", "mp_weapon_lstar", "mp_weapon_rocket_launcher", "mp_weapon_defender", "mp_weapon_mgl" ] )
+		AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg" ] )
+		AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff" ] )
+		AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff" ] )
 	}
 	else
 	{
-		AiGameModes_SetGruntWeapons( [ "mp_weapon_rocket_launcher" ] )
-		AiGameModes_SetSpectreWeapons( [ "mp_weapon_rocket_launcher" ] )
+		AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rocket_launcher" ] )
+		AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_rocket_launcher" ] )
+		AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_rocket_launcher" ] )
 	}
 
 	ScoreEvent_SetupEarnMeterValuesForMixedModes()
-}
-
-// Starts skyshow, this also requiers AINs but doesn't crash if they're missing
-void function OnPrematchStart()
-{
-	thread StratonHornetDogfightsIntense()
 }
 
 void function HideTeamScore()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
-	table result = {}
-	result.TimeOut <- false
-
 	OnThreadEnd(
-		function():( result )
+		function():()
 		{
-			Should_10x_TeamScore = false
+			teamScoreAddition = 1
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
@@ -78,30 +79,22 @@ void function HideTeamScore()
 				StopSoundOnEntity( player, "music_boomtown_22_embarkbt" )
 				StopSoundOnEntity( player, "music_wilds_17_titanfight" )
 			}
-			if( result.TimeOut )
-				return
-			ShouldHideTeamScore = false
-			AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
-			AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
-			foreach( player in GetPlayerArray() )
-			{
-				if( !IsValid( player ) )
-					continue
-				if( "HideScore" in player.s )
-					player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, player.s.HideScore )
-			}
 		}
 	)
 
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
-	wait timeLimit - 70
+	wait timeLimit - 60
 	bool MusicType = RandomInt( 2 ) == 0 ? true : false
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "隊伍比分已顯示", "", < 50, 50, 225 >, 255, 6 )
+		teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 50 + 1
+		if( teamScoreAddition == 1 )
+			NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "本局雙方分數差距較小 分數獲取不加倍", < 50, 50, 225 >, 255, 6 )
+		else
+			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 		if( MusicType )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "music_boomtown_22_embarkbt" )
@@ -114,34 +107,40 @@ void function HideTeamScore()
 			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
 		}
 	}
-	result.TimeOut <- true
-	ShouldHideTeamScore = false
-	AddTeamScore( TEAM_MILITIA, TEAM_MILITIA_HideScore )
-	AddTeamScore( TEAM_IMC, TEAM_IMC_HideScore )
-	foreach( player in GetPlayerArray() )
-	{
-		if( !IsValid( player ) )
-			continue
-		if( "HideScore" in player.s )
-			player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, player.s.HideScore )
-	}
-	wait 10
-	foreach( player in GetPlayerArray() )
-	{
-		if( !IsValid( player ) )
-			continue
-		NSSendAnnouncementMessageToPlayer( player, "十倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
-	}
-	Should_10x_TeamScore = true
 	wait 60
-	foreach( player in GetPlayerArray() )
-	{
-		if( !IsValid( player ) )
-			continue
-		StopSoundOnEntity( player, "music_boomtown_22_embarkbt" )
-		StopSoundOnEntity( player, "music_wilds_17_titanfight" )
-	}
-	WaitForever()
+}
+
+// add settings
+void function AITdm_SetSquadsPerTeam( int squads )
+{
+	file.squadsPerTeam = squads
+}
+
+void function AITdm_SetReapersPerTeam( int reapers )
+{
+	file.reapersPerTeam = reapers
+}
+
+void function AITdm_SetLevelSpectres( int level )
+{
+	file.levelSpectres = level
+}
+
+void function AITdm_SetLevelStalkers( int level )
+{
+	file.levelStalkers = level
+}
+
+void function AITdm_SetLevelReapers( int level )
+{
+	file.levelReapers = level
+}
+//
+
+// Starts skyshow, this also requiers AINs but doesn't crash if they're missing
+void function OnPrematchStart()
+{
+	thread StratonHornetDogfightsIntense()
 }
 
 void function OnPlaying()
@@ -158,32 +157,18 @@ void function OnPlaying()
 // Sets up mode specific hud on client
 void function OnPlayerConnected( entity player )
 {
-	player.s.HideScore <- 0
 	Remote_CallFunction_NonReplay( player, "ServerCallback_AITDM_OnPlayerConnected" )
-}
-
-void function DelayDestroyNPCDroppedWeapon( entity weapon )
-{
-	WaitEndFrame()
-	if ( IsValid( weapon ) )
-		weapon.Destroy()
 }
 
 // Used to handle both player and ai events
 void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 {
-	if ( IsValid( victim.GetActiveWeapon() ) )
-		thread DelayDestroyNPCDroppedWeapon( victim.GetActiveWeapon() )
-
-
 	// Basic checks
-	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() || attacker.IsNPC() ) || GetGameState() != eGameState.Playing )
+	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
 		return
-
 	// Hacked spectre filter
 	if ( victim.GetOwner() == attacker )
 		return
-
 	// NPC titans without an owner player will not count towards any team's score
 	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
 		return
@@ -193,7 +178,6 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 	int teamScore
 	int playerScore
 	string eventName
-	bool IsPlayer = attacker.IsPlayer()
 
 	// Handle AI, marvins aren't setup so we check for them to prevent crash
 	if ( victim.IsNPC() && victim.GetClassName() != "npc_marvin" )
@@ -233,29 +217,9 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	if( ShouldHideTeamScore )
-	{
-		if( attacker.GetTeam() == TEAM_MILITIA )
-			TEAM_MILITIA_HideScore += teamScore
-		else if( attacker.GetTeam() == TEAM_IMC )
-			TEAM_IMC_HideScore += teamScore
-		if( IsPlayer )
-			attacker.s.HideScore += playerScore
-	}
-	else if( Should_10x_TeamScore )
-	{
-		AddTeamScore( attacker.GetTeam(), teamScore * 10 )
-		if( IsPlayer )
-			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
-	}
-	else
-	{
-		AddTeamScore( attacker.GetTeam(), teamScore )
-		if( IsPlayer )
-			attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
-	}
-	if( IsPlayer )
-		attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+	AddTeamScore( attacker.GetTeam(), teamScore * teamScoreAddition )
+	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
+	attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
 
 // When attrition starts both teams spawn ai on preset nodes, after that
@@ -319,7 +283,7 @@ void function SpawnIntroBatch_Threaded( int team )
 
 	int ships = shipNodes.len()
 
-	for ( int i = 0; i < SQUADS_PER_TEAM; i++ )
+	for ( int i = 0; i < file.squadsPerTeam; i++ )
 	{
 		if ( pods != 0 || ships == 0 )
 		{
@@ -364,6 +328,7 @@ void function Spawner_Threaded( int team )
 	// used to index into escalation arrays
 	int index = team == TEAM_MILITIA ? 0 : 1
 
+	file.levels = [ file.levelSpectres, file.levelSpectres ] // due we added settings, should init levels here!
 
 	while( true )
 	{
@@ -378,7 +343,7 @@ void function Spawner_Threaded( int team )
 		if ( file.reapers[ index ] )
 		{
 			array< entity > points = SpawnPoints_GetDropPod()
-			if ( reaperCount < REAPERS_PER_TEAM )
+			if ( reaperCount < file.reapersPerTeam )
 			{
 				entity node = points[ GetSpawnPointIndex( points, team ) ]
 				waitthread AiGameModes_SpawnReaper( node.GetOrigin(), node.GetAngles(), team, "npc_super_spectre_aitdm", ReaperHandler )
@@ -386,7 +351,7 @@ void function Spawner_Threaded( int team )
 		}
 
 		// NORMAL SPAWNS
-		if ( count < SQUADS_PER_TEAM * 4 - 2 )
+		if ( count < file.squadsPerTeam * 4 - 2 )
 		{
 			string ent = file.podEntities[ index ][ RandomInt( file.podEntities[ index ].len() ) ]
 
@@ -432,11 +397,20 @@ void function Escalate( int team )
 	// Based on score escalate a team
 	switch ( file.levels[ index ] )
 	{
-		case LEVEL_SPECTRES:
-			file.levels[ index ] = LEVEL_REAPERS
-			file.reapers[ index ] = true
+		case file.levelSpectres:
+			file.levels[ index ] = file.levelStalkers
 			file.podEntities[ index ].append( "npc_spectre" )
+			SetGlobalNetInt( defcon, 2 )
+			return
+
+		case file.levelStalkers:
+			file.levels[ index ] = file.levelReapers
 			file.podEntities[ index ].append( "npc_stalker" )
+			SetGlobalNetInt( defcon, 3 )
+			return
+
+		case file.levelReapers:
+			file.reapers[ index ] = true
 			SetGlobalNetInt( defcon, 4 )
 			return
 	}
@@ -472,29 +446,46 @@ int function GetSpawnPointIndex( array< entity > points, int team )
 // AI can also flee deeper into their zone suggesting someone spent way too much time on this
 void function SquadHandler( array<entity> guys )
 {
+	int team = guys[0].GetTeam()
+	// show the squad enemy radar
+	array<entity> players = GetPlayerArrayOfEnemies( team )
+	foreach ( entity guy in guys )
+	{
+		if ( IsAlive( guy ) )
+		{
+			foreach ( player in players )
+				guy.Minimap_AlwaysShow( 0, player )
+		}
+	}
+
 	// Not all maps have assaultpoints / have weird assault points ( looking at you ac )
 	// So we use enemies with a large radius
-	array< entity > points = GetNPCArrayOfEnemies( guys[0].GetTeam() )
+	while ( GetNPCArrayOfEnemies( team ).len() == 0 ) // if we can't find any enemy npcs, keep waiting
+		WaitFrame()
 
-	if ( points.len()  == 0 )
+	// our waiting is end, check if any soldiers left
+	bool squadAlive = false
+	foreach ( entity guy in guys )
+	{
+		if ( IsAlive( guy ) )
+			squadAlive = true
+		else
+			guys.removebyvalue( guy )
+	}
+	if ( !squadAlive )
 		return
+
+	array<entity> points = GetNPCArrayOfEnemies( team )
 
 	vector point
 	point = points[ RandomInt( points.len() ) ].GetOrigin()
 
-	array<entity> players = GetPlayerArrayOfEnemies( guys[0].GetTeam() )
-
-	// Setup AI
+	// Setup AI, first assault point
 	foreach ( guy in guys )
 	{
 		guy.EnableNPCFlag( NPC_ALLOW_PATROL | NPC_ALLOW_INVESTIGATE | NPC_ALLOW_HAND_SIGNALS | NPC_ALLOW_FLEE )
 		guy.AssaultPoint( point )
 		guy.AssaultSetGoalRadius( 1600 ) // 1600 is minimum for npc_stalker, works fine for others
-
-		// show on enemy radar
-		foreach ( player in players )
-			guy.Minimap_AlwaysShow( 0, player )
-
 
 		//thread AITdm_CleanupBoredNPCThread( guy )
 	}
@@ -513,16 +504,24 @@ void function SquadHandler( array<entity> guys )
 			// Stop func if our squad has been killed off
 			if ( guys.len() == 0 )
 				return
-
-			// Get point and send guy to it
-			points = GetNPCArrayOfEnemies( guy.GetTeam() )
-			if ( points.len() == 0 )
-				continue
-
-			point = points[ RandomInt( points.len() ) ].GetOrigin()
-
-			guy.AssaultPoint( point )
 		}
+
+		// Get point and send our whole squad to it
+		points = GetNPCArrayOfEnemies( team )
+		if ( points.len() == 0 ) // can't find any points here
+		{
+			WaitFrame() // wait before next loop, so we don't stuck forever
+			continue
+		}
+
+		point = points[ RandomInt( points.len() ) ].GetOrigin()
+
+		foreach ( guy in guys )
+		{
+			if ( IsAlive( guy ) )
+				guy.AssaultPoint( point )
+		}
+
 		wait RandomFloatRange(5.0,15.0)
 	}
 }
@@ -533,24 +532,8 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	if( ShouldHideTeamScore )
-	{
-		if( player.GetTeam() == TEAM_MILITIA )
-			TEAM_MILITIA_HideScore += 1
-		else if( player.GetTeam() == TEAM_IMC )
-			TEAM_IMC_HideScore += 1
-		player.s.HideScore += 1
-	}
-	else if( Should_10x_TeamScore )
-	{
-		AddTeamScore( player.GetTeam(), 10 )
-		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
-	}
-	else
-	{
-		AddTeamScore( player.GetTeam(), 1 )
-		player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
-	}
+	AddTeamScore( player.GetTeam(), 1 * teamScoreAddition )
+	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
 	player.SetPlayerNetInt("AT_bonusPoints", player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
 }
 

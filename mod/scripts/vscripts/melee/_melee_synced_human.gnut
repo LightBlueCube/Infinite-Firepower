@@ -1,0 +1,937 @@
+untyped
+
+global function MeleeThread_PilotVsEnemy
+global function MeleeSyncedServer_Init
+
+// modified to have more execution options
+global function Melee_SetHumanSizedDoClassicExecution // set certain humanSized to use classic execution
+
+global function Melee_SetPlayerClassicExecutionsEnabled // player necksnapping
+global function Melee_ShouldPlayerClassicExecution
+global function Melee_SetNPCClassicExecutionsEnabled // npc necksnapping
+global function Melee_ShouldNPCClassicExecution
+global function Melee_SetUseRandomClassicExecutions
+global function Melee_IsClassicExecutionRandom
+
+global function Melee_SetSyncedMeleeAlwaysKill
+global function Melee_IsSyncedMeleeAlwaysKill
+
+struct
+{
+	bool playerDoClassicExecutions = false
+	bool npcDoClassicExecutions = false
+
+	bool randomClassicExecutions = false
+	bool alwaysKillTarget = false
+
+	table<entity, bool> humanSizedDoClassicExecution
+} file
+// end
+
+void function MeleeSyncedServer_Init()
+{
+	RegisterSignal( "NpcDealsExecutionDamage" )
+}
+
+bool function MeleeThread_PilotVsEnemy( SyncedMelee action, entity attacker, entity target )
+{
+	// function off for reload scripts
+	return MeleeThread_PilotVsEnemyInternal( action, attacker, target )
+}
+
+bool function MeleeThread_PilotVsEnemyInternal( SyncedMelee action, entity attacker, entity target )
+{
+	// removed for now...
+	//Assert( IsHumanSized( target ), target + " is not human sized melee target" )
+	// changed to add decoy and prop support
+	// removed for now, try to use error anim handle. these might broke execution behavior
+	/*
+	if ( !attacker.Anim_HasSequence( action.attackerAnimation3p ) )
+	{
+		print( "human synced melee attacker don't have proper sequence!" )
+		return false
+	}
+	if ( !target.Anim_HasSequence( action.targetAnimation3p ) )
+	{
+		print( "human synced melee target don't have proper sequence!" )
+		return false
+	}
+	*/
+	Assert( attacker.IsPlayer() && IsHumanSized( attacker ), attacker + " is not human sized player attacker" )
+	Assert( IsAlive( attacker ) )
+	Assert( IsAlive( target ) )
+
+	// could get some tf1 execution by using it
+	bool useClassicExecution = false
+
+	// modified in _melee_synced_nolimit.gnut
+	if ( file.playerDoClassicExecutions && attacker.IsPlayer() )
+		useClassicExecution = true
+	// modified in _melee_synced_npc.gnut
+	if ( file.npcDoClassicExecutions && attacker.IsNPC() )
+		useClassicExecution = true
+	
+	// ent in overwrite table
+	if( attacker in file.humanSizedDoClassicExecution )
+		useClassicExecution = file.humanSizedDoClassicExecution[ attacker ]
+
+	bool isAttackerRef
+#if MP
+	//if ( GetCurrentPlaylistVarInt( "fp_embark_enabled", eFirstPersonSequenceForce1PSetting.DISABLED ) >= eFirstPersonSequenceForce1PSetting.CLASSIC_EXECUTION )
+	if ( useClassicExecution ) // really should be a new executions file
+	{
+		action = clone action // have to clone this... otherwise it will modify directly to the execution struct
+		action.attackerAnimation1p = "ptpov_rspn101_melee_necksnap_rear"
+		action.attackerAnimation3p = "pt_rspn101_melee_necksnap_rear"
+		action.targetAnimation1p = "ptpov_melee_necksnap_rear_attacked"
+		action.targetAnimation3p = "pt_melee_necksnap_rear_attacked"
+		action.isAttackerRef = false
+		action.minDot = 0.2
+		
+		entity meleeWeapon = attacker.GetOffhandWeapon( OFFHAND_MELEE )
+		// modifying!!!
+		bool thisTimeDoSwordExecution = false
+		asset attachModel = $"models/weapons/bolo_sword/w_bolo_sword.mdl"
+		if( IsValid( meleeWeapon ) )
+		{
+			if ( meleeWeapon.GetWeaponClassName() == "melee_pilot_sword" )
+				thisTimeDoSwordExecution = true
+			if ( meleeWeapon.GetWeaponClassName() == "melee_pilot_kunai" )
+			{
+				thisTimeDoSwordExecution = true
+				attachModel = $"models/weapons/kunai/w_kunai.mdl" // change execution model to kunai!
+			}
+		}
+		// random execution check
+		if( file.randomClassicExecutions && CoinFlip() )
+			thisTimeDoSwordExecution = true
+		// sword version execution
+        if ( thisTimeDoSwordExecution )
+        {
+			action.attackerAnimation1p = "ptpov_assassin_melee_necksnap_rear"
+			action.attackerAnimation3p = "pt_assassin_melee_necksnap_rear"
+			// may needs tweak on target animation
+			action.targetAnimation1p = "ptpov_assassin_melee_necksnap_rear_attacked"
+			action.targetAnimation3p = "pt_assassin_melee_necksnap_rear_attacked"
+			// modified for kunai executions
+			//action.attachModel1p = $"models/weapons/bolo_sword/w_bolo_sword.mdl"
+			action.attachModel1p = attachModel
+			action.attachTag1p = "PROPGUN"
+			action.minDot = 0.2
+		}
+
+		// magical fix on screen effect
+		if ( target.IsPlayer() )
+			thread ClassicExecution_FadeFromBlackOnDeath( target )
+
+		// fix sound. these animations are lack of sound animevent
+		switch( action.attackerAnimation1p )
+		{
+			case "ptpov_rspn101_melee_necksnap_rear":
+				thread ClassicExecution_DelayedEmitSoundForExecution( attacker, target, "Pilot_Mvmt_Execution_NeckBreak_Neck_Snapped_3P", 0.3 ) // magic sound
+				break
+			case "ptpov_assassin_melee_necksnap_rear":
+				thread ClassicExecution_DelayedEmitSoundForExecution( attacker, target, "Pilot_Mvmt_Execution_Stab_Impacts_fr61_3P", 0.3 ) // magic sound
+				break
+		}
+
+		// need to hardcode false here otherwise it just doesnt work for some reason??
+		isAttackerRef = false
+
+		if ( attacker.IsPlayer() )
+			thread ForceRemoveCinematic( attacker ) // remove DOF for classic execution
+		if ( target.IsPlayer() )
+			thread ForceRemoveCinematic( target ) // remove DOF for classic execution
+	}
+	else 
+#endif
+
+	isAttackerRef = IsAttackerRef( action, target )
+
+	vector attackerOrigin = attacker.GetOrigin()
+	vector targetOrigin = target.GetOrigin()
+
+	attacker.EndSignal( "OnDestroy" )
+	target.EndSignal( "OnDestroy" )
+
+	if ( IsSingleplayer() )
+	{
+		if ( attacker.IsPlayer() )
+		{
+			if ( IsCloaked( attacker ) )
+			{
+				UnlockAchievement( attacker, achievements.CLOAK_TAKEDOWN )
+			}
+		}
+	}
+
+	OnThreadEnd(
+		function() : ( attacker, target, attackerOrigin, targetOrigin, action, isAttackerRef )
+		{
+			if ( IsValid( attacker ) )
+				attacker.ClearParent()
+
+			if ( IsValid( target ) )
+				target.ClearParent()
+
+
+			if ( IsValid( attacker ) )
+			{
+				if( attacker.IsPlayer() ) // save for npc executions
+					attacker.PlayerMelee_SetState( PLAYER_MELEE_STATE_NONE )
+			}
+
+			// Note that the original attacker/target origins are not guarranteed to be a safe spot now because we have moving geo in the game.
+			// Whoever is the 'ref' will be in a safe position though, so we can always use the origin of the person who has been designated as the 'ref'.
+			if ( IsAlive( attacker ) )
+			{
+				if ( !isAttackerRef && IsValid( target ) )
+				{
+					PutEntityInSafeSpot( attacker, target, null, target.GetOrigin(), attacker.GetOrigin() )
+				}
+				else
+				{
+					PutEntityInSafeSpot( attacker, target, null, attacker.GetOrigin(), attacker.GetOrigin() )
+				}
+
+			}
+
+			if ( IsValid( target ) )
+			{
+				target.ClearParent()
+
+				if ( IsAlive( target ) )
+				{
+					// Note that the original target origin is not guarranteed to be a safe spot now because we have moving geo in the game now.
+					if ( isAttackerRef && IsValid( attacker ) )
+					{
+						PutEntityInSafeSpot( target, attacker, null, attacker.GetOrigin(), target.GetOrigin() )
+					}
+					else
+					{
+						PutEntityInSafeSpot( target, attacker, null, target.GetOrigin(), target.GetOrigin() )
+					}
+				}
+			}
+		}
+	)
+
+	// fix for modified deathcam: player can respawn before attacker sequence ends, cause PutEntityInSafeSpot() teleports attacker
+	// needs to end execution if target respawned
+	if ( target.IsPlayer() )
+		EndThreadOnPlayerRespawn( target )
+	//
+
+	thread MeleeThread_PilotVsEnemy_Attacker( action, attacker, target, isAttackerRef )
+
+	// target's sequence is longer
+	waitthread MeleeThread_PilotVsEnemy_Target( action, attacker, target, isAttackerRef )
+
+	attacker.Signal( "SyncedMeleeComplete" )
+	return true
+}
+
+// fix for modified deathcam: player can respawn before attacker sequence ends, cause PutEntityInSafeSpot() teleports attacker
+// needs to end execution if target respawned
+void function EndThreadOnPlayerRespawn( entity player )
+{
+	player.EndSignal( "RespawnMe" )
+	player.EndSignal( "OnRespawned" )
+	player.EndSignal( "PlayerRespawnStarted" )
+}
+//
+
+struct PilotVsEnemyStruct
+{
+	bool clearInvulnerable = false
+	bool wasCloaked = false
+	float cloakEndTime = 0.0
+}
+
+///// modified functions!!!! /////
+void function ClassicExecution_DelayedEmitSoundForExecution( entity attacker, entity victim, string soundAlias, float delay )
+{
+	wait delay
+	if( IsAlive( victim ) && IsAlive( attacker ) )
+		EmitSoundOnEntity( victim, soundAlias )
+}
+
+// for better visual
+void function ClassicExecution_FadeFromBlackOnDeath( entity victim )
+{
+	if ( !victim.IsPlayer() )
+		return
+	
+	// execution might be interrupted
+	victim.EndSignal( "OnAnimationDone" )
+	victim.EndSignal( "OnAnimationInterrupted" )
+	victim.EndSignal( "ScriptAnimStop" )
+	victim.EndSignal( "OnDestroy" )
+
+	victim.WaitSignal( "OnDeath" )
+
+	//print( "RUNNING ClassicExecution_FadeFromBlackOnDeath()" )
+	ScreenFade( victim, 0, 0, 1, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) ) // <0, 0, 1> since ScreenFadeToBlack() uses it
+}
+
+// disable dof
+void function ForceRemoveCinematic( entity ent )
+{
+	if ( !ent.IsPlayer() )
+		return
+
+	wait 0.1
+	if ( IsValid( ent ) )
+		RemoveCinematicFlag( ent, CE_FLAG_EXECUTION )
+}
+///// end
+
+void function DisableCloakBeforeMelee( entity player, PilotVsEnemyStruct dataStruct )
+{
+	if ( IsCloaked( player ) )
+	{
+		dataStruct.wasCloaked = true
+		dataStruct.cloakEndTime = player.GetCloakEndTime()
+		DisableCloak( player, 0.0 )
+	}
+}
+
+void function RestoreCloakAfterMelee( entity player, PilotVsEnemyStruct dataStruct )
+{
+	if ( !IsAlive( player ) )
+		return
+
+	if ( !dataStruct.wasCloaked )
+		return
+
+	float remainingCloakDuration = max( 0.0, dataStruct.cloakEndTime - Time() )
+	if ( remainingCloakDuration > CLOAK_FADE_IN  ) //Has to be higher than fade in duration, otherwise will cloak forever
+		EnableCloak( player, remainingCloakDuration, CLOAK_FADE_IN )
+}
+
+///// modified function!!!! /////
+float function HACK_GetHumanSyncedMeleeSequenceDuration( entity ent, string animationName )
+{
+	float duration
+	try
+	{
+		duration = ent.GetSequenceDuration( animationName )
+	}
+	catch( ex )
+	{
+		// log print
+		//print( ex )
+		//asset orgModel = ent.GetModelName()
+		//print( "Sequence on " + string( orgModel ) + " Not Valid! Resetting to " + string( modelName ) )
+		
+		// error animation handle start
+		thread TrackErrorAnimationEnd( ent )
+		duration = ent.GetSequenceDuration( animationName )
+	}
+
+	return duration
+}
+
+void function HandleCloakExecutionWithCloakedAttacker( entity player, PilotVsEnemyStruct dataStruct, SyncedMelee action  )
+{
+	if ( !IsCloaked( player ) )
+		return //No need to run DisableCloakBeforeMelee() either
+
+	// modified for unsupported models!
+	//float attackerSequenceEndTime = Time() + player.GetSequenceDuration( action.attackerAnimation3p )
+	float attackerSequenceEndTime = Time() + HACK_GetHumanSyncedMeleeSequenceDuration( player, action.attackerAnimation3p )
+	float scheduledCloakEndTime = player.GetCloakEndTime()
+
+	//printt( "attackerSequenceEndTime: " + attackerSequenceEndTime + ", scheduledCloakEndTime: " + scheduledCloakEndTime )
+
+	if ( scheduledCloakEndTime > attackerSequenceEndTime )
+	{
+		//printt( "Cloak ability lasts longer than execution sequence, just doing DisableCloakBeforeMelee" )
+		player.SetCloakFlicker( 0.0, 0.0 ) //Turn off flicker; this is normally not a problem for other executions since cloak is turned off for the entirety of those executions
+		DisableCloakBeforeMelee( player, dataStruct )
+	}
+	else
+	{
+		//Cloak would normally run out during the animation of this execution, which is disruptive to the presentation of cloak animation, so just stop cloak now for good and prevent it from coming back.
+		//printt( "Cloak ability is shorter than execution sequence, DisableCloak now and stop it from coming back" )
+		dataStruct.wasCloaked = true //Have to do this to mark player was cloaked during start of execution, so we can track the stat correctly
+		dataStruct.cloakEndTime = Time()
+		DisableCloak( player, 0.0 )
+		player.Signal( "KillHandleCloakEnd" )
+	}
+}
+
+
+void function MeleeThread_PilotVsEnemy_Attacker( SyncedMelee action, entity attacker, entity target, bool isAttackerRef )
+{
+	attacker.EndSignal( "OnAnimationDone" )
+	attacker.EndSignal( "OnAnimationInterrupted" )
+	attacker.EndSignal( "OnDeath" )
+	attacker.EndSignal( "ScriptAnimStop" )
+
+	attacker.EndSignal( "OnDestroy" )
+	Assert( IsValid( target ) )
+	target.EndSignal( "OnDestroy" )
+
+	foreach ( AnimEventData animEventData in action.attacker3pAnimEvents )
+	{
+		AddAnimEvent( attacker, animEventData.eventName, animEventData.callback, animEventData.optionalVar )
+	}
+	AddAnimEvent( attacker, "synced_melee_enable_planting", EnablePlantingOnEntity )
+
+	PilotVsEnemyStruct dataStruct
+	OnThreadEnd(
+		function() : ( attacker, target, action, dataStruct )
+		{
+			if ( IsValid( attacker ) )
+			{
+				if ( HasAnimEvent( attacker, "synced_melee_enable_planting" ) )
+					DeleteAnimEvent( attacker, "synced_melee_enable_planting" )
+
+				if ( dataStruct.clearInvulnerable )
+				{
+					attacker.ClearInvulnerable()
+				}
+
+				if ( attacker.IsPlayer() )
+				{
+					attacker.PlayerMelee_ExecutionEndAttacker()
+					ClearPlayerAnimViewEntity( attacker )
+					// modified!
+					//DeployAndEnableWeapons( attacker )
+					//EnableOffhandWeapons( attacker )
+					attacker.EnableWeaponViewModel()
+					attacker.Server_TurnOffhandWeaponsDisabledOff()
+
+					RestoreCloakAfterMelee( attacker, dataStruct )
+					#if MP
+					IncrementStatForPilotExecutionWhileCloaked( attacker, target, dataStruct )
+					#endif
+				}
+
+				foreach ( AnimEventData animEventData in action.attacker3pAnimEvents )
+				{
+					if ( HasAnimEvent( attacker, animEventData.eventName ) )
+						DeleteAnimEvent( attacker, animEventData.eventName )
+				}
+
+				// classic execution attacker body fix
+				SetForceDrawWhileParented( attacker, false )
+			}
+
+			if ( !IsAlive( attacker ) )
+				attacker.Anim_Stop()
+		}
+	)
+
+	FirstPersonSequenceStruct attackerSequence
+	attackerSequence.blendTime = 0.4
+	attackerSequence.attachment = "ref"
+	attackerSequence.thirdPersonAnim = action.attackerAnimation3p
+	attackerSequence.firstPersonAnim = action.attackerAnimation1p
+	attackerSequence.thirdPersonCameraAttachments = [action.thirdPersonCameraAttachment]
+	attackerSequence.thirdPersonCameraVisibilityChecks = true
+
+	if ( isAttackerRef )
+	{
+		attackerSequence.noParent = true
+		attackerSequence.playerPushable = true
+		attackerSequence.enablePlanting = true
+	}
+	else
+	{
+		attackerSequence.useAnimatedRefAttachment = true
+		// classic execution attacker body fix
+		SetForceDrawWhileParented( attacker, true )
+	}
+
+	// modified for unsupported models!!!
+	//float duration = attacker.GetSequenceDuration( attackerSequence.thirdPersonAnim )
+	float duration = HACK_GetHumanSyncedMeleeSequenceDuration( attacker, attackerSequence.thirdPersonAnim  )
+
+	if ( attacker.IsPlayer() )
+	{
+		float executionEndTime = Time() + duration
+		attacker.PlayerMelee_ExecutionStartAttacker( executionEndTime )
+		attacker.Lunge_ClearTarget()
+		// this will sometimes make forced executions disable player's offhands forever idk why
+		//HolsterViewModelAndDisableWeapons( attacker )
+		attacker.DisableWeaponViewModel()
+		attacker.Server_TurnOffhandWeaponsDisabledOn()
+
+		if ( action.ref == "execution_cloak" ) //Special case for cloak execution
+		{
+			HandleCloakExecutionWithCloakedAttacker( attacker, dataStruct, action )
+		}
+		else
+		{
+			DisableCloakBeforeMelee( attacker, dataStruct )
+		}
+
+		if ( IsSingleplayer() )
+		{
+			dataStruct.clearInvulnerable = true
+			attacker.SetInvulnerable()
+			thread LowerEnemyAccuracy( attacker, duration )
+		}
+	}
+
+	if ( isAttackerRef )
+	{
+		#if MP
+		if ( ShouldForce1PFirstPersonSequence() && GetCurrentPlaylistVarInt( "fp_embark_enabled", eFirstPersonSequenceForce1PSetting.DISABLED ) < eFirstPersonSequenceForce1PSetting.CLASSIC_EXECUTION )
+			FirstPersonSequenceForce1P( attackerSequence, attacker )
+		#endif
+			
+		thread FirstPersonSequence( attackerSequence, attacker )
+	}
+	else
+	{
+		#if MP
+		if ( ShouldForce1PFirstPersonSequence() && GetCurrentPlaylistVarInt( "fp_embark_enabled", eFirstPersonSequenceForce1PSetting.DISABLED ) < eFirstPersonSequenceForce1PSetting.CLASSIC_EXECUTION )
+			FirstPersonSequenceForce1P( attackerSequence, attacker, target )
+		#endif
+
+		thread FirstPersonSequence( attackerSequence, attacker, target )
+	}
+
+	wait duration
+}
+
+
+void function MeleeThread_PilotVsEnemy_Target( SyncedMelee action, entity attacker, entity target, bool isAttackerRef )
+{
+	attacker.EndSignal( "OnAnimationDone" )
+	attacker.EndSignal( "OnAnimationInterrupted" )
+	attacker.EndSignal( "OnDeath" )
+	attacker.EndSignal( "ScriptAnimStop" )
+
+	attacker.EndSignal( "OnDestroy" )
+	Assert( IsValid( target ) )
+	target.EndSignal( "OnDestroy" )
+
+	foreach ( AnimEventData animEventData in action.target3pAnimEvents )
+	{
+		AddAnimEvent( target, animEventData.eventName, animEventData.callback, animEventData.optionalVar )
+	}
+	AddAnimEvent( target, "synced_melee_enable_planting", EnablePlantingOnEntity )
+
+	PilotVsEnemyStruct dataStruct
+
+	OnThreadEnd(
+		function() : ( attacker, target, action, dataStruct )
+		{
+			if ( IsValid( target ) )
+			{
+				// always enable target visibility for we want to execute a decoy or prop
+				//if ( target.IsNPC() && IsMultiplayer() )
+				//{
+				//	SetForceDrawWhileParented( target, false )
+				//}
+				SetForceDrawWhileParented( target, false )
+
+				TargetClearedExecuted( target )
+
+				if ( HasAnimEvent( target, "mark_for_death" ) )
+					DeleteAnimEvent( target, "mark_for_death" )
+				if ( HasAnimEvent( target, "phase_gib" ) )
+					DeleteAnimEvent( target, "phase_gib" )
+
+				foreach ( AnimEventData animEventData in action.target3pAnimEvents )
+				{
+					if ( HasAnimEvent( target, animEventData.eventName ) )
+						DeleteAnimEvent( target, animEventData.eventName )
+				}
+				if ( HasAnimEvent( target, "synced_melee_enable_planting" ) )
+					DeleteAnimEvent( target, "synced_melee_enable_planting" )
+
+				bool isAlive = IsAlive( target )
+
+				if ( target.IsPlayer() )
+				{
+					// modified!
+					//EnableOffhandWeapons( target )
+					target.Server_TurnOffhandWeaponsDisabledOff()
+					if ( isAlive )
+					{
+						target.DeployWeapon()
+						target.EnableWeaponViewModel()
+					}
+				}
+
+				if ( isAlive )
+				{
+					if ( target.e.markedForExecutionDeath ) //Kill off target if he already reached blackout part of melee
+					{
+						entity killCreditAttacker = null //If the attacker disconnected, we don't have a player to give credit to, that's fine. Script will not error
+						if ( IsValid( target.e.syncedMeleeAttacker ) )
+							killCreditAttacker = target.e.syncedMeleeAttacker
+						//printt( "Killing off target "  + target + " because he already reached blackout part of execution!" )
+                        //target.BecomeRagdoll( Vector(0,0,0), false )
+						int damageAmount = target.GetMaxHealth() + 1
+						if ( IsValid( killCreditAttacker ) )
+						{
+							target.TakeDamage( damageAmount, killCreditAttacker, killCreditAttacker, { forceKill = true, damageType = DMG_MELEE_EXECUTION, damageSourceId = eDamageSourceId.human_execution } )
+						}
+						//markedForExecutionDeath will be cleared in MarkForDeath() which sets it in the first place
+					}
+
+					if ( target.IsPlayer() )
+						RestoreCloakAfterMelee( target, dataStruct )
+				}
+				else // target killed
+				{
+					if( IsValid( attacker ) )
+					{
+						if( attacker.IsPlayer() )
+						{
+							if( IsValid( target ) ) // defensive fix
+								AddPlayerScore( attacker, "Execution", target )
+							else
+								AddPlayerScore( attacker, "Execution" )
+						}
+					}
+				}
+
+				// force killing target
+				if ( file.alwaysKillTarget && IsAlive( target ) )
+				{
+					if( IsValid( attacker ) )
+						target.Die( attacker, attacker, { scriptType = DF_KILLSHOT, damageSourceId = eDamageSourceId.human_execution } )
+				}
+
+				if ( IsValid( target.e.syncedMeleeAttacker ) )
+				{
+					if ( IsValid( target.e.lastSyncedMeleeAttacker ) )
+					{
+						target.e.lastSyncedMeleeAttacker = null
+					}
+
+					target.e.lastSyncedMeleeAttacker = target.e.syncedMeleeAttacker
+					target.e.syncedMeleeAttacker = null
+				}
+			}
+		}
+	)
+
+	TargetSetExecutedBy( target, attacker )
+
+	AddAnimEvent( target, "mark_for_death", MarkForDeath )
+	AddAnimEvent( target, "phase_gib", PhaseGib )
+
+	FirstPersonSequenceStruct targetSequence
+	targetSequence.blendTime = 0.25
+	targetSequence.attachment = "ref"
+	targetSequence.thirdPersonAnim = action.targetAnimation3p
+	targetSequence.thirdPersonCameraAttachments = [action.thirdPersonCameraAttachment]
+	targetSequence.thirdPersonCameraVisibilityChecks = true
+
+	if ( isAttackerRef )
+	{
+		targetSequence.useAnimatedRefAttachment = true
+		// always enable target visibility for we want to execute a decoy or prop
+		//if ( target.IsNPC() && IsMultiplayer() )
+		//{
+		//	SetForceDrawWhileParented( target, true )
+		//}
+		SetForceDrawWhileParented( target, true )
+	}
+	else
+	{
+		targetSequence.noParent = true
+		targetSequence.playerPushable = true
+		targetSequence.enablePlanting = true
+	}
+
+
+	if ( target.IsPlayer() )
+	{
+		// this will sometimes make forced executions disable player's offhands forever idk why
+		//HolsterViewModelAndDisableWeapons( target )
+		target.DisableWeaponViewModel()
+		target.Server_TurnOffhandWeaponsDisabledOn()
+
+		targetSequence.firstPersonAnim = action.targetAnimation1p
+		DisableCloakBeforeMelee( target, dataStruct )
+	}
+
+	if ( attacker.IsPlayer() )
+	{
+		if ( MeleeTargetrequiresDataKnife( target ) )
+		{
+			string tag = GetTagForKnifeMeleeTarget( target )
+			thread AttachPlayerModelForDuration( attacker, DATA_KNIFE_MODEL, tag, 2.2 )
+		}
+		else if ( action.attachTag1p != "" && action.attachModel1p != $"" )
+		{
+			thread AttachPlayerModelForDuration( attacker, action.attachModel1p, action.attachTag1p, 2.2 )
+		}
+	}
+
+	if ( isAttackerRef )
+	{
+		#if MP
+		if ( ShouldForce1PFirstPersonSequence() && target.IsPlayer() && GetCurrentPlaylistVarInt( "fp_embark_enabled", eFirstPersonSequenceForce1PSetting.DISABLED ) < eFirstPersonSequenceForce1PSetting.CLASSIC_EXECUTION )
+			FirstPersonSequenceForce1P( targetSequence, target, attacker )
+		#endif
+		
+		waitthread FirstPersonSequence( targetSequence, target, attacker )
+	}
+	else
+	{
+		#if MP
+		if ( ShouldForce1PFirstPersonSequence() && GetCurrentPlaylistVarInt( "fp_embark_enabled", eFirstPersonSequenceForce1PSetting.DISABLED ) < eFirstPersonSequenceForce1PSetting.CLASSIC_EXECUTION )
+			FirstPersonSequenceForce1P( targetSequence, target )
+		#endif
+		
+		waitthread FirstPersonSequence( targetSequence, target )
+	}
+}
+
+#if MP
+void function IncrementStatForPilotExecutionWhileCloaked( entity attacker, entity target, PilotVsEnemyStruct dataStruct )
+{
+	if ( !IsAlive( attacker ) )
+		return
+
+	if ( IsAlive( target ) )
+		return
+
+	if ( !target.IsPlayer() )
+		return
+
+	if ( !dataStruct.wasCloaked )
+		return
+
+	IncrementPlayerDidPilotExecutionWhileCloaked( attacker ) //Kinda clumsy we have to do it here instead of where all the other kill stats are incremented. Mainly because we turn cloak off at the start of execution so you can't do it where all the other kill stats are incremented
+}
+#endif
+
+void function TargetClearedExecuted( entity target )
+{
+	target.ClearParent()
+	target.Solid()
+	//if ( target.ContextAction_IsMeleeExecution() )
+	//	target.PlayerMelee_ExecutionEndTarget()
+	// modified for executing a decoy or prop
+	if ( target.IsPlayer() || target.IsNPC() )
+	{
+		if ( target.ContextAction_IsMeleeExecution() )
+			target.PlayerMelee_ExecutionEndTarget()
+	}
+	if ( target.IsPlayer() )
+		ClearPlayerAnimViewEntity( target )
+}
+
+void function TargetSetExecutedBy( entity target, entity attacker )
+{
+	//Break out of context actions like hacking control panel etc
+	//if ( target.ContextAction_IsActive() )
+	//	target.Anim_Stop()
+	//target.PlayerMelee_ExecutionStartTarget( attacker )
+	// modified for executing a decoy or prop
+	if ( target.IsPlayer() || target.IsNPC() )
+	{
+		if ( target.ContextAction_IsActive() )
+			target.Anim_Stop()
+		target.PlayerMelee_ExecutionStartTarget( attacker )
+	}
+	target.e.syncedMeleeAttacker = attacker
+	target.NotSolid()
+}
+
+bool function MeleeTargetrequiresDataKnife( entity target )
+{
+	if ( IsProwler( target ) )
+		return true
+
+	if ( IsPilotElite( target ) )
+		return true
+
+	return false
+}
+
+string function GetTagForKnifeMeleeTarget( entity target )
+{
+	Assert( MeleeTargetrequiresDataKnife( target ) )
+
+	if ( IsProwler( target ) )
+		return "PROPGUN"
+
+	if ( IsPilotElite( target ) )
+		return "KNIFE"
+
+	unreachable
+}
+
+function AttachPlayerModelForDuration( var player, asset modelName, var tag, var time )
+{
+	expect entity( player )
+
+	if ( !IsValid( player ) )
+		return
+
+	Assert( IsValid( tag ), "No tag specified for player" )
+
+	entity viewModel = player.GetFirstPersonProxy() //JFS: Defensive fix for player not having view models sometimes
+	if ( !IsValid( viewModel ) )
+		return
+
+	if ( !EntHasModelSet( viewModel ) )
+		return
+
+	entity model = CreatePropDynamic( modelName )
+	model.SetParent( viewModel, tag, false, 0.0 )
+
+	OnThreadEnd(
+		function() : ( model )
+		{
+			if ( IsValid( model ) )
+				model.Destroy()
+		}
+	)
+
+	player.EndSignal( "OnDeath" )
+
+	wait time
+}
+
+void function MarkForDeath( entity target )
+{
+	if ( target.IsNPC() )
+	{
+		//printt("Killing marked for death npc " + target )
+		//Just kill off NPC now, otherwise it will play pain animations on death
+		CodeCallback_OnMeleeKilled( target )
+		return
+	}
+
+	//printt("marking player " + target + " for death")
+	target.e.markedForExecutionDeath = true //This will kill off the player even if the execution animation is interruped from this point forward
+
+	target.EndSignal( "OnDeath" )
+
+	OnThreadEnd(
+	function() : ( target )
+		{
+			target.e.markedForExecutionDeath = false
+		}
+	)
+
+	WaitForever()
+
+}
+
+void function PhaseGib( entity target )
+{
+	if ( !IsAlive( target ) )
+		return
+
+	target.ClearInvulnerable()
+
+	entity attacker
+	if ( IsValid( target.e.syncedMeleeAttacker ) )
+	{
+		attacker = target.e.syncedMeleeAttacker
+	}
+	else if ( IsValid( target.e.lastSyncedMeleeAttacker ) )
+	{
+		attacker = target.e.lastSyncedMeleeAttacker
+	}
+	else
+	{
+		attacker = null
+	}
+
+	int damageAmount = target.GetMaxHealth() + 1
+	target.TakeDamage( damageAmount , attacker, attacker, { forceKill = true, damageType = DMG_MELEE_EXECUTION, damageSourceId = eDamageSourceId.human_execution, scriptType = DF_NO_INDICATOR | DF_GIB } )
+}
+
+
+entity function CreateSyncedMeleeRef( entity attacker, entity target, SyncedMelee action )
+{
+	entity ref = CreateMeleeScriptMoverBetweenEnts( attacker, target )
+
+	vector angles = target.GetAngles()
+	angles.x = ref.GetAngles().x
+
+	ref.SetAngles( angles )
+	if ( action.animRefPos == "attacker" )
+		ref.SetOrigin( attacker.GetOrigin() )
+	else
+		ref.SetOrigin( target.GetOrigin() )
+	return ref
+}
+
+void function ApplyGruntExecutionDamage( entity ref, entity attacker, entity target, float damageDealt )
+{
+	ref.EndSignal( "OnDestroy" )
+	attacker.EndSignal( "OnDeath" )
+	target.EndSignal( "OnDeath" )
+
+	for ( ;; )
+	{
+		table results = attacker.WaitSignal( "NpcDealsExecutionDamage" )
+		float damage
+		switch ( results.parm )
+		{
+			case "lethal":
+				damage = float( target.GetMaxHealth() )
+				break
+
+			case "nonlethal":
+				damage = min( target.GetHealth() - 10, target.GetMaxHealth() * damageDealt )
+				break
+		}
+
+		target.TakeDamage( damage, attacker, attacker, { damageSourceId=eDamageSourceId.human_execution, scriptType = DF_RAGDOLL } )
+	}
+}
+
+// modified to add more exection options
+void function Melee_SetPlayerClassicExecutionsEnabled( bool should )
+{
+	file.playerDoClassicExecutions = should
+}
+
+bool function Melee_ShouldPlayerClassicExecution()
+{
+	return file.playerDoClassicExecutions
+}
+
+void function Melee_SetNPCClassicExecutionsEnabled( bool should )
+{
+	file.npcDoClassicExecutions = should
+}
+
+bool function Melee_ShouldNPCClassicExecution()
+{
+	return file.npcDoClassicExecutions
+}
+
+void function Melee_SetUseRandomClassicExecutions( bool use )
+{
+	file.randomClassicExecutions = use
+}
+
+bool function Melee_IsClassicExecutionRandom()
+{
+	return file.randomClassicExecutions
+}
+
+void function Melee_SetSyncedMeleeAlwaysKill( bool always )
+{
+	file.alwaysKillTarget = always
+}
+
+bool function Melee_IsSyncedMeleeAlwaysKill()
+{
+	return file.alwaysKillTarget
+}
+
+void function Melee_SetHumanSizedDoClassicExecution( entity ent, bool doClassic )
+{
+	if ( !( ent in file.humanSizedDoClassicExecution ) )
+		file.humanSizedDoClassicExecution[ ent ] <- false // default value
+	file.humanSizedDoClassicExecution[ ent ] = doClassic
+}

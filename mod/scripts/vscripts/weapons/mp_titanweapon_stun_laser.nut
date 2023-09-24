@@ -75,9 +75,6 @@ var function OnWeaponPrimaryAttack_titanweapon_stun_laser( entity weapon, Weapon
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	if( weapon.HasMod( "tcp_flash" ) )
-		weaponOwner.TakeSharedEnergy( max( 0, weaponOwner.GetSharedEnergyCount() / 2 ) )
-
 	ShotgunBlast( weapon, attackParams.pos, attackParams.dir, 1, DF_GIB | DF_EXPLOSION )
 	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
 	weapon.SetWeaponChargeFractionForced(1.0)
@@ -117,7 +114,7 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 		return
 	}
 
-	if ( attacker.GetTeam() == target.GetTeam() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
+	if ( attacker.GetTeam() == target.GetTeam() )
 	{
 		entity attackerSoul = attacker.GetTitanSoul()
 		entity weapon = attacker.GetOffhandWeapon( OFFHAND_LEFT )
@@ -130,8 +127,8 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 			if ( IsValid( soul ) )
 			{
 				int shieldRestoreAmount = 750
-				if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
-					shieldRestoreAmount = int( 1.25 * shieldRestoreAmount )
+				if ( SoulHasPassive( attackerSoul, ePassives.PAS_VANGUARD_SHIELD ) )
+					shieldRestoreAmount = int( 2.0 * shieldRestoreAmount )
 
 				float shieldAmount = min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() )
 				shieldRestoreAmount = soul.GetShieldHealthMax() - int( shieldAmount )
@@ -164,9 +161,6 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 	}
 	else if ( target.IsNPC() || target.IsPlayer() )
 	{
-		if( IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
-			if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && attacker.GetTeam() == target.GetTeam() )
-				return
 		if( !attacker.IsTitan() )
 			return
 		int shieldRestoreAmount = target.GetArmorType() == ARMOR_TYPE_HEAVY ? 750 : 250
@@ -194,26 +188,21 @@ void function StunLaser_DamagedTarget( entity target, var damageInfo )
 				}
 			}
 		}
-		if ( IsValid( soul ) && IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
+		if ( IsValid( soul ) )
 		{
 			if ( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
-				shieldRestoreAmount = int( 1.25 * shieldRestoreAmount )
-			if( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") && ( target.IsPlayer() || ( target.GetClassName() != "npc_titan" && !target.IsNPC() ) ) )
-			{
-				ScreenFadeToColor( target, 128, 128, 128, 255, 0.1, 2 )
-			}
-			else
-				soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
+				shieldRestoreAmount = int( 2.0 * shieldRestoreAmount )
+			soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
 		}
 		if( IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
 		{
-			if ( attacker.IsPlayer() && !( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod("tcp_flash") ) )
+			if ( attacker.IsPlayer() )
 			{
 				if( weapon.HasMod( "charge_ball" ) )
 				{
 					if( "lastFXTime" in weapon.s )
 					{
-						if( weapon.s.lastFXTime + 0.1 > Time() )
+						if( weapon.s.lastFXTime + 0.8 > Time() )
 							return
 					}
 					weapon.s.lastFXTime <- Time()
@@ -282,7 +271,7 @@ var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon
 			return
 	#endif
 
-	float speed = 200.0
+	float speed = 500.0
 
 	var fireMode = weapon.GetWeaponInfoFileKeyField( "fire_mode" )
 

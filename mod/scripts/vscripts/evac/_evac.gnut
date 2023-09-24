@@ -77,6 +77,8 @@ struct EvacShipSetting
 	string flyoutSound
 }
 
+bool EvacFlyAway = false
+
 void function Evac_Init()
 {
 	EvacShared_Init()
@@ -361,13 +363,16 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 
 	// holster all weapons
 	foreach ( entity player in dropship.s.evacSlots )
+	{
 		if ( IsValid( player ) )
 		{
 			Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" ) // hud should be disabled here
 			player.HolsterWeapon()
 		}
+	}
 
 	// fly away
+	EvacFlyAway = true
 	dropship.Signal( "EvacShipLeaves" )
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_end", evacNode )
 
@@ -431,6 +436,7 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	}
 }
 
+
 void function AddPlayerToEvacDropship( entity dropship, entity player )
 {
 	int slot = RandomInt( dropship.s.evacSlots.len() )
@@ -455,6 +461,14 @@ void function AddPlayerToEvacDropship( entity dropship, entity player )
 	player.SetInvulnerable()
 	player.UnforceCrouch()
 	player.ForceStand()
+	if( EvacFlyAway )
+	{
+		if ( IsValid( player ) )
+		{
+			Remote_CallFunction_NonReplay( player, "ServerCallback_DisableHudForEvac" ) // hud should be disabled here
+			player.HolsterWeapon()
+		}
+	}
 
 	FirstPersonSequenceStruct fp
 	//fp.firstPersonAnim = EVAC_EMBARK_ANIMS_1P[ slot ]
