@@ -75,9 +75,7 @@ void function ApplyFDDerviedUpgrades( entity player, TitanLoadoutDef loadout )
 	}
 	else if ( loadout.titanClass == "northstar" )
 		ApplyDerivedNorthstarFDUpgrades( upgradeRefs, loadout )
-	else /*if ( loadout.titanClass == "vanguard" )
-		ApplyDerivedVanguardFDUpgrades( upgradeRefs, loadout )
-	else */if ( loadout.titanClass == "ion" )
+	else if ( loadout.titanClass == "ion" )
 	{
 		if( loadout.isPrime == "titan_is_not_prime" )
 			ApplyDerivedIonFDUpgrades( upgradeRefs, loadout )
@@ -97,6 +95,10 @@ void function ApplyFDDerviedUpgrades( entity player, TitanLoadoutDef loadout )
 		if( loadout.isPrime == "titan_is_not_prime" )
 			ApplyDerivedLegionFDUpgrades( upgradeRefs, loadout )
 	}
+
+	if ( loadout.titanClass == "vanguard" )
+		if( loadout.skinIndex == 3 && loadout.camoIndex == -1 )
+			ApplyDerivedVanguardFDUpgrades( upgradeRefs, loadout )
 }
 
 void function ApplyFDUpgradeWeaponPassives( entity titan, TitanLoadoutDef loadout )
