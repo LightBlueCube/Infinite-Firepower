@@ -29,8 +29,8 @@ global function OnWeaponNpcPrimaryAttack_dome_shield
 global const SP_PARTICLE_WALL_DURATION = 8.0
 global const MP_PARTICLE_WALL_DURATION = 6.0
 
-global const BRUTE4_DOME_SHIELD_HEALTH = 3000	//2500
-global const PAS_DOME_SHIELD_HEALTH = 3000
+global const BRUTE4_DOME_SHIELD_HEALTH = 1500	//2500
+global const PAS_DOME_SHIELD_HEALTH = 2000
 global const BRUTE4_DOME_SHIELD_MELEE_MOD = 2.5
 
 function MpTitanabilityBubbleShield_Init()
@@ -57,15 +57,23 @@ var function OnWeaponPrimaryAttack_particle_wall( entity weapon, WeaponPrimaryAt
         OnWeaponPrimaryAttack_dome_shield( weapon, attackParams )
         return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
     }
+	if( weapon.HasMod( "tcp_parent_shield" ) )
+	{
+		thread TitanPersonalShield_Threaded( weaponOwner, 2500, 8 )
+		return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
+	}
+	if( weapon.HasMod( "tcp_color_shield" ) )
+	{
+		thread CreateColorBubbleShield( weaponOwner.GetTeam(), weaponOwner.GetOrigin(), weaponOwner.GetAngles(), 6 )
+		return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
+	}
 	float duration
 	if ( IsSingleplayer() )
 		duration = SP_PARTICLE_WALL_DURATION
 	else
 		duration = MP_PARTICLE_WALL_DURATION
-	if( weapon.HasMod( "tcp_bubble_shield" ) )
-		thread CreateParentedBubbleShield( weaponOwner, weaponOwner.GetOrigin(), weaponOwner.GetAngles(), 8 )
-	else
-		CreateParticleWallFromOwner( weapon.GetWeaponOwner(), duration, attackParams )
+
+	CreateParticleWallFromOwner( weapon.GetWeaponOwner(), duration, attackParams )
 #endif
 	return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
 }
@@ -89,8 +97,274 @@ var function OnWeaponNpcPrimaryAttack_particle_wall( entity weapon, WeaponPrimar
 #endif // #if SERVER
 
 
+void function CreateColorBubbleShield( int team, vector origin, vector angles, float duration = 9999.0 )
+{
+	entity bubbleShield = CreateColorBubbleShieldWithSettings( team, origin, angles, null, 9999 )
+	entity friendlyColoredFX = expect entity ( bubbleShield.s.friendlyColoredFX )
+	entity enemyColoredFX = expect entity ( bubbleShield.s.enemyColoredFX )
+	friendlyColoredFX.SetAngles( angles )
+	enemyColoredFX.SetAngles( angles )
+
+	OnThreadEnd(
+		function () : ( bubbleShield )
+		{
+			DestroyBubbleShield( bubbleShield )
+		}
+	)
+
+	float endTime = duration + Time()
+	int rgb = RandomInt( 30 ) + 1
+	vector color = < 0, 0, 0 >
+	int rgb1 = 0
+	int rgb2 = 0
+	int rgb3 = 0
+	while( endTime > Time() )
+	{
+		WaitFrame()
+		if( rgb / 5 == 0 )
+		{
+			rgb1 = rgb
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, rgb2, 0 >
+		}
+		else if( rgb / 5 == 1 )
+		{
+			rgb1 = rgb - 5
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb3, 250, 0 >
+		}
+		else if( rgb / 5 == 2 )
+		{
+			rgb1 = rgb - 10
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, 250, rgb2 >
+		}
+		else if( rgb / 5 == 3 )
+		{
+			rgb1 = rgb - 15
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, rgb3, 250 >
+		}
+		else if( rgb / 5 == 4 )
+		{
+			rgb1 = rgb - 20
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb2, 0, 250 >
+		}
+		else
+		{
+			rgb1 = rgb - 25
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, 0, rgb3 >
+		}
+
+		if( rgb + 1 > 30 )
+			rgb = 0
+		rgb += 1
+
+		//SendHudMessageToAll( "debuginfo\n"+rgb+"\n"+rgb/10+"\n"+rgb1+"\n"+rgb2+"\nend", -1, 0.3, 200, 200, 225, 0, 0, 5, 1);
 
 
+		EffectSetControlPointVector( friendlyColoredFX, 1, color )
+		EffectSetControlPointVector( enemyColoredFX, 1, color )
+	}
+}
+
+entity function CreateColorBubbleShieldWithSettings( int team, vector origin, vector angles, entity owner = null, float duration = 9999 )
+{
+	entity bubbleShield = CreateEntity( "prop_dynamic" )
+	bubbleShield.SetValueForModelKey( $"models/fx/xo_shield.mdl" )
+	bubbleShield.kv.solid = SOLID_VPHYSICS
+	bubbleShield.kv.rendercolor = "81 130 151"
+	bubbleShield.kv.contents = (int(bubbleShield.kv.contents) | CONTENTS_NOGRAPPLE)
+	bubbleShield.SetOrigin( origin )
+	bubbleShield.SetAngles( angles )
+	 // Blocks bullets, projectiles but not players and not AI
+	bubbleShield.kv.CollisionGroup = TRACE_COLLISION_GROUP_BLOCK_WEAPONS
+	bubbleShield.SetBlocksRadiusDamage( true )
+	DispatchSpawn( bubbleShield )
+	bubbleShield.Hide()
+
+	SetTeam( bubbleShield, team )
+	array<entity> bubbleShieldFXs
+
+	vector coloredFXOrigin = origin + Vector( 0, 0, 25 )
+	table bubbleShieldDotS = expect table( bubbleShield.s )
+	if ( team == TEAM_UNASSIGNED )
+	{
+		entity neutralColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( neutralColoredFX, team )
+		bubbleShieldDotS.neutralColoredFX <- neutralColoredFX
+		bubbleShieldFXs.append( neutralColoredFX )
+	}
+	else
+	{
+		//Create friendly and enemy colored particle systems
+		entity friendlyColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( friendlyColoredFX, team )
+		friendlyColoredFX.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+		EffectSetControlPointVector(  friendlyColoredFX, 1, FRIENDLY_COLOR_FX )
+
+		entity enemyColoredFX = StartParticleEffectInWorld_ReturnEntity( BUBBLE_SHIELD_FX_PARTICLE_SYSTEM_INDEX, coloredFXOrigin, <0, 0, 0> )
+		SetTeam( enemyColoredFX, team )
+		enemyColoredFX.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY
+		EffectSetControlPointVector(  enemyColoredFX, 1, ENEMY_COLOR_FX )
+
+		bubbleShieldDotS.friendlyColoredFX <- friendlyColoredFX
+		bubbleShieldDotS.enemyColoredFX <- enemyColoredFX
+		bubbleShieldFXs.append( friendlyColoredFX )
+		bubbleShieldFXs.append( enemyColoredFX )
+	}
+
+	#if MP
+	DisableTitanfallForLifetimeOfEntityNearOrigin( bubbleShield, origin, TITANHOTDROP_DISABLE_ENEMY_TITANFALL_RADIUS )
+	#endif
+
+	EmitSoundOnEntity( bubbleShield, "BubbleShield_Sustain_Loop" )
+
+	thread CleanupBubbleShield( bubbleShield, bubbleShieldFXs, duration )
+
+	return bubbleShield
+}
+
+void function CleanupBubbleShield( entity bubbleShield, array<entity> bubbleShieldFXs, float fadeTime )
+{
+	bubbleShield.EndSignal( "OnDestroy" )
+
+	OnThreadEnd(
+		function () : ( bubbleShield, bubbleShieldFXs )
+		{
+			if ( IsValid_ThisFrame( bubbleShield ) )
+			{
+				StopSoundOnEntity( bubbleShield, "BubbleShield_Sustain_Loop" )
+				EmitSoundOnEntity( bubbleShield, "BubbleShield_End" )
+				DestroyBubbleShield( bubbleShield )
+			}
+
+			foreach ( fx in bubbleShieldFXs )
+			{
+				if ( IsValid_ThisFrame( fx ) )
+				{
+					EffectStop( fx )
+				}
+			}
+		}
+	)
+
+	wait fadeTime
+}
+
+void function TitanPersonalShield_Threaded( entity owner, int vortexHealth, float duration )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "DisembarkingTitan" )
+	owner.EndSignal( "TitanEjectionStarted" )
+
+
+	if ( duration <= 0 )
+		return
+	//------------------------------
+	// Shield vars
+	//------------------------------
+	vector origin = owner.GetOrigin()
+	vector angles = VectorToAngles( owner.GetPlayerOrNPCViewVector() )
+	angles.x = 0
+	angles.z = 0
+
+	float shieldWallRadius = SHIELD_WALL_RADIUS // 90
+	asset shieldFx = SHIELD_WALL_FX
+	float wallFOV = SHIELD_WALL_FOV
+	float shieldWallHeight = SHIELD_WALL_RADIUS * 2
+
+	//------------------------------
+	// Vortex to block the actual bullets
+	//------------------------------
+	entity vortexSphere = CreateShieldWithSettings( origin + < 0, 0, -64 >, angles, SHIELD_WALL_RADIUS, SHIELD_WALL_RADIUS * 2, SHIELD_WALL_FOV, duration, vortexHealth, SHIELD_WALL_FX )
+	thread DrainHealthOverTime( vortexSphere, vortexSphere.e.shieldWallFX, duration )
+
+	//vortexSphere.SetAngles( angles ) // viewvec?
+	//vortexSphere.SetOrigin( origin + Vector( 0, 0, shieldWallRadius - 64 ) )
+
+	// update fx origin
+	//vortexSphere.e.shieldWallFX.SetOrigin( Vector( 0, 0, shieldWallHeight ) )
+
+	//-----------------------
+	// Attach shield to owner
+	//------------------------
+	entity mover = CreateScriptMover()
+	mover.SetOrigin( origin )
+	mover.SetAngles( angles )
+
+	vortexSphere.SetParent( mover )
+
+	vortexSphere.EndSignal( "OnDestroy" )
+	Assert( IsAlive( owner ) )
+	owner.EndSignal( "ArcStunned" )
+	mover.EndSignal( "OnDestroy" )
+	#if MP
+	vortexSphere.e.shieldWallFX.EndSignal( "OnDestroy" )
+	#endif
+
+	OnThreadEnd(
+	function() : ( owner, mover, vortexSphere )
+		{
+			if ( IsValid( owner ) )
+			{
+				owner.kv.defenseActive = false
+			}
+
+			StopShieldWallFX( vortexSphere )
+
+			if ( IsValid( vortexSphere ) )
+				vortexSphere.Destroy()
+
+			if ( IsValid( mover ) )
+			{
+				//PlayFX( SHIELD_BREAK_FX, mover.GetOrigin(), mover.GetAngles() )
+				mover.Destroy()
+			}
+		}
+	)
+
+	owner.kv.defenseActive = true
+
+	for ( ;; )
+	{
+		Assert( IsAlive( owner ) )
+		UpdateShieldPosition( mover, owner )
+
+		#if MP
+		if ( IsCloaked( owner ) )
+			EntFireByHandle( vortexSphere.e.shieldWallFX, "Stop", "", 0, null, null )
+		else
+			EntFireByHandle( vortexSphere.e.shieldWallFX, "Start", "", 0, null, null )
+		#endif
+	}
+}
+
+void function ShieldDestroyAfterTime( entity vortexSphere, entity owner, float delay )
+{
+	wait delay
+	if( !IsValid(owner) )
+		return
+	if( !IsValid(vortexSphere) )
+		return
+	vortexSphere.SetHealth( 0 )
+}
+
+void function UpdateShieldPosition( entity mover, entity owner )
+{
+	mover.NonPhysicsMoveTo( owner.GetOrigin(), 0.2, 0.0, 0.0 )
+
+	WaitFrame()
+}
 
 const vector BRUTE4_DOME_COLOR_PAS_MOLTING_SHELL = <92, 92, 200>
 const vector BRUTE4_DOME_COLOR_CHARGE_FULL		 = <92, 92, 200>    //<92, 155, 200>	// blue
@@ -496,7 +770,7 @@ var function OnWeaponPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryAtta
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	float duration = 8
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -510,7 +784,7 @@ var function OnWeaponNpcPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryA
 	if ( IsValid( soul ) && IsValid( soul.soul.bubbleShield ))
 		return 0
 
-	float duration = 8
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -553,7 +827,7 @@ void function Brute4GiveShortDomeShield( entity weapon, entity owner, float dura
 		{
 			if ( rechargeDash && IsValid( weapon ) && IsValid( owner ) )
 			{
-				float fireDuration = 8
+				float fireDuration = 6
 				float remainingUseTime = float( weapon.GetWeaponPrimaryClipCount() ) / float( weapon.GetWeaponPrimaryClipCountMax() ) * fireDuration
 				float remainingShieldTime = expect float( owner.s.bubbleShieldHealthFrac ) * fireDuration
 				int refundAmmo = int( min( BRUTE4_MOLTING_SHELL_MAX_REFUND, remainingShieldTime ) * weapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate ) )

@@ -11,6 +11,17 @@
             "ServerCallback": {
                 "After": "InfiniteFirepower_Init"
             }
+        },
+        {
+            "Path": "/weapons/mod_weapon_inits.nut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "ModWeaponInit"
+            }
+        },
+        {
+            "Path": "/teamshuffle.nut",
+            "RunOn": "SERVER && MP"
         }
     ]
 }

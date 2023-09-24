@@ -1,0 +1,33 @@
+WeaponData
+{
+	Mods
+	{
+		mod_spider
+		{
+
+		}
+
+		clustermissile_fast_recharge
+		{
+		}
+
+		mod_ordnance_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+		burn_mod_titan_dumbfire_rockets
+		{
+		}
+		pas_ion_tripwire
+		{
+		}
+
+		tcp_arc_trip
+		{
+			"regen_ammo_refill_rate"						"10"
+		}
+	}
+}

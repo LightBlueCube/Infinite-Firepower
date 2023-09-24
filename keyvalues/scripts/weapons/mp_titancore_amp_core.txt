@@ -1,6 +1,6 @@
 WeaponData
 {
-	"core_duration"									"7.35"
+	"core_duration"									"8.0"
 
 	Mods	//绝大部分script都来自DB大佬的Super.Mixed.Game
 	{

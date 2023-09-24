@@ -399,12 +399,17 @@ void function Shift_Core_UseMeter( entity player )
 
 	if ( remainingTime > 0 )
 	{
-		const float USE_TIME = 4
+		float useTime = 3
 
-		remainingTime = max( remainingTime - USE_TIME, 0 )
+		if( SoulHasPassive( soul, ePassives.PAS_RONIN_SWORDCORE ) )
+			useTime = 2
+
+		remainingTime = max( remainingTime - useTime, 0 )
 		float startTime = soul.GetCoreChargeStartTime()
 		float duration = soul.GetCoreUseDuration()
 
+		if( remainingTime / duration > 1 || remainingTime / duration < 0 )
+			return
 		soul.SetTitanSoulNetFloat( "coreExpireFrac", remainingTime / duration )
 		soul.SetTitanSoulNetFloatOverTime( "coreExpireFrac", 0.0, remainingTime )
 		soul.SetCoreChargeExpireTime( remainingTime + curTime )

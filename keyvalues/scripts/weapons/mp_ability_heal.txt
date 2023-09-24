@@ -48,9 +48,9 @@ WeaponData
 		{
 		}
 
-		tcp
-		{
-			"regen_ammo_refill_rate"						"*2"
-		}
+        tcp_super_dash
+        {
+			"fire_duration"									"0.1"
+        }
 	}
 }

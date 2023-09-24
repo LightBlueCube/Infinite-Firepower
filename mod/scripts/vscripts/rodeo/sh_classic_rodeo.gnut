@@ -7,12 +7,12 @@ global function CreateClassicRodeoWeakpoint
 
 // handling hardcoded nerf!
 const array<int> ELECTRIC_SMOKE_DAMAGESOURCES = [ eDamageSourceId.mp_titanability_smoke,
-												  //eDamageSourceId.mp_titanability_electric_smoke,
+												  eDamageSourceId.mp_weapon_satchel,
 									 			  eDamageSourceId.mp_weapon_grenade_electric_smoke ]
 
 struct
 {
-	float classicRodeoAdditionalDamage = 16 // default additional damage value, should make it changable through playlistVars
+	float classicRodeoAdditionalDamage = 1 // default additional damage value, should make it changable through playlistVars
 } file
 #endif
 
@@ -98,22 +98,8 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	if( IsValid( attackerWeapon ) )
 		weaponName = attackerWeapon.GetWeaponClassName()
 
-	if( weaponName == "mp_weapon_arc_launcher" )
-		classicRodeoAdditionalDamage = 2
-	else if( weaponName == "mp_weapon_epg" || weaponName == "mp_weapon_dmr" )
-		classicRodeoAdditionalDamage = 6
-	else if( weaponName == "mp_weapon_defender" || weaponName == "mp_weapon_mgl" || weaponName == "mp_weapon_pulse_lmg" || weaponName == "mp_weapon_shotgun" )
-		classicRodeoAdditionalDamage = 8
-	else if( weaponName == "mp_weapon_wingman_n" || weaponName == "mp_weapon_wingman")
-		classicRodeoAdditionalDamage = 12
-	else if( weaponName == "mp_weapon_doubletake" )
-		classicRodeoAdditionalDamage = 18
-	else if( weaponName == "mp_weapon_smart_pistol" )
-		classicRodeoAdditionalDamage = 24
-	else if( weaponName == "mp_weapon_shotgun_pistol" )
-		classicRodeoAdditionalDamage = 60
-	else if( weaponName == "mp_weapon_mastiff" )
-		classicRodeoAdditionalDamage = 100
+	float bullet = 1.5 * attackerWeapon.GetWeaponSettingFloat( eWeaponVar.fire_rate )
+	rodeoDamage = int( 15000 / bullet )
 
 	if( ELECTRIC_SMOKE_DAMAGESOURCES.contains( damageSourceID ) ) // hardcoded here
 	{
@@ -125,6 +111,24 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	if( IsValid( titanSoul ) )
 		if( titanSoul.IsDoomed() )
 			classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 2
+
+	if( weaponName == "mp_weapon_arc_launcher" || weaponName == "mp_weapon_epg" || weaponName == "mp_weapon_esaw" )
+		classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 4
+	if( weaponName == "mp_weapon_softball" || weaponName == "mp_weapon_mastiff" )
+		classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 3
+	if( weaponName == "mp_weapon_sniper" || weaponName == "mp_weapon_smr" || weaponName == "mp_weapon_shotgun" || weaponName == "mp_weapon_wingman" || weaponName == "mp_weapon_wingman_n" || weaponName == "mp_weapon_shotgun_pistol" || weaponName == "mp_weapon_doubletake" || weaponName == "mp_weapon_dmr" )
+		classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 2
+	if( weaponName == "mp_weapon_g2" )
+		classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 1.5
+	if( weaponName == "mp_weapon_defender" )
+	{
+		rodeoDamage = 9800
+		if( attackerWeapon.HasMod( "quick_charge" ) )
+			rodeoDamage = 3200
+	}
+	if( damageSourceID == eDamageSourceId.mp_weapon_frag_grenade || damageSourceID == eDamageSourceId.mp_weapon_grenade_gravity || damageSourceID == eDamageSourceId.mp_weapon_grenade_sonar || damageSourceID == eDamageSourceId.mp_weapon_thermite_grenade )
+		classicRodeoAdditionalDamage = classicRodeoAdditionalDamage / 2
+
 	rodeoDamage = int( rodeoDamage * classicRodeoAdditionalDamage ) // no additional damage based on criticalScale
 
 	//print( file.classicRodeoAdditionalDamage )

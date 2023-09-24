@@ -38,15 +38,19 @@ WeaponData
 
 		}
 
-		tcp_bubble_shield
-		{
-			//给nut做识别
-		}
         brute4_bubble_shield
 		{
 			"fire_rate"   									"1.0"
 			//"fire_duration"                                 "6.0"
 			//"regen_ammo_refill_rate"						"*2"
+		}
+		tcp_parent_shield
+		{
+
+		}
+		tcp_color_shield
+		{
+			"regen_ammo_refill_rate"						"*0.75"
 		}
 	}
 }

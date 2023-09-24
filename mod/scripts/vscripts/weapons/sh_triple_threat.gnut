@@ -15,8 +15,8 @@ const FX_TRIPLE_IGNITION_BURN = $"wpn_grenade_TT_activate"
 const BURN_MAGNETIC_FORCE = 2400
 const MIN_FUSE_TIME = 2.3
 const MAX_FUSE_TIME = 2.7
-const MIN_ROLLING_ROUNDS_FUSE_TIME = 3.2
-const MAX_ROLLING_ROUNDS_FUSE_TIME = 3.7
+const MIN_ROLLING_ROUNDS_FUSE_TIME = 6.2
+const MAX_ROLLING_ROUNDS_FUSE_TIME = 6.8
 
 global const TRIPLETHREAT_LAUNCH_VELOCITY = 1100.0
 global const TRIPLETHREAT_MIN_MINE_FUSE_TIME = 8.2
@@ -75,20 +75,13 @@ function FireTripleThreat( entity weapon, WeaponPrimaryAttackParams attackParams
 	bool shouldCreateProjectile = false
 	if ( IsServer() || weapon.ShouldPredictProjectiles() )
 		shouldCreateProjectile = true
-	#if SERVER
-	if( weaponOwner.IsPlayer() )
-	{
-		if( weaponOwner.GetWeaponAmmoLoaded( weapon ) > 3 )
-			EmitSoundOnEntityOnlyToPlayer( weapon, weaponOwner, "Weapon_MGL_Fire_1P" )
-		EmitSoundOnEntityExceptToPlayer( weapon, weaponOwner, "Weapon_MGL_Fire_3P" )
-	}
-	else
-		EmitSoundOnEntity( weaponOwner, "Weapon_MGL_Fire_3P" )
-	#endif
 	#if CLIENT
 		if ( !playerFired )
 			shouldCreateProjectile = false
 	#endif
+
+	// Northstar missing: fix sound!!! default fire sound is too small in ttf2
+	weapon.EmitWeaponSound_1p3p( "Weapon_MGL_Fire_1P", "Weapon_MGL_Fire_3P" )
 
 	entity bossPlayer = weaponOwner
 	bool hasRollingRoundsMod = weapon.HasMod( "rolling_rounds" )
@@ -157,7 +150,6 @@ function FireTripleThreatGrenade( entity weapon, origin, fwd, velocity, playerFi
 	entity nade = weapon.FireWeaponGrenade( origin, fwd, velocity, 0, damageType, damageType, playerFired, true, true )
 	if ( nade )
 	{
-		nade.InitMagnetic( 400.0, "Explo_TripleThreat_MagneticAttract" )
 
 		nade.kv.CollideWithOwner = false
 

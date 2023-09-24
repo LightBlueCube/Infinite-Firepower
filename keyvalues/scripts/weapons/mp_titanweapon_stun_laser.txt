@@ -24,16 +24,11 @@ WeaponData
 		{
 		}
 
-		tcp_flash
-		{
-			"regen_ammo_refill_rate"						"*0.5"
-		}
-
 		charge_ball	//绝大部分script都来自db大佬的Super.Mixed.Game
 		{
 			"rui_crosshair_index"							"1"
 
-			"charge_time" 									"0.7"
+			"charge_time" 									"2.5"
 			"charge_cooldown_time"							"0.6"
 			"charge_cooldown_delay"   						"0.1"
 			"charge_end_forces_fire"						"1"

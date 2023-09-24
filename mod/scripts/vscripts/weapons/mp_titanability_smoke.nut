@@ -95,14 +95,14 @@ void function TitanSmokescreen( entity ent, entity weapon )
 	smokescreen.damageOuterRadius = 375.0
 	if ( weapon.HasMod( "maelstrom" ) )
 	{
-		smokescreen.dpsPilot = 90
-		smokescreen.dpsTitan = 850
+		smokescreen.dpsPilot = 45
+		smokescreen.dpsTitan = 1350
 		smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
 		smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P
 	}
 	else
 	{
-		smokescreen.dpsPilot = 40
+		smokescreen.dpsPilot = 45
 		smokescreen.dpsTitan = 450
 	}
 	smokescreen.damageDelay = 1.0

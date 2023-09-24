@@ -104,7 +104,7 @@ WeaponData
 
 	"crosshair"							"crosshair_t"
 	"explosion_damage"								"350"		// 150
-	"explosion_damage_heavy_armor"					"400"		// 150
+	"explosion_damage_heavy_armor"					"1000"		// 150
 
 	"explosion_inner_radius"  						"140"
 	"explosionradius" 								"320"
@@ -382,7 +382,7 @@ WeaponData
 	"npc_fire_at_enemy_defense_time"				"1.5"
 
 	"npc_explosion_damage"							"350"
-	"npc_explosion_damage_heavy_armor"				"600"
+	"npc_explosion_damage_heavy_armor"				"1000"
 
 	// WeaponED Unhandled Key/Values and custom script Key/Values
 	"bob_tilt_angle"  								"0.5"

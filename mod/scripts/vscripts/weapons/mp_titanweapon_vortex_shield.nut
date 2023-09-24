@@ -221,8 +221,6 @@ function EndVortex( entity weapon )
 
 bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, entity vortexSphere, var damageInfo )
 {
-	//if ( weapon.HasMod( "shield_only" ) )
-	//	return true
 
 	#if CLIENT
 		return true
@@ -239,14 +237,40 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 		string attackerWeaponName	= attackerWeapon.GetWeaponClassName()
 		int damageType				= DamageInfo_GetCustomDamageType( damageInfo )
 
+		TakeAmountIfIsRodeoAttack( attacker, weapon )
 		return TryVortexAbsorb( vortexSphere, attacker, origin, damageSourceID, attackerWeapon, attackerWeaponName, "hitscan", null, damageType, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
 	#endif
 }
 
+void function TakeAmountIfIsRodeoAttack( entity attacker, entity weapon )
+{
+	entity owner = weapon.GetWeaponOwner()
+	if( !IsAlive( owner ) || !owner.IsTitan() )
+		return
+	if( !IsValid( owner.GetTitanSoul() ) )
+		return
+	if( !IsValid( attacker ) )
+		return
+	if( !IsAlive( attacker ) || !attacker.IsPlayer() || attacker.IsTitan() )
+		return
+	if( attacker.GetTitanSoulBeingRodeoed() != owner.GetTitanSoul() )
+		return
+
+	if ( weapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
+	{
+
+		int totalEnergy = owner.GetSharedEnergyTotal()
+		owner.TakeSharedEnergy( int( float( totalEnergy ) * 0.2 ) )
+	}
+	else
+	{
+		float frac = min ( weapon.GetWeaponChargeFraction() + 0.2, 1.0 )
+		weapon.SetWeaponChargeFraction( frac )
+	}
+}
+
 bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos )
 {
-	//if ( weapon.HasMod( "shield_only" ) )
-	//	return true
 
 	#if CLIENT
 		return true
@@ -399,8 +423,8 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_vortex_shield( entity wea
 		// should be fixed in a better way; possibly by giving ION a modded version of vortex?
 		if ( GetConVarInt( "bug_reproNum" ) != 131242 && weapon.IsChargeWeapon() )
 		{
-			if ( weapon.HasMod( "tcp_vortex" ) )
-				allowSwitch = weapon.GetWeaponChargeFraction() < 0.1
+			if ( weapon.HasMod( "slow_recovery_vortex" ) )
+				allowSwitch = weapon.GetWeaponChargeFraction() == 0.0
 			else
 				allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
 		}

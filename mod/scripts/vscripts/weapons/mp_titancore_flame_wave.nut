@@ -356,7 +356,7 @@ void function GroundSlamThink( entity weapon )
     owner.SetVelocity( baseVelocity )
     //wait BERSERKER_DASH_TIME
     //owner.SetVelocity( < 0, 0, -170 > )
-	owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).SetWeaponPrimaryClipCount( owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).GetWeaponPrimaryClipCountMax() )
+	//owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).SetWeaponPrimaryClipCount( owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).GetWeaponPrimaryClipCountMax() )
     while( true )
     {
         WaitFrame()
