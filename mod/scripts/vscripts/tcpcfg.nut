@@ -134,6 +134,26 @@ void function OnClientConnected( entity player )
 	player.s.KsGUIL2_1 <- 0
 	player.s.lastGUITime <- 0.0
 	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND2, KsGUI, 0 )
+	AddPlayerHeldButtonEventCallback( player, IN_MELEE, DropBattery, 1 )
+}
+
+void function DropBattery( entity player )
+{
+	if( player.IsHuman() && IsAlive( player ) )
+	{
+		if( PlayerHasMaxBatteryCount( player ) )
+		{
+			entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
+			vector viewVector = player.GetViewVector()
+			vector playerVel = player.GetVelocity()
+			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
+			battery.SetVelocity( batteryVel )
+
+			SendHudMessage( player, "已丢出电池!", -1, 0.4, 100, 255, 100, 0, 0, 2, 1 )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
+			return
+		}
+	}
 }
 
 void function KsGUI( entity player )
