@@ -39,7 +39,6 @@ void function NukeTitanAndNuclearBomb_Init()
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
-	AddClientCommandCallback( "hw", NukeTitan )
 }
 
 void function OnWinnerDetermined()	//anti-crash
@@ -149,7 +148,7 @@ void function DropBattery( entity player )
 			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 			battery.SetVelocity( batteryVel )
 
-			SendHudMessage( player, "已丢出电池!", -1, 0.4, 100, 255, 100, 0, 0, 2, 1 )
+			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 0, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 			return
 		}
@@ -218,12 +217,12 @@ void function KsGUIL2Select( entity player )
 	local l2 = player.s.KsGUIL2_1
 	if( l1 == 1 && l2 == 0 )
 	{
-		NukeTitan_Threaded( player, [ "1" ] )
+		NukeTitan( player, false )
 		player.s.lastGUITime = Time()
 	}
 	if( l1 == 1 && l2 == 1 )
 	{
-		NukeTitan_Threaded( player, [ "all" ] )
+		NukeTitan( player, true )
 		player.s.KsGUIL2 = false
 	}
 }
@@ -245,7 +244,7 @@ void function KsGUI_L2_2( entity player )
 		return
 	}
 
-	SendHudMessage( player, "聚变打击离线", -1, 0.4, 255, 100, 100, 0, 0, 2, 1 )
+	SendHudMessage( player, "\n聚变打击离线", -1, 0.3, 255, 100, 100, 0, 0, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 }
 
@@ -282,10 +281,10 @@ void function KsGUI_L2_1( entity player )
 
 	if( l2 == 0 )
 	{
-		SendHudMessage( player, ">>交付一个<<  -  ==交付全部==", -1, 0.4, 200, 200, 225, 0, 0, 3, 1 )
+		SendHudMessage( player, "当前剩余"+ player.s.HaveNukeTitan +"个核武未交付\n◆交付一个◆  -  ◇交付全部◇", -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
 	}
 	else
-		SendHudMessage( player, "==交付一个==  -  >>交付全部<<", -1, 0.4, 200, 200, 225, 0, 0, 3, 1 )
+		SendHudMessage( player, "当前剩余"+ player.s.HaveNukeTitan +"个核武未交付\n◇交付一个◇  -  ◆交付全部◆", -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
 
 }
 
@@ -301,12 +300,12 @@ void function KsGUI_L2_0( entity player )
 			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 			battery.SetVelocity( batteryVel )
 
-			SendHudMessage( player, "已丢出电池!", -1, 0.4, 100, 255, 100, 0, 0, 2, 1 )
+			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 0, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 			return
 		}
 	}
-	SendHudMessage( player, "你没有电池！", -1, 0.4, 255, 100, 100, 0, 0, 2, 1 )
+	SendHudMessage( player, "\n你没有电池！", -1, 0.3, 255, 100, 100, 0, 0, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 }
 
@@ -324,15 +323,15 @@ void function KsGUI_SwitchL1( entity player )
 	else if( !skipL1Add )
 		player.s.KsGUIL1 = 0
 	local l1 = player.s.KsGUIL1
-	string text = ""
+	string text = "短按切换 == Main Menu == 长按选中\n"
 	int i = 0
 
 	for( ;; )
 	{
 		if( i == l1 )
-			text += ">>"
+			text += "◆"
 		else
-			text += "=="
+			text += "◇"
 
 		text += KSGUI_L1_TEXT[ i ]
 
@@ -342,9 +341,9 @@ void function KsGUI_SwitchL1( entity player )
 			text += player.s.HaveNuclearBomb ? "(在线)" : "(离线)"
 
 		if( i == l1 )
-			text += "<<"
+			text += "◆"
 		else
-			text += "=="
+			text += "◇"
 
 		if( i == KSGUI_L1_TEXT.len() - 1 )
 			break
@@ -354,121 +353,40 @@ void function KsGUI_SwitchL1( entity player )
 	}
 
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
-	SendHudMessage( player, text, -1, 0.4, 200, 200, 225, 0, 0, 3, 1 )
+	SendHudMessage( player, text, -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
 
 }
 
-bool function NukeTitan( entity player, array<string> args )
+void function NukeTitan( entity player, bool all )
 {
-	thread NukeTitan_Threaded( player, args )
-	return true
-}
-void function NukeTitan_Threaded( entity player, array<string> args )
-{
-	if( !IsValid( player ) )
-		return
-	if( args.len() == 0 )
+	if( player.s.HaveNukeTitan <= 0 )
 	{
-		if( "HaveNukeTitan" in player.s )
+		SendHudMessage( player, "\n你没有核武泰坦!", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !player.IsHuman() )
+	{
+		SendHudMessage( player, "\n你需要处于铁驭状态才能交付核武泰坦", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( all )
+	{
+		SendHudMessage( player, "\n成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+		for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
 		{
-			SendHudMessage( player, "当前拥有 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1 )
-			return
+			PlayerInventory_GiveNukeTitan( player )
 		}
-		else
-		{
-			SendHudMessage( player, "当前拥有 0 个核武泰坦", -1, 0.3, 255, 0, 0, 255, 0.15, 2, 1 )
-			return
-		}
+		player.s.HaveNukeTitan = 0
 	}
 	else
 	{
-		int i = 0
-		if( args[0] == "all" )
-		{
-			if( "HaveNukeTitan" in player.s )
-			{
-				if( player.s.HaveNukeTitan <= 0 )
-				{
-					SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-					EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-					return
-				}
-				if( player.IsTitan() )
-				{
-					SendHudMessage( player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-					EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-					return
-				}
-				if( !player.IsHuman() )
-				{
-					SendHudMessage( player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-					EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-					return
-				}
-				SendHudMessage( player, "成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-				for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
-				{
-					PlayerInventory_GiveNukeTitan( player )
-				}
-				player.s.HaveNukeTitan = 0
-			}
-			else
-			{
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-			}
-			return
-		}
-		else
-			i = args[0].tointeger()
-		if( i <= 0 )
-		{
-			SendHudMessage( player, "填入了非法参数", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-			return
-		}
-		if( "HaveNukeTitan" in player.s )
-		{
-			if( player.s.HaveNukeTitan <= 0 )
-			{
-				SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-				return
-			}
-			if( i > player.s.HaveNukeTitan )
-			{
-				SendHudMessage( player, "你只有 "+ player.s.HaveNukeTitan +" 个核武泰坦\n但你填入的值 "+ i +" 明显大于你所拥有的值", -1, 0.4, 255, 0, 0, 255, 0.15, 3, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-				return
-			}
-			if( player.IsTitan() )
-			{
-				SendHudMessage( player, "你需要先离开泰坦才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-				return
-			}
-			if( !player.IsHuman() )
-			{
-				SendHudMessage( player, "你需要处于铁驭状态才能交付核武泰坦", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-				return
-			}
-			player.s.HaveNukeTitan -= i
-			SendHudMessage( player, "成功交付了 "+ i +" 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.4, 255, 0, 0, 255, 0, 3, 1 )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-			while( i > 0 )
-			{
-				PlayerInventory_GiveNukeTitan( player )
-				i -= 1
-			}
-		}
-		else
-		{
-			SendHudMessage( player, "你没有核武泰坦!", -1, 0.4, 255, 0, 0, 255, 0, 2, 1 )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		}
-		return
+		player.s.HaveNukeTitan -= 1
+		SendHudMessage( player, "成功交付了 1 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.3, 255, 0, 0, 255, 0, 3, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+		PlayerInventory_GiveNukeTitan( player )
 	}
 }
 
@@ -477,7 +395,7 @@ void function RestoreKillStreak( entity player )
 {
 	if( "HaveNukeTitan" in player.s )
 		if( player.s.HaveNukeTitan != 0 )
-			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "記得使用！", < 255, 0, 0 >, 255, 5 )
+			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "按 泰坦中欄位（默認為G）鍵 打開連殺菜單！", < 255, 0, 0 >, 255, 5 )
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////聚变打击已就绪，长按\"近战\"键（默认为\"F\"）以启用////////", -1, 0.4, 255, 0, 0, 255, 0.15, 5, 1 )
