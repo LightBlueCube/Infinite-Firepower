@@ -395,7 +395,7 @@ void function RestoreKillStreak( entity player )
 {
 	if( "HaveNukeTitan" in player.s )
 		if( player.s.HaveNukeTitan != 0 )
-			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "按 泰坦中欄位（默認為G）鍵 打開連殺菜單！", < 255, 0, 0 >, 255, 5 )
+			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "按 泰坦輔助技能（默認為G）鍵 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////聚变打击已就绪，长按\"近战\"键（默认为\"F\"）以启用////////", -1, 0.4, 255, 0, 0, 255, 0.15, 5, 1 )
