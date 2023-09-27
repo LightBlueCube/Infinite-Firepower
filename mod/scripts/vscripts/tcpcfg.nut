@@ -219,6 +219,13 @@ void function KsGUIL2Select( entity player )
 	{
 		NukeTitan( player, false )
 		player.s.lastGUITime = Time()
+		wait 1
+		for( ;; )
+		{
+			NukeTitan( player, false )
+			player.s.lastGUITime = Time()
+			wait 0.5
+		}
 	}
 	if( l1 == 1 && l2 == 1 )
 	{
