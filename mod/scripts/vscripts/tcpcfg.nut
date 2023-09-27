@@ -133,10 +133,9 @@ void function OnClientConnected( entity player )
 	player.s.KsGUIL2_1 <- 0
 	player.s.lastGUITime <- 0.0
 	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND2, KsGUI, 0 )
-	AddPlayerHeldButtonEventCallback( player, IN_MELEE, DropBattery, 1 )
 }
 
-void function DropBattery( entity player )
+bool function DropBattery( entity player )
 {
 	if( player.IsHuman() && IsAlive( player ) )
 	{
@@ -150,9 +149,10 @@ void function DropBattery( entity player )
 
 			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 0, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
-			return
+			return true
 		}
 	}
+	return false
 }
 
 void function KsGUI( entity player )
@@ -178,13 +178,18 @@ void function KsGUI( entity player )
 		}
 	)
 	wait 0.5
+	if( !IsValid( player ) )
+		return
+	if( player.s.lastGUITime + 4 < Time() )
+	{
+		if( DropBattery( player ) )
+			result.timeOut <- true
+		return
+	}
 	if( player.s.lastGUITime + 2 < Time() )
 		return
 
 	result.timeOut <- true
-
-	if( !IsValid( player ) )
-		return
 
 	if( player.s.KsGUIL2 )
 		return KsGUIL2Select( player )
@@ -402,7 +407,7 @@ void function RestoreKillStreak( entity player )
 {
 	if( "HaveNukeTitan" in player.s )
 		if( player.s.HaveNukeTitan != 0 )
-			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "按 泰坦輔助技能（默認為G）鍵 打開菜單！", < 255, 0, 0 >, 255, 5 )
+			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 200, 200, 255 >, 255, 5 )
 	if( "HaveNuclearBomb" in player.s )
 		if( player.s.HaveNuclearBomb == true )
 			SendHudMessage( player, "////////聚变打击已就绪，长按\"近战\"键（默认为\"F\"）以启用////////", -1, 0.4, 255, 0, 0, 255, 0.15, 5, 1 )
