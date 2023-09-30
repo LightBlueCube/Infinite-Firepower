@@ -111,7 +111,7 @@ global float ANTI_RODEO_DEFAULT_WINDOW_START = 0.55
 
 //nessie modify
 const int PILOT_BATTERY_BUGGED_LIMIT = 1
-const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 64
+const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 48
 
 struct AntiRodeoPlayerData
 {
