@@ -115,7 +115,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "剩餘"+ attacker.s.NukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
 				}
 			}
-			if( attacker.s.totalKills % 25 == 0 )
+			if( attacker.s.totalKills % 20 == 0 )
 			{
 				attacker.s.cruiseMissile += 1
 				NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
@@ -191,7 +191,7 @@ void function KsGUI( entity player )
 					KsGUI_SwitchL1( player )
 		}
 	)
-	wait 0.5
+	wait 0.3
 	if( !IsValid( player ) )
 		return
 	if( player.s.lastGUITime + 4 < Time() )
@@ -328,7 +328,6 @@ void function KsGUI_L2_1( entity player )
 			player.s.KsGUIL2_1 = 1
 	}
 	player.s.lastGUITime = Time()
-	player.s.KsGUIL2 = true
 
 	if( player.s.KsGUIL2 == false )
 	{
@@ -337,6 +336,8 @@ void function KsGUI_L2_1( entity player )
 	}
 	else
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
+
+	player.s.KsGUIL2 = true
 
 	local l2 = player.s.KsGUIL2_1
 	if( l2 == 0 )
@@ -898,6 +899,15 @@ void function CruiseMissileAnim_Think( entity owner )
 	owner.EndSignal( "OnDeath" )
 	owner.s.usingCruiseMissile = true
 
+	foreach( player in GetPlayerArray() )
+	{
+		if( IsValid( player ) )
+		{
+			NSSendLargeMessageToPlayer( player,"巡飛彈來襲！", "注意頭頂！", 7, "rui/callsigns/callsign_95_col" )
+			EmitSoundOnEntityOnlyToPlayer( player, player, "lstar_lowammowarning" )
+		}
+	}
+
 	table result = {}
 	result.timeOut <- false
 
@@ -968,7 +978,7 @@ void function CruiseMissileAnim_Think( entity owner )
 		owner.UnfreezeControlsOnServer()
 		turret.ClearDriver()
 		turret.Destroy()
-		owner.SetAngles( < 90, 90, 0 > )
+		owner.SetAngles( < 75, 90, 0 > )
 		StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 		result.timeOut <- true
 		FireCruiseMissile( owner )	//launcher
