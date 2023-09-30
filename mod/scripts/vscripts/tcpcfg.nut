@@ -55,7 +55,7 @@ void function KillStreak_Init()
 	if( GetMapName() == "mp_grave" )
 		CM_FIREORIGIN = < 5000, -4000, 5000 >
 	if( GetMapName() == "mp_homestead" )
-		CM_FIREORIGIN = < 1000, -1000, 7000 >
+		CM_FIREORIGIN = < 1000, -1000, 6000 >
 	if( GetMapName() == "mp_relic02" )
 		CM_FIREORIGIN = < 0, -4000, 7000 >
 
@@ -115,7 +115,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 					NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "剩餘"+ attacker.s.NukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
 				}
 			}
-			if( attacker.s.KillStreak % 20 == 0 )
+			if( attacker.s.totalKills % 25 == 0 )
 			{
 				attacker.s.cruiseMissile += 1
 				NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
@@ -285,6 +285,18 @@ void function KsGUI_L2_2( entity player )
 	if( !IsAlive( player ) )
 	{
 		SendHudMessage( player, "\n死亡时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( IsValid( player.GetTitanSoulBeingRodeoed() ) )
+	{
+		SendHudMessage( player, "\n训牛时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( player.GetParent() )
+	{
+		SendHudMessage( player, "\n在有绑定的父级实体时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 		return
 	}
@@ -987,6 +999,8 @@ void function FireCruiseMissile( entity weaponOwner )
 	StorePilotWeapons( weaponOwner )
 	entity weapon = weaponOwner.GiveWeapon( "mp_weapon_rocket_launcher" )
 
+	bool shouldPredict = weapon.ShouldPredictProjectiles()
+
 	float speed = 500.0
 
 	thread CalculateCruiseMissilePoint( weapon, weaponOwner )
@@ -1150,7 +1164,7 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 			SendHudMessage( weaponOwner, "//////////////// 动力段已启动 ////////////////", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 		}
 		else
-			SendHudMessage( weaponOwner, "缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按 攻击键 立刻启动动力段", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
+			SendHudMessage( weaponOwner, "缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 		WaitFrame()
 	}
 }
