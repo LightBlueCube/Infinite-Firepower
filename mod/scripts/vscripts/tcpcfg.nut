@@ -898,6 +898,9 @@ void function CruiseMissileAnim_Think( entity owner )
 	owner.EndSignal( "OnDeath" )
 	owner.s.usingCruiseMissile = true
 
+	table result = {}
+	result.timeOut <- false
+
 	entity dropship = CreateDropship( owner.GetTeam(), CM_FIREORIGIN, < 0, 0, 0 > )
 	DispatchSpawn( dropship )
 	dropship.EndSignal( "OnDestroy" )
@@ -918,7 +921,7 @@ void function CruiseMissileAnim_Think( entity owner )
 	turret.SetDriver( owner )
 
 	OnThreadEnd(
-		function() : ( turret, mover, dropship, owner )
+		function() : ( turret, mover, dropship, owner, result )
 		{
 			if( IsValid( dropship ) )
 				dropship.Destroy()
@@ -930,6 +933,11 @@ void function CruiseMissileAnim_Think( entity owner )
 			}
 			if( IsValid( owner ) )
 			{
+				if( !result.timeOut )
+				{
+					DeployAndEnableWeapons( owner )
+					owner.UnfreezeControlsOnServer()
+				}
 				StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 				owner.s.usingCruiseMissile = false
 			}
@@ -962,6 +970,7 @@ void function CruiseMissileAnim_Think( entity owner )
 		turret.Destroy()
 		owner.SetAngles( < 90, 90, 0 > )
 		StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
+		result.timeOut <- true
 		FireCruiseMissile( owner )	//launcher
 	}
 	wait 0.5
