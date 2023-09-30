@@ -9,12 +9,11 @@ void function InfiniteFirepower_Init()
 
 	TitanChange_Init()    //至尊泰坦替换，神盾血
 
-	NukeTitanAndNuclearBomb_Init()    //核武泰坦和核弹
+	KillStreak_Init()    //核武泰坦和核弹
 
 	TeamShuffle_Init()    //打乱队伍
 
 	thread UseTimeCheck()
-
 }
 
 
@@ -32,13 +31,35 @@ void function TitanChange_Init()
 	AddCallback_OnTitanDoomed( OnTitanDoomed )
 }
 
-void function NukeTitanAndNuclearBomb_Init()
+vector CM_FIREORIGIN = < 0, 0, 6000 >
+void function KillStreak_Init()
 {
+	PrecacheModel( $"models/Robots/turret_rocket/turret_rocket.mdl" )
+	RegisterWeaponDamageSource( "mp_weapon_cruise_missile", "巡飛彈" )
+	RegisterSignal( "MissileImpact" )
+	RegisterSignal( "CalculateCruiseMissilePoint" )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
+
+	if( GetMapName() == "mp_complex3" )
+		CM_FIREORIGIN = < -4000, -1000, 6000 >
+	if( GetMapName() == "mp_crashsite3" )
+		CM_FIREORIGIN = < -5000, 0, 6000 >
+	if( GetMapName() == "mp_eden" )
+		CM_FIREORIGIN = < 1000, 0, 4000 >
+	if( GetMapName() == "mp_forwardbase_kodai" )
+		CM_FIREORIGIN = < 0, 0, 12000 >
+	if( GetMapName() == "mp_grave" )
+		CM_FIREORIGIN = < 5000, -4000, 5000 >
+	if( GetMapName() == "mp_homestead" )
+		CM_FIREORIGIN = < 1000, -1000, 7000 >
+	if( GetMapName() == "mp_relic02" )
+		CM_FIREORIGIN = < 0, -4000, 7000 >
+
+
 }
 
 void function OnWinnerDetermined()	//anti-crash
@@ -81,37 +102,28 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 			attacker.s.totalKills += 1
 			if( victim.IsPlayer() )
 				attacker.s.KillStreakNoNPC += 1
-			if( attacker.s.totalKills % 4 == 0 || attacker.s.KillStreak % 4 == 0 )
+			if( attacker.s.totalKills % 6 == 0 || attacker.s.KillStreak % 4 == 0 )
 			{
-				if( attacker.s.totalKills % 4 == 0 && attacker.s.KillStreak % 4 == 0 )
+				if( attacker.s.totalKills % 6 == 0 && attacker.s.KillStreak % 4 == 0 )
 				{
-					if( "HaveNukeTitan" in attacker.s )
-					{
-						attacker.s.HaveNukeTitan += 2
-					}
-					else
-					{
-						attacker.s.HaveNukeTitan <- 2
-					}
-					NSSendAnnouncementMessageToPlayer( attacker, "獲得雙倍核武泰坦！", "剩餘"+ attacker.s.HaveNukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
+					attacker.s.NukeTitan += 2
+					NSSendAnnouncementMessageToPlayer( attacker, "獲得雙倍核武泰坦！", "剩餘"+ attacker.s.NukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
 				}
 				else
 				{
-					if( "HaveNukeTitan" in attacker.s )
-					{
-						attacker.s.HaveNukeTitan += 1
-					}
-					else
-					{
-						attacker.s.HaveNukeTitan <- 1
-					}
-					NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "剩餘"+ attacker.s.HaveNukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
+					attacker.s.NukeTitan += 1
+					NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "剩餘"+ attacker.s.NukeTitan +"個未交付", < 255, 0, 0 >, 255, 5 )
 				}
+			}
+			if( attacker.s.KillStreak % 20 == 0 )
+			{
+				attacker.s.cruiseMissile += 1
+				NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
 			}
 			if( attacker.s.KillStreakNoNPC == 30 )
 			{
 				attacker.s.HaveNuclearBomb <- true	//给核弹，给监听用
-				NSSendAnnouncementMessageToPlayer( attacker, "獲得聚變打擊能力！", "", < 255, 0, 0 >, 255, 5 )
+				NSSendAnnouncementMessageToPlayer( attacker, "聚變打擊已上綫！", "", < 255, 0, 0 >, 255, 5 )
 			}
 		}
 	}
@@ -125,7 +137,9 @@ void function OnClientConnected( entity player )
 
 	// KS //
 	player.s.HaveNuclearBomb <- false
-	player.s.HaveNukeTitan <- 0
+	player.s.NukeTitan <- 0
+	player.s.cruiseMissile <- 0
+	player.s.usingCruiseMissile <- false
 
 	// GUI //
 	player.s.KsGUIL1 <- 0
@@ -147,7 +161,7 @@ bool function DropBattery( entity player )
 			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 			battery.SetVelocity( batteryVel )
 
-			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 0, 0, 2, 1 )
+			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 			return true
 		}
@@ -159,7 +173,7 @@ void function KsGUI( entity player )
 {
 	table result = {}
 	result.timeOut <- false
-	if( !player.IsHuman() )
+	if( !player.IsHuman() || player.s.usingCruiseMissile )
 	{
 		result.timeOut <- true
 		return
@@ -207,6 +221,8 @@ void function KsGUI_L1ToL2( entity player )
 		KsGUI_L2_1( player )
 	if( l1 == 2 )
 		KsGUI_L2_2( player )
+	if( l1 == 3 )
+		KsGUI_L2_NB( player )
 }
 
 void function KsGUI_SwitchL2( entity player )
@@ -222,9 +238,6 @@ void function KsGUIL2Select( entity player )
 	local l2 = player.s.KsGUIL2_1
 	if( l1 == 1 && l2 == 0 )
 	{
-		NukeTitan( player, false )
-		player.s.lastGUITime = Time()
-		wait 1
 		for( ;; )
 		{
 			NukeTitan( player, false )
@@ -239,7 +252,7 @@ void function KsGUIL2Select( entity player )
 	}
 }
 
-void function KsGUI_L2_2( entity player )
+void function KsGUI_L2_NB( entity player )
 {
 	if( player.s.HaveNuclearBomb == true )
 	{
@@ -253,26 +266,57 @@ void function KsGUI_L2_2( entity player )
 			arrayPlayer.s.HaveNuclearBomb <- false
 		}
 		thread NuclearBombAnimThink( player )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 		return
 	}
 
-	SendHudMessage( player, "\n聚变打击离线", -1, 0.3, 255, 100, 100, 0, 0, 2, 1 )
+	SendHudMessage( player, "\n聚变打击离线", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+}
+
+void function KsGUI_L2_2( entity player )
+{
+	if( player.s.cruiseMissile == 0 )
+	{
+		SendHudMessage( player, "\n无巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !IsAlive( player ) )
+	{
+		SendHudMessage( player, "\n死亡时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !player.IsHuman() )
+	{
+		SendHudMessage( player, "\n你需要处于铁驭状态才能使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	thread CruiseMissileAnim_Think( player )
+	SendHudMessage( player, " ", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+	player.s.cruiseMissile -= 1
 }
 
 void function KsGUI_L2_1( entity player )
 {
 	bool skipL2Add = false
-	if( player.s.KsGUIL2 && player.s.lastGUITime + 2 < Time() )
+	if( player.s.KsGUIL2 && player.s.lastGUITime + 3 < Time() )
 	{
-		if( player.s.lastGUITime + 3 < Time() )
-		{
-			player.s.KsGUIL2 = false
-			return KsGUI_SwitchL1( player )
-		}
-		else
-			skipL2Add = true
+		player.s.KsGUIL2 = false
+		return KsGUI_SwitchL1( player )
 	}
+	if( player.s.KsGUIL2 && player.s.lastGUITime + 2 > Time() )
+	{
+		if( player.s.KsGUIL2_1 == 1 )
+			player.s.KsGUIL2_1 = 0
+		else
+			player.s.KsGUIL2_1 = 1
+	}
+	player.s.lastGUITime = Time()
+	player.s.KsGUIL2 = true
 
 	if( player.s.KsGUIL2 == false )
 	{
@@ -282,21 +326,11 @@ void function KsGUI_L2_1( entity player )
 	else
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
 
-	player.s.lastGUITime = Time()
-	player.s.KsGUIL2 = true
-	if( player.s.KsGUIL2_1 == 1 && !skipL2Add )
-		player.s.KsGUIL2_1 = 0
-	else if( !skipL2Add )
-		player.s.KsGUIL2_1 = 1
-
 	local l2 = player.s.KsGUIL2_1
-
 	if( l2 == 0 )
-	{
-		SendHudMessage( player, "当前剩余"+ player.s.HaveNukeTitan +"个核武未交付\n◆交付一个◆  -  ◇交付全部◇", -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
-	}
+		SendHudMessage( player, "当前剩余"+ player.s.NukeTitan +"个核武未交付\n\n◆交付一个◆  -  ◇交付全部◇", -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
 	else
-		SendHudMessage( player, "当前剩余"+ player.s.HaveNukeTitan +"个核武未交付\n◇交付一个◇  -  ◆交付全部◆", -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
+		SendHudMessage( player, "当前剩余"+ player.s.NukeTitan +"个核武未交付\n\n◇交付一个◇  -  ◆交付全部◆", -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
 
 }
 
@@ -312,34 +346,68 @@ void function KsGUI_L2_0( entity player )
 			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 			battery.SetVelocity( batteryVel )
 
-			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 0, 0, 2, 1 )
+			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 			return
 		}
 	}
-	SendHudMessage( player, "\n你没有电池！", -1, 0.3, 255, 100, 100, 0, 0, 2, 1 )
+	SendHudMessage( player, "\n你没有电池！", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 }
 
-const array<string> KSGUI_L1_TEXT = [ "丢出电池", "核武泰坦", "聚变打击" ]
+const array<string> KSGUI_L1_TEXT =	[ "丢出电池", "核武泰坦", "巡弋飞弹", "聚变打击" ]
+const array< array<string> > KSGUI_L1_SPACE = [ [ "  ", "  " ], [ " ", " " ], [ " ", " " ], [ "  ", "  " ] ]
 
 void function KsGUI_SwitchL1( entity player )
 {
-	bool skipL1Add = false
-	if( player.s.lastGUITime + 2 < Time() )
-		skipL1Add = true
+	if( player.s.lastGUITime + 2 > Time() )
+	{
+		if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 )
+			player.s.KsGUIL1 += 1
+		else
+			player.s.KsGUIL1 = 0
+	}
 	player.s.lastGUITime = Time()
 
-	if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 && !skipL1Add )
-		player.s.KsGUIL1 += 1
-	else if( !skipL1Add )
-		player.s.KsGUIL1 = 0
+	array<var> skipL1Elem = []
+	if( player.s.NukeTitan == 0 )
+		skipL1Elem.append( 1 )
+	if( player.s.cruiseMissile == 0 )
+		skipL1Elem.append( 2 )
+	if( player.s.HaveNuclearBomb == false )
+		skipL1Elem.append( 3 )
+	foreach( i in skipL1Elem )
+	{
+		if( skipL1Elem.contains( player.s.KsGUIL1 ) )
+		{
+			if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 )
+				player.s.KsGUIL1 += 1
+			else
+				player.s.KsGUIL1 = 0
+		}
+	}
+
+
 	local l1 = player.s.KsGUIL1
-	string text = "短按切换 == Main Menu == 长按选中\n"
+	string text = "短按切换 == Main Menu == 长按选中\n\n"
 	int i = 0
 
 	for( ;; )
 	{
+		if( i == KSGUI_L1_TEXT.len() )
+			break
+
+		if( skipL1Elem.contains( i ) )
+		{
+			i++
+			continue
+		}
+
+		if( i != 0 )
+			text += "-"
+
+		text += KSGUI_L1_SPACE[i][0]
+
 		if( i == l1 )
 			text += "◆"
 		else
@@ -348,55 +416,63 @@ void function KsGUI_SwitchL1( entity player )
 		text += KSGUI_L1_TEXT[ i ]
 
 		if( i == 1 )
-			text += "("+ player.s.HaveNukeTitan +")"
+		{
+			if( player.s.NukeTitan < 10 )
+				text += "(0"+ player.s.NukeTitan +")"
+			else
+				text += "("+ player.s.NukeTitan +")"
+		}
 		if( i == 2 )
-			text += player.s.HaveNuclearBomb ? "(在线)" : "(离线)"
+		{
+			if( player.s.cruiseMissile < 10 )
+				text += "(0"+ player.s.cruiseMissile +")"
+			else
+				text += "("+ player.s.cruiseMissile +")"
+		}
 
 		if( i == l1 )
 			text += "◆"
 		else
 			text += "◇"
 
-		if( i == KSGUI_L1_TEXT.len() - 1 )
-			break
+		text += KSGUI_L1_SPACE[i][1]
 
-		text += "  -  "
 		i++
 	}
 
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
-	SendHudMessage( player, text, -1, 0.3, 200, 200, 225, 0, 0, 3, 1 )
+	SendHudMessage( player, text, -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
 
 }
 
 void function NukeTitan( entity player, bool all )
 {
-	if( player.s.HaveNukeTitan <= 0 )
+	if( player.s.NukeTitan <= 0 )
 	{
-		SendHudMessage( player, "\n你没有核武泰坦!", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		SendHudMessage( player, "\n你没有核武泰坦!", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 		return
 	}
 	if( !player.IsHuman() )
 	{
-		SendHudMessage( player, "\n你需要处于铁驭状态才能交付核武泰坦", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		SendHudMessage( player, "\n你需要处于铁驭状态才能交付核武泰坦", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 		return
 	}
 	if( all )
 	{
-		SendHudMessage( player, "\n成功交付了 "+ player.s.HaveNukeTitan +" 个核武泰坦", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+		SendHudMessage( player, "\n成功交付了 "+ player.s.NukeTitan +" 个核武泰坦", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-		for( var i = player.s.HaveNukeTitan; i > 0; i -= 1)
+		for( var i = player.s.NukeTitan; i > 0; i -= 1)
 		{
 			PlayerInventory_GiveNukeTitan( player )
 		}
-		player.s.HaveNukeTitan = 0
+		player.s.NukeTitan = 0
 	}
 	else
 	{
-		player.s.HaveNukeTitan -= 1
-		SendHudMessage( player, "成功交付了 1 个核武泰坦\n剩余 "+ player.s.HaveNukeTitan +" 个核武泰坦未交付", -1, 0.3, 255, 0, 0, 255, 0, 3, 1 )
+		player.s.NukeTitan -= 1
+		SendHudMessage( player, "\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 		PlayerInventory_GiveNukeTitan( player )
 	}
@@ -405,12 +481,10 @@ void function NukeTitan( entity player, bool all )
 
 void function RestoreKillStreak( entity player )
 {
-	if( "HaveNukeTitan" in player.s )
-		if( player.s.HaveNukeTitan != 0 )
-			NSSendAnnouncementMessageToPlayer( player, "剩餘"+ player.s.HaveNukeTitan +"個核武泰坦未交付", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 200, 200, 255 >, 255, 5 )
-	if( "HaveNuclearBomb" in player.s )
-		if( player.s.HaveNuclearBomb == true )
-			SendHudMessage( player, "////////聚变打击已就绪，长按\"近战\"键（默认为\"F\"）以启用////////", -1, 0.4, 255, 0, 0, 255, 0.15, 5, 1 )
+	if( player.s.NukeTitan != 0 || player.s.cruiseMissile != 0 )
+			NSSendAnnouncementMessageToPlayer( player, "有連殺未使用！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 200, 200, 255 >, 255, 5 )
+	if( player.s.HaveNuclearBomb == true )
+			SendHudMessage( player, "//////// 聚变打击已就绪 ////////", -1, 0.4, 255, 0, 0, 255, 0.15, 5, 1 )
 	if( "DontRestore" in player.s )
 	{
 		if( player.s.DontRestore == true )
@@ -800,11 +874,327 @@ void function OnTitanfall( entity titan )
 	}
 }
 
+////////////////////
+///    KS SYS   ////
+////////////////////
 
+//// CruiseMissile ////
 
-///////////////////////
-////	核弹系统	////
-///////////////////////
+void function CruiseMissileAnim_Think( entity owner )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.s.usingCruiseMissile = true
+
+	entity dropship = CreateDropship( owner.GetTeam(), CM_FIREORIGIN, < 0, 0, 0 > )
+	DispatchSpawn( dropship )
+	dropship.EndSignal( "OnDestroy" )
+	dropship.EndSignal( "OnDeath" )
+	entity mover = CreateScriptMover( CM_FIREORIGIN, < 0, 0, 0 > )
+
+	entity turret = CreateTurretEnt( CM_FIREORIGIN,  < 0, 0, 0 >, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
+	turret.Hide()
+	turret.SetInvulnerable()
+	turret.SetParent( dropship ) // if missile gets destroyed,
+	turret.SetAngles( < 45, -90, 0 > )
+	turret.SetOrigin( < -800, 0, 1200 > )
+	turret.GiveWeapon( "mp_weapon_rocket_launcher" )
+	DisableWeapons( turret, [] )
+	HolsterAndDisableWeapons( owner )
+	owner.SetAngles( < 60, 90, 0 > )
+	owner.FreezeControlsOnServer()
+	turret.SetDriver( owner )
+
+	OnThreadEnd(
+		function() : ( turret, mover, dropship, owner )
+		{
+			if( IsValid( dropship ) )
+				dropship.Destroy()
+			mover.Destroy()
+			if( IsValid( turret ) )
+			{
+				turret.ClearDriver()
+				turret.Destroy()
+			}
+			if( IsValid( owner ) )
+			{
+				StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
+				owner.s.usingCruiseMissile = false
+			}
+		}
+	)
+
+	thread PlayAnim( dropship, "cd_dropship_rescue_side_start", mover )	//fly in
+	EmitSoundOnEntity( dropship, "Goblin_IMC_Evac_Flyin" )
+	EmitSoundOnEntityOnlyToPlayer( owner, owner, "scr_s2s_intro_crow_engage_warp_speed" )
+	thread WarpInEffectEvacShip( dropship )
+	float sequenceDuration = dropship.GetSequenceDuration( "cd_dropship_rescue_side_start" )
+	float cycleFrac = dropship.GetScriptedAnimEventCycleFrac( "cd_dropship_rescue_side_start", "ReadyToLoad" )
+	wait ( sequenceDuration * cycleFrac ) - 0.3
+
+	mover.SetOrigin( turret.GetOrigin() )
+	turret.SetParent( mover )
+	turret.SetAngles( < 45, -90, 0 > )
+	mover.NonPhysicsMoveTo( dropship.GetOrigin(), 0.3, 0.0, 0.0 )
+	ScreenFadeToBlack( owner, 0.3, 0.2 )
+
+	wait 0.3
+	mover.SetOrigin( CM_FIREORIGIN )
+	thread PlayAnim( dropship, "cd_dropship_rescue_side_idle", mover )	//waiting
+
+	wait 0.1
+	if( IsValid( owner ) )
+	{
+		owner.UnfreezeControlsOnServer()
+		turret.ClearDriver()
+		turret.Destroy()
+		owner.SetAngles( < 90, 90, 0 > )
+		StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
+		FireCruiseMissile( owner )	//launcher
+	}
+	wait 0.5
+
+	mover.SetOrigin( CM_FIREORIGIN )
+	waitthread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
+}
+
+void function WarpInEffectEvacShip( entity dropship )
+{
+	dropship.EndSignal( "OnDestroy" )
+	float sfxWait = 0.1
+	float totalTime = WARPINFXTIME
+	float preWaitTime = 0.16 // give it some time so it's actually playing anim, and we can get it's "origin" attatch for playing warp in effect
+	string sfx = "dropship_warpin"
+
+	wait preWaitTime
+
+	int attach = dropship.LookupAttachment( "origin" )
+	vector origin = dropship.GetAttachmentOrigin( attach )
+	vector angles = dropship.GetAttachmentAngles( attach )
+
+	entity fx = PlayFX( FX_GUNSHIP_CRASH_EXPLOSION_ENTRANCE, origin, angles )
+	fx.FXEnableRenderAlways()
+	fx.DisableHibernation()
+
+	wait sfxWait
+	EmitSoundAtPosition( TEAM_UNASSIGNED, origin, sfx )
+
+	wait totalTime - sfxWait
+}
+
+void function FireCruiseMissile( entity weaponOwner )
+{
+	StorePilotWeapons( weaponOwner )
+	entity weapon = weaponOwner.GiveWeapon( "mp_weapon_rocket_launcher" )
+
+	float speed = 500.0
+
+	thread CalculateCruiseMissilePoint( weapon, weaponOwner )
+
+	vector beForeOrigin = weaponOwner.GetOrigin()
+	vector missileSpawnOrigin = CM_FIREORIGIN
+	missileSpawnOrigin.z -= 200
+	weaponOwner.SetOrigin( missileSpawnOrigin )
+	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, < 0, 90, 0 >, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
+	weaponOwner.SetOrigin( beForeOrigin )
+
+	if ( missile )
+	{
+		EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_Archer_Fire_1P" )
+		thread CruiseMissileThink( weapon, weaponOwner, missile )
+	}
+}
+void function CalculateCruiseMissilePoint( entity weapon, entity weaponOwner )
+{
+	weaponOwner.EndSignal( "OnDestroy" )
+	weaponOwner.EndSignal( "OnDeath" )
+	weaponOwner.Signal( "CalculateCruiseMissilePoint" )
+	weaponOwner.EndSignal( "CalculateCruiseMissilePoint" )
+	weapon.EndSignal( "OnDestroy" )
+
+	entity info_target = CreateEntity( "info_target" )
+	info_target.SetOrigin( weapon.GetOrigin() )
+	info_target.SetInvulnerable()
+	DispatchSpawn( info_target )
+	weapon.s.guidedMissileTarget <- info_target
+
+	OnThreadEnd(
+		function() : ( weapon, info_target )
+		{
+			if ( IsValid( info_target ) )
+			{
+				info_target.Kill_Deprecated_UseDestroyInstead()
+				if ( IsValid( weapon ) )
+					delete weapon.s.guidedMissileTarget
+			}
+		}
+	)
+
+	while ( true )
+	{
+		if ( !IsValid_ThisFrame( weaponOwner ) || !IsValid_ThisFrame( weapon ) )
+			return
+
+		TraceResults result = GetViewTrace( weaponOwner )
+		info_target.SetOrigin( result.endPos )
+
+		WaitFrame()
+	}
+}
+
+void function CruiseMissileThink( entity weapon, entity weaponOwner, entity missile )
+{
+	weaponOwner.EndSignal( "OnDestroy" )
+	weaponOwner.EndSignal( "OnDeath" )
+	missile.EndSignal( "OnDestroy" )
+	missile.EndSignal( "MissileImpact" )
+
+	if( "guidedMissileTarget" in weapon.s && IsValid( weapon.s.guidedMissileTarget ) )
+	{
+		missile.SetMissileTarget( weapon.s.guidedMissileTarget, Vector( 0, 0, 0 ) )
+		missile.SetHomingSpeeds( 400, 0 )
+	}
+
+	missile.kv.lifetime = 12
+
+	//HACK: using turret
+	entity turret = CreateTurretEnt( missile.GetOrigin(), missile.GetAngles(), null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
+	turret.Hide()
+	//turret.NotSolid()
+	turret.SetInvulnerable()
+	turret.SetParent( missile, "exhaust" ) // if missile gets destroyed,
+	turret.SetAngles( < 180, 0, -90 > )
+	turret.GiveWeapon( "mp_weapon_rocket_launcher" )
+	DisableWeapons( turret, [] )
+
+	turret.SetDriver( weaponOwner )
+
+	// needed to avoid missile gets destroyed and player stuck in turret forever
+	AddEntityDestroyedCallback(
+		missile,
+		function( missile ) : ( missile, turret )
+		{
+			if ( IsValid( turret ) )
+				turret.ClearParent() // clear turret so it won't get destroyed
+		}
+	)
+
+	AddEntityDestroyedCallback(
+		turret,
+		function( turret ) : ( turret, weaponOwner )
+		{
+			if ( IsValid( turret ) )
+				turret.ClearDriver() // clear driver before turret actually gets destroyed
+		}
+	)
+
+	OnThreadEnd(
+		function(): ( weapon, weaponOwner, turret )
+		{
+			if ( IsValid( weaponOwner ) )
+			{
+				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_widow_engage_warp_speed" )
+				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_seyar_flyby" )
+				Remote_CallFunction_Replay( weaponOwner, "ServerCallback_TitanEMP", 0.4, 0.4, 0.4 )
+				// now try to use viewcontrol entity
+				//weaponOwner.SetTrackEntity( null )
+				//weaponOwner.ClearTrackEntitySettings()
+
+				//weaponOwner.ClearViewEntity()
+				DeployAndEnableWeapons( weaponOwner )
+				ScreenFade( weaponOwner, 0, 0, 0, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) )
+
+				EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "titan_nuclear_death_explode" )
+
+				RetrievePilotWeapons( weaponOwner )
+				TakePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
+
+				// if missile accidentally gets destroyed, this is required to make player out of movement lock
+				if ( !IsValid( turret ) )
+					weaponOwner.Die( weaponOwner, weaponOwner, { damageSourceId = damagedef_suicide } )
+				else
+					thread CruiseMissileExplode( turret.GetOrigin(), weaponOwner )
+			}
+
+			if ( IsValid( turret ) )
+			{
+				turret.ClearDriver()
+				turret.Destroy()
+			}
+		}
+	)
+
+	EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "scr_s2s_intro_seyar_flyby" )
+	bool HasAppendSpeed = false
+	int sec = 50
+	for( ;; )
+	{
+		sec--
+		if( !IsValid( weaponOwner ) )
+			break
+		if( ( weaponOwner.IsInputCommandHeld( IN_ATTACK ) || sec == 0 ) && !HasAppendSpeed )
+		{
+			missile.SetVelocity( missile.GetForwardVector() * 6000 )
+			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_TitanEMP", 0.1, 0.5, 0.5 )
+			StopSoundOnEntity( weaponOwner, "scr_s2s_intro_seyar_flyby" )
+			EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "scr_s2s_intro_widow_engage_warp_speed" )
+
+			HasAppendSpeed = true
+		}
+
+		if( HasAppendSpeed )
+		{
+			StatusEffect_AddTimed( weaponOwner, eStatusEffect.stim_visual_effect, 1.0, 0.1, 0 )
+			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_ScreenShake", 400, 200, 0.2 )
+			GivePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
+			SendHudMessage( weaponOwner, "//////////////// 动力段已启动 ////////////////", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
+		}
+		else
+			SendHudMessage( weaponOwner, "缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按 攻击键 立刻启动动力段", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
+		WaitFrame()
+	}
+}
+
+void function CruiseMissileExplode( vector origin, entity owner )
+{
+	PlayFX( TITAN_NUCLEAR_CORE_FX_3P, origin + Vector( 0, 0, -100 ), Vector(0,RandomInt(360),0) )
+
+	entity inflictor = CreateEntity( "script_ref" )
+	inflictor.SetOrigin( origin )
+	inflictor.kv.spawnflags = SF_INFOTARGET_ALWAYS_TRANSMIT_TO_CLIENT
+	DispatchSpawn( inflictor )
+
+	EmitSoundOnEntity( inflictor, "titan_nuclear_death_explode" )
+
+	OnThreadEnd(
+		function() : ( inflictor )
+		{
+			if ( IsValid( inflictor ) )
+				inflictor.Destroy()
+		}
+	)
+
+	for ( int i = 0; i < 20; i++ )
+	{
+		RadiusDamage(
+			origin,										// center
+			owner,										// attacker
+			inflictor,									// inflictor
+			75,											// damage
+			1500,										// damageHeavyArmor
+			350,										// innerRadius
+			750,										// outerRadius
+			0,											// flags
+			0,											// distanceFromAttacker
+			75,											// explosionForce
+			DF_EXPLOSION | DF_STOPS_TITAN_REGEN,		// scriptDamageFlags
+			eDamageSourceId.mp_weapon_cruise_missile )	// scriptDamageSourceIdentifier
+
+		wait 0.1
+	}
+}
+
+//// NuclearBomb ////
 
 void function NuclearBombAnimThink( entity owner )
 {
