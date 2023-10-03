@@ -3527,13 +3527,8 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 		if( random <= 8 )	//0,1,2,3,4,5,6,7,8 -> 90%Yellow 10%Green
 		{
 			newBattery.SetSkin( 2 )
-			Battery_StartFX( newBattery )
 		}
-		/*if( random >= 6 )	//6,7,8,9 -> 30%  50% Yellow 40%Red 10% Green
-		{
-			newBattery.SetSkin( 1 )
-			Battery_StartFX( newBattery )
-		}*/
+		Battery_StopFX( newBattery )
 		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery )
 	}
 }
@@ -3545,11 +3540,11 @@ void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery,
 		endTime = Time() + destroyTime
 	while( Time() < endTime )
 	{
+		WaitFrame()
 		if( !IsValid( battery ) )
 			return
 		if( battery.GetParent() )
 			return
-		WaitFrame()
 	}
 
 	if( justDestroyIt )
@@ -3561,11 +3556,11 @@ void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery,
 	endTime = Time() + destroyTime
 	while( Time() < endTime )
 	{
+		WaitFrame()
 		if( !IsValid( battery ) )
 			return
 		if( battery.GetParent() )
 			return
-		WaitFrame()
 	}
 
 	battery.Destroy()
