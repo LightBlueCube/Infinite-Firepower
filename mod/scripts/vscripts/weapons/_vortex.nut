@@ -573,9 +573,6 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 	VortexDrainedByImpact( vortexWeapon, weapon, projectile, damageType )
 	Vortex_NotifyAttackerDidDamage( expect entity( impactData.attacker ), owner, impactData.origin )
 
-	if ( vortexWeapon.HasMod( "shield_only" ) )
-		return true
-
 	if ( impactData.refireBehavior == VORTEX_REFIRE_ABSORB )
 		return true
 
@@ -641,28 +638,26 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	if( hasVortexRegen )
 	{
 		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
 		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) ) / 2
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
 
-		if( amount == 0 )
+		if( amount <= 0 )
 		{
 			if ( projectile )
-				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) ) / 2
+				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
 			else
-				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) ) / 2
+				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
 		}
 
-		{
-			// 离子版: 使用能量系统
-			entity owner = vortexWeapon.GetWeaponOwner()
-			int totalEnergy = owner.GetSharedEnergyTotal()		//最大
-			int currentEnergy = owner.GetSharedEnergyCount()	//当前
-			int val = int( amount )
-			if( currentEnergy - val < 0 )
-				val = currentEnergy
+		// 离子版: 使用能量系统
+		entity owner = vortexWeapon.GetWeaponOwner()
+		int currentEnergy = owner.GetSharedEnergyCount()
+		int val = int( amount )
+		if( currentEnergy - val <= 0 )
+			val = currentEnergy
+		if( val >= 0 )
 			owner.TakeSharedEnergy( val )
-		}
 	}
 	else
 	{
