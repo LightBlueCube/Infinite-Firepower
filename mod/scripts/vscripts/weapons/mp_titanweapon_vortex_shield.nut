@@ -221,6 +221,8 @@ function EndVortex( entity weapon )
 
 bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, entity vortexSphere, var damageInfo )
 {
+	if ( weapon.HasMod( "shield_only" ) )
+		return true
 
 	#if CLIENT
 		return true
@@ -236,6 +238,10 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 			return true
 		string attackerWeaponName	= attackerWeapon.GetWeaponClassName()
 		int damageType				= DamageInfo_GetCustomDamageType( damageInfo )
+
+
+		if( attackerWeapon.HasMod( "burn_mod_titan_vortex_shield" ) )
+			return true
 
 		TakeAmountIfIsRodeoAttack( attacker, weapon )
 		return TryVortexAbsorb( vortexSphere, attacker, origin, damageSourceID, attackerWeapon, attackerWeaponName, "hitscan", null, damageType, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
@@ -256,7 +262,7 @@ void function TakeAmountIfIsRodeoAttack( entity attacker, entity weapon )
 	if( attacker.GetTitanSoulBeingRodeoed() != owner.GetTitanSoul() )
 		return
 
-	if ( weapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
+	if( weapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
 	{
 
 		int totalEnergy = owner.GetSharedEnergyTotal()
@@ -271,6 +277,8 @@ void function TakeAmountIfIsRodeoAttack( entity attacker, entity weapon )
 
 bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos )
 {
+	if ( weapon.HasMod( "shield_only" ) )
+		return true
 
 	#if CLIENT
 		return true

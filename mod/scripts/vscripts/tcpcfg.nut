@@ -740,9 +740,9 @@ void function OnTitanfall( entity titan )
 		soul.s.TitanHasBeenChange <- true
 		soul.s.titanTitle <- "執政官"
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
-		titan.SetSharedEnergyRegenDelay( 1.0 )
-		titan.SetSharedEnergyRegenRate( 100 )
-		soul.s.SharedEnergyRegenRate <- 100
+		titan.SetSharedEnergyRegenDelay( 2.0 )
+		titan.SetSharedEnergyRegenRate( 200 )
+		soul.s.SharedEnergyRegenRate <- 200
 		soul.s.SharedEnergyRegenDelay <- 1.0
 
 		array<entity> weapons = titan.GetMainWeapons()
@@ -755,7 +755,7 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, [ "tcp_vortex", "shield_only", "burn_mod_titan_vortex_shield" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, [ "tcp_vortex", "burn_mod_titan_vortex_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_laser_trip", OFFHAND_TITAN_CENTER, [ "pas_ion_tripwire", "tcp_arc_trip" ] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "tcp_arc_bomb" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
@@ -1933,64 +1933,257 @@ void function RandomMap()
 	switch( RandomInt )
 	{
 		case 0:
-			if( GetMapName() != "mp_black_water_canal" )
-				ServerCommand( "map mp_black_water_canal" )
+			if( GetMapName() == "mp_black_water_canal" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_black_water_canal" )
 			break
 		case 1:
-			if( GetMapName() != "mp_complex3" )
-				ServerCommand( "map mp_complex3" )
+			if( GetMapName() == "mp_complex3" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_complex3" )
 			break
 		case 2:
-			if( GetMapName() != "mp_crashsite3" )
-				ServerCommand( "map mp_crashsite3" )
+			if( GetMapName() == "mp_crashsite3" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_crashsite3" )
 			break
 		case 3:
-			if( GetMapName() != "mp_drydock" )
-				ServerCommand( "map mp_drydock" )
+			if( GetMapName() == "mp_drydock" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_drydock" )
 			break
 		case 4:
-			if( GetMapName() != "mp_eden" )
-				ServerCommand( "map mp_eden" )
+			ReRandom()
+			return
+			if( GetMapName() == "mp_eden" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_eden" )
 			break
 		case 5:
-			if( GetMapName() != "mp_forwardbase_kodai" )
-				ServerCommand( "map mp_forwardbase_kodai" )
+			if( GetMapName() == "mp_forwardbase_kodai" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_forwardbase_kodai" )
 			break
 		case 6:
-			if( GetMapName() != "mp_grave" )
-				ServerCommand( "map mp_grave" )
+			if( GetMapName() == "mp_grave" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_grave" )
 			break
 		case 7:
-			if( GetMapName() != "mp_homestead" )
-				ServerCommand( "map mp_homestead" )
+			if( GetMapName() == "mp_homestead" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_homestead" )
 			break
 		case 8:
-			if( GetMapName() != "mp_thaw" )
-				ServerCommand( "map mp_thaw" )
+			if( GetMapName() == "mp_thaw" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_thaw" )
 			break
 		case 9:
-			if( GetMapName() != "mp_angel_city" )
-				ServerCommand( "map mp_angel_city" )
+			if( GetMapName() == "mp_angel_city" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_angel_city" )
 			break
 		case 10:
-			if( GetMapName() != "mp_colony02" )
-				ServerCommand( "map mp_colony02" )
+			if( GetMapName() == "mp_colony02" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_colony02" )
 			break
 		case 11:
-			if( GetMapName() != "mp_relic02" )
-				ServerCommand( "map mp_relic02" )
+			if( GetMapName() == "mp_relic02" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_relic02" )
 			break
 		case 12:
-			if( GetMapName() != "mp_wargames" )
-				ServerCommand( "map mp_wargames" )
+			if( GetMapName() == "mp_wargames" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_wargames" )
 			break
 		case 13:
-			if( GetMapName() != "mp_glitch" )
-				ServerCommand( "map mp_glitch" )
+			if( GetMapName() == "mp_glitch" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_glitch" )
 			break
 		case 14:
-			if( GetMapName() != "mp_rise" )
-				ServerCommand( "map mp_rise" )
+			if( GetMapName() == "mp_rise" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_rise" )
+			break
+		default:
+			break
+	}
+}
+void function ReRandom()
+{
+	int RandomInt = RandomInt( 15 )
+	switch( RandomInt )
+	{
+		case 0:
+			if( GetMapName() == "mp_black_water_canal" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_black_water_canal" )
+			break
+		case 1:
+			if( GetMapName() == "mp_complex3" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_complex3" )
+			break
+		case 2:
+			if( GetMapName() == "mp_crashsite3" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_crashsite3" )
+			break
+		case 3:
+			if( GetMapName() == "mp_drydock" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_drydock" )
+			break
+		case 4:
+			ReRandom()
+			return
+			if( GetMapName() == "mp_eden" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_eden" )
+			break
+		case 5:
+			if( GetMapName() == "mp_forwardbase_kodai" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_forwardbase_kodai" )
+			break
+		case 6:
+			if( GetMapName() == "mp_grave" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_grave" )
+			break
+		case 7:
+			if( GetMapName() == "mp_homestead" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_homestead" )
+			break
+		case 8:
+			if( GetMapName() == "mp_thaw" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_thaw" )
+			break
+		case 9:
+			if( GetMapName() == "mp_angel_city" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_angel_city" )
+			break
+		case 10:
+			if( GetMapName() == "mp_colony02" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_colony02" )
+			break
+		case 11:
+			if( GetMapName() == "mp_relic02" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_relic02" )
+			break
+		case 12:
+			if( GetMapName() == "mp_wargames" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_wargames" )
+			break
+		case 13:
+			if( GetMapName() == "mp_glitch" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_glitch" )
+			break
+		case 14:
+			if( GetMapName() == "mp_rise" )
+			{
+				ReRandom()
+				return
+			}
+			ServerCommand( "map mp_rise" )
 			break
 		default:
 			break
