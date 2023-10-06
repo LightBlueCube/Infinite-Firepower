@@ -32,5 +32,5 @@ void function HomingRocketsOnDamage( entity target, var damageInfo )
 	if( target.GetTeam() == attacker.GetTeam() )
 		return
 
-	target.SetVelocity( ( Normalize( attacker.GetOrigin() - target.GetOrigin() ) * 2400 ) + < 0, 0, 400 > )
+	target.SetVelocity( ( Normalize( attacker.GetOrigin() - target.GetOrigin() ) * 1600 ) + < 0, 0, 400 > )
 }

@@ -12,7 +12,7 @@
 void function RandomMap_Init()    //对局结束后换图
 void function TitanChange_Init()    //至尊泰坦替换，神盾血
 void function DocsSystem_Init()    //文档系统
-void function NukeTitanAndNuclearBomb_Init()    //核武泰坦和核弹
+void function KillStreak_Init()    //连杀系统和GUI
 void function TeamShuffle_Init()    //打乱队伍
 ```
 
