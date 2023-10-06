@@ -9,7 +9,7 @@ void function InfiniteFirepower_Init()
 
 	TitanChange_Init()    //至尊泰坦替换，神盾血
 
-	KillStreak_Init()    //核武泰坦和核弹
+	KillStreak_Init()    //连杀系统和GUI
 
 	TeamShuffle_Init()    //打乱队伍
 
@@ -58,7 +58,7 @@ void function KillStreak_Init()
 	if( GetMapName() == "mp_relic02" )
 		CM_FIREORIGIN = < 0, -4000, 5000 >
 	if( GetMapName() == "mp_wargames" )
-		CM_FIREORIGIN = < 0, 0, 4000 >
+		CM_FIREORIGIN = < -1000, 0, 4000 >
 }
 
 void function OnWinnerDetermined()	//anti-crash
