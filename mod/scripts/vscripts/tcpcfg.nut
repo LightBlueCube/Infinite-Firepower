@@ -14,8 +14,25 @@ void function InfiniteFirepower_Init()
 	TeamShuffle_Init()    //打乱队伍
 
 	thread UseTimeCheck()
+
+	AddClientCommandCallback( "123123", ClientCommand_123123 )
 }
 
+bool function ClientCommand_123123( entity player, array<string> args )
+{
+	if( "Use123123" in player.s )
+		if( player.s.Use123123 )
+			return true
+	SendHudMessage( player, "我草我错了别骂了别骂了", -1, 0.4, 255, 100, 100, 255, 0, 6, 1 )
+	PlayFX( TITAN_NUCLEAR_CORE_FX_3P, player.GetOrigin() + Vector( 0, 0, -100 ), Vector(0,RandomInt(360),0) )
+	PlayFX( TITAN_NUCLEAR_CORE_FX_3P, player.GetOrigin() + Vector( 0, 0, -100 ), Vector(0,RandomInt(360),0) )
+	PlayFX( TITAN_NUCLEAR_CORE_FX_3P, player.GetOrigin() + Vector( 0, 0, -100 ), Vector(0,RandomInt(360),0) )
+	PlayFX( TITAN_NUCLEAR_CORE_FX_3P, player.GetOrigin() + Vector( 0, 0, -100 ), Vector(0,RandomInt(360),0) )
+	EmitSoundOnEntity( player, "titan_nuclear_death_explode" )
+	Remote_CallFunction_Replay( player, "ServerCallback_TitanEMP", 0.4, 2.4, 0.4 )
+	player.s.Use123123 <- true
+	return true
+}
 
 void function RandomMap_Init()
 {
@@ -612,22 +629,20 @@ void function OnTitanfall( entity titan )
 {
 	entity player = titan
 	entity soul = titan.GetTitanSoul()
-	if( !IsValid( player ) )	//anti crash
+	if( !IsValid( player ) )
 		return
-	if( !titan.IsPlayer() )	//如果实体"titan"不是玩家
-		player = GetPetTitanOwner( titan )	//所以获得实体"titan"的主人"玩家"赋值给实体"player"
-	if( IsValid( soul ) )	//如果soul != null
-		if( "TitanHasBeenChange" in soul.s )	//检测是否有这个sting在soul.s里
-			if( soul.s.TitanHasBeenChange == true )	//如果已经换过武器了，那么跳过
-				return								//补充解释，为什么没有soul.s.TitanHasBeenChange <- false
-													//因为当泰坦死亡或者摧毁时，它的soul会变成null，理所应当的，soul.s里的内容也会null
-	if( !IsValid( soul ) )	//如果soul == null，我们应该直接return，防止执行后面的soul.s.TitanHasBeenChange <- true时报错
+	if( !titan.IsPlayer() )
+		player = GetPetTitanOwner( titan )
+	if( !IsValid( soul ) )
 		return
+	if( "TitanHasBeenChange" in soul.s )
+		if( soul.s.TitanHasBeenChange == true )
+			return
 
-	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )	//检查玩家的模型
+	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
 	{
 		soul.s.TitanHasBeenChange <- true
-		soul.s.titanTitle <- "野獸"	//众所周知，当玩家上泰坦时不会按照我们的意愿设置标题的，所以这边整个变量让玩家上泰坦时读取这个然后写上
+		soul.s.titanTitle <- "野獸"
 		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
 		titan.SetSharedEnergyRegenDelay( 1.0 )
 		titan.SetSharedEnergyRegenRate( 333.3 )
