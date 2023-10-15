@@ -48,6 +48,8 @@ void function NoGravity40cm( entity owner )
 
 	if( !IsValid( owner ) )
 		return
+	if( !IsValid( owner.GetTitanSoul() ) )
+		return
 	if( !owner.IsTitan() )
 		return
 	if( owner.GetMainWeapons().len() == 0 )
