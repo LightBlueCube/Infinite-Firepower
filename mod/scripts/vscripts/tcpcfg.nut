@@ -1317,16 +1317,16 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_ScreenShake", 400, 200, 0.2 )
 			GivePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
 			if( weaponOwner.s.dropShipAlive )
-				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n//////////////// 动力段已启动 ////////////////", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n//////////////// 动力段已启动 ////////////////\n巡弋飞弹自毁倒计时 T-"+ float( sec + 70 ) / 10 +"s", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 			else
-				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n//////////////// 动力段已启动 ////////////////", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n//////////////// 动力段已启动 ////////////////\n巡弋飞弹自毁倒计时 T-"+ float( sec + 70 ) / 10 +"s", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 		}
 		else
 		{
 			if( weaponOwner.s.dropShipAlive )
-				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"s\n按住 攻击键 立刻启动动力段", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 			else
-				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"s\n按住 攻击键 立刻启动动力段", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 		}
 
 		WaitFrame()
