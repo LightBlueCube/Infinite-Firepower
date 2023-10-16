@@ -1014,6 +1014,8 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	vector camAngles = cmFireAngles
 	camAngles.x += 60
 	camAngles.y += 90
+	if( camAngles.y > 360 )
+		camAngles.y -= 360
 
 	entity turret = CreateTurretEnt( cmFireOrigin,  cmFireAngles, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
 	turret.Hide()
