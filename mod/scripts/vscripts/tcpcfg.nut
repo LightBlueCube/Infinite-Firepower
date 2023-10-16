@@ -48,7 +48,7 @@ void function TitanChange_Init()
 	AddCallback_OnTitanDoomed( OnTitanDoomed )
 }
 
-vector CM_FIREORIGIN = < 0, 0, 5000 >
+float CM_FIREHIGHER = 5000
 void function KillStreak_Init()
 {
 	PrecacheModel( $"models/Robots/turret_rocket/turret_rocket.mdl" )
@@ -62,20 +62,8 @@ void function KillStreak_Init()
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
 
-	if( GetMapName() == "mp_complex3" )
-		CM_FIREORIGIN = < -4000, -1000, 5000 >
-	if( GetMapName() == "mp_crashsite3" )
-		CM_FIREORIGIN = < -5000, 0, 5000 >
-	if( GetMapName() == "mp_eden" )
-		CM_FIREORIGIN = < 1000, 0, 5000 >
-	if( GetMapName() == "mp_grave" )
-		CM_FIREORIGIN = < 5000, -4000, 5000 >
-	if( GetMapName() == "mp_homestead" )
-		CM_FIREORIGIN = < 1000, -1000, 5000 >
-	if( GetMapName() == "mp_relic02" )
-		CM_FIREORIGIN = < 0, -4000, 5000 >
 	if( GetMapName() == "mp_wargames" )
-		CM_FIREORIGIN = < -1000, 0, 4000 >
+		CM_FIREHIGHER = 4000
 }
 
 void function OnWinnerDetermined()	//anti-crash
@@ -155,7 +143,7 @@ void function OnClientConnected( entity player )
 	player.s.HaveNuclearBomb <- false
 	player.s.NukeTitan <- 0
 	player.s.cruiseMissile <- 0
-	player.s.cmBeforeOrigin <- CM_FIREORIGIN
+	player.s.cmBeforeOrigin <- < 0, 0, 0 >
 	player.s.usingCruiseMissile <- false
 	player.s.dropShipAlive <- true
 
@@ -944,6 +932,8 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.FreezeControlsOnServer()
 	owner.SetInvulnerable()
 	owner.s.cmBeforeOrigin = owner.GetOrigin()
+	vector cmFireOrigin = owner.GetOrigin()
+	cmFireOrigin.z = CM_FIREHIGHER
 
 	OnThreadEnd(
 		function() : ( owner )
@@ -972,7 +962,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	wait 0.5
 	ScreenFadeToBlack( owner, 0.8, 0.3 )
 	wait 1
-	thread CruiseMissileAnim_Think( owner )
+	thread CruiseMissileAnim_Think( owner, cmFireOrigin )
 
 	owner.SetPhysics( MOVETYPE_NOCLIP )	//防止玩家因为逃离战场而去世
 	for( ;; )
@@ -980,13 +970,13 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		WaitFrame()
 		if( !owner.s.usingCruiseMissile )
 			return
-		vector origin = CM_FIREORIGIN
+		vector origin = cmFireOrigin
 		origin.z += 200
 		owner.SetOrigin( origin )
 	}
 }
 
-void function CruiseMissileAnim_Think( entity owner )
+void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
@@ -1008,16 +998,16 @@ void function CruiseMissileAnim_Think( entity owner )
 	table result = {}
 	result.timeOut <- false
 
-	entity dropship = CreateDropship( owner.GetTeam(), CM_FIREORIGIN, < 0, 0, 0 > )
+	entity dropship = CreateDropship( owner.GetTeam(), cmFireOrigin, < 0, 0, 0 > )
 	owner.s.dropShipAlive = true
 	DispatchSpawn( dropship )
 	dropship.EndSignal( "OnDestroy" )
 	dropship.EndSignal( "OnDeath" )
 	dropship.SetHealth( 2500 )
 	dropship.SetMaxHealth( 2500 )
-	entity mover = CreateScriptMover( CM_FIREORIGIN, < 0, 0, 0 > )
+	entity mover = CreateScriptMover( cmFireOrigin, < 0, 0, 0 > )
 
-	entity turret = CreateTurretEnt( CM_FIREORIGIN,  < 0, 0, 0 >, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
+	entity turret = CreateTurretEnt( cmFireOrigin,  < 0, 0, 0 >, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
 	turret.Hide()
 	turret.SetInvulnerable()
 	turret.SetParent( dropship ) // if missile gets destroyed,
@@ -1054,7 +1044,7 @@ void function CruiseMissileAnim_Think( entity owner )
 		}
 	)
 
-	thread DropShipSonar( owner, owner.GetTeam() )
+	thread DropShipSonar( owner, owner.GetTeam(), cmFireOrigin )
 
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_start", mover )	//fly in
 	EmitSoundOnEntity( dropship, "Goblin_IMC_Evac_Flyin" )
@@ -1070,7 +1060,7 @@ void function CruiseMissileAnim_Think( entity owner )
 	ScreenFadeToBlack( owner, 0.3, 0.2 )
 
 	wait 0.3
-	mover.SetOrigin( CM_FIREORIGIN )
+	mover.SetOrigin( cmFireOrigin )
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_idle", mover )	//waiting
 
 	wait 0.1
@@ -1080,8 +1070,8 @@ void function CruiseMissileAnim_Think( entity owner )
 	owner.SetAngles( < 75, 90, 0 > )
 	StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 	result.timeOut <- true
-	thread FireCruiseMissile( owner )	//launcher
-	mover.SetOrigin( CM_FIREORIGIN )
+	thread FireCruiseMissile( owner, cmFireOrigin )	//launcher
+	mover.SetOrigin( cmFireOrigin )
 
 	owner.WaitSignal( "CruiseMissileExplode" )
 
@@ -1089,7 +1079,7 @@ void function CruiseMissileAnim_Think( entity owner )
 	waitthread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
 }
 
-void function DropShipSonar( entity owner, int sonarTeam )
+void function DropShipSonar( entity owner, int sonarTeam, vector cmFireOrigin )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
@@ -1100,12 +1090,12 @@ void function DropShipSonar( entity owner, int sonarTeam )
 	foreach( ent in GetNPCArray() )
 	{
 		sonarEnt.append( ent )
-		DropShipSonarStart( ent, sonarTeam )
+		DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
 	}
 	foreach( ent in GetPlayerArray() )
 	{
 		sonarEnt.append( ent )
-		DropShipSonarStart( ent, sonarTeam )
+		DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
 	}
 
 	OnThreadEnd(
@@ -1124,7 +1114,7 @@ void function DropShipSonar( entity owner, int sonarTeam )
 		WaitFrame()
 	}
 }
-void function DropShipSonarStart( entity ent, int sonarTeam )
+void function DropShipSonarStart( entity ent, int sonarTeam, vector cmFireOrigin )
 {
 	if( !IsValid( ent ) )
 		return
@@ -1137,14 +1127,14 @@ void function DropShipSonarStart( entity ent, int sonarTeam )
 		if ( StatusEffect_Get( ent, eStatusEffect.damage_received_multiplier ) > 0 )
 			Highlight_SetSonarHighlightWithParam0( ent, "enemy_sonar", <1,0,0> )
 		else
-			Highlight_SetSonarHighlightWithParam1( ent, "enemy_sonar", CM_FIREORIGIN )
+			Highlight_SetSonarHighlightWithParam1( ent, "enemy_sonar", cmFireOrigin )
 	}
 	else
 	{
 		ent.SetCloakFlicker( 0.5, -1 )
 	}
 
-	Highlight_SetSonarHighlightOrigin( ent, CM_FIREORIGIN )
+	Highlight_SetSonarHighlightOrigin( ent, cmFireOrigin )
 
 	int statusEffectHandle = StatusEffect_AddEndless( ent, eStatusEffect.sonar_detected, 1.0 )
 	ent.s.statusEffectHandle <- statusEffectHandle
@@ -1164,7 +1154,7 @@ void function DropShipSonarEnd( entity ent, int team )
 		ent.SetCloakFlicker( 0, 0 )
 }
 
-void function FireCruiseMissile( entity weaponOwner )
+void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin )
 {
 	StorePilotWeapons( weaponOwner )
 	entity weapon = weaponOwner.GiveWeapon( "mp_weapon_rocket_launcher" )
@@ -1176,8 +1166,8 @@ void function FireCruiseMissile( entity weaponOwner )
 	thread CalculateCruiseMissilePoint( weapon, weaponOwner )
 
 	vector beForeOrigin = weaponOwner.GetOrigin()
-	vector missileSpawnOrigin = CM_FIREORIGIN
-	missileSpawnOrigin.z -= 200
+	vector missileSpawnOrigin = cmFireOrigin
+	missileSpawnOrigin.z -= 50
 	weaponOwner.SetOrigin( missileSpawnOrigin )
 	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, < 0, 90, 0 >, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
 	weaponOwner.SetOrigin( beForeOrigin )
@@ -1327,16 +1317,16 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_ScreenShake", 400, 200, 0.2 )
 			GivePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
 			if( weaponOwner.s.dropShipAlive )
-				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n//////////////// 动力段已启动 ////////////////", -1, -0.45, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n//////////////// 动力段已启动 ////////////////", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
 			else
-				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n//////////////// 动力段已启动 ////////////////", -1, -0.45, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n//////////////// 动力段已启动 ////////////////", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
 		}
 		else
 		{
 			if( weaponOwner.s.dropShipAlive )
-				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.45, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
 			else
-				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.45, 255, 0, 0, 255, 0, 0.2, 0 )
+				SendHudMessage( weaponOwner, "//////// 投放艇信号丢失 ////////\n缓冲段燃料剩余时间 T-" + float( sec ) / 10 +"\n按住 攻击键 立刻启动动力段", -1, -0.4, 255, 0, 0, 255, 0, 0.2, 0 )
 		}
 
 		WaitFrame()

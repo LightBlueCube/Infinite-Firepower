@@ -5,7 +5,7 @@ WeaponData
 		accelerator
 		{
 			"fire_rate"						"4"
-			"fire_rate_max"					"18"
+			"fire_rate_max"					"17"
 			"fire_rate_max_time_speedup"	"5.0"
 			"fire_rate_max_time_cooldown"	"0.1"
 			"ammo_clip_size"   				"60"

@@ -28,7 +28,10 @@ WeaponData
 		{
 			"rui_crosshair_index"							"1"
 
-			"charge_time" 									"2.5"
+			"charge_time" 									"0.01"
+
+			"deploy_time" 									"0.01"
+
 			"charge_cooldown_time"							"0.6"
 			"charge_cooldown_delay"   						"0.1"
 			"charge_end_forces_fire"						"1"
@@ -70,7 +73,7 @@ WeaponData
 			"charge_effect_3p"								"wpn_arc_cannon_charge"
 			"charge_effect_attachment"						"muzzle_flash"
 
-			"regen_ammo_refill_rate"						"4.0"
+			"regen_ammo_refill_rate"						"9.0"
 
 			"fire_rate"   									"10.0"
 			"fire_duration"                                 "0.55"
