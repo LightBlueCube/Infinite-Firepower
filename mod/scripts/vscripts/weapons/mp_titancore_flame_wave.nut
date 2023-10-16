@@ -352,18 +352,19 @@ void function GroundSlamThink( entity weapon )
     EmitSoundOnEntityOnlyToPlayer( owner, owner, "titan_flight_liftoff_1p" )
     EmitSoundOnEntityExceptToPlayer( owner, owner, "titan_flight_liftoff_3p" )
     vector baseVelocity = owner.GetViewVector() * BERSERKER_DASH_VELOCITY
-    baseVelocity.z = -750
+    baseVelocity.z = owner.GetVelocity().z
     owner.SetVelocity( baseVelocity )
+	WaitFrame()
     //wait BERSERKER_DASH_TIME
     //owner.SetVelocity( < 0, 0, -170 > )
 	//owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).SetWeaponPrimaryClipCount( owner.GetOffhandWeapon( OFFHAND_ORDNANCE ).GetWeaponPrimaryClipCountMax() )
-    while( true )
+    /*while( true )
     {
         WaitFrame()
         TraceResults traceresult = TraceLine( owner.GetOrigin(), owner.GetOrigin() - < 0, 0, 300 >, owner, (TRACE_MASK_SHOT | CONTENTS_BLOCKLOS), TRACE_COLLISION_GROUP_NONE )
         if( IsValid( traceresult.hitEnt ) )
             break
-    }
+    }*/
     //mitSoundOnEntityOnlyToPlayer( owner, owner, "titan_flight_descent_1p" )
     //EmitSoundOnEntityExceptToPlayer( owner, owner, "titan_flight_descent_3p" )
     StopSoundOnEntity( weapon, "flamewave_start_1p" ) // client fix

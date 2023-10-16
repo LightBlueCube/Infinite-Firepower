@@ -21,11 +21,11 @@ var function OnWeaponPrimaryAttack_ability_heal( entity weapon, WeaponPrimaryAtt
 		EmitSoundOnEntityExceptToPlayer( ownerPlayer, ownerPlayer, "Stryder.Dash" )
 		EmitSoundOnEntityOnlyToPlayer( ownerPlayer, ownerPlayer, "titan_flight_liftoff_1p" )
 		float movestunEffect = 1.0 - StatusEffect_Get( ownerPlayer, eStatusEffect.dodge_speed_slow )
-		float moveSpeed = 800 * movestunEffect
+		float moveSpeed = 600 * movestunEffect
 		if( ownerPlayer.IsOnGround() )
-			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed, < 0, 0, 400 > )
+			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed, ownerPlayer.GetVelocity() + < 0, 0, 400 > )
 		else
-			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed * 0.5 , < 0, 0, 600 > )
+			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed * 0.5 , ownerPlayer.GetVelocity() + < 0, 0, 800 > )
 		entity soul = ownerPlayer.GetTitanSoul()
 		if ( soul == null )
 			soul = ownerPlayer
