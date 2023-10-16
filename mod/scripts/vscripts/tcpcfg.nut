@@ -62,6 +62,8 @@ void function KillStreak_Init()
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_OnClientConnected( OnClientConnected )
 
+	if( GetMapName() == "mp_grave" )
+		CM_FIREHIGHER = 4500
 	if( GetMapName() == "mp_wargames" )
 		CM_FIREHIGHER = 4000
 }
@@ -630,7 +632,7 @@ void function OnTitanfall( entity titan )
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
 	{
 		soul.s.TitanHasBeenChange <- true
-		soul.s.titanTitle <- "野獸"
+		soul.s.titanTitle <- "野獸"//四號"
 		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
 		titan.SetSharedEnergyRegenDelay( 1.0 )
 		titan.SetSharedEnergyRegenRate( 333.3 )
@@ -646,7 +648,7 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-        titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_sp_base" ] )
+        titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_brute" ] )
 	  	titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL,["tcp_sp_base"] )
 		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER )
         titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp_sp_base"] )
@@ -934,6 +936,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.s.cmBeforeOrigin = owner.GetOrigin()
 	vector cmFireOrigin = owner.GetOrigin()
 	cmFireOrigin.z = CM_FIREHIGHER
+	vector cmFireAngles = < 0, RandomIntRange( 0, 359 ), 0 >
 
 	OnThreadEnd(
 		function() : ( owner )
@@ -962,7 +965,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	wait 0.5
 	ScreenFadeToBlack( owner, 0.8, 0.3 )
 	wait 1
-	thread CruiseMissileAnim_Think( owner, cmFireOrigin )
+	thread CruiseMissileAnim_Think( owner, cmFireOrigin, cmFireAngles )
 
 	owner.SetPhysics( MOVETYPE_NOCLIP )	//防止玩家因为逃离战场而去世
 	for( ;; )
@@ -976,7 +979,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	}
 }
 
-void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
+void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector cmFireAngles )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
@@ -997,17 +1000,22 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 
 	table result = {}
 	result.timeOut <- false
+	result.timeOut2 <- false
 
-	entity dropship = CreateDropship( owner.GetTeam(), cmFireOrigin, < 0, 0, 0 > )
+	entity dropship = CreateDropship( owner.GetTeam(), cmFireOrigin, cmFireAngles )
 	owner.s.dropShipAlive = true
 	DispatchSpawn( dropship )
 	dropship.EndSignal( "OnDestroy" )
 	dropship.EndSignal( "OnDeath" )
 	dropship.SetHealth( 2500 )
 	dropship.SetMaxHealth( 2500 )
-	entity mover = CreateScriptMover( cmFireOrigin, < 0, 0, 0 > )
+	entity mover = CreateScriptMover( cmFireOrigin, cmFireAngles )
 
-	entity turret = CreateTurretEnt( cmFireOrigin,  < 0, 0, 0 >, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
+	vector camAngles = cmFireAngles
+	camAngles.x += 60
+	camAngles.y += 90
+
+	entity turret = CreateTurretEnt( cmFireOrigin,  cmFireAngles, null, ROCKET_TURRET_MODEL, "PROTO_at_turret" )
 	turret.Hide()
 	turret.SetInvulnerable()
 	turret.SetParent( dropship ) // if missile gets destroyed,
@@ -1015,7 +1023,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 	turret.SetOrigin( < -800, 0, 1200 > )
 	turret.GiveWeapon( "mp_weapon_rocket_launcher" )
 	DisableWeapons( turret, [] )
-	owner.SetAngles( < 60, 90, 0 > )
+	owner.SetAngles( camAngles )
 	owner.SetOrigin( owner.GetOrigin() )
 	FindNearestSafeSpotAndPutEntity( owner, 5 )
 	turret.SetDriver( owner )
@@ -1038,7 +1046,8 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 					owner.s.usingCruiseMissile = false
 					EmitSoundOnEntityOnlyToPlayer( owner, owner, "goblin_dropship_explode" )
 				}
-				owner.s.dropShipAlive = false
+				if( !result.timeOut2 )
+					owner.s.dropShipAlive = false
 				StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 			}
 		}
@@ -1055,7 +1064,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 
 	mover.SetOrigin( turret.GetOrigin() )
 	turret.SetParent( mover )
-	turret.SetAngles( < 45, -90, 0 > )
+	turret.SetAngles( camAngles )
 	mover.NonPhysicsMoveTo( dropship.GetOrigin(), 0.3, 0.0, 0.0 )
 	ScreenFadeToBlack( owner, 0.3, 0.2 )
 
@@ -1067,15 +1076,17 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin )
 	owner.UnfreezeControlsOnServer()
 	turret.ClearDriver()
 	turret.Destroy()
-	owner.SetAngles( < 75, 90, 0 > )
+	camAngles.x += 15
+	owner.SetAngles( camAngles )
 	StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 	result.timeOut <- true
-	thread FireCruiseMissile( owner, cmFireOrigin )	//launcher
+	thread FireCruiseMissile( owner, cmFireOrigin, cmFireAngles, camAngles )	//launcher
 	mover.SetOrigin( cmFireOrigin )
 
 	owner.WaitSignal( "CruiseMissileExplode" )
 
 	owner.s.dropShipAlive = false
+	result.timeOut2 <- true
 	waitthread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
 }
 
@@ -1154,7 +1165,7 @@ void function DropShipSonarEnd( entity ent, int team )
 		ent.SetCloakFlicker( 0, 0 )
 }
 
-void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin )
+void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin, vector cmFireAngles, vector camAngles )
 {
 	StorePilotWeapons( weaponOwner )
 	entity weapon = weaponOwner.GiveWeapon( "mp_weapon_rocket_launcher" )
@@ -1169,7 +1180,7 @@ void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin )
 	vector missileSpawnOrigin = cmFireOrigin
 	missileSpawnOrigin.z -= 50
 	weaponOwner.SetOrigin( missileSpawnOrigin )
-	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, < 0, 90, 0 >, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
+	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, camAngles, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
 	weaponOwner.SetOrigin( beForeOrigin )
 
 	if ( missile )
