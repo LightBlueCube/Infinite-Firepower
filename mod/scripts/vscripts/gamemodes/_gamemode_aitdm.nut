@@ -12,6 +12,17 @@ const int LEVEL_REAPERS = 500
 
 int teamScoreAddition = 1
 
+array<string> lastMinMusic = [
+	"music_reclamation_17a_thingsgetbad",
+	"music_boomtown_22_embarkbt",
+	"music_wilds_17_titanfight",
+	"music_reclamation_04_firsttitanbattle",
+	"music_skyway_12_titanhillwave03",
+	"music_skyway_13_enroutetobliskandslone",
+	"music_s2s_07_shipexplode",
+	"music_s2s_12_steering",
+]
+
 // add settings
 global function AITdm_SetSquadsPerTeam
 global function AITdm_SetReapersPerTeam
@@ -85,7 +96,7 @@ void function HideTeamScore()
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
 	wait timeLimit - 60
-	bool MusicType = RandomInt( 2 ) == 0 ? true : false
+	int random = RandomInt( lastMinMusic.len() )
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
@@ -95,17 +106,9 @@ void function HideTeamScore()
 			NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "本局雙方分數差距較小 分數獲取不加倍", < 50, 50, 225 >, 255, 6 )
 		else
 			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
-		if( MusicType )
-		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "music_boomtown_22_embarkbt" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "music_boomtown_22_embarkbt" )
-		}
-		else
-		{
-			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "music_wilds_17_titanfight" )
-		}
+
+		EmitSoundOnEntityOnlyToPlayer( player, player, lastMinMusic[ random ] )
+		EmitSoundOnEntityOnlyToPlayer( player, player, lastMinMusic[ random ] )
 	}
 	wait 60
 }
