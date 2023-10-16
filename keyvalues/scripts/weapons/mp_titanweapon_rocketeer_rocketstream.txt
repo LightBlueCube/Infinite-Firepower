@@ -26,13 +26,14 @@ WeaponData
 		{
 		}
 
-		tcp_sp_base
+		tcp_brute
 		{
 			"damage_near_value"   							"200"
 			"damage_far_value"								"200"
 			"damage_near_value_titanarmor"					"350"
 			"damage_far_value_titanarmor" 					"300"
 			"explosionradius" 								"200"
+		//	"explosion_damage"								"100"
 
 			"deploy_time" 									"1.75"
 		}
