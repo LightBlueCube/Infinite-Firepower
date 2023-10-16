@@ -3509,14 +3509,14 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 	if( !IsValid( titanSoul ) )
 		return
 
-	float batteryCount = float( ClassicRodeo_GetSoulBatteryCount( titanSoul ) ) // Floats instead of ints since we need decimal values for the math
+	int batteryCount = ClassicRodeo_GetSoulBatteryCount( titanSoul ) // Floats instead of ints since we need decimal values for the math
 	if( batteryCount < 1 )
 		return
-	for ( float i = 1.0; i <= batteryCount; i += 1.0 )
+	for ( int i = 1; i <= batteryCount; i += 1 )
 	{
 		entity newBattery = Rodeo_CreateBatteryPack()
 		newBattery.s.touchEnabledTime = Time() + 0.3
-		vector direction = AnglesToForward( <0, i/batteryCount * 360.0, 0> )
+		vector direction = AnglesToForward( < 0, float( i ) / float( batteryCount ) * 360.0, 0 > )
 		newBattery.SetOrigin( ent.GetWorldSpaceCenter() + direction * 30 )
 		newBattery.SetAngles( <0, 0, 0 > )
 		vector baseVelocity = ent.GetVelocity()
