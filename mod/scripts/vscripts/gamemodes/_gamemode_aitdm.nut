@@ -79,16 +79,16 @@ void function HideTeamScore()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
+	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
 	OnThreadEnd(
-		function():()
+		function():( music )
 		{
 			teamScoreAddition = 1
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
 					continue
-				StopSoundOnEntity( player, "music_boomtown_22_embarkbt" )
-				StopSoundOnEntity( player, "music_wilds_17_titanfight" )
+				StopSoundOnEntity( player, music )
 			}
 		}
 	)
@@ -96,7 +96,6 @@ void function HideTeamScore()
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
 	wait timeLimit - 60
-	int random = RandomInt( lastMinMusic.len() )
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
@@ -107,8 +106,8 @@ void function HideTeamScore()
 		else
 			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
-		EmitSoundOnEntityOnlyToPlayer( player, player, lastMinMusic[ random ] )
-		EmitSoundOnEntityOnlyToPlayer( player, player, lastMinMusic[ random ] )
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 	}
 	wait 60
 }
