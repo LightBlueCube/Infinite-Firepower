@@ -793,10 +793,12 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
+		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveOffhandWeapon( "mp_ability_swordblock", OFFHAND_SPECIAL )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER, [ "tcp_emp" ])
 		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )
+		titan.GiveOffhandWeapon( "melee_titan_punch_northstar", OFFHAND_MELEE )
 
 		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
 								ePassives.PAS_RONIN_ARCWAVE,
