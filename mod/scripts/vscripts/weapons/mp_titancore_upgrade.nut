@@ -85,7 +85,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 void function AmmoCoreThink( entity owner, entity weapon )
 {
 	owner.Signal( "AmmoCoreThink" )
-	owner.EndSignal( "OnDestroy" )
+	weapon.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "DisembarkingTitan" )
 	owner.EndSignal( "TitanEjectionStarted" )
