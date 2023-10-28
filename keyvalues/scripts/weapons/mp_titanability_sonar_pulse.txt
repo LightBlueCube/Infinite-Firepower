@@ -14,15 +14,10 @@ WeaponData
 		{
 		}
 
-		tcp_grapple
-		{
-			"regen_ammo_refill_rate"						"10"
-		}
-
 		tcp_smoke
 		{
 		}
-		tcp_bubble_shield
+		tcp_gravity
 		{
 		}
 	}

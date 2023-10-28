@@ -52,5 +52,9 @@ WeaponData
 		{
 			"regen_ammo_refill_rate"						"*0.75"
 		}
+		tcp_dash_shield
+		{
+			"regen_ammo_refill_rate"						"*2"
+		}
 	}
 }

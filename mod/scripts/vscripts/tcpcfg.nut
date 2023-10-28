@@ -632,7 +632,7 @@ void function OnTitanfall( entity titan )
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
 	{
 		soul.s.TitanHasBeenChange <- true
-		soul.s.titanTitle <- "野獸"//四號"
+		soul.s.titanTitle <- "野獸四號"
 		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
 		titan.SetSharedEnergyRegenDelay( 1.0 )
 		titan.SetSharedEnergyRegenRate( 333.3 )
@@ -649,10 +649,10 @@ void function OnTitanfall( entity titan )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
         titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_brute" ] )
-	  	titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL,["tcp_sp_base"] )
-		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER )
-        titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp_sp_base"] )
-		titan.GiveOffhandWeapon( "mp_titancore_flight_core", OFFHAND_EQUIPMENT, [ "tcp_sp_base" ] )
+	  	titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "tcp_dash_shield" ] )
+		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER, [ "tcp_super_hover" ] )
+        titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_ORDNANCE, [ "tcp_gravity" ] )
+		titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tcp_gravity" ] )
 
 		array<int> passives = [ ePassives.PAS_NORTHSTAR_WEAPON,
 								ePassives.PAS_NORTHSTAR_CLUSTER,
@@ -663,7 +663,6 @@ void function OnTitanfall( entity titan )
 		{
 			TakePassive( soul, passive )
 		}
-		GivePassive( soul, ePassives.PAS_NORTHSTAR_FLIGHTCORE )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
@@ -929,7 +928,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.EndSignal( "OnDeath" )
 	owner.s.usingCruiseMissile = true
 	owner.kv.VisibilityFlags = 0
-	PhaseShift( owner, 0, 1.8 )
+	PhaseShift( owner, 0, 1.2 )
 	HolsterAndDisableWeapons( owner )
 	owner.SetOrigin( owner.GetOrigin() )
 	FindNearestSafeSpotAndPutEntity( owner, 5 )
@@ -964,12 +963,11 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		}
 	)
 
-	wait 0.5
-	ScreenFadeToBlack( owner, 0.8, 0.3 )
-	wait 1
+	ScreenFadeToBlack( owner, 0.9, 0.8 )
+	owner.SetPhysics( MOVETYPE_NOCLIP )	//防止玩家因为逃离战场而去世
+	wait 1.0
 	thread CruiseMissileAnim_Think( owner, cmFireOrigin, cmFireAngles )
 
-	owner.SetPhysics( MOVETYPE_NOCLIP )	//防止玩家因为逃离战场而去世
 	for( ;; )
 	{
 		WaitFrame()
@@ -990,6 +988,8 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	{
 		if( !IsValid( player ) )
 			continue
+		if( player == owner )
+			continue
 		if( player.GetTeam() == owner.GetTeam() )
 		{
 			NSSendLargeMessageToPlayer( player,"友方巡飛彈投放中！", "投放飛艇會標記出所有敵人的的位置！保護飛艇！", 7, "rui/callsigns/callsign_95_col" )
@@ -1005,12 +1005,16 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	result.timeOut2 <- false
 
 	entity dropship = CreateDropship( owner.GetTeam(), cmFireOrigin, cmFireAngles )
+	asset shipMdl = owner.GetTeam() == TEAM_MILITIA ? $"models/vehicle/crow_dropship/crow_dropship_hero.mdl" : $"models/vehicle/goblin_dropship/goblin_dropship_hero.mdl"
 	owner.s.dropShipAlive = true
 	DispatchSpawn( dropship )
 	dropship.EndSignal( "OnDestroy" )
 	dropship.EndSignal( "OnDeath" )
+	dropship.SetValueForModelKey( shipMdl )
 	dropship.SetHealth( 2500 )
 	dropship.SetMaxHealth( 2500 )
+	dropship.SetModel( shipMdl )
+	thread WarpInEffectEvacShip( dropship )
 	entity mover = CreateScriptMover( cmFireOrigin, cmFireAngles )
 
 	vector camAngles = cmFireAngles
@@ -1030,7 +1034,8 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	owner.SetAngles( camAngles )
 	owner.SetOrigin( owner.GetOrigin() )
 	FindNearestSafeSpotAndPutEntity( owner, 5 )
-	turret.SetDriver( owner )
+	thread DropShipTempHide( dropship, turret, owner )
+
 
 	OnThreadEnd(
 		function() : ( turret, mover, dropship, owner, result )
@@ -1040,9 +1045,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 				turret.ClearDriver()
 				turret.Destroy()
 			}
-			if( IsValid( dropship ) )
-				dropship.Destroy()
-			mover.Destroy()
+			thread DropShipFlyOut( dropship, mover )
 			if( IsValid( owner ) )
 			{
 				if( !result.timeOut )
@@ -1091,7 +1094,60 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 
 	owner.s.dropShipAlive = false
 	result.timeOut2 <- true
-	waitthread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
+}
+
+void function DropShipFlyOut( entity dropship, entity mover )
+{
+	if( IsValid( dropship ) )
+	{
+		thread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
+		wait dropship.GetSequenceDuration( "cd_dropship_rescue_side_end" )
+
+		dropship.kv.VisibilityFlags = 0 // prevent jetpack trails being like "dive" into ground
+		WaitFrame() // better wait because we are server
+		if( IsValid( dropship ) )
+			thread __WarpOutEffectShared( dropship )
+
+		dropship.Destroy()
+	}
+	mover.Destroy()
+}
+
+void function DropShipTempHide( entity dropship, entity turret, entity owner )
+{
+	dropship.kv.VisibilityFlags = 0 // or it will still shows the jetpack fxs
+	HideName( dropship )
+	wait 0.65
+	if( IsValid( dropship ) && IsValid( turret ) && IsValid( owner ) )
+	{
+		dropship.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
+		ShowName( dropship )
+		turret.SetDriver( owner )
+	}
+}
+
+void function WarpInEffectEvacShip( entity dropship )
+{
+	dropship.EndSignal( "OnDestroy" )
+	float sfxWait = 0.1
+	float totalTime = WARPINFXTIME
+	float preWaitTime = 0.16 // give it some time so it's actually playing anim, and we can get it's "origin" attatch for playing warp in effect
+	string sfx = "dropship_warpin"
+
+	wait preWaitTime
+
+	int attach = dropship.LookupAttachment( "origin" )
+	vector origin = dropship.GetAttachmentOrigin( attach )
+	vector angles = dropship.GetAttachmentAngles( attach )
+
+	entity fx = PlayFX( FX_GUNSHIP_CRASH_EXPLOSION_ENTRANCE, origin, angles )
+	fx.FXEnableRenderAlways()
+	fx.DisableHibernation()
+
+	wait sfxWait
+	EmitSoundAtPosition( TEAM_UNASSIGNED, origin, sfx )
+
+	wait totalTime - sfxWait
 }
 
 void function DropShipSonar( entity owner, int sonarTeam, vector cmFireOrigin )
@@ -1182,7 +1238,7 @@ void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin, vector
 
 	vector beForeOrigin = weaponOwner.GetOrigin()
 	vector missileSpawnOrigin = cmFireOrigin
-	missileSpawnOrigin.z -= 50
+	missileSpawnOrigin.z -= 60
 	weaponOwner.SetOrigin( missileSpawnOrigin )
 	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, camAngles, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
 	weaponOwner.SetOrigin( beForeOrigin )

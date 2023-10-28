@@ -84,14 +84,16 @@ void function HighLightingTarget( entity target, entity owner )
 
 	int sonarTeam = owner.GetTeam()
 	int statusEffect = StatusEffect_AddEndless( target, eStatusEffect.damage_received_multiplier, 0.5 )
+	int statusEffectHandle = StatusEffect_AddEndless( target, eStatusEffect.sonar_detected, 1.0 )
 
 	OnThreadEnd(
-		function() : ( target, statusEffect, sonarTeam )
+		function() : ( target, statusEffect, sonarTeam, statusEffectHandle )
 		{
 			if ( IsValid( target ) )
 			{
 				Highlight_ClearEnemyHighlight( target )
 				StatusEffect_Stop( target, statusEffect )
+				StatusEffect_Stop( target, statusEffectHandle )
 			}
 		}
 	)

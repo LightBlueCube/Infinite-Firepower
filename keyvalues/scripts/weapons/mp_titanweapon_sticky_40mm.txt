@@ -16,7 +16,7 @@ WeaponData
 		}
 		mortar_shots
 		{
-			"impact_effect_table" 							"exp_satchel"
+			"impact_effect_table" 							"none"
 			"vortex_impact_effect"							"P_impact_exp_XLG_metal"
 			"explosion_inner_radius"  						"10"
 			"explosionradius" 								"225"
@@ -65,7 +65,7 @@ WeaponData
 
 		tcp_no_gravity
 		{
-			"impact_effect_table" 							"exp_satchel"
+			"impact_effect_table" 							"none"
 			"vortex_impact_effect"							"P_impact_exp_XLG_metal"
 			"explosion_inner_radius"  						"10"
 			"explosionradius" 								"225"

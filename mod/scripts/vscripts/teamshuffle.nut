@@ -63,6 +63,12 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 		return true
 	}
 
+	if ( player.GetParent() )
+	{
+    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "有被绑定的父级实体，不可切换队伍", false ) // chathook has been fucked up
+		return true
+	}
+
 	if ( GetPlayerArray().len() == 1 )
 	{
     	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "人数不足，不可切换队伍", false ) // chathook has been fucked up
