@@ -43,6 +43,9 @@ function MpTitanabilityBubbleShield_Init()
 	    PrecacheHUDMaterial( $"vgui/hud/dpad_bubble_shield_charge_1" )
 	    PrecacheHUDMaterial( $"vgui/hud/dpad_bubble_shield_charge_2" )
     #endif
+
+	RegisterWeaponDamageSource( "mp_titanability_dash_shield", "牽引護盾" )
+	AddDamageCallbackSourceID( eDamageSourceId.mp_titanability_dash_shield, DashShieldDamaged )
 }
 
 var function OnWeaponPrimaryAttack_particle_wall( entity weapon, WeaponPrimaryAttackParams attackParams )
@@ -60,6 +63,11 @@ var function OnWeaponPrimaryAttack_particle_wall( entity weapon, WeaponPrimaryAt
 	if( weapon.HasMod( "tcp_parent_shield" ) )
 	{
 		thread TitanPersonalShield_Threaded( weaponOwner, 2500, 8 )
+		return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
+	}
+	if( weapon.HasMod( "tcp_dash_shield" ) )
+	{
+		thread TitanDashShield_Threaded( weaponOwner, weapon, attackParams )
 		return weapon.GetWeaponInfoFileKeyField( "ammo_per_shot" )
 	}
 	if( weapon.HasMod( "tcp_color_shield" ) )
@@ -96,6 +104,195 @@ var function OnWeaponNpcPrimaryAttack_particle_wall( entity weapon, WeaponPrimar
 }
 #endif // #if SERVER
 
+void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "DisembarkingTitan" )
+	owner.EndSignal( "TitanEjectionStarted" )
+
+
+	//------------------------------
+	// Shield vars
+	//------------------------------
+	vector origin = owner.GetOrigin()
+	vector angles = VectorToAngles( owner.GetPlayerOrNPCViewVector() )
+	angles.x = 0
+	angles.z = 0
+
+	float shieldWallRadius = SHIELD_WALL_RADIUS // 90
+	asset shieldFx = SHIELD_WALL_FX
+	float wallFOV = SHIELD_WALL_FOV
+	float shieldWallHeight = SHIELD_WALL_RADIUS * 2
+
+	//------------------------------
+	// Vortex to block the actual bullets
+	//------------------------------
+	entity vortexSphere = CreateShieldWithSettings( origin + < 0, 0, -64 >, angles, SHIELD_WALL_RADIUS, SHIELD_WALL_RADIUS * 2, SHIELD_WALL_FOV, 4, 1, SHIELD_WALL_FX )
+	vortexSphere.SetTakeDamageType( DAMAGE_NO )
+	//vortexSphere.SetAngles( angles ) // viewvec?
+	//vortexSphere.SetOrigin( origin + Vector( 0, 0, shieldWallRadius - 64 ) )
+
+	// update fx origin
+	//vortexSphere.e.shieldWallFX.SetOrigin( Vector( 0, 0, shieldWallHeight ) )
+
+	//-----------------------
+	// Attach shield to owner
+	//------------------------
+	entity mover = CreateScriptMover()
+	mover.SetOrigin( origin )
+	mover.SetAngles( angles )
+
+	vortexSphere.SetParent( mover )
+
+	vortexSphere.EndSignal( "OnDestroy" )
+	Assert( IsAlive( owner ) )
+	owner.EndSignal( "ArcStunned" )
+	mover.EndSignal( "OnDestroy" )
+	#if MP
+	vortexSphere.e.shieldWallFX.EndSignal( "OnDestroy" )
+	#endif
+
+	OnThreadEnd(
+	function() : ( owner, mover, vortexSphere )
+		{
+			if ( IsValid( owner ) )
+			{
+				owner.kv.defenseActive = false
+			}
+
+			StopShieldWallFX( vortexSphere )
+
+			if ( IsValid( vortexSphere ) )
+				vortexSphere.Destroy()
+
+			if ( IsValid( mover ) )
+			{
+				//PlayFX( SHIELD_BREAK_FX, mover.GetOrigin(), mover.GetAngles() )
+				mover.Destroy()
+			}
+		}
+	)
+
+	owner.kv.defenseActive = true
+
+	vector newPos
+	vector pos = attackParams.pos
+	vector dir = attackParams.dir
+	dir.z = 0
+	dir = Normalize( dir )
+
+	int rgb = RandomInt( 30 ) + 1
+	vector color = < 0, 0, 0 >
+	int rgb1 = 0
+	int rgb2 = 0
+	int rgb3 = 0
+
+	TraceResults downTrace = TraceLine( origin, origin + <0.0, 0.0, -1000.0>, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+	if ( downTrace.fraction == 1.0 )
+		return
+	mover.SetOrigin( downTrace.endPos )
+
+	for ( ;; )
+	{
+		WaitFrame()
+
+		if( rgb / 5 == 0 )
+		{
+			rgb1 = rgb
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, rgb2, 0 >
+		}
+		else if( rgb / 5 == 1 )
+		{
+			rgb1 = rgb - 5
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb3, 250, 0 >
+		}
+		else if( rgb / 5 == 2 )
+		{
+			rgb1 = rgb - 10
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, 250, rgb2 >
+		}
+		else if( rgb / 5 == 3 )
+		{
+			rgb1 = rgb - 15
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 0, rgb3, 250 >
+		}
+		else if( rgb / 5 == 4 )
+		{
+			rgb1 = rgb - 20
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < rgb2, 0, 250 >
+		}
+		else
+		{
+			rgb1 = rgb - 25
+			rgb2 = rgb1 * 50
+			rgb3 = 250 - rgb2
+			color = < 250, 0, rgb3 >
+		}
+
+		if( rgb + 1 > 30 )
+			rgb = 0
+		rgb += 1
+
+		SetShieldWallCPointOrigin( vortexSphere.e.shieldWallFX, color )
+
+		pos = mover.GetOrigin()
+		newPos = pos + dir * 200
+
+		TraceResults upwardTrace = TraceLine( pos + < 0, 0, 100 >, newPos + < 0, 0, 100 >, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		if ( upwardTrace.fraction < 1.0 )
+		{
+			if ( IsValid( upwardTrace.hitEnt ) )
+			{
+				if ( upwardTrace.hitEnt.IsWorld() || upwardTrace.hitEnt.IsPlayer() || upwardTrace.hitEnt.IsNPC() )
+					return
+			}
+		}
+
+		RadiusDamage(
+			pos + dir * 100,								// center
+			owner,											// attacker
+			mover,											// inflictor
+			5,												// damage
+			50,												// damageHeavyArmor
+			500,											// innerRadius
+			500,											// outerRadius
+			SF_ENVEXPLOSION_NO_DAMAGEOWNER,					// flags
+			0,												// distanceFromAttacker
+			0,												// explosionForce
+			DF_ELECTRICAL,									// scriptDamageFlags
+			eDamageSourceId.mp_titanability_dash_shield )	// scriptDamageSourceIdentifier
+
+		mover.NonPhysicsMoveTo( newPos, 0.2, 0.0, 0.0 )
+	}
+}
+
+void function DashShieldDamaged( entity target, var damageInfo )
+{
+	entity mover = DamageInfo_GetInflictor( damageInfo )
+	if( !IsValid( mover ) || !IsValid( target ) )
+		return
+	if( !target.IsNPC() && !target.IsPlayer() )
+		return
+	if( target.GetParent() )
+		return
+
+	if( target.IsPlayer() )
+		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 1.0, 1.0 )
+	target.SetVelocity( Normalize( mover.GetAngles() ) * 400 )
+	if( target.IsOnGround() )
+		target.SetVelocity( target.GetVelocity() + < 0, 0, 300 > )
+}
 
 void function CreateColorBubbleShield( int team, vector origin, vector angles, float duration = 9999.0 )
 {
@@ -167,9 +364,6 @@ void function CreateColorBubbleShield( int team, vector origin, vector angles, f
 		if( rgb + 1 > 30 )
 			rgb = 0
 		rgb += 1
-
-		//SendHudMessageToAll( "debuginfo\n"+rgb+"\n"+rgb/10+"\n"+rgb1+"\n"+rgb2+"\nend", -1, 0.3, 200, 200, 225, 0, 0, 5, 1);
-
 
 		EffectSetControlPointVector( friendlyColoredFX, 1, color )
 		EffectSetControlPointVector( enemyColoredFX, 1, color )

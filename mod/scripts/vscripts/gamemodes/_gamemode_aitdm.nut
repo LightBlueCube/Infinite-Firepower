@@ -106,9 +106,9 @@ void function HideTeamScore()
 		else
 			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
-		EmitSoundOnEntityOnlyToPlayer( player, player, music )
-		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 	}
+	EmitSoundAtPosition( TEAM_UNASSIGNED, < 0, 0, 0 >, music )
+	EmitSoundAtPosition( TEAM_UNASSIGNED, < 0, 0, 0 >, music )
 	wait 60
 }
 

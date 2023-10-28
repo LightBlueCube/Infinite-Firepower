@@ -45,6 +45,9 @@ global function ChargeBall_ChargeEnd
 global function ChargeBall_StopChargeEffects
 global function ChargeBall_GetChargeTime
 
+global function VanguardEnergySiphon_DamagedPlayerOrNPC
+global function TripleThreatGrenade_DamagedPlayerOrNPC
+
 global function PlayerUsedOffhand
 #if SERVER
 global function SetPlayerCooldowns
@@ -91,8 +94,6 @@ global function DevPrintAllStatusEffectsOnEnt
 	global function Thermite_DamagePlayerOrNPCSounds
 	global function AddThreatScopeColorStatusEffect
 	global function RemoveThreatScopeColorStatusEffect
-
-	global function VanguardEnergySiphon_DamagedPlayerOrNPC
 #endif //SERVER
 #if CLIENT
 	global function GlobalClientEventHandler

@@ -1834,8 +1834,11 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 			case eDamageSourceId.mp_titanweapon_dumbfire_rockets:
 				vector normal = projectile.GetVelocity() * -1
 				normal = Normalize( normal )
-				ClusterRocket_Detonate( projectile, normal )
-				CreateNoSpawnArea( TEAM_INVALID, TEAM_INVALID, contactPos, ( CLUSTER_ROCKET_BURST_COUNT / 5.0 ) * 0.5 + 1.0, CLUSTER_ROCKET_BURST_RANGE + 100 )
+				if( !( projectile.ProjectileGetMods().contains( "tcp_arc_bomb" ) ) )
+				{
+					ClusterRocket_Detonate( projectile, normal )
+					CreateNoSpawnArea( TEAM_INVALID, TEAM_INVALID, contactPos, ( CLUSTER_ROCKET_BURST_COUNT / 5.0 ) * 0.5 + 1.0, CLUSTER_ROCKET_BURST_RANGE + 100 )
+				}
 				break
 
 			case eDamageSourceId.mp_weapon_grenade_electric_smoke:

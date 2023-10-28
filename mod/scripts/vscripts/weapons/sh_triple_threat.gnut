@@ -48,7 +48,23 @@ function MpTitanweaponTripleThreat_Init()
 	PrecacheParticleSystem( FX_MINE_LIGHT )
 	PrecacheParticleSystem( FX_TRIPLE_IGNITION )
 	PrecacheParticleSystem( FX_TRIPLE_IGNITION_BURN )
+
+	// northstarCN specific. northstar didn't support this damageSourceId
+#if SERVER
+	// needs to wait for eDamageSourceId.mp_titanweapon_triplethreat being registered
+	AddCallback_EntitiesDidLoad( InitTripleThreatDamageCallback )
+#endif
+	//
 }
+
+// northstarCN specific. northstar didn't support this damageSourceId
+#if SERVER
+void function InitTripleThreatDamageCallback()
+{
+	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_triplethreat, TripleThreatGrenade_DamagedPlayerOrNPC )
+}
+#endif
+//
 
 var function OnWeaponPrimaryAttack_titanweapon_triplethreat( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
@@ -152,6 +168,8 @@ function FireTripleThreatGrenade( entity weapon, origin, fwd, velocity, playerFi
 	{
 
 		nade.kv.CollideWithOwner = false
+
+		EmitSoundOnEntity( nade, "Weapon_softball_Grenade_Emitter" )
 
 		Grenade_Init( nade, weapon )
 		#if SERVER

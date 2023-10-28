@@ -1,0 +1,29 @@
+WeaponData
+{
+	Mods
+	{
+		pas_defensive_core
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+
+		burn_mod_titan_smoke
+		{
+		}
+
+		tcp_super_hover
+		{
+			"ammo_clip_size"   								"201"
+			"ammo_default_total"							"201"
+			"ammo_min_to_fire"								"201"
+			"ammo_per_shot"									"201"
+			"ammo_stockpile_max"							"201"
+
+			"regen_ammo_refill_rate"						"20"
+			"fire_duration"   								"0.5"
+		}
+	}
+}

@@ -102,9 +102,11 @@ WeaponData
 	// Damage - When Used by Players
 	"damage_type" 									"burn"
 
-	"crosshair"							"crosshair_t"
+	"show_grenade_indicator" 						"1"
+
+	"crosshair"										"crosshair_t"
 	"explosion_damage"								"350"		// 150
-	"explosion_damage_heavy_armor"					"1000"		// 150
+	"explosion_damage_heavy_armor"					"1200"		// 150
 
 	"explosion_inner_radius"  						"140"
 	"explosionradius" 								"320"
@@ -376,13 +378,13 @@ WeaponData
 
 	"npc_min_burst"									"1"
 	"npc_max_burst"									"1"
-	"npc_rest_time_between_bursts_min"					"0.1"
-	"npc_rest_time_between_bursts_max"					"0.4"
+	// northstar default value messes actual fire_rate
+	//"npc_rest_time_between_bursts_min"					"0.1"
+	//"npc_rest_time_between_bursts_max"					"0.4"
+	"npc_rest_time_between_bursts_min"				"0.8"
+	"npc_rest_time_between_bursts_max"				"1.2"
 
 	"npc_fire_at_enemy_defense_time"				"1.5"
-
-	"npc_explosion_damage"							"350"
-	"npc_explosion_damage_heavy_armor"				"1000"
 
 	// WeaponED Unhandled Key/Values and custom script Key/Values
 	"bob_tilt_angle"  								"0.5"
@@ -416,6 +418,24 @@ WeaponData
     "clip_bodygroup_show_for_milestone_1"	"0"
     "clip_bodygroup_show_for_milestone_2"	"1"
 
+
+
+	// NPC
+	// modified: hopefully these fixes npc dealing damage
+	"npc_explosion_damage"							"150" // was 350, which is too high
+	"npc_explosion_damage_heavy_armor"				"550"
+
+
+	// modified: hopefully these fixes npc targeting enemies
+	// same as softball's status, make npcs try not to hurt themselves
+	"npc_min_engage_range"							"100"
+	"npc_min_engage_range_heavy_armor"				"500"
+
+	"npc_max_engage_range"							"2000"
+	"npc_max_engage_range_heavy_armor"				"2000"
+
+	// northstar missing, should re-assign activity
+	"activitymodifier"								"mp_titanweapon_triple_threat"
 
 	Mods
 	{

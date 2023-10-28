@@ -41,7 +41,6 @@ void function MpTitanWeaponStunLaser_Init()
 	PrecacheParticleSystem( $"P_impact_exp_emp_med_air" )
 
 	#if SERVER
-		AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_stun_laser, ChargeBallOnDamage )
 		RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_stun_laser ) // doing check in stun laser damagesourceID
 	#endif
 }
@@ -276,22 +275,6 @@ var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 
-void function ChargeBallOnDamage( entity ent, var damageInfo )
-{
-	entity weapon = DamageInfo_GetWeapon( damageInfo )
-	if( DamageInfo_GetDamage( damageInfo ) == 0 )
-		return
-	if( !IsValid( weapon ) )
-		return
-	if( !weapon.HasMod( "charge_ball" ) )
-		return
-
-	const ARC_TITAN_EMP_DURATION			= 0.35
-	const ARC_TITAN_EMP_FADEOUT_DURATION	= 0.35
-
-	StatusEffect_AddTimed( ent, eStatusEffect.emp, 0.1, ARC_TITAN_EMP_DURATION, ARC_TITAN_EMP_FADEOUT_DURATION )
-}
-
 entity function ChargeBall_FireArcBall( entity weapon, vector pos, vector dir, bool shouldPredict, float damage = BALL_LIGHTNING_DAMAGE, bool isCharged = false, bool forceVisualFix = false )
 {
 	entity owner = weapon.GetWeaponOwner()
@@ -429,10 +412,8 @@ void function ChargeBall_BallLightningThink( entity ballLightning, int damageSou
 
 	EmitSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
 
-	local data = {}
-
 	OnThreadEnd(
-		function() : ( ballLightning, data )
+		function() : ( ballLightning )
 		{
 			if ( IsValid( ballLightning ) )
 				StopSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
@@ -451,18 +432,18 @@ void function ChargeBall_BallLightningThink( entity ballLightning, int damageSou
 			vector origin = ballLightning.GetOrigin()
 			BallLightningData fxData = ballLightning.e.ballLightningData
 			RadiusDamage(
-		    	origin,				// origin
+		    	origin,							// origin
 		    	ballLightning.GetOwner(),		// owner
 		    	ballLightning,		 			// inflictor
-		    	fxData.damageToPilots,								// normal damage
+		    	fxData.damageToPilots,			// normal damage
 		    	fxData.damage,					// heavy armor damage
 		    	500,							// inner radius
 		    	500,							// outer radius
 		    	SF_ENVEXPLOSION_NO_DAMAGEOWNER,	// explosion flags
 		    	0, 								// distanceFromAttacker
 		    	0, 								// explosionForce
-		    	fxData.deathPackage,				// damage flags
-		    	damageSourceId	// damage source id
+		    	fxData.deathPackage,			// damage flags
+		    	damageSourceId					// damage source id
 			)
 		}
 		wait 0.1

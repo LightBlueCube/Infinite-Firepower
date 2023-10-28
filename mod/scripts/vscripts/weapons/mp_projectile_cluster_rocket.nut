@@ -4,7 +4,7 @@ global function OnProjectileCollision_ClusterRocket
 void function OnProjectileCollision_ClusterRocket( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
 	array<string> mods = projectile.ProjectileGetMods()
-	if( mods.contains( "tcp_arc_bomb" ) || mods.contains( "tcp_grapple" ) )
+	if( mods.contains( "tcp_arc_bomb" ) )
 		return
 	float duration = mods.contains( "pas_northstar_cluster" ) ? PAS_NORTHSTAR_CLUSTER_ROCKET_DURATION : CLUSTER_ROCKET_DURATION
 

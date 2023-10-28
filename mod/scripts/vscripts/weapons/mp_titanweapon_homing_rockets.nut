@@ -1,5 +1,6 @@
 untyped
 
+global function MpTitanWeaponHomingRockets_Init
 global function OnWeaponOwnerChanged_titanweapon_homing_rockets
 global function OnWeaponPrimaryAttack_titanweapon_homing_rockets
 
@@ -20,12 +21,6 @@ const HOMINGROCKETS_LAUNCH_STRAIGHT_LERP_TIME = 0.1
 void function MpTitanWeaponHomingRockets_Init()
 {
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_homing_rockets, HomingRocketsOnDamage )
-}
-
-void function HomingRocketsOnDamage( entity target, var damageInfo )
-{
-	StatusEffect_AddTimed( target, eStatusEffect.move_slow, 0.5, 1.0, 0.5 )
-	Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.4, 1.0, 1.0 )
 }
 
 void function OnWeaponOwnerChanged_titanweapon_homing_rockets( entity weapon, WeaponOwnerChangedParams changeParams )
@@ -68,3 +63,28 @@ var function OnWeaponNpcPrimaryAttack_titanweapon_homing_rockets( entity weapon,
 	return OnWeaponPrimaryAttack_titanweapon_homing_rockets( weapon, attackParams )
 }
 #endif
+
+void function HomingRocketsOnDamage( entity target, var damageInfo )
+{
+	if( !IsValid( target ) )
+		return
+
+	StatusEffect_AddTimed( target, eStatusEffect.move_slow, 0.25, 1.0, 1.0 )
+	if( target.IsPlayer() )
+		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 1.0, 1.0 )
+
+	entity attacker = DamageInfo_GetAttacker( damageInfo )
+	if( !IsValid( attacker ) )
+		return
+	if( !attacker.IsNPC() && !attacker.IsPlayer() )
+		return
+	if( !IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
+		return
+	if( !attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "tcp_push_back" ) )
+		return
+	if( target.GetTeam() == attacker.GetTeam() )
+		return
+
+	target.SetVelocity( ( Normalize( attacker.GetOrigin() - target.GetOrigin() ) * 1600 ) + < 0, 0, 400 > )
+}
+
