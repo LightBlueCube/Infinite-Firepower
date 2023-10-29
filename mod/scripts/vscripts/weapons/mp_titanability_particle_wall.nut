@@ -176,7 +176,7 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 
 	owner.kv.defenseActive = true
 
-	vector newPos
+	vector newPos = attackParams.pos
 	vector pos = attackParams.pos
 	vector dir = attackParams.dir
 	dir.z = 0
@@ -187,11 +187,6 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 	int rgb1 = 0
 	int rgb2 = 0
 	int rgb3 = 0
-
-	TraceResults downTrace = TraceLine( origin, origin + <0.0, 0.0, -1000.0>, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
-	if ( downTrace.fraction == 1.0 )
-		return
-	mover.SetOrigin( downTrace.endPos )
 
 	for ( ;; )
 	{
@@ -246,17 +241,28 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 
 		SetShieldWallCPointOrigin( vortexSphere.e.shieldWallFX, color )
 
-		pos = mover.GetOrigin()
-		newPos = pos + dir * 200
+		pos = newPos// mover.GetOrigin()
+		newPos = pos + dir * 100
 
-		TraceResults upwardTrace = TraceLine( pos + < 0, 0, 100 >, newPos + < 0, 0, 100 >, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
-		if ( upwardTrace.fraction < 1.0 )
+		TraceResults trace = TraceLine( pos, newPos, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		if ( trace.fraction < 1.0 )
 		{
-			if ( IsValid( upwardTrace.hitEnt ) )
+			trace = TraceLine( pos + < 0, 0, 100 >, newPos + < 0, 0, 100 >, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+			if ( trace.fraction < 1.0 )
 			{
-				if ( upwardTrace.hitEnt.IsWorld() || upwardTrace.hitEnt.IsPlayer() || upwardTrace.hitEnt.IsNPC() )
-					return
+				if ( IsValid( trace.hitEnt ) )
+				{
+					if ( trace.hitEnt.IsWorld() || trace.hitEnt.IsPlayer() || trace.hitEnt.IsNPC() )
+						return
+				}
 			}
+		}
+		if( trace.fraction == 1.0 )
+		{
+			TraceResults downTrace = TraceLine( trace.endPos + < 0, 0, 50 >, trace.endPos + < 0.0, 0.0, -1000.0 >, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+			if ( downTrace.fraction == 1.0 )
+				return
+			newPos = downTrace.endPos
 		}
 
 		RadiusDamage(
