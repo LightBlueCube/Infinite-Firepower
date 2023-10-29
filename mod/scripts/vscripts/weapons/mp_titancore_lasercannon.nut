@@ -494,7 +494,7 @@ void function GravityCoreOnDamage( entity target, var damageInfo )
 	if( target.IsOnGround() )
 		target.SetVelocity( target.GetVelocity() + < 0, 0, 400 > )
 	if( target.IsPlayer() )
-		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.3, 1.0, 1.0 )
+		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.3, 0.5, 1.0 )
 
 	origin = DamageInfo_GetDamagePosition( damageInfo )
 	int hitBox = DamageInfo_GetHitBox( damageInfo )
