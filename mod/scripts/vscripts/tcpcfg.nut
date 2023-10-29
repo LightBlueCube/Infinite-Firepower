@@ -157,26 +157,6 @@ void function OnClientConnected( entity player )
 	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND2, KsGUI, 0 )
 }
 
-bool function DropBattery( entity player )
-{
-	if( player.IsHuman() && IsAlive( player ) )
-	{
-		if( PlayerHasMaxBatteryCount( player ) )
-		{
-			entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
-			vector viewVector = player.GetViewVector()
-			vector playerVel = player.GetVelocity()
-			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
-			battery.SetVelocity( batteryVel )
-
-			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
-			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
-			return true
-		}
-	}
-	return false
-}
-
 void function KsGUI( entity player )
 {
 	table result = {}
@@ -379,6 +359,14 @@ void function KsGUI_L2_1( entity player )
 
 void function KsGUI_L2_0( entity player )
 {
+	if( DropBattery( player ) )
+		return
+	SendHudMessage( player, "\n你没有电池！", -1, 0.3, 255, 0, 0, 255, 0, 2, 1 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+}
+
+bool function DropBattery( entity player )
+{
 	if( player.IsHuman() && IsAlive( player ) )
 	{
 		if( PlayerHasMaxBatteryCount( player ) )
@@ -389,13 +377,17 @@ void function KsGUI_L2_0( entity player )
 			vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
 			battery.SetVelocity( batteryVel )
 
-			SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
+			if( battery.GetSkin() == 0 )
+				SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
+			if( battery.GetSkin() == 1 )
+				SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+			if( battery.GetSkin() == 2 )
+				SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 255, 255, 100, 255, 0, 2, 1 )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
-			return
+			return true
 		}
 	}
-	SendHudMessage( player, "\n你没有电池！", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
-	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+	return false
 }
 
 const array<string> KSGUI_L1_TEXT =	[ "丢出电池", "核武泰坦", "巡弋飞弹", "聚变打击" ]
