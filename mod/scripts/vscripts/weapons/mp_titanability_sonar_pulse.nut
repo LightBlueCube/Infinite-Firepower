@@ -326,7 +326,7 @@ void function GravityNodeThink( entity projectile )
 						origin,											// center
 						owner,											// attacker
 						inflictor,										// inflictor
-						30,												// damage
+						20,												// damage
 						400,											// damageHeavyArmor
 						400,											// innerRadius
 						400,											// outerRadius
@@ -436,7 +436,7 @@ void function ChargeBall_BallLightningThink( entity ballLightning, int damageSou
 			ballLightning.GetOwner(),		// owner
 			ballLightning,		 			// inflictor
 			1,								// normal damage
-			30,								// heavy armor damage
+			20,								// heavy armor damage
 			500,							// inner radius
 			500,							// outer radius
 			SF_ENVEXPLOSION_NO_DAMAGEOWNER,	// explosion flags
@@ -465,31 +465,7 @@ void function GravityNodeOnDamage( entity target, var damageInfo )
 	if( target.IsOnGround() )
 		target.SetVelocity( target.GetVelocity() + < 0, 0, 210 > )
 	if( target.IsPlayer() )
-		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 1.0, 1.0 )
-	thread HighLightingTarget( target, ball )
-}
-
-void function HighLightingTarget( entity target, entity ball )
-{
-	target.EndSignal( "OnDeath" )
-	target.EndSignal( "OnDestroy" )
-	ball.EndSignal( "OnDestroy" )
-
-	if( Hightlight_HasEnemyHighlight( target, "enemy_sonar" ) )
-		return
-
-	OnThreadEnd(
-		function() : ( target )
-		{
-			if ( IsValid( target ) )
-			{
-				Highlight_ClearEnemyHighlight( target )
-			}
-		}
-	)
-	Highlight_SetEnemyHighlight( target, "enemy_sonar" )
-
-	wait GRAVITYNODE_LIFETIME
+		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 0.1, 1.0 )
 }
 
 void function TitanSonarSmokescreen( entity ent, entity owner )
