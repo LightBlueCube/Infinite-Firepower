@@ -4,6 +4,7 @@ WeaponData
 	{
 		rocketstream_fast
 		{
+			"fire_rate"   					"*2"
 		}
 
 		coop_mortar_titan
@@ -33,7 +34,7 @@ WeaponData
 			"damage_near_value_titanarmor"					"350"
 			"damage_far_value_titanarmor" 					"300"
 			"explosionradius" 								"200"
-			"explosion_damage"								"100"
+			"explosion_damage"								"60"
 			"reload_time_late1" 							"2.0"
 			"reloadempty_time_late1" 						"2.0"
 
