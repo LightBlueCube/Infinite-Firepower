@@ -80,15 +80,16 @@ void function HideTeamScore()
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
 	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
+	entity mover = CreateScriptMover( < 0, 0, 0 >, < 0, 0, 0 > )
 	OnThreadEnd(
-		function():( music )
+		function():( music, mover )
 		{
 			teamScoreAddition = 1
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
 					continue
-				StopSoundOnEntity( player, music )
+				StopSoundOnEntity( mover, music )
 			}
 		}
 	)
@@ -107,8 +108,8 @@ void function HideTeamScore()
 			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
 	}
-	EmitSoundAtPosition( TEAM_UNASSIGNED, < 0, 0, 0 >, music )
-	EmitSoundAtPosition( TEAM_UNASSIGNED, < 0, 0, 0 >, music )
+	EmitSoundOnEntity( mover, music )
+	EmitSoundOnEntity( mover, music )
 	wait 60
 }
 

@@ -413,12 +413,22 @@ void function KsGUI_SwitchL1( entity player )
 	player.s.lastGUITime = Time()
 
 	array<var> skipL1Elem = []
+	if( !PlayerHasMaxBatteryCount( player ) )
+		skipL1Elem.append( 0 )
 	if( player.s.NukeTitan == 0 )
 		skipL1Elem.append( 1 )
 	if( player.s.cruiseMissile == 0 )
 		skipL1Elem.append( 2 )
 	if( player.s.HaveNuclearBomb == false )
 		skipL1Elem.append( 3 )
+
+	if( skipL1Elem.len() == KSGUI_L1_TEXT.len() )
+	{
+		player.s.KsGUIL1 = 0
+		player.s.lastGUITime = Time() - 4
+		return
+	}
+
 	foreach( i in skipL1Elem )
 	{
 		if( skipL1Elem.contains( player.s.KsGUIL1 ) )
@@ -434,6 +444,7 @@ void function KsGUI_SwitchL1( entity player )
 	local l1 = player.s.KsGUIL1
 	string text = "短按切换 == Main Menu == 长按选中\n\n"
 	int i = 0
+	bool isFristElem = true
 
 	for( ;; )
 	{
@@ -446,8 +457,10 @@ void function KsGUI_SwitchL1( entity player )
 			continue
 		}
 
-		if( i != 0 )
+		if( !isFristElem )	//notFristElem
 			text += "-"
+		else				//isFristElem
+			isFristElem = false
 
 		text += KSGUI_L1_SPACE[i][0]
 
@@ -1103,7 +1116,8 @@ void function DropShipFlyOut( entity dropship, entity mover )
 		thread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
 		wait dropship.GetSequenceDuration( "cd_dropship_rescue_side_end" )
 
-		dropship.kv.VisibilityFlags = 0 // prevent jetpack trails being like "dive" into ground
+		if( IsValid( dropship ) )
+			dropship.kv.VisibilityFlags = 0 // prevent jetpack trails being like "dive" into ground
 		WaitFrame() // better wait because we are server
 		if( IsValid( dropship ) )
 			thread __WarpOutEffectShared( dropship )
