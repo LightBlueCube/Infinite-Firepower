@@ -1115,15 +1115,19 @@ void function DropShipFlyOut( entity dropship, entity mover )
 	{
 		thread PlayAnim( dropship, "cd_dropship_rescue_side_end", mover )	//flyout
 		wait dropship.GetSequenceDuration( "cd_dropship_rescue_side_end" )
-
-		if( IsValid( dropship ) )
-			dropship.kv.VisibilityFlags = 0 // prevent jetpack trails being like "dive" into ground
-		WaitFrame() // better wait because we are server
-		if( IsValid( dropship ) )
-			thread __WarpOutEffectShared( dropship )
-
-		dropship.Destroy()
 	}
+
+	if( IsValid( dropship ) )
+		dropship.kv.VisibilityFlags = 0 // prevent jetpack trails being like "dive" into ground
+	WaitFrame() // better wait because we are server
+
+	if( IsValid( dropship ) )
+		thread __WarpOutEffectShared( dropship )
+	wait 1
+
+	if( IsValid( dropship ) )
+		dropship.Destroy()
+
 	mover.Destroy()
 }
 
