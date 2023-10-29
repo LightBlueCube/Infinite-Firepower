@@ -1036,10 +1036,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	turret.SetOrigin( < -800, 0, 1200 > )
 	turret.GiveWeapon( "mp_weapon_rocket_launcher" )
 	DisableWeapons( turret, [] )
-	owner.SetAngles( camAngles )
-	owner.SetOrigin( owner.GetOrigin() )
-	FindNearestSafeSpotAndPutEntity( owner, 5 )
-	thread DropShipTempHide( dropship, turret, owner )
+	thread DropShipTempHide( dropship, turret, owner, camAngles )
 
 
 	OnThreadEnd(
@@ -1123,7 +1120,7 @@ void function DropShipFlyOut( entity dropship, entity mover )
 	mover.Destroy()
 }
 
-void function DropShipTempHide( entity dropship, entity turret, entity owner )
+void function DropShipTempHide( entity dropship, entity turret, entity owner, vector camAngles )
 {
 	dropship.kv.VisibilityFlags = 0 // or it will still shows the jetpack fxs
 	HideName( dropship )
@@ -1132,6 +1129,7 @@ void function DropShipTempHide( entity dropship, entity turret, entity owner )
 	{
 		dropship.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 		ShowName( dropship )
+		owner.SetAngles( camAngles )
 		turret.SetDriver( owner )
 	}
 }
