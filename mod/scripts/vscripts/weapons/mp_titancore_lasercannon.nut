@@ -387,8 +387,8 @@ void function GravityCoreThink( entity weapon, entity owner )
 				owner.GetOrigin(),											// origin
 				owner,														// owner
 				owner,		 												// inflictor
-				80,															// normal damage
-				2000,														// heavy armor damage
+				50,															// normal damage
+				1600,														// heavy armor damage
 				400,														// inner radius
 				400,														// outer radius
 				SF_ENVEXPLOSION_NO_DAMAGEOWNER,								// explosion flags
@@ -414,7 +414,7 @@ void function GravityCoreThink( entity weapon, entity owner )
 			owner,														// owner
 			owner,		 												// inflictor
 			1,															// normal damage
-			30,															// heavy armor damage
+			40,															// heavy armor damage
 			1000,														// inner radius
 			1000,														// outer radius
 			SF_ENVEXPLOSION_NO_DAMAGEOWNER,								// explosion flags
@@ -474,7 +474,7 @@ void function GravityCoreExplodeOnDamage( entity target, var damageInfo )
 
 	vector origin = owner.GetOrigin()
 
-	target.SetVelocity( ( Normalize( target.GetOrigin() - origin ) * 1000 ) + < 0, 0, 800 > )
+	target.SetVelocity( ( Normalize( target.GetOrigin() - origin ) * 800 ) + < 0, 0, 400 > )
 	if( target.IsPlayer() )
 		Remote_CallFunction_Replay( target, "ServerCallback_ScreenShake", 200, 100, 0.5 )
 }
