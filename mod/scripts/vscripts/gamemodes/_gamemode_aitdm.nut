@@ -222,7 +222,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 	// Add score + update network int to trigger the "Score +n" popup
 	AddTeamScore( attacker.GetTeam(), teamScore * teamScoreAddition )
 	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
-	attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+	attacker.SetPlayerNetInt("AT_bonusPoints", min( 1023, attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) ) )
 }
 
 // When attrition starts both teams spawn ai on preset nodes, after that
@@ -537,7 +537,7 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Add score + update network int to trigger the "Score +n" popup
 	AddTeamScore( player.GetTeam(), 1 * teamScoreAddition )
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
-	player.SetPlayerNetInt("AT_bonusPoints", player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+	player.SetPlayerNetInt("AT_bonusPoints", min( 1023, player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) ) )
 }
 
 // Same as SquadHandler, just for reapers
