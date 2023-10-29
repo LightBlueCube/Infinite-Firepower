@@ -294,7 +294,9 @@ void function DashShieldDamaged( entity target, var damageInfo )
 		return
 
 	if( target.IsPlayer() )
-		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 1.0, 1.0 )
+		EmitSoundOnEntityOnlyToPlayer( target, target, "flesh_electrical_damage_1p" )
+
+	StatusEffect_AddTimed( target, eStatusEffect.emp, 0.4, 1.0, 0.5 )
 	target.SetVelocity( Normalize( mover.GetAngles() ) * 400 )
 	if( target.IsOnGround() )
 		target.SetVelocity( target.GetVelocity() + < 0, 0, 300 > )

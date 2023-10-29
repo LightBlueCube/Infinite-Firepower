@@ -19,6 +19,7 @@ void function GravityNode_Init()
 	RegisterWeaponDamageSource( "mp_titanweapon_gravity_node", "重力場" )
 	RegisterWeaponDamageSource( "mp_titanweapon_gravity_node_explode", "重力場" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_gravity_node, GravityNodeOnDamage )
+	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_gravity_node_explode, GravityNodeExplodeOnDamage )
 	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_gravity_node )
 }
 
@@ -333,7 +334,7 @@ void function GravityNodeThink( entity projectile )
 						SF_ENVEXPLOSION_NO_DAMAGEOWNER,					// flags
 						0,												// distanceFromAttacker
 						0,												// explosionForce
-						DF_ELECTRICAL,									// scriptDamageFlags
+						DF_EXPLOSION | DF_STOPS_TITAN_REGEN,			// scriptDamageFlags
 						eDamageSourceId.mp_titanweapon_gravity_node_explode )		// scriptDamageSourceIdentifier
 				}
 			}
@@ -359,9 +360,7 @@ void function GravityNodeThink( entity projectile )
 				inflictor.Kill_Deprecated_UseDestroyInstead( 1.0 )
 
 			if( IsValid( ball ) )
-			{
 				ball.Destroy()
-			}
 			if( IsValid( mover ) )
 				mover.Destroy()
 		}
@@ -462,10 +461,21 @@ void function GravityNodeOnDamage( entity target, var damageInfo )
 
 	vector origin = ball.GetOrigin()
 	target.SetVelocity( origin - target.GetOrigin() )
+	StatusEffect_AddTimed( target, eStatusEffect.emp, 0.4, 1.0, 0.5 )
 	if( target.IsOnGround() )
 		target.SetVelocity( target.GetVelocity() + < 0, 0, 210 > )
-	if( target.IsPlayer() )
-		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 0.1, 1.0 )
+}
+
+void function GravityNodeExplodeOnDamage( entity target, var damageInfo )
+{
+	if( !IsValid( target ) )
+		return
+	if( !target.IsNPC() && !target.IsPlayer() )
+		return
+
+	vector origin = DamageInfo_GetDamagePosition( damageInfo )
+
+	target.SetVelocity( ( Normalize( target.GetOrigin() - origin ) * 600 ) + < 0, 0, 200 > )
 }
 
 void function TitanSonarSmokescreen( entity ent, entity owner )
