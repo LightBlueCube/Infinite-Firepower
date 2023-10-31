@@ -942,7 +942,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.s.cmBeforeOrigin = owner.GetOrigin()
 	vector cmFireOrigin = owner.GetOrigin()
 	cmFireOrigin.z = CM_FIREHIGHER
-	vector cmFireAngles = < 0, RandomIntRange( 0, 359 ), 0 >
+	vector cmFireAngles = < 0, RandomInt( 360 ), 0 >
 
 	OnThreadEnd(
 		function() : ( owner )

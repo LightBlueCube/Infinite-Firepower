@@ -2,13 +2,14 @@ untyped
 global function GamemodeAITdm_Init
 
 // these are now default settings
-const int SQUADS_PER_TEAM = 0
+const int SQUADS_PER_TEAM = 4
 
-const int REAPERS_PER_TEAM = 0
+const int REAPERS_PER_TEAM = 2
 
-const int LEVEL_SPECTRES = 125
-const int LEVEL_STALKERS = 380
-const int LEVEL_REAPERS = 500
+const int LEVEL_SPECTRES = 0
+const int LEVEL_STALKERS = 0
+const int LEVEL_REAPERS = 0
+
 
 int teamScoreAddition = 1
 
@@ -33,9 +34,8 @@ global function AITdm_SetLevelReapers
 struct
 {
 	// Due to team based escalation everything is an array
-	array< int > levels = [] // Initilazed in `Spawner_Threaded`
-	array< array< string > > podEntities = [ [ "npc_soldier" ], [ "npc_soldier" ] ]
-	array< bool > reapers = [ false, false ]
+	array< array< string > > podEntities = [ [ "npc_soldier", "npc_spectre", "npc_stalker" ], [ "npc_soldier", "npc_spectre", "npc_stalker" ] ]
+	array< bool > reapers = [ true, true ]
 
 	// default settings
 	int squadsPerTeam = SQUADS_PER_TEAM
@@ -59,23 +59,14 @@ void function GamemodeAITdm_Init()
 
 	AddCallback_NPCLeeched( OnSpectreLeeched )
 
-	if ( GetCurrentPlaylistVarInt( "aitdm_archer_grunts", 0 ) == 0 )
-	{
-		AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg" ] )
-		AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff" ] )
-		AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff" ] )
-	}
-	else
-	{
-		AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rocket_launcher" ] )
-		AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_rocket_launcher" ] )
-		AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_rocket_launcher" ] )
-	}
+	AiGameModes_SetNPCWeapons( "npc_soldier", [ "mp_weapon_rspn101", "mp_weapon_dmr", "mp_weapon_r97", "mp_weapon_lmg", "mp_weapon_rocket_launcher" ] )
+	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
+	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 
 	ScoreEvent_SetupEarnMeterValuesForMixedModes()
 }
 
-void function HideTeamScore()
+void function LastMinThink()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
@@ -148,12 +139,15 @@ void function OnPrematchStart()
 
 void function OnPlaying()
 {
-	thread HideTeamScore()
+	thread LastMinThink()
+	return
 	// don't run spawning code if ains and nms aren't up to date
 	if ( GetAINScriptVersion() == AIN_REV && GetNodeCount() != 0 )
 	{
 		thread SpawnIntroBatch_Threaded( TEAM_MILITIA )
 		thread SpawnIntroBatch_Threaded( TEAM_IMC )
+		SetGlobalNetInt( "MILdefcon", 4 )
+		SetGlobalNetInt( "IMCdefcon", 4 )
 	}
 }
 
@@ -167,13 +161,10 @@ void function OnPlayerConnected( entity player )
 void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 {
 	// Basic checks
-	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
+	if ( victim == attacker || !( attacker.IsPlayer() || attacker.IsNPC() || attacker.IsTitan() ) || GetGameState() != eGameState.Playing )
 		return
 	// Hacked spectre filter
 	if ( victim.GetOwner() == attacker )
-		return
-	// NPC titans without an owner player will not count towards any team's score
-	if ( attacker.IsNPC() && attacker.IsTitan() && !IsValid( GetPetTitanOwner( attacker ) ) )
 		return
 
 	// Split score so we can check if we are over the score max
@@ -221,8 +212,11 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 
 	// Add score + update network int to trigger the "Score +n" popup
 	AddTeamScore( attacker.GetTeam(), teamScore * teamScoreAddition )
-	attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
-	attacker.SetPlayerNetInt("AT_bonusPoints", min( 1023, attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) ) )
+	if( !attacker.IsNPC() )
+	{
+		attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
+		attacker.SetPlayerNetInt("AT_bonusPoints", attacker.GetPlayerGameStat( PGS_ASSAULT_SCORE ) )
+	}
 }
 
 // When attrition starts both teams spawn ai on preset nodes, after that
@@ -331,12 +325,8 @@ void function Spawner_Threaded( int team )
 	// used to index into escalation arrays
 	int index = team == TEAM_MILITIA ? 0 : 1
 
-	file.levels = [ file.levelSpectres, file.levelSpectres ] // due we added settings, should init levels here!
-
 	while( true )
 	{
-		Escalate( team )
-
 		// TODO: this should possibly not count scripted npc spawns, probably only the ones spawned by this script
 		array<entity> npcs = GetNPCArrayOfTeam( team )
 		int count = npcs.len()
@@ -384,43 +374,6 @@ void function Aitdm_SpawnDropShip( entity node, int team )
 	thread AiGameModes_SpawnDropShip( node.GetOrigin(), node.GetAngles(), team, 4, SquadHandler )
 	wait 20
 }
-
-// Based on points tries to balance match
-void function Escalate( int team )
-{
-	int score = GameRules_GetTeamScore( team )
-	int index = team == TEAM_MILITIA ? 1 : 0
-	// This does the "Enemy x incoming" text
-	string defcon = team == TEAM_MILITIA ? "IMCdefcon" : "MILdefcon"
-
-	// Return if the team is under score threshold to escalate
-	if ( score < file.levels[ index ] || file.reapers[ index ] )
-		return
-
-	// Based on score escalate a team
-	switch ( file.levels[ index ] )
-	{
-		case file.levelSpectres:
-			file.levels[ index ] = file.levelStalkers
-			file.podEntities[ index ].append( "npc_spectre" )
-			SetGlobalNetInt( defcon, 2 )
-			return
-
-		case file.levelStalkers:
-			file.levels[ index ] = file.levelReapers
-			file.podEntities[ index ].append( "npc_stalker" )
-			SetGlobalNetInt( defcon, 3 )
-			return
-
-		case file.levelReapers:
-			file.reapers[ index ] = true
-			SetGlobalNetInt( defcon, 4 )
-			return
-	}
-
-	unreachable // hopefully
-}
-
 
 // Decides where to spawn ai
 // Each team has their "zone" where they and their ai spawns
