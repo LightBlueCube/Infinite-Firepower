@@ -113,7 +113,7 @@ void function PlayerInventory_GiveInventoryItem( entity player, InventoryItem in
 		player.TakeWeaponNow( preexistingWeapon.GetWeaponClassName() )
 
 	player.GiveOffhandWeapon( inventoryItem.weaponRef, OFFHAND_INVENTORY, mods )
-	}
+}
 
 void function PlayerInventory_PushInventoryItem( entity player, InventoryItem inventoryItem )
 {
