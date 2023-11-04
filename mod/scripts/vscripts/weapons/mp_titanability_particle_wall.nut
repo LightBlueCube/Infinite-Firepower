@@ -241,7 +241,7 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 
 		SetShieldWallCPointOrigin( vortexSphere.e.shieldWallFX, color )
 
-		pos = newPos// mover.GetOrigin()
+		pos = newPos
 		newPos = pos + dir * 100
 
 		TraceResults trace = TraceLine( pos, newPos, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
