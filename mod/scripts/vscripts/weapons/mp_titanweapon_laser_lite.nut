@@ -72,7 +72,7 @@ void function LaserLite_DamagedTarget( entity target, var damageInfo )
 	}
 	if( !IsValid( target ) )
 		return
-	if( !target.IsNPC() && !target.IsPlayer() )
+	if( !target.IsNPC() && !target.IsTitan() )
 		return
 	thread HighLightingTarget( target, attacker )
 }
