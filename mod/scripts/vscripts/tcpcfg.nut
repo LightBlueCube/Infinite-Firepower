@@ -13,8 +13,6 @@ void function InfiniteFirepower_Init()
 
 	TeamShuffle_Init()    //打乱队伍
 
-	SetScoreEvent_EarnMeterOwnValue( "PilotBatteryApplied", 0.8 )	//修改使用电池治疗友军获取的泰坦值获取百分比为80%
-
 	thread UseTimeCheck()
 
 	AddClientCommandCallback( "123123", ClientCommand_123123 )

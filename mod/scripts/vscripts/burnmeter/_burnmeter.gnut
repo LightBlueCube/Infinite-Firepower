@@ -546,11 +546,12 @@ void function PlayerUsesNukeTitanBurncard( entity player )
 void function PlayerUsesNukeBurncardThreaded( entity player )
 {
 	Point spawnpoint = GetTitanReplacementPoint( player, false )
-	entity titan = CreateOgre( player.GetTeam(), spawnpoint.origin, spawnpoint.angles )
+	entity titan = CreateOgre( TEAM_UNASSIGNED, spawnpoint.origin, spawnpoint.angles )
+	SetTeam( titan, player.GetTeam() )
 	DispatchSpawn( titan )
 
 	titan.kv.script_hotdrop = "4"
-	thread NPCTitanHotdrops( titan, false, "at_hotdrop_drop_2knee_turbo" )
+	thread PlayersTitanHotdrops( titan, spawnpoint.origin, spawnpoint.angles, player, "at_hotdrop_drop_2knee_turbo" )
 
 	Remote_CallFunction_Replay( player, "ServerCallback_ReplacementTitanSpawnpoint", spawnpoint.origin.x, spawnpoint.origin.y, spawnpoint.origin.z, Time() + GetHotDropImpactTime( titan, "at_hotdrop_drop_2knee_turbo" ) + 1.6 )
 

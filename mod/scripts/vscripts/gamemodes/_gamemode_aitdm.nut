@@ -1,5 +1,6 @@
 untyped
 global function GamemodeAITdm_Init
+global bool HAVE_AI_PACK_AND_SHOULD_SPAWN_AI = false
 
 // these are now default settings
 const int SQUADS_PER_TEAM = 4
@@ -9,7 +10,6 @@ const int REAPERS_PER_TEAM = 2
 const int LEVEL_SPECTRES = 0
 const int LEVEL_STALKERS = 0
 const int LEVEL_REAPERS = 0
-
 
 int teamScoreAddition = 1
 
@@ -63,7 +63,23 @@ void function GamemodeAITdm_Init()
 	AiGameModes_SetNPCWeapons( "npc_spectre", [ "mp_weapon_hemlok_smg", "mp_weapon_doubletake", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 	AiGameModes_SetNPCWeapons( "npc_stalker", [ "mp_weapon_hemlok_smg", "mp_weapon_lstar", "mp_weapon_mastiff", "mp_weapon_rocket_launcher", "mp_weapon_mgl" ] )
 
-	ScoreEvent_SetupEarnMeterValuesForMixedModes()
+	//ScoreEvent_SetupEarnMeterValuesForMixedModes()
+
+	//use modded setting!
+	ScoreEvent_SetEarnMeterValues( "KillPilot", 0.10, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "KillTitan", 0.0, 0.15 )
+	ScoreEvent_SetEarnMeterValues( "TitanKillTitan", 0.0, 0.0 ) // unsure
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryStolen", 0.0, 0.20 ) // this actually just doesn't have overdrive in vanilla even
+	ScoreEvent_SetEarnMeterValues( "Headshot", 0.05, 0.0 )
+	ScoreEvent_SetEarnMeterValues( "FirstStrike", 0.4, 0.0 )
+	ScoreEvent_SetEarnMeterValues( "PilotBatteryApplied", 0.0, 0.80 )
+
+	// ai
+	ScoreEvent_SetEarnMeterValues( "KillGrunt", 0.05, 0.05, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSpectre", 0.05, 0.05, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "LeechSpectre", 0.05, 0.05 )
+	ScoreEvent_SetEarnMeterValues( "KillStalker", 0.05, 0.05, 0.5 )
+	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
 }
 
 void function LastMinThink()
@@ -73,14 +89,14 @@ void function LastMinThink()
 	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
 	entity mover = CreateScriptMover( < 0, 0, 0 >, < 0, 0, 0 > )
 	OnThreadEnd(
-		function():( music, mover )
+		function():( music )
 		{
 			teamScoreAddition = 1
 			foreach( player in GetPlayerArray() )
 			{
 				if( !IsValid( player ) )
 					continue
-				StopSoundOnEntity( mover, music )
+				StopSoundOnEntity( player, music )
 			}
 		}
 	)
@@ -98,9 +114,9 @@ void function LastMinThink()
 		else
 			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
+		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 	}
-	EmitSoundOnEntity( mover, music )
-	EmitSoundOnEntity( mover, music )
 	wait 60
 }
 
@@ -140,7 +156,8 @@ void function OnPrematchStart()
 void function OnPlaying()
 {
 	thread LastMinThink()
-	return
+	if( !HAVE_AI_PACK_AND_SHOULD_SPAWN_AI )
+		return
 	// don't run spawning code if ains and nms aren't up to date
 	if ( GetAINScriptVersion() == AIN_REV && GetNodeCount() != 0 )
 	{
