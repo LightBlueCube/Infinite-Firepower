@@ -9,11 +9,12 @@
 如果你真的想尝尝屎的话，这里提供了几个func，可以按照自行需求搭配
 
 ```Squirrel
-void function RandomMap_Init()    //对局结束后换图
-void function TitanChange_Init()    //至尊泰坦替换，神盾血
-void function DocsSystem_Init()    //文档系统
-void function KillStreak_Init()    //连杀系统和GUI
-void function TeamShuffle_Init()    //打乱队伍
+void function RandomMap_Init()             //对局结束后换图
+void function TitanChange_Init()           //至尊泰坦替换，神盾血
+void function DocsSystem_Init()            //文档系统
+void function KillStreak_Init()            //连杀系统和GUI
+void function TeamShuffle_Init()           //打乱队伍
+void function BetterRespawnPoint_Init()    //更好的重生点
 ```
 
 - **注意！无火几乎完全摧毁了_passives.gnut文件，在使用此mod的情况下无法开启fd升级**

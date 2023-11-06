@@ -82,6 +82,37 @@ void function GamemodeAITdm_Init()
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
 }
 
+int function GetScoreAdditionFromTeam( int team, int score )
+{
+	float floatScore = float( score * teamScoreAddition )
+
+	int otherTeam = GetOtherTeam( team )
+	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / 200
+
+	if( addition >= 0 && addition <= 1)
+		return int( floatScore )
+	if( addition >= 0 )
+		return round( floatScore * addition )
+
+	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) ) / 200
+	if( addition == 0 )
+		return int( floatScore )
+
+	addition = 1 / addition
+	if( addition >= 1 )
+		return int( floatScore )
+
+	return round( floatScore * addition )
+}
+
+int function round( float num )
+{
+	int i = int( num )
+	if( num - i < 0.5)
+		return i
+	return i + 1
+}
+
 void function LastMinThink()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
@@ -108,7 +139,7 @@ void function LastMinThink()
 	{
 		if( !IsValid( player ) )
 			continue
-		teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 50 + 1
+		teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 40 + 1
 		if( teamScoreAddition == 1 )
 			NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "本局雙方分數差距較小 分數獲取不加倍", < 50, 50, 225 >, 255, 6 )
 		else
@@ -228,7 +259,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( attacker.GetTeam(), teamScore * teamScoreAddition )
+	AddTeamScore( attacker.GetTeam(), GetScoreAdditionFromTeam( attacker.GetTeam(), teamScore ) )
 	if( !attacker.IsNPC() )
 	{
 		attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
@@ -505,7 +536,7 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( player.GetTeam(), 1 * teamScoreAddition )
+	AddTeamScore( player.GetTeam(), GetScoreAdditionFromTeam( player.GetTeam(), 1 ) )
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
 	player.SetPlayerNetInt("AT_bonusPoints", min( 1023, player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) ) )
 }
