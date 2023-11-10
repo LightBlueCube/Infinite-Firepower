@@ -1,0 +1,103 @@
+untyped
+global function KillStreak_Init
+
+struct{
+	int nukeTitan = 4
+	int cruiseMissile = 15
+	int vtol = 20
+	int nuclearBomb = 30
+}file
+
+void function KillStreak_Init()
+{
+	KsGUI_Init()
+
+	AddCallback_OnClientConnected( OnClientConnected )
+	AddCallback_OnPlayerRespawned( RestoreKillStreak )
+	AddCallback_OnPlayerKilled( OnPlayerKilled )
+	AddCallback_OnNPCKilled( OnPlayerKilled )
+	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+}
+
+void function OnWinnerDetermined()
+{
+    SetNuclearBombDisable()
+}
+
+void function OnClientConnected( entity player )
+{
+	player.s.KillStreak <- 0
+	player.s.TotalKills <- 0
+	player.s.KillStreakNoNPC <- 0
+
+	player.s.HaveNuclearBomb <- false
+	player.s.HaveVTOL <- false
+	player.s.NukeTitan <- 0
+	player.s.CruiseMissile <- 0
+}
+
+void function RestoreKillStreak( entity player )
+{
+	if( player.s.HaveNuclearBomb == true )
+		NSSendAnnouncementMessageToPlayer( player, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 225, 50, 60 >, 255, 6 )
+	else if( player.s.NukeTitan != 0 || player.s.CruiseMissile != 0 || player.s.HaveVTOL )
+		NSSendAnnouncementMessageToPlayer( player, "有連殺獎勵未使用！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+
+	if( "DontRestore" in player.s )
+	{
+		if( player.s.DontRestore )
+		{
+			player.s.DontRestore <- false
+			return
+		}
+	}
+
+	player.s.KillStreak <- 0	//重置玩家的一命击杀数
+	player.s.KillStreakNoNPC <- 0
+}
+
+void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
+{
+	if( !IsValid( attacker ) )
+		return
+	if( victim.IsTitan() && attacker.IsTitan() )
+		printt( " kill+1 "+ attacker.GetModelName() + attacker.GetCamo() + attacker.GetSkin() +" dead+1 "+ victim.GetModelName() + victim.GetCamo() + victim.GetSkin() )
+
+	if( attacker.IsNPC() && attacker.IsTitan() )
+	{
+		attacker = attacker.GetBossPlayer()
+		if( !IsValid( attacker ) )
+			return
+	}
+	if( !attacker.IsPlayer() )
+		return
+	if( attacker == victim || attacker.GetTeam() == victim.GetTeam() )
+		return
+	if( victim.IsNPC() && !victim.IsTitan() )
+		return
+
+	attacker.s.KillStreak += 1
+	attacker.s.TotalKills += 1
+	if( victim.IsPlayer() )
+		attacker.s.KillStreakNoNPC += 1
+
+	if( attacker.s.TotalKills % file.nukeTitan == 0 )
+	{
+		attacker.s.NukeTitan += 1
+		NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "", < 255, 0, 0 >, 255, 5 )
+	}
+	if( attacker.s.TotalKills % file.cruiseMissile == 0 )
+	{
+		attacker.s.CruiseMissile += 1
+		NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
+	}
+	if( attacker.s.KillStreak == file.vtol )
+	{
+		//vtol features
+	}
+	if( attacker.s.KillStreakNoNPC == file.nuclearBomb )
+	{
+		attacker.s.HaveNuclearBomb <- true
+		NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "", < 255, 0, 0 >, 255, 6 )
+	}
+}

@@ -1,0 +1,236 @@
+untyped
+global function KsGUI_Init
+
+void function KsGUI_Init()
+{
+	AddCallback_OnClientConnected( OnClientConnected )
+}
+
+void function OnClientConnected( entity player )
+{
+	player.s.KsGUIL1 <- 0
+	player.s.KsGUIL2 <- false
+	player.s.KsGUIL2_1 <- 0
+	player.s.lastGUITime <- -10.0
+	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND2, KsGUI, 0 )
+}
+
+void function KsGUI( entity player )
+{
+	table result = {}
+	result.timeOut <- false
+	if( !player.IsHuman() || player.s.usingCruiseMissile )
+	{
+		result.timeOut <- true
+		return
+	}
+
+	OnThreadEnd(
+		function() : ( player, result )
+		{
+			if( result.timeOut )
+				return
+			if( IsValid( player ) )
+				if( player.s.KsGUIL2 )
+					KsGUI_SwitchL2( player )
+				else
+					KsGUI_SwitchL1( player )
+		}
+	)
+	wait 0.3
+	if( !IsValid( player ) )
+		return
+	if( player.s.lastGUITime + 4 < Time() )
+	{
+		if( DropBattery( player ) )
+			result.timeOut <- true
+		return
+	}
+	if( player.s.lastGUITime + 2 < Time() )
+		return
+
+	result.timeOut <- true
+
+	if( player.s.KsGUIL2 )
+		return KsGUIL2Select( player )
+	KsGUI_L1ToL2( player )
+
+	return
+}
+
+const array<string> KSGUI_L1_TEXT =	[ "丢出电池", "核武泰坦", "巡弋飞弹", "VTOL", "折叠时空武器" ]
+
+void function KsGUI_SwitchL1( entity player )
+{
+	if( player.s.lastGUITime + 2 > Time() )
+	{
+		if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 )
+			player.s.KsGUIL1 += 1
+		else
+			player.s.KsGUIL1 = 0
+	}
+	player.s.lastGUITime = Time()
+
+	array<var> skipL1Elem = []
+	bool skipAll = false
+	if( !PlayerHasMaxBatteryCount( player ) )
+		skipL1Elem.append( 0 )
+	if( player.s.NukeTitan == 0 )
+		skipL1Elem.append( 1 )
+	if( player.s.CruiseMissile == 0 )
+		skipL1Elem.append( 2 )
+    if( !player.s.HaveVTOL )
+		skipL1Elem.append( 3 )
+	if( !player.s.HaveNuclearBomb )
+		skipL1Elem.append( 4 )
+
+	if( skipL1Elem.len() == KSGUI_L1_TEXT.len() )
+	{
+		player.s.KsGUIL1 = 0
+		player.s.lastGUITime = Time() - 4
+		skipAll = true
+	}
+
+	foreach( i in skipL1Elem )
+	{
+		if( skipAll )
+			break
+		if( skipL1Elem.contains( player.s.KsGUIL1 ) )
+		{
+			if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 )
+				player.s.KsGUIL1 += 1
+			else
+				player.s.KsGUIL1 = 0
+		}
+	}
+
+
+	local l1 = player.s.KsGUIL1
+	string text = "短按切换 == Main Menu == 长按选中\n\n"
+	int i = 0
+	bool isFristElem = true
+
+	for( ;; )
+	{
+		if( skipAll )
+		{
+			text += "啥都木有 ┐(‘～`;)┌"
+			break
+		}
+
+		if( i == KSGUI_L1_TEXT.len() )
+			break
+
+		if( skipL1Elem.contains( i ) )
+		{
+			i++
+			continue
+		}
+
+		if( !isFristElem )
+			text += "-"
+		isFristElem = false
+
+		text += " "
+
+		if( i == l1 )
+			text += "◆"
+		else
+			text += "◇"
+
+		text += KSGUI_L1_TEXT[i]
+
+		if( i == 1 )
+			text += "("+ player.s.NukeTitan +")"
+		if( i == 2 )
+			text += "("+ player.s.CruiseMissile +")"
+
+		if( i == l1 )
+			text += "◆"
+		else
+			text += "◇"
+
+		text += " "
+
+		i++
+	}
+
+	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
+	SendHudMessage( player, text, -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
+}
+
+void function KsGUI_L1ToL2( entity player )
+{
+	local l1 = player.s.KsGUIL1
+	if( l1 == 0 )
+		ApplyDropBattery( player )
+	if( l1 == 1 )
+		KsGUI_L2_1( player )
+	if( l1 == 2 )
+		ApplyCruiseMissile( player )
+    if( l1 == 3 )
+        ApplyVTOL( player )
+	if( l1 == 4 )
+		ApplyNuclearBomb( player )
+}
+
+void function KsGUI_SwitchL2( entity player )
+{
+	local l1 = player.s.KsGUIL1
+	if( l1 == 1 )
+		KsGUI_L2_1( player )
+}
+
+void function KsGUIL2Select( entity player )
+{
+	local l1 = player.s.KsGUIL1
+	local l2 = player.s.KsGUIL2_1
+	if( l1 == 1 && l2 == 0 )
+	{
+		for( ;; )
+		{
+			ApplyNukeTitan( player )
+			player.s.lastGUITime = Time()
+			wait 0.5
+		}
+	}
+	if( l1 == 1 && l2 == 1 )
+	{
+		ApplyNukeTitan( player, true )
+		player.s.KsGUIL2 = false
+	}
+}
+
+void function KsGUI_L2_1( entity player )
+{
+	if( player.s.KsGUIL2 && player.s.lastGUITime + 3 < Time() )
+	{
+		player.s.KsGUIL2 = false
+		return KsGUI_SwitchL1( player )
+	}
+	if( player.s.KsGUIL2 && player.s.lastGUITime + 2 > Time() )
+	{
+		if( player.s.KsGUIL2_1 == 1 )
+			player.s.KsGUIL2_1 = 0
+		else
+			player.s.KsGUIL2_1 = 1
+	}
+	player.s.lastGUITime = Time()
+
+	if( player.s.KsGUIL2 == false )
+	{
+		EmitSoundOnEntityOnlyToPlayer( player, player, "Menu_LoadOut_Titan_Select" )
+		player.s.KsGUIL2_1 = 0
+	}
+	else
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
+
+	player.s.KsGUIL2 = true
+
+	local l2 = player.s.KsGUIL2_1
+	if( l2 == 0 )
+		SendHudMessage( player, "当前剩余"+ player.s.NukeTitan +"个核武未交付\n\n◆交付一个◆  -  ◇交付全部◇", -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
+	else
+		SendHudMessage( player, "当前剩余"+ player.s.NukeTitan +"个核武未交付\n\n◇交付一个◇  -  ◆交付全部◆", -1, 0.3, 200, 200, 225, 255, 0, 2, 1 )
+
+}

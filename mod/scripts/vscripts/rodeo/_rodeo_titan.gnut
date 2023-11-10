@@ -3889,7 +3889,7 @@ void function ClassicRodeo_SetEnabled( bool enabled )
 
 bool function ClassicRodeo_IsEnabled()
 {
-	return GetCurrentPlaylistVarInt( "classic_rodeo", 0 ) == 1 || file.classicRodeoEnabled
+	return file.classicRodeoEnabled
 }
 
 void function ClassicRodeo_SetStarterBatteryCount( int count )

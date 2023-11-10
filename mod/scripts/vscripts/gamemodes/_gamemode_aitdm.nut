@@ -86,6 +86,9 @@ int function GetScoreAdditionFromTeam( int team, int score )
 {
 	float floatScore = float( score * teamScoreAddition )
 
+	if( team != TEAM_IMC && team != TEAM_MILITIA )
+		return int( floatScore )
+
 	int otherTeam = GetOtherTeam( team )
 	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / 200
 
@@ -118,7 +121,6 @@ void function LastMinThink()
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
 	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
-	entity mover = CreateScriptMover( < 0, 0, 0 >, < 0, 0, 0 > )
 	OnThreadEnd(
 		function():( music )
 		{
@@ -135,16 +137,12 @@ void function LastMinThink()
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
 	wait timeLimit - 60
+	teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 50 + 2
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 40 + 1
-		if( teamScoreAddition == 1 )
-			NSSendAnnouncementMessageToPlayer( player, "最後1分鐘！", "本局雙方分數差距較小 分數獲取不加倍", < 50, 50, 225 >, 255, 6 )
-		else
-			NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
-
+		NSSendAnnouncementMessageToPlayer( player, teamScoreAddition +"倍分數獲取！", "最後1分鐘！", < 50, 50, 225 >, 255, 6 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 		EmitSoundOnEntityOnlyToPlayer( player, player, music )
 	}
@@ -181,7 +179,7 @@ void function AITdm_SetLevelReapers( int level )
 // Starts skyshow, this also requiers AINs but doesn't crash if they're missing
 void function OnPrematchStart()
 {
-	thread StratonHornetDogfightsIntense()
+	//thread StratonHornetDogfightsIntense()
 }
 
 void function OnPlaying()
@@ -369,6 +367,7 @@ void function SpawnIntroBatch_Threaded( int team )
 void function Spawner_Threaded( int team )
 {
 	svGlobal.levelEnt.EndSignal( "GameStateChanged" )
+	svGlobal.levelEnt.EndSignal( "NukeStart" )
 
 	// used to index into escalation arrays
 	int index = team == TEAM_MILITIA ? 0 : 1

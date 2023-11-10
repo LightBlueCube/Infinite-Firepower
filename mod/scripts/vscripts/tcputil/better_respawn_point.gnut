@@ -1,0 +1,72 @@
+global function BetterRespawnPoint_Init
+global function GetsBetterSpawnPointByTeam
+
+void function BetterRespawnPoint_Init()
+{
+	AddCallback_OnPlayerRespawned( BetterRespawnPoint_Pilot )
+	SetRecalculateRespawnAsTitanStartPointCallback( BetterRespawnPoint_Titan )
+}
+
+void function BetterRespawnPoint_Pilot( entity player )
+{
+	if ( GetGameState() <= eGameState.Prematch )
+		return
+	if( player.IsTitan() )
+		return
+
+	player.SetOrigin( GetsBetterSpawnPointByTeam( player.GetTeam(), false, 1500 ).GetOrigin() )
+}
+
+entity function BetterRespawnPoint_Titan( entity player, entity spawnPoint )
+{
+	return GetsBetterSpawnPointByTeam( player.GetTeam(), true, 1500 )
+}
+
+entity function GetsBetterSpawnPointByTeam( int team, bool isTitan, float distance, int callTimes = 0 )
+{
+	int i = 0
+	int nearPlayer = 0
+	float distance = 0
+	int nearPlayerSave = 0
+	float distanceSave = 0
+	int arrayNum = -1
+	array<entity> points = isTitan ? SpawnPoints_GetTitan() : SpawnPoints_GetPilot()
+
+	if( callTimes >= 10 )
+		return points[ RandomInt( points.len() ) ]
+
+	foreach( point in points )
+	{
+		foreach( ent in GetPlayerArray() )
+		{
+			if( !IsAlive( ent ) )
+				continue
+			if( ent.GetTeam() != team )
+			{
+				if( distance < Distance( ent.GetOrigin(), point.GetOrigin() ) )
+					distance = Distance( ent.GetOrigin(), point.GetOrigin() )
+				continue
+			}
+			if( Distance( ent.GetOrigin(), point.GetOrigin() ) < distance )
+			{
+				nearPlayer++
+			}
+		}
+
+		if( nearPlayer > nearPlayerSave || ( nearPlayer == nearPlayerSave && distance > distanceSave ) )
+		{
+			nearPlayerSave = nearPlayer
+			distanceSave = distance
+			arrayNum = i
+		}
+		i++
+		nearPlayer = 0
+		distance = 0
+	}
+
+	if( arrayNum < 0 || distance < 500 )
+		return GetsBetterSpawnPointByTeam( team, isTitan, distance + 500, callTimes + 1 )
+
+	return points[ arrayNum ]
+}
+
