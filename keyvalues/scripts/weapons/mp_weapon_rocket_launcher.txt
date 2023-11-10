@@ -1,5 +1,0 @@
-WeaponData
-{
-	// modified callbacks
-	"OnProjectileCollision"								"OnProjectileCollision_weapon_rocket_launcher"
-}

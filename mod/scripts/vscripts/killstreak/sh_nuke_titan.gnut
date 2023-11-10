@@ -1,0 +1,60 @@
+global function PlayerUsesNukeBurncardThreaded
+global function PlayerInventory_GiveNukeTitan
+
+void function PlayerInventory_GiveNukeTitan( entity player )
+{
+	InventoryItem inventoryItem
+	inventoryItem.itemType = eInventoryItemType.burnmeter
+	inventoryItem.burnReward = BurnReward_GetByRef( "burnmeter_nuke_titan" )
+	inventoryItem.weaponRef = inventoryItem.burnReward.weaponName
+
+	PlayerInventory_GetPlayerInventoryStack( player ).append( inventoryItem )
+	player.SetPlayerNetInt( "itemInventoryCount", SvPlayerInventory_ItemCount( player ) )
+
+	array<string> mods = []
+
+	if ( inventoryItem.itemType == eInventoryItemType.burnmeter ) {
+		mods.append( "burn_card_weapon_mod" )
+		if ( inventoryItem.burnReward.extraWeaponMod != "" )
+			mods.append( inventoryItem.burnReward.extraWeaponMod )
+	}
+
+	// ensure inventory slot isn't full to avoid crash
+	entity preexistingWeapon = player.GetOffhandWeapon( OFFHAND_INVENTORY )
+
+	if( IsValid( preexistingWeapon ) )
+		player.TakeWeaponNow( preexistingWeapon.GetWeaponClassName() )
+
+	preexistingWeapon = player.GetOffhandWeapon( OFFHAND_INVENTORY ) // defensive fix
+	if( IsValid( preexistingWeapon ) )
+		player.TakeWeaponNow( preexistingWeapon.GetWeaponClassName() )
+
+	player.GiveOffhandWeapon( inventoryItem.weaponRef, OFFHAND_INVENTORY, mods )
+}
+
+//called from brunmeter
+void function PlayerUsesNukeBurncardThreaded( entity player )
+{
+	Point spawnpoint = GetTitanReplacementPoint( player, false )
+	entity titan = CreateOgre( TEAM_UNASSIGNED, spawnpoint.origin, spawnpoint.angles )
+	SetTeam( titan, player.GetTeam() )
+	DispatchSpawn( titan )
+
+	titan.kv.script_hotdrop = "4"
+	thread PlayersTitanHotdrops( titan, spawnpoint.origin, spawnpoint.angles, player, "at_hotdrop_drop_2knee_turbo" )
+
+	Remote_CallFunction_Replay( player, "ServerCallback_ReplacementTitanSpawnpoint", spawnpoint.origin.x, spawnpoint.origin.y, spawnpoint.origin.z, Time() + GetHotDropImpactTime( titan, "at_hotdrop_drop_2knee_turbo" ) + 1.6 )
+
+	DoomTitan( titan )
+	titan.SetBossPlayer(player) // Do this so that if we crush something we get awarded the kill.
+
+	entity soul = titan.GetTitanSoul()
+	soul.soul.nukeAttacker = player // Use this to get credit for the explosion kills.
+
+	NPC_SetNuclearPayload( titan )
+
+	titan.WaitSignal( "ClearDisableTitanfall" )
+	titan.ClearBossPlayer() // Stop being the boss so we don't get an award for this titan blowing up.
+
+	thread TitanEjectPlayer( titan, true )
+}

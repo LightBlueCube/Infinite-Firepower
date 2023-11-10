@@ -1,26 +1,82 @@
 {
     "Name": "Infinite-Firepower",
-    "Description": "Infinite-Firepower",
-    "Authors": ["VoyageDB","LightBlueCube"],
     "LoadPriority": 101,
-    "RequiredOnClient": false,
     "Scripts": [
+
+        // custom loaded inits //
         {
-            "Path": "tcpcfg.nut",
+            "Path": "tcp_loadedinits.gnut",
             "RunOn": "SERVER && MP",
             "ServerCallback": {
                 "After": "InfiniteFirepower_Init"
             }
         },
+
+        // TitanChange //
+
         {
-            "Path": "/weapons/mod_weapon_inits.nut",
+            "Path": "_titanchange.nut",
+            "RunOn": "SERVER && MP"
+        },
+
+        // KillStreak //
+
+        {
+            "Path": "killstreak/_killstreak.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "killstreak/_ksgui.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "killstreak/sh_apply.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "killstreak/sh_nuke_titan.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "killstreak/cruise_missile.gnut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "CruiseMissile_Init"
+            }
+        },
+        {
+            "Path": "killstreak/nuclear_bomb.gnut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "NuclearBomb_Init"
+            }
+        },
+
+        // utilitys //
+
+        {
+            "Path": "tcputil/random_map.nut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "tcputil/better_respawn_point.gnut",
+            "RunOn": "SERVER && MP"
+        },
+
+        // modded weapons //
+
+        {
+            "Path": "weapons/mod_weapon_inits.nut",
             "RunOn": "SERVER && MP",
             "ServerCallback": {
                 "After": "ModWeaponInit"
             }
         },
+
+        // utility //
+
         {
-            "Path": "/teamshuffle.nut",
+            "Path": "teamshuffle.nut",
             "RunOn": "SERVER && MP"
         }
     ]
