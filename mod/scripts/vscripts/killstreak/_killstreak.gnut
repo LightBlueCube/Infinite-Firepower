@@ -1,5 +1,7 @@
 untyped
 global function KillStreak_Init
+global function KillStreakEnable
+global function SetKillStreakEnable
 
 struct{
 	int nukeTitan = 4
@@ -7,6 +9,8 @@ struct{
 	int vtol = 20
 	int nuclearBomb = 30
 }file
+
+bool KILL_STREAK_ENABLE = true
 
 void function KillStreak_Init()
 {
@@ -17,6 +21,16 @@ void function KillStreak_Init()
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+}
+
+bool function KillStreakEnable()
+{
+	return KILL_STREAK_ENABLE
+}
+
+void function SetKillStreakEnable( bool state )
+{
+	KILL_STREAK_ENABLE = state
 }
 
 void function OnWinnerDetermined()
@@ -58,6 +72,9 @@ void function RestoreKillStreak( entity player )
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 {
+	if( !KillStreakEnable() )
+		return
+
 	if( !IsValid( attacker ) )
 		return
 	if( victim.IsTitan() && attacker.IsTitan() )

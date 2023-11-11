@@ -1,6 +1,5 @@
 untyped
 global function GamemodeAITdm_Init
-global bool HAVE_AI_PACK_AND_SHOULD_SPAWN_AI = false
 
 // these are now default settings
 const int SQUADS_PER_TEAM = 4
@@ -30,6 +29,8 @@ global function AITdm_SetReapersPerTeam
 global function AITdm_SetLevelSpectres
 global function AITdm_SetLevelStalkers
 global function AITdm_SetLevelReapers
+global function SpawnIntroBatch_Threaded
+
 
 struct
 {
@@ -185,16 +186,6 @@ void function OnPrematchStart()
 void function OnPlaying()
 {
 	thread LastMinThink()
-	if( !HAVE_AI_PACK_AND_SHOULD_SPAWN_AI )
-		return
-	// don't run spawning code if ains and nms aren't up to date
-	if ( GetAINScriptVersion() == AIN_REV && GetNodeCount() != 0 )
-	{
-		thread SpawnIntroBatch_Threaded( TEAM_MILITIA )
-		thread SpawnIntroBatch_Threaded( TEAM_IMC )
-		SetGlobalNetInt( "MILdefcon", 4 )
-		SetGlobalNetInt( "IMCdefcon", 4 )
-	}
 }
 
 // Sets up mode specific hud on client
