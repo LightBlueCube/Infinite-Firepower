@@ -420,6 +420,8 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 			continue
 		}
 
+		GiveRandomKillStreakInNextMatch( player )
+
 		SetPlayerActiveObjective( player, "EG_DropshipExtractSuccessfulEscape" )
 
 		// let evacing team able to see the ship again

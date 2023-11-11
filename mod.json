@@ -79,5 +79,11 @@
             "Path": "teamshuffle.nut",
             "RunOn": "SERVER && MP"
         }
+    ],
+    "ConVars": [
+        {
+            "Name": "random_killstreak_players",
+            "DefaultValue": ""
+        }
     ]
 }

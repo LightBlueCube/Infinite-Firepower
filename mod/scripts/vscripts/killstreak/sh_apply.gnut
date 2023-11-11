@@ -122,6 +122,12 @@ void function ApplyCruiseMissile( entity player )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
+    if( !player.IsOnGround() )
+    {
+        SendHudMessage( player, "\n你需要站在地上才能使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+        return
+    }
 
     thread CruiseMissileAnim_ThinkBefore( player )
     SendHudMessage( player, " ", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )

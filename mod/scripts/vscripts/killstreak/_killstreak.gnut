@@ -2,6 +2,7 @@ untyped
 global function KillStreak_Init
 global function KillStreakEnable
 global function SetKillStreakEnable
+global function GiveRandomKillStreakInNextMatch
 
 struct{
 	int nukeTitan = 4
@@ -12,15 +13,19 @@ struct{
 
 bool KILL_STREAK_ENABLE = true
 
+array<string> RandomKillStreakPlayers = []
+
 void function KillStreak_Init()
 {
 	KsGUI_Init()
 
+	RandomKillStreakPlayers = GetStringArrayFromConVar( "random_killstreak_players" )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
+	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 }
 
 bool function KillStreakEnable()
@@ -36,6 +41,8 @@ void function SetKillStreakEnable( bool state )
 void function OnWinnerDetermined()
 {
     SetNuclearBombDisable()
+	if( KillStreakEnable() )
+		RandomKillStreakPlayers = []
 }
 
 void function OnClientConnected( entity player )
@@ -48,10 +55,16 @@ void function OnClientConnected( entity player )
 	player.s.HaveVTOL <- false
 	player.s.NukeTitan <- 0
 	player.s.CruiseMissile <- 0
+
+	if( RandomKillStreakPlayers.contains( player.GetUID() ) )
+		player.s.GiveRandomKillStreak <- true
 }
 
 void function RestoreKillStreak( entity player )
 {
+	if( !KillStreakEnable() )
+		return
+
 	if( player.s.HaveNuclearBomb == true )
 		NSSendAnnouncementMessageToPlayer( player, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 225, 50, 60 >, 255, 6 )
 	else if( player.s.NukeTitan != 0 || player.s.CruiseMissile != 0 || player.s.HaveVTOL )
@@ -65,9 +78,35 @@ void function RestoreKillStreak( entity player )
 			return
 		}
 	}
+	if( "GiveRandomKillStreak" in player.s )
+	{
+		if( player.s.GiveRandomKillStreak )
+		{
+			thread RandomKillStreak_MsgShared( player )
+			player.s.CruiseMissile += RandomInt( 5 ) == 0 ? 1 : 0	//20%
+			if( player.s.CruiseMissile > 0 )
+				player.s.NukeTitan += RandomInt( 3 )
+			else
+				player.s.NukeTitan += RandomInt( 4 ) + 1
+
+			player.s.GiveRandomKillStreak <- false
+		}
+	}
 
 	player.s.KillStreak <- 0	//重置玩家的一命击杀数
 	player.s.KillStreakNoNPC <- 0
+}
+
+void function RandomKillStreak_MsgShared( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	WaitFrame()
+	while( player.GetParent() )
+	{
+		WaitFrame()
+	}
+	NSSendAnnouncementMessageToPlayer( player, "在上一對局成功撤離，給予隨機連殺獎勵！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -117,4 +156,39 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 		attacker.s.HaveNuclearBomb <- true
 		NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "", < 255, 0, 0 >, 255, 6 )
 	}
+}
+
+void function GameStateEnter_Postmatch()
+{
+	StoreStringArrayIntoConVar( "random_killstreak_players", RandomKillStreakPlayers )
+}
+
+void function GiveRandomKillStreakInNextMatch( entity player )
+{
+	RandomKillStreakPlayers.append( player.GetUID() )
+	NSSendAnnouncementMessageToPlayer( player, "成功撤離！將在下一對局給予隨機連殺獎勵", "", < 50, 50, 225 >, 255, 5 )
+}
+
+
+array<string> function GetStringArrayFromConVar( string convar )
+{
+    return split( GetConVarString( convar ), "," )
+}
+
+// 用于更新整个ConVar数组
+string function StoreStringArrayIntoConVar( string convar, array<string> arrayToStore )
+{
+    string builtString = ""
+    foreach ( string item in arrayToStore )
+    {
+        if ( builtString == "" ) // 第一个元素，不添加逗号
+            builtString = item
+        else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
+            builtString += "," + item
+    }
+
+    // 更新ConVar
+    SetConVarString( convar, builtString )
+    // 返回构造好的字符串
+    return builtString
 }
