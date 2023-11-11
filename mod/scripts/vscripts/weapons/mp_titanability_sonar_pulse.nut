@@ -245,7 +245,7 @@ void function GravityNodePlanted( entity projectile )
 	thread GravityNodeThink( projectile )
 }
 
-const GRAVITYNODE_LIFETIME = 2.0
+const GRAVITYNODE_LIFETIME = 1.6
 const GRAVITYNODE_BUILDUP_TIME = 1.0
 
 void function GravityNodeThink( entity projectile )
