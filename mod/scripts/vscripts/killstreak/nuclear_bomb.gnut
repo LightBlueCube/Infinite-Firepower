@@ -319,6 +319,20 @@ void function NuclearBombThink( entity owner )
 		realSec = float( sec ) / 10
 		PlayNukeSound()
 		SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA  T-"+ realSec +"s\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+
+		if( sec == 11 )
+		{
+			foreach( player in GetPlayerArray() )
+			{
+				if( !IsValid( player ) )
+					continue
+				Remote_CallFunction_NonReplay( player, "ServerCallback_PlayScreenFXWarpJump" )
+				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
+				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
+				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
+				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
+			}
+		}
 	}
 	wait 0.1
 	SendHudMessageToAll( "//////////////// WARNING ////////////////\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-0s\n//////////////// WARNING ////////////////", -1, 0.3, 235, 0, 0, 255, 0, 0.1, 0 )
