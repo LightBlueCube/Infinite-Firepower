@@ -1989,55 +1989,21 @@ void function Rodeo_PilotPicksUpBattery( entity pilot, entity battery )
 
 entity function Rodeo_TakeBatteryAwayFromPilot( entity pilot )
 {
-	// allows player throw battery in non-titan modes
-	if( Riff_TitanAvailability() == eTitanAvailability.Never && file.canThrowBattery )
-	{
-		RemovePlayerHeldButtonEventCallback( pilot, IN_USE, Rodeo_PilotThrowsBattery, RODEO_THROW_BATTERY_BUTTON_HOLD_TIME )
-		//for controller players
-		RemovePlayerHeldButtonEventCallback( pilot, IN_USE_AND_RELOAD, Rodeo_PilotThrowsBattery, RODEO_THROW_BATTERY_BUTTON_HOLD_TIME * 2 )
-	}
-
-	// nessie defensive fix
-	if( GetPlayerBatteryCount( pilot ) == 0 )
-		return
-
 	SetPlayerBatteryCount( pilot, GetPlayerBatteryCount( pilot ) - 1 )
 
-	if ( GetPlayerBatteryCount( pilot ) == 0 )
+	// removing some of respawn's remaining code. "unreachable" and hardcodes never makes any sense
+	entity battery = GetBatteryOnBack( pilot )
+	// clear out exisiting battery network var
+	SetBatteryOnBack( pilot, null ) //Defensive fix for 209362. Set it to null before doing any other actions on it which might cause execution to jump somewhere else. I think doing PutEntityInSafeSpot() might cause this?
+
+	// nessie fix
+	// sometimes battery can be invalid
+	if( IsValid( battery ) )
 	{
-		entity battery = GetBatteryOnBack( pilot )
-		Assert( IsValid( battery ) )
-		Assert( battery.GetParent() == pilot )
+		battery.Minimap_AlwaysShow( TEAM_MILITIA, null )
+		battery.Minimap_AlwaysShow( TEAM_IMC, null )
 
-		// nessie fix
-		if( !IsValid( battery ) )
-			return
-		SetBatteryOnBack( pilot, null ) //Defensive fix for 209362. Set it to null before doing any other actions on it which might cause execution to jump somewhere else. I think doing PutEntityInSafeSpot() might cause this?
-
-		bool shouldHideIcon = false
-		if( "hideIcon" in battery.s ) // icon hide for battery
-		{
-			if( expect bool( battery.s.hideIcon ) )
-				shouldHideIcon = true
-		}
-
-		if( !shouldHideIcon )
-		{
-			battery.Minimap_AlwaysShow( TEAM_MILITIA, null )
-			battery.Minimap_AlwaysShow( TEAM_IMC, null )
-		}
-		else
-		{
-			battery.Minimap_Hide( TEAM_MILITIA, null )
-			battery.Minimap_Hide( TEAM_IMC, null )
-			if( IsFFAGame() ) // hide for ffa
-			{
-				for( int i = 0; i <= 30; i++ ) // ttf2 is up to 30 teams
-					battery.Minimap_Hide( i, null )
-			}
-		}
-
-		battery.s.touchEnabledTime = Time() + 1.0
+		battery.s.touchEnabledTime = Time() + 0.3
 
 		Battery_StartFX( battery ) //Needed to properly restore effect when player is killed while cloaked and carrying a battery
 
@@ -2054,14 +2020,9 @@ entity function Rodeo_TakeBatteryAwayFromPilot( entity pilot )
 		battery.SetAngles( <0, 0, 0 > )
 		battery.SetVelocity( < 0, 0, 1 > )
 		PutEntityInSafeSpot( battery, pilot, null, pilot.GetOrigin(), battery.GetOrigin() ) //This might cause thread of execution to jump somewhere else, see 209362
-		return battery
-	}
-	else
-	{
-		return null
 	}
 
-	unreachable
+	return battery
 }
 
 void function Rodeo_PilotThrowsBattery( entity pilot )

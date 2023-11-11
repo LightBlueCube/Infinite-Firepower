@@ -17,6 +17,9 @@ void function OnClientConnected( entity player )
 
 void function KsGUI( entity player )
 {
+	if( !KillStreakEnable() )
+		return
+
 	table result = {}
 	result.timeOut <- false
 	if( !player.IsHuman() || player.s.usingCruiseMissile )

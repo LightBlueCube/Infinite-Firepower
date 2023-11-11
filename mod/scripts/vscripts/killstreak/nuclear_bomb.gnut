@@ -175,6 +175,9 @@ void function PlayFinishBeepSound( entity owner )
 		return
 	StopSoundOnEntity( owner, "Wilds_Scr_HelmetHUDText_Finish" )
 	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
+	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
+	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
+	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
 }
 
 void function PlayBeepSound( entity owner )
@@ -191,9 +194,17 @@ void function RandomStringAnim( entity owner )
 	string msg = ""
 	string bar = ""
 	if( IsValid( owner ) )
-		EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Print" )
+	{
+		EmitSoundOnEntityOnlyToPlayer( owner, owner, "dataknife_loopable_beep" )
+	}
 	for( int a = 0; a < 50; a++ )
 	{
+		if( a == 25 && IsValid( owner ) )
+		{
+			StopSoundOnEntity( owner, "dataknife_loopable_beep" )
+			EmitSoundOnEntityOnlyToPlayer( owner, owner, "dataknife_loopable_beep" )
+		}
+
 		msg = ""
 		bar = ""
 		for( int b = 0; b < 9; b++ )
@@ -340,7 +351,7 @@ void function NuclearBombThink( entity owner )
 		npc.Die()
 	}
 
-	wait 4
+	wait 3
 	SetGameState( eGameState.Postmatch )
 }
 
@@ -371,7 +382,7 @@ void function NukeExplode( entity player, entity owner )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "death.pinkmist" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
-		ScreenFadeToColor( player, 192, 192, 192, 255, 0.2, 6  )
+		ScreenFadeToColor( player, 192, 192, 192, 255, 0.2, 4  )
 	}
 }
 

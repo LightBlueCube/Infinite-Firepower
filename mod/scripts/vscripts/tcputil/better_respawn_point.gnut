@@ -1,5 +1,9 @@
 global function BetterRespawnPoint_Init
 global function GetsBetterSpawnPointByTeam
+global function BetterRespawnPointEnable
+global function SetBetterRespawnPointEnable
+
+bool BETTER_RESPAWN_POINT_ENABLE = false
 
 void function BetterRespawnPoint_Init()
 {
@@ -7,8 +11,20 @@ void function BetterRespawnPoint_Init()
 	SetRecalculateRespawnAsTitanStartPointCallback( BetterRespawnPoint_Titan )
 }
 
+bool function BetterRespawnPointEnable()
+{
+	return BETTER_RESPAWN_POINT_ENABLE
+}
+
+void function SetBetterRespawnPointEnable( bool state )
+{
+	BETTER_RESPAWN_POINT_ENABLE = state
+}
+
 void function BetterRespawnPoint_Pilot( entity player )
 {
+	if( !BetterRespawnPointEnable() )
+		return
 	if ( GetGameState() <= eGameState.Prematch )
 		return
 	if( player.IsTitan() )
@@ -19,6 +35,9 @@ void function BetterRespawnPoint_Pilot( entity player )
 
 entity function BetterRespawnPoint_Titan( entity player, entity spawnPoint )
 {
+	if( !BetterRespawnPointEnable() )
+		return spawnPoint
+
 	return GetsBetterSpawnPointByTeam( player.GetTeam(), true, 1500 )
 }
 
