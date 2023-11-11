@@ -499,6 +499,10 @@ void function GravityCoreOnDamage( entity target, var damageInfo )
 	origin = DamageInfo_GetDamagePosition( damageInfo )
 	int hitBox = DamageInfo_GetHitBox( damageInfo )
 	string tag = GetEntityCenterTag( target )
+	int index = target.LookupAttachment( tag )
+	if ( index == 0 )
+		return
+
 	BallLightningData fxData
 	thread BallLightningZapConnectionFX( owner, target, tag, fxData )
 	BallLightningZapFX( owner, target, tag, fxData )
