@@ -45,8 +45,8 @@ void function KsGUI( entity player )
 		return
 	if( player.s.lastGUITime + 4 < Time() )
 	{
-		if( DropBattery( player ) )
-			result.timeOut <- true
+		DropBattery( player )
+		result.timeOut <- true
 		return
 	}
 	if( player.s.lastGUITime + 2 < Time() )
