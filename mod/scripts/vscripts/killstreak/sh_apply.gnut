@@ -41,6 +41,7 @@ void function DropBattery( entity player )
     vector playerVel = player.GetVelocity()
     vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
     battery.SetVelocity( batteryVel )
+    battery.s.touchEnabledTime <- Time() + 1
 
     if( battery.GetSkin() == 0 )
         SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )

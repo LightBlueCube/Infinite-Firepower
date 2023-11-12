@@ -62,6 +62,10 @@
             "Path": "tcputil/better_respawn_point.gnut",
             "RunOn": "SERVER && MP"
         },
+        {
+            "Path": "tcputil/anti_afk.nut",
+            "RunOn": "SERVER && MP"
+        },
 
         // modded weapons //
 
