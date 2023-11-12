@@ -43,7 +43,7 @@ WeaponData
 			"explosion_damage_heavy_armor"					"100"
 			"explosionradius" 								"200"
 
-			"smart_ammo_lock_type"							"large"
+			"smart_ammo_lock_type"							"any"
 		}
 	}
 }
