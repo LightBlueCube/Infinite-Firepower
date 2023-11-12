@@ -66,6 +66,10 @@
             "Path": "tcputil/anti_afk.nut",
             "RunOn": "SERVER && MP"
         },
+        {
+            "Path": "tcputil/teamshuffle.nut",
+            "RunOn": "SERVER && MP"
+        },
 
         // modded weapons //
 
@@ -75,13 +79,6 @@
             "ServerCallback": {
                 "After": "ModWeaponInit"
             }
-        },
-
-        // utility //
-
-        {
-            "Path": "teamshuffle.nut",
-            "RunOn": "SERVER && MP"
         }
     ],
     "ConVars": [

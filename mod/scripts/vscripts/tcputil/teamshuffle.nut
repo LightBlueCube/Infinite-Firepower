@@ -7,7 +7,17 @@ const array<string> DISABLED_MAPS = ["mp_lobby"]
 
 const array<string> MANUAL_SWITCH_COMMANDS = // chat command will append a "!"
 [
-	"switch"
+	"switch",
+	"!switch",
+	"！switch",
+
+	"SWITCH",
+	"!SWITCH",
+	"！SWITCH",
+
+	"Switch",
+	"!Switch",
+	"！Switch",
 ]
 
 const int BALANCE_ALLOWED_TEAM_DIFFERENCE = 1
@@ -24,6 +34,8 @@ struct
 
 float unBalanceTime = 0
 
+int lastColor = 0
+
 void function TeamShuffle_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Prematch, ShuffleTeams )
@@ -36,6 +48,32 @@ void function TeamShuffle_Init()
 	{
 		AddClientCommandCallback( command, CC_TrySwitchTeam )
 	}
+	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
+}
+
+ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msgStruct )
+{
+    string message = msgStruct.message
+    array<string> splitedMsg = split( message, " " ) // split with white space
+
+	if ( MANUAL_SWITCH_COMMANDS.contains( splitedMsg[0] ) )
+	{
+		CC_TrySwitchTeam( msgStruct.player, [] )
+		msgStruct.shouldBlock = true
+		return msgStruct
+	}
+
+	array<string> ansi_colors = [
+		"\x1b[31m", "\x1b[32m", "\x1b[33m", "\x1b[34m", "\x1b[35m", "\x1b[36m", "\x1b[37m",
+		"\x1b[96m", "\x1b[95m", "\x1b[94m", "\x1b[93m", "\x1b[92m", "\x1b[61m", "\x1b[90m"
+	]
+
+	lastColor++
+	if( lastColor >= ansi_colors.len() )
+		lastColor = 0
+	msgStruct.message = ansi_colors[ lastColor ] + msgStruct.message
+
+    return msgStruct
 }
 
 bool function CC_TrySwitchTeam( entity player, array<string> args )
@@ -143,42 +181,18 @@ void function CheckPlayerDisconnect( entity player )
 
 	int weakTeam = imcTeamSize > mltTeamSize ? TEAM_MILITIA : TEAM_IMC
 	foreach ( entity player in GetPlayerArrayOfTeam( GetOtherTeam( weakTeam ) ) )
-		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍当前不平衡，可通过控制台输入 switch 切换队伍。", false )
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍当前不平衡，可通过输入 !switch 切换队伍。", false )
 }
 
 void function ShuffleTeams()
 {
 	TeamShuffleThink()
-	bool disabledClassicMP = !GetClassicMPMode() && !ClassicMP_ShouldTryIntroAndEpilogueWithoutClassicMP()
-	//print( "disabledClassicMP: " + string( disabledClassicMP ) )
-	if ( disabledClassicMP )
-	{
-		WaitFrame() // do need wait before shuffle
-		FixShuffle()
-	}
-	else if( ClassicMP_GetIntroLength() < 1 )
-	{
-		FixShuffle()
-		WaitFrame() // do need wait to make things shuffled
-	}
-	else if( ClassicMP_GetIntroLength() >= 5 )
-		thread FixShuffle( ClassicMP_GetIntroLength() - 0.5 ) // fix shuffle
 }
 
 void function TeamShuffleThink()
 {
 	if( file.hasShuffled )
 		return
-	// Check if the gamemode or map are on the blacklist
-	bool gamemodeDisable = SHUFFLE_DISABLED_GAMEMODES.contains(GAMETYPE) || IsFFAGame();
-	bool mapDisable = DISABLED_MAPS.contains(GetMapName());
-
-  	if ( gamemodeDisable )
-    	return
-
-  	if ( mapDisable )
-    	return
-
  	if ( GetPlayerArray().len() == 0 )
     	return
 
@@ -205,24 +219,12 @@ void function TeamShuffleThink()
     //
     	SetTeam( player, team )
 	}
+	FixShuffle()
 	file.hasShuffled = true
 }
 
-void function FixShuffle( float delay = 0 )
+void function FixShuffle()
 {
-	return
-	if( delay > 0 )
-		wait delay
-
-	bool gamemodeDisable = SHUFFLE_DISABLED_GAMEMODES.contains(GAMETYPE) || IsFFAGame();
-	bool mapDisable = DISABLED_MAPS.contains(GetMapName());
-
-  	if ( gamemodeDisable )
-    	return
-
-  	if ( mapDisable )
-    	return
-
 	int mltTeamSize = GetPlayerArrayOfTeam( TEAM_MILITIA ).len()
 	int imcTeamSize = GetPlayerArrayOfTeam( TEAM_IMC ).len()
 	int teamSizeDifference = abs( mltTeamSize - imcTeamSize )
@@ -245,23 +247,8 @@ void function FixShuffle( float delay = 0 )
 		poorGuy = largerTeamPlayers[ largerTeamIndex ]
 		largerTeamIndex += 1
 
-		if( IsAlive( poorGuy ) ) // poor guy
-		{
-			poorGuy.Die( null, null, { damageSourceId = eDamageSourceId.team_switch } ) // better
-			if ( poorGuy.GetPlayerGameStat( PGS_DEATHS ) >= 1 ) // reduce the death count
-				poorGuy.AddToPlayerGameStat( PGS_DEATHS, -1 )
-		}
 		int oldTeam = poorGuy.GetTeam()
 		SetTeam( poorGuy, GetOtherTeam( largerTeam ) )
-		if( !RespawnsEnabled() ) // do need respawn the guy if respawnsdisabled
-			thread RespawnAsPilotInAfterFrame( poorGuy )
-	}
-	if( IsValid( poorGuy ) )
-	{
-		// only notify once
-		Chat_ServerPrivateMessage( poorGuy, ANSI_COLOR_TEAM + "由于队伍人数不平衡，你已被重新分队", false )
-		thread WaitForPlayerRespawnThenNotify( poorGuy )
-		NotifyClientsOfTeamChange( poorGuy, oldTeam, poorGuy.GetTeam() )
 	}
 }
 

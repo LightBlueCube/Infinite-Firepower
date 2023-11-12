@@ -1993,8 +1993,6 @@ entity function Rodeo_TakeBatteryAwayFromPilot( entity pilot )
 
 	// removing some of respawn's remaining code. "unreachable" and hardcodes never makes any sense
 	entity battery = GetBatteryOnBack( pilot )
-	printt( "bat"+ IsValid( battery ) )
-	printt( "ent"+ pilot )
 	// clear out exisiting battery network var
 	SetBatteryOnBack( pilot, null ) //Defensive fix for 209362. Set it to null before doing any other actions on it which might cause execution to jump somewhere else. I think doing PutEntityInSafeSpot() might cause this?
 
