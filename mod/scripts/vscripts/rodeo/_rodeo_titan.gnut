@@ -2253,7 +2253,7 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 			}
 		}
 		if( battery == null && SoulHasPassive( soul, ePassives.PAS_VANGUARD_COREMETER ) )
-			coreFrac = 0.1
+			coreFrac = 0.2
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 
 		int shieldHealth = soul.GetShieldHealth()
@@ -2269,6 +2269,8 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool shou
 				frac = RedBatteryHealthSegmentFrac
 			}
 		}
+		if( battery == null && SoulHasPassive( soul, ePassives.PAS_VANGUARD_COREMETER ) )
+			frac = RedBatteryHealthSegmentFrac
 
 		int addHealth = int( healingAmount * frac )
 

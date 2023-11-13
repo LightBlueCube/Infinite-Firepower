@@ -314,6 +314,13 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_idle", evacNode )
 
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsValid( player ) )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離有獎勵！", < 50, 50, 225 >, 255, 6 )
+	}
+
 	// hover sound
 	EmitSoundOnEntity( dropship, evacShip.hoverSound )
 
