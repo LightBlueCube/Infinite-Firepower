@@ -418,7 +418,7 @@ function DeployLaserPylon( entity projectile )
 }
 
 
-const DAMAGE_AGAINST_TITANS 			= 5
+const DAMAGE_AGAINST_TITANS 			= 4
 const DAMAGE_AGAINST_PILOTS 			= 1
 const EMP_DAMAGE_TICK_RATE = 0.1
 const FX_EMP_FIELD						= $"P_xo_emp_field"
@@ -629,7 +629,7 @@ void function LaserTripEMP_DamagedPlayerOrNPC( entity ent, var damageInfo )
 		return
 	if( ent.GetTeam() == attacker.GetTeam() )
 		return
-	StatusEffect_AddTimed( ent, eStatusEffect.move_slow, 0.4, 1.0, 1.0 )
+	//StatusEffect_AddTimed( ent, eStatusEffect.move_slow, 0.4, 1.0, 1.0 )
 	if( !ent.IsPlayer() )
 		return
 	Remote_CallFunction_Replay( ent, "ServerCallback_TitanEMP", 0.2, 1.0, 1.0 )

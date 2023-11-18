@@ -214,6 +214,8 @@ float function HandleBlockingAndCalcDamageScaleForHit( entity blockingEnt, var d
 	if ( blockingEnt.IsTitan() )
 	{
 		bool shouldPassThroughDamage = (( DamageInfo_GetCustomDamageType( damageInfo ) & (DF_RODEO | DF_MELEE | DF_DOOMED_HEALTH_LOSS) ) > 0)
+		if( DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.rodeo )
+			return 1.0
 		if ( shouldPassThroughDamage )
 			return 1.0
 

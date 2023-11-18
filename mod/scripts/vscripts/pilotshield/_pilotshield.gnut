@@ -1,0 +1,190 @@
+untyped
+global function PilotShield_Init
+
+void function PilotShield_Init()
+{
+    RegisterSignal( "StartButtonCancelCheck" )
+    RegisterSignal( "StopUseShieldBattery" )
+    RegisterSignal( "DoneUseShieldBattery" )
+
+	AddCallback_OnClientConnected( OnClientConnected )
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddDamageCallback( "player", OnPlayerDamaged )
+	RegisterWeaponDamageSource( "pilot_shield_pass", "" )
+}
+
+void function OnClientConnected( entity player )
+{
+	if( !KillStreakEnable() )
+		return
+
+	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND4, TryUseShieldBattery, 0.0 )
+}
+
+void function OnPlayerDamaged( entity victim, var damageInfo )
+{
+	if( victim.GetShieldHealth() == 0 || !victim.IsHuman() || DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.pilot_shield_pass )
+		return
+
+	float damage = DamageInfo_GetDamage( damageInfo )
+
+	if( DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.mp_titanability_smoke && damage < victim.GetShieldHealth() )
+	{
+		victim.SetHealth( max( 1, victim.GetHealth() - damage ) )
+	}
+
+	if( damage >= victim.GetShieldHealth() )
+	{
+		victim.TakeDamage( victim.GetShieldHealth(), DamageInfo_GetAttacker( damageInfo ), DamageInfo_GetWeapon( damageInfo ), { damageSourceId = eDamageSourceId.pilot_shield_pass, scriptType = DamageInfo_GetCustomDamageType( damageInfo ) } )
+		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 2.0, 2.0 )
+		EmitSoundOnEntityOnlyToPlayer( victim, victim, "titan_energyshield_down_1P" )
+		DamageInfo_SetDamage( damageInfo, damage - victim.GetShieldHealth() )
+		return
+	}
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( DamageInfo_GetDamage( damageInfo ), 0, victim.GetShieldHealthMax(), 0.0, 1.0 ), 2.0, 2.0 )
+	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	if( !KillStreakEnable() )
+		return
+
+	// health&shield update
+	if ( !IsAlive( player ) ) // can't set health for a no-alive entity
+		return
+	if ( !player.IsTitan() && player.GetPlayerSettings() != "spectator" )
+	{
+		player.SetShieldHealthMax( 100 )
+		player.SetShieldHealth( 100 )
+	}
+}
+
+void function TryUseShieldBattery( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	entity activeWeapon = player.GetActiveWeapon()
+	wait 0.5
+
+	player.Signal( "StopUseShieldBattery" )
+	player.EndSignal( "StopUseShieldBattery" )
+
+	if( player.GetShieldHealth() == player.GetShieldHealthMax() )
+		return
+
+	entity battery = GetBatteryOnBack( player )
+	if( !IsValid( battery ) )
+		return
+	battery.EndSignal( "OnDestroy" )
+
+	table results = {}
+	results.canceledUsage <- true // if player cancels usage it will run more functions
+
+	int statusEffectHandle = StatusEffect_AddEndless( player, eStatusEffect.move_slow, 0.3 )
+
+	OnThreadEnd(
+		function(): ( player, battery, statusEffectHandle, activeWeapon, results )
+		{
+			if( !IsValid( player ) )
+				return
+
+			player.s.GUIDisable = false
+
+			player.DeployWeapon()
+			player.Server_TurnOffhandWeaponsDisabledOff()
+			if( IsValid( player.GetOffhandWeapon( OFFHAND_INVENTORY ) ) )
+				if( player.GetOffhandWeapon( OFFHAND_INVENTORY ).GetWeaponInfoFileKeyField( "fire_mode" ) == "offhand_hybrid" )
+					if( IsValid( activeWeapon ) && IsAlive( player ) )
+						player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
+
+			StopSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
+			StatusEffect_Stop( player, statusEffectHandle )
+
+			if( !results.canceledUsage )
+				return
+			if( !IsAlive( player ) )
+				return
+			if( !IsValid( battery ) )
+				return
+			if( !PlayerHasMaxBatteryCount( player ) )
+				return
+
+			entity newestBattery = Rodeo_TakeBatteryAwayFromPilot( player )
+			if( IsValid( battery ) && IsValid( newestBattery ) )
+			{
+				if( battery == newestBattery )
+					Rodeo_PilotPicksUpBattery( player, battery )
+				else
+					Rodeo_PilotPicksUpBattery( player, newestBattery )
+			}
+		}
+	)
+	player.s.GUIDisable = true
+
+	bool isAmped = IsAmpedBattery( battery )
+	float useTime = 2
+
+	player.HolsterWeapon()
+	player.Server_TurnOffhandWeaponsDisabledOn()
+	wait 0.6 // wait for player hoster their weapon
+	battery.ClearParent()
+	battery.SetParent( player, "PROPGUN" )
+	battery.SetAngles( < 0,90,90 > )
+	EmitSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
+
+	float startTime = Time()
+	while( startTime + useTime > Time() )
+	{
+		player.HolsterWeapon() // defensive fix
+		player.Server_TurnOffhandWeaponsDisabledOn()
+		if( isAmped )
+			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n松开按键以取消", -1, 0.3, 255, 255, 100, 255, 0, 0.2, 0 )
+		else
+			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n松开按键以取消", -1, 0.3, 100, 255, 100, 255, 0, 0.2, 0 )
+
+		if( !PlayerHasMaxBatteryCount( player ) )
+			return
+		WaitFrame()
+	}
+	if( !PlayerHasMaxBatteryCount( player ) )
+		return
+
+	// done using
+	player.Signal( "DoneUseShieldBattery" )
+	results.canceledUsage = false
+	player.SetShieldHealth( player.GetShieldHealthMax() )
+
+	entity shieldFXHandle = StartParticleEffectOnEntity_ReturnEntity( player, GetParticleSystemIndex( $"P_xo_armor_body_CP" ), FX_PATTACH_POINT_FOLLOW, player.LookupAttachment( "CHESTFOCUS" ) )
+
+	SetTeam( shieldFXHandle, player.GetTeam() )
+	shieldFXHandle.SetOwner( player )
+
+	if( isAmped )
+		EffectSetControlPointVector( shieldFXHandle, 1, < 255, 165, 0 > )
+	else
+		EffectSetControlPointVector( shieldFXHandle, 1, < 30, 255, 100 > )
+
+	shieldFXHandle.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY | ENTITY_VISIBLE_TO_FRIENDLY
+
+	EmitSoundOnEntityExceptToPlayer( player, player, "ui_titanbattery_pilot_give_titanbattery" )
+	MessageToPlayer( player, eEventNotifications.Rodeo_PilotAppliedBatteryToYou, player, isAmped )
+
+	entity newestBattery = Rodeo_TakeBatteryAwayFromPilot( player )
+	if( IsValid( battery ) && IsValid( newestBattery ) )
+	{
+		if( battery == newestBattery )
+			newestBattery.Destroy()
+	}
+}
+
+string function CreateHudProgressBarThroughTime( float nowGlobalTime, float startGlobalTime, float totalTime )
+{
+	int sysbolNum = int( GraphCapped( nowGlobalTime, startGlobalTime, startGlobalTime + totalTime, 0, 16 ) ) + 1
+	string text = ""
+	for( int i = sysbolNum; i > 0; i-- )
+		text += "/"
+	for( int i = 16 - sysbolNum; i > 0; i-- )
+		text += "-"
+	return text
+}

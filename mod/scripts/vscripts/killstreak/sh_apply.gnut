@@ -5,6 +5,7 @@ global function ApplyNukeTitan
 global function ApplyCruiseMissile
 global function ApplyVTOL
 global function ApplyNuclearBomb
+global function ApplyShieldBattery
 
 void function ApplyDropBattery( entity player )
 {
@@ -66,7 +67,7 @@ void function ApplyNukeTitan( entity player )
         return
     }
 	player.s.NukeTitan -= 1
-	thread SendKsGUI_Threaded( player, "==按住以持续交付==\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", < 100, 255, 100 >, 2, 1 )
+	thread SendKsGUI_Threaded( player, "按住以持续交付\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 	PlayerInventory_GiveNukeTitan( player )
 }
@@ -117,7 +118,7 @@ void function ApplyCruiseMissile( entity player )
     }
 
     thread CruiseMissileAnim_ThinkBefore( player )
-    thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 2, 1 )
+    thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
     EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
     player.s.CruiseMissile -= 1
 }
@@ -139,4 +140,182 @@ void function ApplyNuclearBomb( entity player )
 	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
     thread NuclearBombAnimThink( player )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+}
+
+void function ApplyShieldBattery( entity player )
+{
+	if( !player.IsHuman() )
+    {
+        thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用电池", < 255, 100, 100 >, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+        return
+    }
+    if( !IsAlive( player ) )
+    {
+        thread SendKsGUI_Threaded( player, "\n死亡时不可使用电池", < 255, 100, 100 >, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+        return
+    }
+	if( !PlayerHasMaxBatteryCount( player ) )
+	{
+        thread SendKsGUI_Threaded( player, "\n你没有电池", < 255, 100, 100 >, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( player.GetShieldHealth() == player.GetShieldHealthMax() )
+	{
+        thread SendKsGUI_Threaded( player, "\n护盾已满", < 255, 100, 100 >, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	thread SendKsGUI_Threaded( player, "\n正在取出电池...", < 100, 255, 100 >, 0.7, 0 )
+    EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+	thread ApplyShieldBatteryThreaded( player )
+}
+
+void function ApplyShieldBatteryThreaded( entity player )
+{
+	player.Signal( "StopUseShieldBattery" )
+	player.EndSignal( "StopUseShieldBattery" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+
+	entity battery = GetBatteryOnBack( player )
+	if( !IsValid( battery ) )
+		return
+	battery.EndSignal( "OnDestroy" )
+
+	table results = {}
+	results.canceledUsage <- true // if player cancels usage it will run more functions
+
+	int statusEffectHandle = StatusEffect_AddEndless( player, eStatusEffect.move_slow, 0.3 )
+
+	OnThreadEnd(
+		function(): ( player, battery, statusEffectHandle, results )
+		{
+			if( !IsValid( player ) )
+				return
+
+			player.s.GUIDisable = false
+			player.DeployWeapon()
+			player.Server_TurnOffhandWeaponsDisabledOff()
+
+			StopSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
+			StatusEffect_Stop( player, statusEffectHandle )
+
+			if( !results.canceledUsage )
+				return
+			if( !IsAlive( player ) )
+				return
+			if( !IsValid( battery ) )
+				return
+			if( !PlayerHasMaxBatteryCount( player ) )
+				return
+
+			entity newestBattery = Rodeo_TakeBatteryAwayFromPilot( player )
+			if( IsValid( battery ) && IsValid( newestBattery ) )
+			{
+				if( battery == newestBattery )
+					Rodeo_PilotPicksUpBattery( player, battery )
+				else
+					Rodeo_PilotPicksUpBattery( player, newestBattery )
+			}
+		}
+	)
+	player.s.GUIDisable = true
+
+	bool isAmped = IsAmpedBattery( battery )
+	float useTime = 2
+
+	thread ButtonCancelCheck( player, useTime + 0.6 )
+
+	player.HolsterWeapon()
+	player.Server_TurnOffhandWeaponsDisabledOn()
+	wait 0.6 // wait for player hoster their weapon
+	battery.ClearParent()
+	battery.SetParent( player, "PROPGUN" )
+	battery.SetAngles( < 0,90,90 > )
+	EmitSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
+
+	float startTime = Time()
+	while( startTime + useTime > Time() )
+	{
+		player.HolsterWeapon() // defensive fix
+		player.Server_TurnOffhandWeaponsDisabledOn()
+		if( isAmped )
+			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n按开火键以取消", -1, 0.3, 255, 255, 100, 255, 0, 0.2, 0 )
+		else
+			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n按开火键以取消", -1, 0.3, 100, 255, 100, 255, 0, 0.2, 0 )
+
+		if( !PlayerHasMaxBatteryCount( player ) )
+			return
+
+		WaitFrame()
+	}
+	if( !PlayerHasMaxBatteryCount( player ) )
+		return
+
+	// done using
+	player.Signal( "DoneUseShieldBattery" )
+	results.canceledUsage = false
+	player.SetShieldHealth( player.GetShieldHealthMax() )
+
+	entity shieldFXHandle = StartParticleEffectOnEntity_ReturnEntity( player, GetParticleSystemIndex( $"P_xo_armor_body_CP" ), FX_PATTACH_POINT_FOLLOW, player.LookupAttachment( "CHESTFOCUS" ) )
+
+	SetTeam( shieldFXHandle, player.GetTeam() )
+	shieldFXHandle.SetOwner( player )
+
+	if( isAmped )
+		EffectSetControlPointVector( shieldFXHandle, 1, < 255, 165, 0 > )
+	else
+		EffectSetControlPointVector( shieldFXHandle, 1, < 30, 255, 100 > )
+
+	shieldFXHandle.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY | ENTITY_VISIBLE_TO_FRIENDLY
+
+	EmitSoundOnEntityExceptToPlayer( player, player, "ui_titanbattery_pilot_give_titanbattery" )
+	MessageToPlayer( player, eEventNotifications.Rodeo_PilotAppliedBatteryToYou, player, isAmped )
+
+	entity newestBattery = Rodeo_TakeBatteryAwayFromPilot( player )
+	if( IsValid( battery ) && IsValid( newestBattery ) )
+	{
+		if( battery == newestBattery )
+			newestBattery.Destroy()
+	}
+}
+
+string function CreateHudProgressBarThroughTime( float nowGlobalTime, float startGlobalTime, float totalTime )
+{
+	int sysbolNum = int( GraphCapped( nowGlobalTime, startGlobalTime, startGlobalTime + totalTime, 0, 16 ) ) + 1
+	string text = ""
+	for( int i = sysbolNum; i > 0; i-- )
+		text += "/"
+	for( int i = 16 - sysbolNum; i > 0; i-- )
+		text += "-"
+	return text
+}
+
+void function ButtonCancelCheck( entity player, float maxTime )
+{
+    player.Signal( "StartButtonCancelCheck" )
+    player.EndSignal( "OnDestroy" )
+    player.EndSignal( "OnDeath" )
+    player.EndSignal( "StartButtonCancelCheck" )
+    player.EndSignal( "DoneUseShieldBattery" )
+    player.EndSignal( "StopUseShieldBattery" )
+
+    OnThreadEnd(
+        function(): ( player )
+        {
+            if( IsValid( player ) )
+                RemoveButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+        }
+    )
+
+    AddButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+    wait maxTime
+}
+
+void function InterruptShieldBattery( entity player )
+{
+    player.Signal( "StopUseShieldBattery" )
 }
