@@ -3494,11 +3494,11 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 			newBattery.SetSkin( 2 )
 		}
 		Battery_StopFX( newBattery )
-		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery )
+		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
 	}
 }
 
-void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery, bool justDestroyIt = false , float time = 60, float destroyTime = 60 )
+void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery, bool justDestroyIt = false, float time = 60, float destroyTime = 60 )
 {
 	float endTime = Time() + time
 	if( justDestroyIt )
@@ -3513,7 +3513,10 @@ void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery,
 	}
 
 	if( justDestroyIt )
+	{
 		battery.Destroy()
+		return
+	}
 
 	battery.SetSkin( 1 )
 	Battery_StartFX( battery )

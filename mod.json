@@ -56,6 +56,13 @@
             }
         },
 
+		// PilotShield //
+
+		{
+            "Path": "pilotshield/_pilotshield.gnut",
+            "RunOn": "SERVER && MP"
+        },
+
         // utilitys //
 
         {

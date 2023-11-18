@@ -16,6 +16,8 @@ void function InfiniteFirepower_Init()
 
 	ColorfulChat_Init()	//炫彩聊天文字
 
+	PilotShield_Init()	//Apex like 铁驭护盾
+
 	thread UseTimeCheck()
 }
 

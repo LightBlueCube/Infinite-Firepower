@@ -318,7 +318,9 @@ void function Evac( int evacTeam, float initialWait, float arrivalTime, float wa
 	{
 		if( !IsValid( player ) )
 			continue
-		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離有獎勵！", < 50, 50, 225 >, 255, 6 )
+		if( player.GetTeam() != evacTeam )
+			continue
+		NSSendAnnouncementMessageToPlayer( player, "撤離艇已到達！", "成功撤離有獎勵！", < 50, 50, 225 >, 255, 5 )
 	}
 
 	// hover sound
@@ -585,7 +587,7 @@ void function EvacDropshipDamaged( entity evacShip, var damageInfo )
 {
 	int damageSourceID = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	if( damageSourceID == damagedef_nuclear_core )
-		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * EVAC_SHIP_DAMAGE_MULTIPLIER_AGAINST_NUCLEAR_CORE )
+		DamageInfo_SetDamage( damageInfo, DamageInfo_GetDamage( damageInfo ) * 0.2 )
 }
 
 void function WarpInEffectEvacShip( entity dropship )

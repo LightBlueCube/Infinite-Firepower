@@ -8,7 +8,8 @@ global function CreateClassicRodeoWeakpoint
 // handling hardcoded nerf!
 const array<int> ELECTRIC_SMOKE_DAMAGESOURCES = [ eDamageSourceId.mp_titanability_smoke,
 												  eDamageSourceId.mp_weapon_satchel,
-									 			  eDamageSourceId.mp_weapon_grenade_electric_smoke ]
+									 			  eDamageSourceId.mp_weapon_grenade_electric_smoke,
+												  eDamageSourceId.mp_weapon_thermite_grenade ]
 
 struct
 {

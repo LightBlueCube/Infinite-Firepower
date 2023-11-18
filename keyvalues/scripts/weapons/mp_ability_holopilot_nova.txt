@@ -1,0 +1,8 @@
+WeaponData
+{
+	// General
+	"fire_mode"   									"offhand"
+
+	// Models
+	"viewmodel"   									"models/dev/empty_model.mdl"
+}
