@@ -30,6 +30,7 @@ function MpTitanweaponVortexShield_Init()
 
 	RegisterSignal( "DisableAmpedVortex" )
 	RegisterSignal( "FireAmpedVortexBullet" )
+	RegisterSignal( "TrackSharedEnergy" )
 }
 
 function VortexShieldPrecache()
@@ -239,11 +240,10 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 		string attackerWeaponName	= attackerWeapon.GetWeaponClassName()
 		int damageType				= DamageInfo_GetCustomDamageType( damageInfo )
 
-
-		if( attackerWeapon.HasMod( "burn_mod_titan_vortex_shield" ) )
-			return true
-
 		TakeAmountIfIsRodeoAttack( attacker, weapon )
+		if( weapon.HasMod( "tcp_vortex" ) )
+				weapon.s.trackEnergyCooldown <- true
+
 		return TryVortexAbsorb( vortexSphere, attacker, origin, damageSourceID, attackerWeapon, attackerWeaponName, "hitscan", null, damageType, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
 	#endif
 }
@@ -288,6 +288,10 @@ bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weap
 
 		int damageSourceID = projectile.ProjectileGetDamageSourceID()
 		string weaponName = projectile.ProjectileGetWeaponClassName()
+
+		TakeAmountIfIsRodeoAttack( projectile.GetOwner(), weapon )
+		if( weapon.HasMod( "tcp_vortex" ) )
+				weapon.s.trackEnergyCooldown <- true
 
 		return TryVortexAbsorb( vortexSphere, attacker, contactPos, damageSourceID, projectile, weaponName, "projectile", projectile, null, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
 	#endif
@@ -393,13 +397,62 @@ bool function OnWeaponChargeBegin_titanweapon_vortex_shield( entity weapon )
 	{
 		PlayerUsedOffhand( weaponOwner, weapon )
 		StartVortex( weapon )
+		if( weapon.HasMod( "tcp_vortex" ) )
+			thread TrackSharedEnergyOnVortexOn( weaponOwner, weapon )
 	}
 	return true
 }
 
+void function TrackSharedEnergyOnVortexOn( entity owner, entity weapon )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "TitanEjectionStarted" )
+	owner.EndSignal( "DisembarkingTitan" )
+
+	owner.Signal( "TrackSharedEnergy" )
+	owner.EndSignal( "TrackSharedEnergy" )
+
+	if( !owner.IsTitan() )
+		return
+	entity soul = owner.GetTitanSoul()
+	if( !IsValid( soul ) )
+		return
+
+	int cooldown = 0
+	int delay = int( soul.s.SharedEnergyRegenDelay ) * 10
+	float amount = float( soul.s.SharedEnergyRegenRate ) / 10
+	for( ;; )
+	{
+		WaitFrame()
+		if( "trackEnergyCooldown" in weapon.s )
+		{
+			if( weapon.s.trackEnergyCooldown )
+			{
+				weapon.s.trackEnergyCooldown <- false
+				cooldown = delay
+				continue
+			}
+		}
+		if( cooldown > 0 )
+		{
+			cooldown--
+			continue
+		}
+
+		if( owner.GetSharedEnergyCount() + amount > owner.GetSharedEnergyTotal() - 1 )
+		{
+			owner.AddSharedEnergy( max( 0, ( owner.GetSharedEnergyTotal() - 1 ) - owner.GetSharedEnergyCount() ) )
+			continue
+		}
+		owner.AddSharedEnergy( amount )
+	}
+}
 
 void function OnWeaponChargeEnd_titanweapon_vortex_shield( entity weapon )
 {
+	if( IsValid( weapon.GetWeaponOwner() ) )
+		weapon.GetWeaponOwner().Signal( "TrackSharedEnergy" )
 	// if ( weapon.HasMod( "slow_recovery_vortex" ) )
 	// {
 	// 	weapon.SetWeaponChargeFraction( 1.0 )

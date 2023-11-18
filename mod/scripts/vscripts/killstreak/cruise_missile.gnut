@@ -2,7 +2,7 @@ untyped
 global function CruiseMissile_Init
 global function CruiseMissileAnim_ThinkBefore
 
-float CM_FIREHIGHER = 5000
+float FIRE_HIGHER = 5000
 
 void function CruiseMissile_Init()
 {
@@ -14,9 +14,9 @@ void function CruiseMissile_Init()
     AddCallback_OnClientConnected( OnClientConnected )
 
 	if( GetMapName() == "mp_grave" )
-		CM_FIREHIGHER = 4500
+		FIRE_HIGHER = 4500
 	if( GetMapName() == "mp_wargames" )
-		CM_FIREHIGHER = 4000
+		FIRE_HIGHER = 4000
 }
 
 void function OnClientConnected( entity player )
@@ -40,7 +40,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.SetInvulnerable()
 	owner.s.cmBeforeOrigin = owner.GetOrigin()
 	vector cmFireOrigin = owner.GetOrigin()
-	cmFireOrigin.z = CM_FIREHIGHER
+	cmFireOrigin.z = FIRE_HIGHER
 	vector cmFireAngles = < 0, RandomInt( 360 ), 0 >
 
 	OnThreadEnd(

@@ -1,0 +1,19 @@
+global function SkillChange_Init
+
+void function SkillChange_Init()
+{
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddCallback_OnPlayerGetsNewPilotLoadout( OnPlayerGetsNewPilotLoadout )
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	if( player.IsTitan() )
+		return
+	printt( player.GetModelName() )
+}
+
+void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )	//玩家在重生后切换了配装，这时候我们还得拿掉一次村规武器
+{
+	return OnPlayerRespawned( player )
+}

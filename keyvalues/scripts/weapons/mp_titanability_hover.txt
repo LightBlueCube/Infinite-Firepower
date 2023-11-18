@@ -16,14 +16,8 @@ WeaponData
 
 		tcp_super_hover
 		{
-			"ammo_clip_size"   								"201"
-			"ammo_default_total"							"201"
-			"ammo_min_to_fire"								"201"
-			"ammo_per_shot"									"201"
-			"ammo_stockpile_max"							"201"
-
 			"regen_ammo_refill_rate"						"20"
-			"fire_duration"   								"0.5"
+			"fire_duration"   								"1.0"
 		}
 	}
 }

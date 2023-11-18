@@ -40,6 +40,7 @@ void function NuclearBombAnimThink( entity owner )
 	SetShouldPlayDefaultMusic( false )
 	SetServerVar( "gameEndTime", Time() + 120.0 )
 
+	WaitFrame()
 	array<string> a = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" ]
 	PlayBeepSound( owner )
 	a.append( "IBM System/370 Model 168" )
@@ -174,11 +175,8 @@ void function PlayFinishBeepSound( entity owner )
 {
 	if( !IsValid( owner ) )
 		return
-	StopSoundOnEntity( owner, "Wilds_Scr_HelmetHUDText_Finish" )
-	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
-	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
-	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
-	EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
+	for( int i = 4; i > 0; i-- )
+		EmitSoundOnEntityOnlyToPlayer( owner, owner, "Wilds_Scr_HelmetHUDText_Finish" )
 }
 
 void function PlayBeepSound( entity owner )
@@ -195,9 +193,7 @@ void function RandomStringAnim( entity owner )
 	string msg = ""
 	string bar = ""
 	if( IsValid( owner ) )
-	{
 		EmitSoundOnEntityOnlyToPlayer( owner, owner, "dataknife_loopable_beep" )
-	}
 	for( int a = 0; a < 50; a++ )
 	{
 		if( a == 25 && IsValid( owner ) )
@@ -213,21 +209,15 @@ void function RandomStringAnim( entity owner )
 			msg += "        "
 			string s = ""
 			for( int c = 0; c < 30; c++ )
-			{
 				s += randomString[ RandomInt( randomString.len() ) ]
-			}
 			msg += s
 			msg += "\n"
 		}
 		msg += "    "
 		for( int d = 0; d < a; d += 5 )
-		{
 			bar += "/"
-		}
 		for( int e = 50 - a; e >= 5; e -= 5 )
-		{
 			bar += "-"
-		}
 		msg += "INITIALIZING TARGETING MATRIX ["+ bar +"]"
 		if( IsValid( owner ) )
 			SendHudMessage( owner, msg, 0, 0.3, 235, 235, 235, 255, 0, 2, 0 )
@@ -240,6 +230,8 @@ void function RandomStringAnim( entity owner )
 void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 {
 	if( !IsValid( owner ) )
+		return
+	if( !owner.s.GUIClose )
 		return
 
 	string msg = ""
@@ -259,67 +251,81 @@ void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 	SendHudMessage( owner, msg, 0, 0.3, 235, 235, 235, 255, 0, 2, 0 )
 }
 
-void function PlayBeepSoundToAll()
+string function GetWarnSysbols( int val, int endVal )
+{
+	int sysbolNum = int( GraphCapped( val, 0, endVal, 0, 24 ) )
+	string text = ""
+	for( int i = sysbolNum; i > 0; i-- )
+		text += "/"
+	text += " WARNING " + text
+	return text
+}
+
+void function SendNuclearWarn( string msg )
 {
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
 			continue
-		EmitSoundOnEntityOnlyToPlayer( player, player, "hud_boost_card_radar_jammer_redtextbeep_1p" )
+		if( !player.s.GUIClose )
+			continue
+		SendHudMessage( player, msg, -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
 	}
 }
 
 void function NuclearBombThink( entity owner )
 {
+	svGlobal.levelEnt.Signal( "NukeStart" )
 	string ownerName
 	if( IsValid( owner ) )
 		ownerName = owner.GetPlayerName()
 	else
 		ownerName = "[错误:玩家离线]"
 
-	svGlobal.levelEnt.Signal( "NukeStart" )
-	SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
-	PlayBeepSoundToAll()
+	for( int i = 0; i < 25; i++ )
+	{
+		PlayFinishBeepSoundToAll()
+		SendNuclearWarn( GetWarnSysbols( i, 24 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n"+ GetWarnSysbols( i, 24 ) )
+		WaitFrame()
+	}
 	wait 0.5
-	SendHudMessageToAll( "", -1, 0.4, 235, 235, 235, 255, 0, 2, 0 )
+	SendNuclearWarn( "" )
 	wait 0.3
-	SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+	SendNuclearWarn( GetWarnSysbols( 1, 1 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n"+ GetWarnSysbols( 1, 1 ) )
 	PlayBeepSoundToAll()
-	wait 0.5
-	SendHudMessageToAll( "", -1, 0.4, 235, 235, 235, 255, 0, 2, 0 )
 	wait 0.3
-	SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+	SendNuclearWarn( "" )
+	wait 0.2
+	SendNuclearWarn( GetWarnSysbols( 1, 1 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n"+ GetWarnSysbols( 1, 1 ) )
 	PlayBeepSoundToAll()
 	wait 0.8
-	SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
-	PlayBeepSoundToAll()
-	wait 1
+
 	float realSec
 	for( int sec = 200; sec > 0; sec-- )
 	{
 		realSec = float( sec ) / 10
 		PlayNukeSound()
-		SendHudMessageToAll( "//////////////// WARNING ////////////////\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n//////////////// WARNING ////////////////", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendNuclearWarn( GetWarnSysbols( sec, 200 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n"+ GetWarnSysbols( sec, 200 ) )
 		wait 0.1
 		sec--
 		realSec = float( sec ) / 10
 		PlayNukeSound()
-		SendHudMessageToAll( "//////////////// WARNING ////////////////\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n//////////////// WARNING ////////////////", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendNuclearWarn( GetWarnSysbols( sec, 200 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n"+ GetWarnSysbols( sec, 200 ) )
 		wait 0.1
 		sec--
 		realSec = float( sec ) / 10
 		PlayNukeSound()
-		SendHudMessageToAll( "//////////////// WARNING ////////////////\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n//////////////// WARNING ////////////////", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendNuclearWarn( GetWarnSysbols( sec, 200 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n"+ GetWarnSysbols( sec, 200 ) )
 		wait 0.1
 		sec--
 		realSec = float( sec ) / 10
 		PlayNukeSound()
-		SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendNuclearWarn( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-"+ realSec +"s\n" )
 		wait 0.1
 		sec--
 		realSec = float( sec ) / 10
 		PlayNukeSound()
-		SendHudMessageToAll( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA  T-"+ realSec +"s\n", -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendNuclearWarn( "\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA  T-"+ realSec +"s\n" )
 
 		if( sec == 11 )
 		{
@@ -328,15 +334,13 @@ void function NuclearBombThink( entity owner )
 				if( !IsValid( player ) )
 					continue
 				Remote_CallFunction_NonReplay( player, "ServerCallback_PlayScreenFXWarpJump" )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
-				EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
+				for( int i = 4; i > 0; i-- )
+					EmitSoundOnEntityOnlyToPlayer( player, player, "haven_scr_carrierwarpout" )
 			}
 		}
 	}
 	wait 0.1
-	SendHudMessageToAll( "//////////////// WARNING ////////////////\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-0s\n//////////////// WARNING ////////////////", -1, 0.3, 235, 0, 0, 255, 0, 0.1, 0 )
+	SendNuclearWarn( "" )
 
 	if( IsValid( owner ) )
 		SetWinner( owner.GetTeam() )
@@ -373,6 +377,18 @@ void function NuclearBombThink( entity owner )
 	SetGameState( eGameState.Postmatch )
 }
 
+void function PlayBeepSoundToAll()
+{
+	foreach( player in GetPlayerArray() )
+		PlayBeepSound( player )
+}
+
+void function PlayFinishBeepSoundToAll()
+{
+	foreach( player in GetPlayerArray() )
+		PlayFinishBeepSound( player )
+}
+
 void function PlayNukeSound()
 {
 	foreach( player in GetPlayerArray() )
@@ -385,31 +401,33 @@ void function PlayNukeSound()
 
 void function NukeExplode( entity player, entity owner )
 {
+	player.EndSignal( "OnDestroy" )
+
 	StopSoundOnEntity( player, "titan_cockpit_missile_close_warning" )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "goblin_dropship_explode_OLD" )
-	thread FakeShellShock_Threaded( player, 10 )
-	ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 6  )
+	thread FakeShellShock_Threaded( player, 3 )
+	ScreenFadeToColor( player, 192, 192, 192, 64, 0.1, 3 )
 	thread NukeFX( player )
-
+	StatusEffect_AddTimed( player, eStatusEffect.emp, 1.0, 3.0, 0.0 )
 	wait 2
-	if( IsValid( player ) )
-	{
-		StopSoundOnEntity( player, "goblin_dropship_explode_OLD" )
-		if( IsAlive( player ) )
-			player.Die( owner, owner, { damageSourceId = eDamageSourceId.mp_weapon_nuclear_bomb } )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "death.pinkmist" )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
-		ScreenFadeToColor( player, 192, 192, 192, 255, 0.2, 4  )
-	}
+
+	StopSoundOnEntity( player, "goblin_dropship_explode_OLD" )
+	if( IsAlive( player ) )
+		player.Die( owner, owner, { damageSourceId = eDamageSourceId.mp_weapon_nuclear_bomb } )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "death.pinkmist" )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "titan_nuclear_death_explode" )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "bt_beacon_controlroom_dish_explosion" )
+	ScreenFadeToColor( player, 192, 192, 192, 255, 0.2, 4 )
 }
 
 void function NukeFX( entity player )
 {
+	player.EndSignal( "OnDestroy" )
+
 	float endTime = Time() + 2.1
 	float bloomScale = 1.0
 	float sunScale = -1.0
-	while ( Time() < endTime && IsValid( player ) )
+	while ( Time() < endTime )
 	{
 		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 200, 100, 0.5 )
 		Remote_CallFunction_NonReplay( player, "ServerCallback_SetMapSettings", bloomScale, false, 1.0, 1.0, 1.0, 0, 0, sunScale, 1.0 )
@@ -421,16 +439,20 @@ void function NukeFX( entity player )
 
 void function FakeShellShock_Threaded( entity victim, float duration )
 {
-	victim.EndSignal( "OnDeath" )
+	victim.EndSignal( "OnDestroy" )
+
 	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, duration, 0.25 )
 	StatusEffect_AddTimed( victim, eStatusEffect.turn_slow, 0.25, duration, 0.25 )
 	AddCinematicFlag( victim, CE_FLAG_EXECUTION )
+	AddCinematicFlag( victim, CE_FLAG_HIDE_MAIN_HUD )
 
 	OnThreadEnd(
 		function(): ( victim )
 		{
-			if( IsValid( victim ) )
-				RemoveCinematicFlag( victim, CE_FLAG_EXECUTION )
+			if( !IsValid( victim ) )
+				return
+			RemoveCinematicFlag( victim, CE_FLAG_EXECUTION )
+			RemoveCinematicFlag( victim, CE_FLAG_HIDE_MAIN_HUD )
 		}
 	)
 

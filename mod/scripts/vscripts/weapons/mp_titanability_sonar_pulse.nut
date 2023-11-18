@@ -1,5 +1,5 @@
 untyped
-global function GravityNode_Init
+global function MpTitanWeaponSonarPulse_Init
 global function OnProjectileCollision_titanability_sonar_pulse
 global function OnWeaponPrimaryAttack_titanability_sonar_pulse
 global function OnWeaponAttemptOffhandSwitch_titanability_sonar_pulse
@@ -14,8 +14,9 @@ const int SONAR_PULSE_RADIUS = 1250
 const float SONAR_PULSE_DURATION = 5.0
 const float FD_SONAR_PULSE_DURATION = 10.0
 
-void function GravityNode_Init()
+void function MpTitanWeaponSonarPulse_Init()
 {
+	// gravity node
 	RegisterWeaponDamageSource( "mp_titanweapon_gravity_node", "重力場" )
 	RegisterWeaponDamageSource( "mp_titanweapon_gravity_node_explode", "重力場" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_gravity_node, GravityNodeOnDamage )
@@ -73,6 +74,7 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 {
 	if( projectile.ProjectileGetMods().contains( "tcp_gravity" ) )
 		return OnProjectileCollision_weapon_deployable( projectile, pos, normal, hitEnt, hitbox, isCritical )
+
 	#if SERVER
 		entity owner = projectile.GetOwner()
 		array<string> mods = projectile.ProjectileGetMods()

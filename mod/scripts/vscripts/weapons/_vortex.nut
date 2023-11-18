@@ -597,25 +597,36 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 
 	if ( reflect )
 	{
-		local attackParams = {}
-		attackParams.pos <- owner.EyePosition()
-		attackParams.dir <- owner.GetPlayerOrNPCViewVector()
-
-		int bulletsFired = VortexReflectAttack( vortexWeapon, attackParams, expect vector( impactData.origin ) )
-
-		Vortex_CleanupImpactAbsorbFX( vortexWeapon )
-		Vortex_ClearImpactEventData( vortexWeapon )
-
-		while ( vortexSphere.GetBulletAbsorbedCount() > 0 )
-			vortexSphere.RemoveBulletFromSphere();
-
-		while ( vortexSphere.GetProjectileAbsorbedCount() > 0 )
-			vortexSphere.RemoveProjectileFromSphere();
+		thread ReflectAfterFrame( vortexWeapon, vortexSphere, owner )
 	}
 
 	return true
 }
 #endif // SERVER
+
+void function ReflectAfterFrame( entity vortexWeapon, entity vortexSphere, entity owner )
+{
+	vortexWeapon.EndSignal( "OnDestroy" )
+	local attackParams = {}
+	attackParams.pos <- owner.EyePosition()
+	attackParams.dir <- owner.GetPlayerOrNPCViewVector()
+
+	WaitFrame()
+
+	int bulletsFired = VortexReflectAttack( vortexWeapon, attackParams )
+
+	if( !IsValid( vortexSphere ) )
+		return
+
+	Vortex_CleanupImpactAbsorbFX( vortexWeapon )
+	Vortex_ClearImpactEventData( vortexWeapon )
+
+	while ( vortexSphere.GetBulletAbsorbedCount() > 0 )
+		vortexSphere.RemoveBulletFromSphere();
+
+	while ( vortexSphere.GetProjectileAbsorbedCount() > 0 )
+		vortexSphere.RemoveProjectileFromSphere();
+}
 
 function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity projectile, damageType )
 {
@@ -650,10 +661,9 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
 		}
 
-		// 离子版: 使用能量系统
 		entity owner = vortexWeapon.GetWeaponOwner()
 		int currentEnergy = owner.GetSharedEnergyCount()
-		int val = int( amount )
+		int val = int( amount / 5 )
 		if( currentEnergy - val <= 0 )
 			val = currentEnergy
 		if( val >= 0 )
@@ -1938,15 +1948,9 @@ float function HandleWeakToPilotWeapons( entity vortexSphere, string weaponName,
 #endif
 
 // ???: reflectOrigin not used
-int function VortexReflectAttack( entity vortexWeapon, attackParams, vector reflectOrigin )
+int function VortexReflectAttack( entity vortexWeapon, attackParams )//, vector reflectOrigin )
 {
 	entity vortexSphere = vortexWeapon.GetWeaponUtilityEntity()
-	if ( !vortexSphere )
-		return 0
-
-	#if SERVER
-		Assert( vortexSphere )
-	#endif
 
 	int totalfired = 0
 	int totalAttempts = 0
@@ -2001,7 +2005,8 @@ int function VortexReflectAttack( entity vortexWeapon, attackParams, vector refl
 	vortexWeapon.Signal( "VortexFired" )
 
 #if SERVER
-	vortexSphere.ClearAllBulletsFromSphere()
+	if( IsValid( vortexSphere ) )
+		vortexSphere.ClearAllBulletsFromSphere()
 #endif
 
 	/*

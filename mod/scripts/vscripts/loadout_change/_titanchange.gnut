@@ -98,10 +98,6 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "野獸四號"
 		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
-		titan.SetSharedEnergyRegenDelay( 1.0 )
-		titan.SetSharedEnergyRegenRate( 333.3 )
-		soul.s.SharedEnergyRegenRate <- 333.3
-		soul.s.SharedEnergyRegenDelay <- 1.0
 
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
@@ -130,9 +126,9 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "遠征"
 		titan.SetSharedEnergyRegenDelay( 1.0 )
+		soul.s.SharedEnergyRegenDelay <- 1.0
 		titan.SetSharedEnergyRegenRate( 333.3 )
 		soul.s.SharedEnergyRegenRate <- 333.3
-		soul.s.SharedEnergyRegenDelay <- 1.0
 
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
@@ -199,9 +195,9 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "執政官"
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
-		titan.SetSharedEnergyRegenDelay( 2.0 )
 		titan.SetSharedEnergyRegenRate( 200 )
 		soul.s.SharedEnergyRegenRate <- 200
+		titan.SetSharedEnergyRegenDelay( 1.0 )
 		soul.s.SharedEnergyRegenDelay <- 1.0
 
         foreach( weapon in titan.GetMainWeapons() )
@@ -214,7 +210,7 @@ void function OnTitanfall( entity titan )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, [ "tcp_vortex", "burn_mod_titan_vortex_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_laser_trip", OFFHAND_TITAN_CENTER, [ "pas_ion_tripwire", "tcp_arc_trip" ] )
-		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "tcp_arc_bomb" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "archon_stun_impact" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
 
 		array<int> passives = [ ePassives.PAS_ION_WEAPON,
@@ -265,12 +261,9 @@ void function OnTitanfall( entity titan )
 		soul.s.shouldFPEmbark <- true
 		soul.s.classicExecution <- true
 		titan.SetSharedEnergyTotal( 550 )
+		soul.s.SharedEnergyTotal <- 550
 		titan.SetSharedEnergyRegenRate( 30 )
 		soul.s.SharedEnergyRegenRate <- 30
-		soul.s.SharedEnergyTotal <- 550
-
-		if( titan.GetSharedEnergyCount() > soul.s.SharedEnergyTotal )
-			titan.TakeSharedEnergy( titan.GetSharedEnergyCount() - soul.s.SharedEnergyTotal )
 
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )

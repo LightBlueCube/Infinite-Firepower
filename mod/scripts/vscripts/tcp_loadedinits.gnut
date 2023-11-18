@@ -1,11 +1,8 @@
-untyped //entity.s need this
 global function InfiniteFirepower_Init
 
 void function InfiniteFirepower_Init()
 {
-	RegisterSignal( "NukeStart" )
-
-	RandomMap_Init()    //对局结束后换图
+	RandomMap_Init()    //随机换图
 
 	TitanChange_Init()    //至尊泰坦替换，神盾血
 
@@ -16,6 +13,8 @@ void function InfiniteFirepower_Init()
 	BetterRespawnPoint_Init()	//更好的重生点
 
 	AntiAFK_Init()	//反挂机
+
+	ColorfulChat_Init()	//炫彩聊天文字
 
 	thread UseTimeCheck()
 }

@@ -43,6 +43,7 @@ void function LaserCannon_Init()
 	RegisterWeaponDamageSource( "mp_titancore_gravity_core_explode", "重力核心" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titancore_gravity_core, GravityCoreOnDamage )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titancore_gravity_core_explode, GravityCoreExplodeOnDamage )
+	RegisterBallLightningDamage( eDamageSourceId.mp_titancore_gravity_core )
 }
 
 #if SERVER
@@ -374,11 +375,15 @@ void function GravityCoreThink( entity weapon, entity owner )
 	StatusEffect_AddTimed( soul, eStatusEffect.dodge_speed_slow, 0.6, 1.0, 0 )
 	owner.s.flyingSlow <- true
 	entity FX = StartParticleEffectOnEntity_ReturnEntity( owner, GetParticleSystemIndex( $"P_wpn_grenade_gravity" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	entity mover = CreateScriptMover( owner.GetOrigin(), owner.GetAngles() )
+	mover.SetParent( owner )
 
 	OnThreadEnd(
-		function() : ( owner, FX )
+		function() : ( owner, FX, mover )
 		{
 			EntFireByHandle( FX, "kill", "", 1.5, null, null )
+			if( IsValid( mover ) )
+				mover.Destroy()
 			if( !IsValid( owner ) )
 				return
 			owner.s.flyingSlow <- false
@@ -412,7 +417,7 @@ void function GravityCoreThink( entity weapon, entity owner )
 		RadiusDamage(
 			owner.GetOrigin(),											// origin
 			owner,														// owner
-			owner,		 												// inflictor
+			mover,		 												// inflictor
 			1,															// normal damage
 			40,															// heavy armor damage
 			1000,														// inner radius
@@ -495,17 +500,6 @@ void function GravityCoreOnDamage( entity target, var damageInfo )
 		target.SetVelocity( target.GetVelocity() + < 0, 0, 400 > )
 	if( target.IsPlayer() )
 		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.3, 0.5, 1.0 )
-
-	origin = DamageInfo_GetDamagePosition( damageInfo )
-	int hitBox = DamageInfo_GetHitBox( damageInfo )
-	string tag = GetEntityCenterTag( target )
-	int index = target.LookupAttachment( tag )
-	if ( index == 0 )
-		return
-
-	BallLightningData fxData
-	thread BallLightningZapConnectionFX( owner, target, tag, fxData )
-	BallLightningZapFX( owner, target, tag, fxData )
 }
 
 string function GetEntityCenterTag( entity target )

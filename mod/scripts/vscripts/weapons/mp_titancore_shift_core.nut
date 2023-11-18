@@ -480,7 +480,7 @@ void function BeginEmpWaveAng( entity projectile, WeaponPrimaryAttackParams atta
 	projectile.NotSolid()
 	projectile.e.onlyDamageEntitiesOnce = true
 	EmitSoundOnEntity( projectile, "arcwave_tail_3p" )
-	waitthread WeaponAttackWave( projectile, 0, projectile, attackParams.pos, attackParams.dir + rightVec * angleoffset, CreateEmpWaveSegment )
+	waitthread WeaponAttackWave_tcp_arc_wave( projectile, 0, projectile, attackParams.pos, attackParams.dir + rightVec * angleoffset, CreateEmpWaveSegment )
 	StopSoundOnEntity( projectile, "arcwave_tail_3p" )
 	projectile.Destroy()
 }
@@ -518,4 +518,135 @@ bool function CreateEmpWaveSegment( entity projectile, int projectileCount, enti
 		eDamageSourceId.mp_titanweapon_arc_wave )
 
 	return true
+}
+
+void function WeaponAttackWave_tcp_arc_wave( entity ent, int projectileCount, entity inflictor, vector pos, vector dir, bool functionref( entity, int, entity, entity, vector, vector, int ) waveFunc )
+{
+	ent.EndSignal( "OnDestroy" )
+
+	entity weapon
+	entity projectile
+	int maxCount
+	float step
+	entity owner
+	int damageNearValueTitanArmor
+	int count = 0
+	array<vector> positions = []
+	vector lastDownPos
+	bool firstTrace = true
+
+	dir = <dir.x, dir.y, 0.0>
+	dir = Normalize( dir )
+	vector angles = VectorToAngles( dir )
+
+	if ( ent.IsProjectile() )
+	{
+		projectile = ent
+		string chargedPrefix = ""
+		if ( ent.proj.isChargedShot )
+			chargedPrefix = "charge_"
+
+		maxCount = expect int( ent.ProjectileGetWeaponInfoFileKeyField( chargedPrefix + "wave_max_count" ) )
+		step = expect float( ent.ProjectileGetWeaponInfoFileKeyField( chargedPrefix + "wave_step_dist" ) )
+		owner = ent.GetOwner()
+		damageNearValueTitanArmor = projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor )
+	}
+	else
+	{
+		weapon = ent
+		maxCount = expect int( ent.GetWeaponInfoFileKeyField( "wave_max_count" ) )
+		step = expect float( ent.GetWeaponInfoFileKeyField( "wave_step_dist" ) )
+		owner = ent.GetWeaponOwner()
+		damageNearValueTitanArmor = weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor )
+	}
+
+	owner.EndSignal( "OnDestroy" )
+
+	for ( int i = 0; i < maxCount; i++ )
+	{
+		vector newPos = pos + dir * step
+
+		vector traceStart = pos
+		vector traceEndUnder = newPos
+		vector traceEndOver = newPos
+
+		if ( !firstTrace )
+		{
+			traceStart = lastDownPos + <0.0, 0.0, 80.0 >
+			traceEndUnder = <newPos.x, newPos.y, traceStart.z - 40.0 >
+			traceEndOver = <newPos.x, newPos.y, traceStart.z + step * 0.57735056839> // The over height is to cover the case of a sheer surface that then continues gradually upwards (like mp_box)
+		}
+		firstTrace = false
+
+		VortexBulletHit ornull vortexHit = VortexBulletHitCheck( owner, traceStart, traceEndOver )
+		if ( vortexHit )
+		{
+			expect VortexBulletHit( vortexHit )
+			entity vortexWeapon = vortexHit.vortex.GetOwnerWeapon()
+
+			if ( vortexWeapon && vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield" )
+				VortexDrainedByImpact( vortexWeapon, weapon, projectile, null ) // drain the vortex shield
+			else if ( IsVortexSphere( vortexHit.vortex ) )
+				VortexSphereDrainHealthForDamage( vortexHit.vortex, damageNearValueTitanArmor )
+
+			WaitFrame()
+			continue
+		}
+
+		//DebugDrawLine( traceStart, traceEndUnder, 0, 255, 0, true, 25.0 )
+		array ignoreArray = []
+		if ( IsValid( inflictor ) && inflictor.GetOwner() != null )
+			ignoreArray.append( inflictor.GetOwner() )
+
+		TraceResults forwardTrace = TraceLine( traceStart, traceEndUnder, ignoreArray, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		if ( forwardTrace.fraction == 1.0 )
+		{
+			//DebugDrawLine( forwardTrace.endPos, forwardTrace.endPos + <0.0, 0.0, -1000.0>, 255, 0, 0, true, 25.0 )
+			TraceResults downTrace = TraceLine( forwardTrace.endPos, forwardTrace.endPos + <0.0, 0.0, -1000.0>, ignoreArray, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+			if ( downTrace.fraction == 1.0 )
+				break
+
+			entity movingGeo = null
+			if ( downTrace.hitEnt && downTrace.hitEnt.HasPusherRootParent() && !downTrace.hitEnt.IsMarkedForDeletion() )
+				movingGeo = downTrace.hitEnt
+
+			if ( !waveFunc( ent, projectileCount, inflictor, movingGeo, downTrace.endPos, angles, i ) )
+				return
+
+			lastDownPos = downTrace.endPos
+			pos = forwardTrace.endPos
+
+			WaitFrame()
+			continue
+		}
+
+		TraceResults upwardTrace = TraceLine( traceStart, traceEndOver, ignoreArray, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		//DebugDrawLine( traceStart, traceEndOver, 0, 0, 255, true, 25.0 )
+		if ( upwardTrace.fraction < 1.0 )
+		{
+			if ( IsValid( upwardTrace.hitEnt ) )
+			{
+				if ( upwardTrace.hitEnt.IsWorld() || upwardTrace.hitEnt.IsPlayer() || upwardTrace.hitEnt.IsNPC() )
+					break
+			}
+		}
+		else
+		{
+			TraceResults downTrace = TraceLine( upwardTrace.endPos, upwardTrace.endPos + <0.0, 0.0, -1000.0>, ignoreArray, TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+			if ( downTrace.fraction == 1.0 )
+				break
+
+			entity movingGeo = null
+			if ( downTrace.hitEnt && downTrace.hitEnt.HasPusherRootParent() && !downTrace.hitEnt.IsMarkedForDeletion() )
+				movingGeo = downTrace.hitEnt
+
+			if ( !waveFunc( ent, projectileCount, inflictor, movingGeo, downTrace.endPos, angles, i ) )
+				return
+
+			lastDownPos = downTrace.endPos
+			pos = forwardTrace.endPos
+		}
+
+		WaitFrame()
+	}
 }

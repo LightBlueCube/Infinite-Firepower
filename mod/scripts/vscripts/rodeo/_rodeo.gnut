@@ -412,6 +412,7 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	float yAxis = player.GetInputAxisForward()
 
 	vector velocity
+	float speed = 500
 	if ( fabs( xAxis ) < 0.2 && fabs( yAxis ) < 0.2 )
 	{
 	    // no press = back press
@@ -423,19 +424,25 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	    vector rightVec = right * xAxis
 	    vector directionVec = ( rightVec + forwardVec )
 
-	    //printt( "ForwardVec: " + forwardVec + ", rightVec: " + rightVec + ", directionVec :" + directionVec + ", directionVec scaled: " + (directionVec * 350 ) ) // for bug 123013
-
-	    float speed = 500
 	    velocity = directionVec * speed
 	}
 
-	// IMPORTANT: Don't give boost pilots too much vertical or they go sky high
-	if ( player.GetPlayerSettingsField( "boostEnabled" ).tointeger() > 0 )
-	    velocity += Vector( 0,0,400 )
-	else
-	    velocity += Vector( 0,0,400 )
+	float y1 = rodeoTarget.GetAngles().y
+	float y2 = VectorToAngles( velocity ).y
+	float ang = y1 - y2	//cant use abs( float ), must be abs( int )
+	if( ang < 0 )
+		ang = ang * -1
+	if( ang > 180 )
+		ang = 360 - ang
 
-	//printt( "Setting velocity to: " + velocity ) // for bug 123013
+	float frac = GraphCapped( ang, 0, 180, 0, 1 )
+	if( frac < 0.5 )
+		frac = 0.5
+
+	velocity = velocity * frac
+	if( velocity == < 0, 0, 0 > )
+		velocity = AnglesToForward( < 0, rodeoTarget.GetAngles().y, 0 > ) * -speed
+	velocity.z += 400
 
 	player.SetVelocity( velocity )
 	player.JumpedOffRodeo()
