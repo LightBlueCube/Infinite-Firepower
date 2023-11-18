@@ -1,0 +1,14 @@
+global function SetPlayerToNightSky
+
+void function SetPlayerToNightSky( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	svGlobal.levelEnt.EndSignal( "NukeExplode" )
+	player.SetSkyCamera( GetEnt( SKYBOXSPACE ) )
+
+	for( ;; )
+	{
+		WaitFrame()
+		Remote_CallFunction_NonReplay( player, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
+	}
+}

@@ -30,11 +30,8 @@ const string ANSI_COLOR_ENEMY = "\x1b[38;5;208m"
 struct
 {
 	bool hasShuffled = false
+	float unBalanceTime = 0
 } file
-
-float unBalanceTime = 0
-
-int lastColor = 0
 
 void function TeamShuffle_Init()
 {
@@ -47,33 +44,8 @@ void function TeamShuffle_Init()
 	foreach ( string command in MANUAL_SWITCH_COMMANDS )
 	{
 		AddClientCommandCallback( command, CC_TrySwitchTeam )
+		AddChatCommandCallback( command, CC_TrySwitchTeam )
 	}
-	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
-}
-
-ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msgStruct )
-{
-    string message = msgStruct.message
-    array<string> splitedMsg = split( message, " " ) // split with white space
-
-	if ( MANUAL_SWITCH_COMMANDS.contains( splitedMsg[0] ) )
-	{
-		CC_TrySwitchTeam( msgStruct.player, [] )
-		msgStruct.shouldBlock = true
-		return msgStruct
-	}
-
-	array<string> ansi_colors = [
-		"\x1b[31m", "\x1b[32m", "\x1b[33m", "\x1b[34m", "\x1b[35m", "\x1b[36m", "\x1b[37m",
-		"\x1b[96m", "\x1b[95m", "\x1b[94m", "\x1b[93m", "\x1b[92m", "\x1b[61m", "\x1b[90m"
-	]
-
-	lastColor++
-	if( lastColor >= ansi_colors.len() )
-		lastColor = 0
-	msgStruct.message = ansi_colors[ lastColor ] + msgStruct.message
-
-    return msgStruct
 }
 
 bool function CC_TrySwitchTeam( entity player, array<string> args )
@@ -85,38 +57,38 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 	// Blacklist guards
   	if ( gamemodeDisable )
 	{
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前模式不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前模式不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
   	if ( mapDisable )
-    {
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前地图不可切换队伍", false ) // chathook has been fucked up
+	{
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前地图不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
 	if ( player.isSpawning )
 	{
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "作为泰坦复活途中，不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "作为泰坦复活途中，不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
 	if ( player.GetParent() )
 	{
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "有被绑定的父级实体，不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "有被绑定的父级实体，不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
 	if ( GetPlayerArray().len() == 1 )
 	{
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "人数不足，不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "人数不足，不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
 	// Check if difference is smaller than 2 ( dont balance when it is 0 or 1 )
 	if( abs ( GetPlayerArrayOfTeam( TEAM_IMC ).len() - GetPlayerArrayOfTeam( TEAM_MILITIA ).len() ) <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
 	{
-    	Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "队伍已平衡，不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "队伍已平衡，不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
@@ -136,9 +108,9 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 ClServer_MessageStruct function Chat_TrySwitchTeam( ClServer_MessageStruct msgStruct )
 {
 	entity sender = msgStruct.player
-    CC_TrySwitchTeam( sender, [] )
-    msgStruct.shouldBlock = true // always block the message
-    return msgStruct
+	CC_TrySwitchTeam( sender, [] )
+	msgStruct.shouldBlock = true // always block the message
+	return msgStruct
 }
 
 void function CheckPlayerDisconnect( entity player )
@@ -154,10 +126,10 @@ void function CheckPlayerDisconnect( entity player )
 
 	// Blacklist guards
   	if ( gamemodeDisable )
-    	return
+		return
 
   	if ( mapDisable )
-    	return
+		return
 
 	if ( GetPlayerArray().len() == 1 )
 		return
@@ -176,8 +148,8 @@ void function CheckPlayerDisconnect( entity player )
 	if( abs ( imcTeamSize - mltTeamSize ) <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
 		return
 
-	if( unBalanceTime + 60 < Time() )
-		unBalanceTime = Time()
+	if( file.unBalanceTime + 60 < Time() )
+		file.unBalanceTime = Time()
 
 	int weakTeam = imcTeamSize > mltTeamSize ? TEAM_MILITIA : TEAM_IMC
 	foreach ( entity player in GetPlayerArrayOfTeam( GetOtherTeam( weakTeam ) ) )
@@ -194,30 +166,30 @@ void function TeamShuffleThink()
 	if( file.hasShuffled )
 		return
  	if ( GetPlayerArray().len() == 0 )
-    	return
+		return
 
   	// Set team to TEAM_UNASSIGNED
   	foreach ( player in GetPlayerArray() )
-    	SetTeam ( player, TEAM_UNASSIGNED )
+		SetTeam ( player, TEAM_UNASSIGNED )
 
   	int maxTeamSize = GetPlayerArray().len() / 2
 
   	// Assign teams
   	foreach ( player in GetPlayerArray() )
   	{
-    	if( !IsValid( player ) )
-      		continue
+		if( !IsValid( player ) )
+	  		continue
 
-    	// Get random team
-    	int team = RandomIntRange( TEAM_IMC, TEAM_MILITIA + 1 )
-    	// Gueard for team size
-    	if ( GetPlayerArrayOfTeam( team ).len() >= maxTeamSize )
-    	{
-      		SetTeam( player, GetOtherTeam( team ) )
-      			continue
-    	}
-    //
-    	SetTeam( player, team )
+		// Get random team
+		int team = RandomIntRange( TEAM_IMC, TEAM_MILITIA + 1 )
+		// Gueard for team size
+		if ( GetPlayerArrayOfTeam( team ).len() >= maxTeamSize )
+		{
+	  		SetTeam( player, GetOtherTeam( team ) )
+	  			continue
+		}
+	//
+		SetTeam( player, team )
 	}
 	FixShuffle()
 	file.hasShuffled = true
@@ -270,7 +242,7 @@ void function WaitForPlayerRespawnThenNotify( entity player )
 
 void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 {
-	if( unBalanceTime + 60 > Time() )
+	if( file.unBalanceTime + 60 > Time() )
 		return
 	// general check
   	if ( !CanChangeTeam() )
@@ -294,10 +266,10 @@ bool function CanChangeTeam()
 
 	// Blacklist guards
   	if ( gamemodeDisable )
-    	return false
+		return false
 
   	if ( mapDisable )
-    	return false
+		return false
 
 	// Check if difference is smaller than 2 ( dont balance when it is 0 or 1 )
 	// May be too aggresive ??
@@ -357,7 +329,7 @@ bool function ClientCommand_SwitchTeam( entity player, array<string> args )
 	string PlayerFaction = GetFactionChoice( player )
 	string EnemyFaction = GetEnemyFaction( player )
 	int PlayerTeamCount = GetPlayerArrayOfTeam( PlayerTeam ).len()
-    	int EnemyTeamCount = GetPlayerArrayOfTeam( EnemyTeam ).len()
+		int EnemyTeamCount = GetPlayerArrayOfTeam( EnemyTeam ).len()
 	int MaxPlayers = GetGamemodeVarOrUseValue( GetConVarString( "ns_private_match_last_mode" ), "max_players", "12" ).tointeger()
 
 	if( PlayerTeam != TEAM_MILITIA && PlayerTeam != TEAM_IMC )

@@ -6,24 +6,23 @@ global function ApplyCruiseMissile
 global function ApplyVTOL
 global function ApplyNuclearBomb
 
-
 void function ApplyDropBattery( entity player )
 {
     if( !player.IsHuman() )
     {
-        SendHudMessage( player, "\n你需要处于铁驭状态才能扔出电池", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能扔出电池", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !IsAlive( player ) )
     {
-        SendHudMessage( player, "\n死亡时不可丢出电池", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n死亡时不可丢出电池", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !PlayerHasMaxBatteryCount( player ) )
     {
-        SendHudMessage( player, "\n你没有电池", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你没有电池", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
@@ -44,94 +43,81 @@ void function DropBattery( entity player )
     battery.s.touchEnabledTime <- Time() + 1
 
     if( battery.GetSkin() == 0 )
-        SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 100, 255, 100 >, 2, 1 )
     if( battery.GetSkin() == 1 )
-        SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 255, 100, 100 >, 2, 1 )
     if( battery.GetSkin() == 2 )
-        SendHudMessage( player, "\n已丢出电池!", -1, 0.3, 255, 255, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 255, 255, 100 >, 2, 1 )
     EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 }
 
-void function ApplyNukeTitan( entity player, bool applyAll = false )
+void function ApplyNukeTitan( entity player )
 {
     if( player.s.NukeTitan <= 0 )
     {
-        SendHudMessage( player, "\n你没有核武泰坦!", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你没有核武泰坦!", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !player.IsHuman() )
     {
-        SendHudMessage( player, "\n你需要处于铁驭状态才能交付核武泰坦", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能交付核武泰坦", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
-    if( applyAll )
-    {
-        SendHudMessage( player, "\n成功交付了 "+ player.s.NukeTitan +" 个核武泰坦", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
-        EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-        for( var i = player.s.NukeTitan; i > 0; i -= 1)
-        {
-            PlayerInventory_GiveNukeTitan( player )
-        }
-        player.s.NukeTitan = 0
-    }
-    else
-    {
-        player.s.NukeTitan -= 1
-        SendHudMessage( player, "\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
-        EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-        PlayerInventory_GiveNukeTitan( player )
-    }
+	player.s.NukeTitan -= 1
+	thread SendKsGUI_Threaded( player, "==按住以持续交付==\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", < 100, 255, 100 >, 2, 1 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+	PlayerInventory_GiveNukeTitan( player )
 }
 
 void function ApplyCruiseMissile( entity player )
 {
     if( player.s.CruiseMissile <= 0 )
     {
-        SendHudMessage( player, "\n无巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n无巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !IsAlive( player ) )
     {
-        SendHudMessage( player, "\n死亡时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n死亡时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( IsValid( player.GetTitanSoulBeingRodeoed() ) )
     {
-        SendHudMessage( player, "\n训牛时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n训牛时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( player.GetParent() )
     {
-        SendHudMessage( player, "\n在有绑定的父级实体时不可使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n在有绑定的父级实体时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !player.IsHuman() )
     {
-        SendHudMessage( player, "\n你需要处于铁驭状态才能使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( player.IsPhaseShifted() )
     {
-        SendHudMessage( player, "\n你需要离开相位才能使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你需要离开相位才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
     if( !player.IsOnGround() )
     {
-        SendHudMessage( player, "\n你需要站在地上才能使用巡弋飞弹", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n你需要站在地上才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
 
     thread CruiseMissileAnim_ThinkBefore( player )
-    SendHudMessage( player, " ", -1, 0.3, 100, 255, 100, 255, 0, 2, 1 )
+    thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 2, 1 )
     EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
     player.s.CruiseMissile -= 1
 }
@@ -145,11 +131,12 @@ void function ApplyNuclearBomb( entity player )
 {
     if( !player.s.HaveNuclearBomb )
     {
-        SendHudMessage( player, "\n折叠时空武器离线", -1, 0.3, 255, 100, 100, 255, 0, 2, 1 )
+        thread SendKsGUI_Threaded( player, "\n折叠时空武器离线", < 255, 100, 100 >, 2, 1 )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
 
+	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
     thread NuclearBombAnimThink( player )
-    EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }

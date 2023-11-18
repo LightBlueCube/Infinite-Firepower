@@ -12,10 +12,14 @@
             }
         },
 
-        // TitanChange //
+        // LoadoutChange //
 
         {
-            "Path": "_titanchange.nut",
+            "Path": "loadout_change/_titanchange.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "loadout_change/_skillchange.gnut",
             "RunOn": "SERVER && MP"
         },
 
@@ -69,6 +73,21 @@
         {
             "Path": "tcputil/teamshuffle.nut",
             "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "tcputil/sh_night_sky.gnut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "tcputil/colorful_chat.nut",
+            "RunOn": "SERVER && MP"
+        },
+        {
+            "Path": "tcputil/sh_chatcommand.gnut",
+            "RunOn": "SERVER && MP",
+            "ServerCallback": {
+                "After": "ChatCommand_Init"
+            }
         },
 
         // modded weapons //

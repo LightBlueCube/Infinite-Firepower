@@ -1,5 +1,14 @@
 WeaponData
 {
+	// for archon_stun_impact
+	// grenade behaviors
+	"grenade_bounce_vel_frac_shallow"				"0.53"
+	"grenade_bounce_vel_frac_sharp"					"0.32"
+	"grenade_bounce_vel_frac_along_normal"			"0.5"
+	"grenade_bounce_randomness"						"0.2"
+	"grenade_bounce_extra_vertical_randomness"		"0.2"
+	"grenade_roll_vel_frac_per_second"				"0.1"
+
 	Mods
 	{
 		clustermissile_fast_recharge
@@ -40,15 +49,29 @@ WeaponData
 		{
 		}
 
-		tcp_arc_bomb
+		//from super.mixed.game
+		archon_stun_impact // create a stun grenade on impact, no sonar effect
 		{
+			"projectile_trail_effect_0" 					"wpn_grenade_frag_blue"
+			"bounce_effect_table"							"bounce_arc"
+
+			"titanarmor_critical_hit_required"          	"0" // able to damage titan
+
+			"grenade_ignition_time"							"0.75" // explosion delay
+
 			"impact_effect_table" 							"exp_emp"
-			"damage_near_value_titanarmor"					"1200"
-			"explosion_damage"								"100"
+			"impulse_force"   								"500"
+			"impulse_force_explosions"						"50000"
+
+			// cooldown
+			"regen_ammo_refill_rate"						"13.5"
+
+			// bigger radius
+			"explosion_inner_radius"  						"150"
+			"explosionradius" 								"350"
+
+			"explosion_damage"								"200"
 			"explosion_damage_heavy_armor"					"1000"
-			"explosion_inner_radius"  						"200"
-			"explosionradius" 								"400"
-			"regen_ammo_refill_rate"						"9"
 		}
 	}
 }

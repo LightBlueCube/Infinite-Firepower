@@ -350,7 +350,7 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 	EmitSoundOnEntityExceptToPlayer( player, player, soundInfo.liftoff_3p )
 	thread PlayFlyingSound( player, soundInfo )
 
-	float RISE_VEL = 500
+	float RISE_VEL = 400
 
 	vector startOrigin = player.GetOrigin()
 
@@ -394,12 +394,11 @@ void function TakeWeaponClip( weapon )
 {
 	weapon.EndSignal( "OnDestroy" )
 
-	float endTime = Time() + 1.1
-	float timePassed = 0.6
+	float timePassed = 1.1
 	while( timePassed > 0 )
 	{
 		timePassed -= 0.1
-		weapon.SetWeaponPrimaryClipCountAbsolute( GraphCapped( timePassed, 0.0, 0.6, 0, weapon.GetWeaponPrimaryClipCountMax() ) )
+		weapon.SetWeaponPrimaryClipCountAbsolute( GraphCapped( timePassed, 0.0, 1.1, 0, weapon.GetWeaponPrimaryClipCountMax() ) )
 		WaitFrame()
 	}
 }

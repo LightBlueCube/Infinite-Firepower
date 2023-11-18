@@ -1,0 +1,62 @@
+global function ChatCommand_Init
+global function AddChatCommandCallback
+global function AddCallback_OnReceivedSayTextMessage_AfterChatCommand
+
+struct
+{
+	table<string, bool functionref( entity, array<string> )> chatCommandCallbacks
+	array<ClServer_MessageStruct functionref(ClServer_MessageStruct)> afterChatCommandCallbacks
+} file
+
+void function ChatCommand_Init()
+{
+	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
+}
+
+void function AddChatCommandCallback( string cmd, bool functionref( entity, array<string> ) callbackFunc )
+{
+	if( cmd in file.chatCommandCallbacks )
+	{
+		printt( "[ERROR] ChatCommand: command:"+ cmd +" already exists")
+		unreachable
+	}
+
+	file.chatCommandCallbacks[ cmd ] <- callbackFunc
+}
+
+void function AddCallback_OnReceivedSayTextMessage_AfterChatCommand( ClServer_MessageStruct functionref( ClServer_MessageStruct ) callbackFunc )
+{
+	if( file.afterChatCommandCallbacks.contains( callbackFunc ) )
+	{
+		printt( "[ERROR] ChatCommand: function already exists" )
+		unreachable
+	}
+
+	file.afterChatCommandCallbacks.append( callbackFunc )
+}
+
+ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msgStruct )
+{
+	string message = msgStruct.message
+	array<string> splitedMsg = split( message, " " ) // split with white space
+	string cmd = splitedMsg[0]
+	array<string> args = splitedMsg
+	args.removebyvalue( cmd )
+
+	if( cmd in file.chatCommandCallbacks )
+	{
+		msgStruct.shouldBlock = file.chatCommandCallbacks[ cmd ]( msgStruct.player, args )
+		if( msgStruct.shouldBlock )
+			return msgStruct
+	}
+
+	foreach ( callbackFunc in file.afterChatCommandCallbacks )
+	{
+		ClServer_MessageStruct returnStruct = callbackFunc( msgStruct )
+		msgStruct.message = returnStruct.message
+		msgStruct.isTeam = returnStruct.isTeam
+		msgStruct.shouldBlock = msgStruct.shouldBlock || returnStruct.shouldBlock
+	}
+
+	return msgStruct
+}

@@ -1,5 +1,6 @@
 untyped
 global function KillStreak_Init
+global function GetKillStreakData
 global function KillStreakEnable
 global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
@@ -26,6 +27,16 @@ void function KillStreak_Init()
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.WinnerDetermined, OnWinnerDetermined )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+}
+
+table function GetKillStreakData()
+{
+	return {
+		nukeTitan = file.nukeTitan,
+		cruiseMissile = file.cruiseMissile,
+		vtol = file.vtol,
+		nuclearBomb = file.nuclearBomb
+	}
 }
 
 bool function KillStreakEnable()
@@ -83,13 +94,12 @@ void function RestoreKillStreak( entity player )
 		if( player.s.GiveRandomKillStreak )
 		{
 			thread RandomKillStreak_MsgShared( player )
-			player.s.CruiseMissile += RandomInt( 5 ) == 0 ? 1 : 0	//20%
-			if( player.s.CruiseMissile > 0 )
-				player.s.NukeTitan += RandomInt( 3 )
-			else
-				player.s.NukeTitan += RandomInt( 4 ) + 1
+			player.s.NukeTitan += RandomInt( 8 ) + 1
+			if( player.s.NukeTitan <= 4 )
+				player.s.CruiseMissile += 1
 
 			player.s.GiveRandomKillStreak <- false
+			RandomKillStreakPlayers.removebyvalue( player.GetUID() )
 		}
 	}
 

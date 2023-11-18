@@ -12,6 +12,8 @@ void function MpTitanWeaponLaserLite_Init()
 	#if SERVER
 		AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_laser_lite, LaserLite_DamagedTarget )
 	#endif
+
+	RegisterSignal( "MarkLaserTagetThink" )
 }
 
 bool function OnWeaponAttemptOffhandSwitch_titanweapon_laser_lite( entity weapon )
@@ -35,6 +37,9 @@ var function OnWeaponPrimaryAttack_titanweapon_laser_lite( entity weapon, Weapon
 	#endif
 
 	entity weaponOwner = weapon.GetWeaponOwner()
+	if( !weaponOwner.CanUseSharedEnergy( weapon.GetWeaponCurrentEnergyCost() ) )
+		return 0
+
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
@@ -81,6 +86,8 @@ void function HighLightingTarget( entity target, entity owner )
 {
 	target.EndSignal( "OnDeath" )
 	target.EndSignal( "OnDestroy" )
+	target.Signal( "MarkLaserTagetThink" )
+	target.EndSignal( "MarkLaserTagetThink" )
 
 	int sonarTeam = owner.GetTeam()
 	int statusEffect = StatusEffect_AddEndless( target, eStatusEffect.damage_received_multiplier, 0.5 )
@@ -97,9 +104,8 @@ void function HighLightingTarget( entity target, entity owner )
 			}
 		}
 	)
-	if( Hightlight_HasEnemyHighlight( target, "enemy_boss_bounty" ) )
-		Highlight_ClearEnemyHighlight( target )
-	Highlight_SetEnemyHighlight( target, "enemy_boss_bounty" )
+	Highlight_ClearEnemyHighlight( target )
+	Highlight_SetSonarHighlightWithParam0( target, "enemy_sonar", <1, 0, 0> )
 
 	wait 6
 }

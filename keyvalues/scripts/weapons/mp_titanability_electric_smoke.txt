@@ -1,4 +1,0 @@
-WeaponData
-{
-	"ammo_stockpile_max"							"8"
-}

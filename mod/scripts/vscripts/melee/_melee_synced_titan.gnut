@@ -1728,6 +1728,7 @@ void function Execution_GivePilotBattery( entity fakePilotModel )
 	entity tempBattery3p = CreatePropDynamic( RODEO_BATTERY_MODEL_FOR_RODEO_ANIMS )
 	tempBattery3p.SetParent( fakePilotModel, "R_HAND", false, 0.0 )
 	tempBattery3p.RemoveFromSpatialPartition()
+	tempBattery3p.SetSkin( 1 )
 	tempBattery3p.Show()
 	Battery_StartFX( tempBattery3p )
 }

@@ -4,6 +4,13 @@ global function RandomMap
 void function RandomMap_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+	if( [ "mp_rise", "mp_eden" ].contains( GetMapName() ) || RandomInt( 3 ) == 0 )
+		AddCallback_OnClientConnected( OnClientConnected )
+}
+
+void function OnClientConnected( entity player )
+{
+    thread SetPlayerToNightSky( player )
 }
 
 void function GameStateEnter_Postmatch()
@@ -41,8 +48,6 @@ void function RandomMap()
 			ServerCommand( "map mp_drydock" )
 			break
 		case 4:
-			RandomMap()
-			return
 			if( GetMapName() == "mp_eden" )
 				return RandomMap()
 			ServerCommand( "map mp_eden" )

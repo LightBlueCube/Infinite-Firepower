@@ -209,7 +209,8 @@ function DeployLaserPylon( entity projectile )
 	SetTargetName( tower, "Laser Tripwire Base" )
 	tower.SetMaxHealth( LASER_TRIP_HEALTH )
 	tower.SetHealth( LASER_TRIP_HEALTH )
-	tower.SetTakeDamageType( DAMAGE_YES )
+	if( !arcTrip )
+		tower.SetTakeDamageType( DAMAGE_YES )
 	tower.SetDamageNotifications( true )
 	tower.SetDeathNotifications( true )
 	tower.SetArmorType( ARMOR_TYPE_HEAVY )
@@ -258,11 +259,6 @@ function DeployLaserPylon( entity projectile )
 
 	pylon.SetMaxHealth( LASER_TRIP_HEALTH )
 	pylon.SetHealth( LASER_TRIP_HEALTH )
-	if( arcTrip )
-	{
-		pylon.SetMaxHealth( 1000 )
-		pylon.SetHealth( 1000 )
-	}
 	pylon.SetTakeDamageType( DAMAGE_NO )
 	pylon.SetDamageNotifications( true )
 	pylon.SetDeathNotifications( true )
@@ -633,7 +629,7 @@ void function LaserTripEMP_DamagedPlayerOrNPC( entity ent, var damageInfo )
 		return
 	if( ent.GetTeam() == attacker.GetTeam() )
 		return
-	//StatusEffect_AddTimed( ent, eStatusEffect.move_slow, 0.4, 1.0, 1.0 )
+	StatusEffect_AddTimed( ent, eStatusEffect.move_slow, 0.4, 1.0, 1.0 )
 	if( !ent.IsPlayer() )
 		return
 	Remote_CallFunction_Replay( ent, "ServerCallback_TitanEMP", 0.2, 1.0, 1.0 )
