@@ -10,7 +10,6 @@ void function PilotShield_Init()
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 	AddDamageCallback( "player", OnPlayerDamaged )
-	RegisterWeaponDamageSource( "pilot_shield_pass", "" )
 }
 
 void function OnClientConnected( entity player )
@@ -23,25 +22,20 @@ void function OnClientConnected( entity player )
 
 void function OnPlayerDamaged( entity victim, var damageInfo )
 {
-	if( victim.GetShieldHealth() == 0 || !victim.IsHuman() || DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.pilot_shield_pass )
+	if( victim.GetShieldHealth() == 0 || !victim.IsHuman() )
 		return
 
 	float damage = DamageInfo_GetDamage( damageInfo )
 
-	if( DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.mp_titanability_smoke && damage < victim.GetShieldHealth() )
-	{
-		victim.SetHealth( max( 1, victim.GetHealth() - damage ) )
-	}
-
 	if( damage >= victim.GetShieldHealth() )
 	{
-		victim.TakeDamage( victim.GetShieldHealth(), DamageInfo_GetAttacker( damageInfo ), DamageInfo_GetWeapon( damageInfo ), { damageSourceId = eDamageSourceId.pilot_shield_pass, scriptType = DamageInfo_GetCustomDamageType( damageInfo ) } )
+		DamageInfo_SetDamage( damageInfo, damage - victim.GetShieldHealth() )
+		victim.SetShieldHealth( 0 )
 		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 2.0, 2.0 )
 		EmitSoundOnEntityOnlyToPlayer( victim, victim, "titan_energyshield_down_1P" )
-		DamageInfo_SetDamage( damageInfo, damage - victim.GetShieldHealth() )
 		return
 	}
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( DamageInfo_GetDamage( damageInfo ), 0, victim.GetShieldHealthMax(), 0.0, 1.0 ), 2.0, 2.0 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( victim.GetShieldHealth(), victim.GetShieldHealthMax(), 0, 0.1, 1.0 ), 2.0, 2.0 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
 }
 

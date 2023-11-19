@@ -99,7 +99,7 @@ void function OnRodeoWeakpointDamaged( entity weakpoint, var damageInfo )
 	if( IsValid( attackerWeapon ) )
 		weaponName = attackerWeapon.GetWeaponClassName()
 
-	float bullet = 1.2 * attackerWeapon.GetWeaponSettingFloat( eWeaponVar.fire_rate )
+	float bullet = 2.0 * attackerWeapon.GetWeaponSettingFloat( eWeaponVar.fire_rate )
 	rodeoDamage = int( 15000 / bullet )
 
 	if( ELECTRIC_SMOKE_DAMAGESOURCES.contains( damageSourceID ) ) // hardcoded here
