@@ -46,8 +46,6 @@ void function SendKsGUI_Threaded( entity player, string text, vector rgb, float 
 void function OnClientConnected( entity player )
 {
 	player.s.KsGUIL1 <- 0
-	player.s.KsGUIL2 <- false
-	player.s.KsGUIL2_1 <- 0
 	player.s.GUIActive <- false
 	player.s.GUIClose <- true
 	player.s.GUIDisable <- false

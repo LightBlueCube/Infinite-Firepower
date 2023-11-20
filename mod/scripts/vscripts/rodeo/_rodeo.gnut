@@ -412,7 +412,7 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	float yAxis = player.GetInputAxisForward()
 
 	vector velocity
-	float speed = 500
+	float speed = 400
 	if ( fabs( xAxis ) < 0.2 && fabs( yAxis ) < 0.2 )
 	{
 	    // no press = back press
@@ -440,8 +440,6 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 		frac = 0.5
 
 	velocity = velocity * frac
-	if( velocity == < 0, 0, 0 > )
-		velocity = AnglesToForward( < 0, rodeoTarget.GetAngles().y, 0 > ) * -( speed / 2 )
 	velocity.z += 400
 
 	player.SetVelocity( velocity )

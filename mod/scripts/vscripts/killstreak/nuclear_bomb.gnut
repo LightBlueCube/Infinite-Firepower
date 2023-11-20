@@ -231,7 +231,7 @@ void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 {
 	if( !IsValid( owner ) )
 		return
-	if( !owner.s.GUIClose )
+	if( !owner.s.GUIClose || owner.s.GUIDisable )
 		return
 
 	string msg = ""
@@ -267,7 +267,7 @@ void function SendNuclearWarn( string msg )
 	{
 		if( !IsValid( player ) )
 			continue
-		if( !player.s.GUIClose )
+		if( !player.s.GUIClose || player.s.GUIDisable )
 			continue
 		SendHudMessage( player, msg, -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
 	}
@@ -292,12 +292,12 @@ void function NuclearBombThink( entity owner )
 	SendNuclearWarn( "" )
 	wait 0.3
 	SendNuclearWarn( GetWarnSysbols( 1, 1 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n"+ GetWarnSysbols( 1, 1 ) )
-	PlayBeepSoundToAll()
+	PlayFinishBeepSoundToAll()
 	wait 0.3
 	SendNuclearWarn( "" )
 	wait 0.2
 	SendNuclearWarn( GetWarnSysbols( 1, 1 ) +"\n侦测到来自 "+ ownerName +" 的折叠时空武器打击\n预计到达时间 ETA T-20s\n"+ GetWarnSysbols( 1, 1 ) )
-	PlayBeepSoundToAll()
+	PlayFinishBeepSoundToAll()
 	wait 0.8
 
 	float realSec
@@ -375,12 +375,6 @@ void function NuclearBombThink( entity owner )
 
 	wait 3
 	SetGameState( eGameState.Postmatch )
-}
-
-void function PlayBeepSoundToAll()
-{
-	foreach( player in GetPlayerArray() )
-		PlayBeepSound( player )
 }
 
 void function PlayFinishBeepSoundToAll()
