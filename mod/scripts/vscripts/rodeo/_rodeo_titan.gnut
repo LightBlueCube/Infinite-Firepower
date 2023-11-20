@@ -75,6 +75,8 @@ global function Rodeo_SetBatteryIconsHide
 global function Rodeo_SetWorldBatteryMaxCount
 global function Rodeo_SetBatteryPickupAllowed
 
+global function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded
+
 #if DEV
 global function SetDebugRodeoPrint
 global function GetDebugRodeoPrint
@@ -111,7 +113,7 @@ global float ANTI_RODEO_DEFAULT_WINDOW_START = 0.55
 
 //nessie modify
 const int PILOT_BATTERY_BUGGED_LIMIT = 1
-const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 48
+const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 32
 
 struct AntiRodeoPlayerData
 {
@@ -1957,6 +1959,7 @@ void function Rodeo_PilotPicksUpBattery_Silent( entity pilot, entity battery )
 	if ( GetPlayerBatteryCount( pilot ) == 1 )
 	{
 		battery.SetParent( pilot, "BATTERY_ATTACH" )
+		Battery_StartFX( battery )
 		battery.MarkAsNonMovingAttachment()
 		battery.RemoveFromSpatialPartition()
 		SetBatteryOnBack( pilot, battery )

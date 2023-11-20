@@ -8,7 +8,7 @@ void function PilotShield_Init()
     RegisterSignal( "DoneUseShieldBattery" )
 
 	AddCallback_OnClientConnected( OnClientConnected )
-	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddCallback_PlayerClassChanged( OnPlayerClassChanged )
 	AddDamageCallback( "player", OnPlayerDamaged )
 }
 
@@ -26,20 +26,28 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 		return
 
 	float damage = DamageInfo_GetDamage( damageInfo )
+	if( damage <= 0 )
+		return
+
+	DamageInfo_AddCustomDamageType( damageInfo, DF_SHIELD_DAMAGE )
 
 	if( damage >= victim.GetShieldHealth() )
 	{
 		DamageInfo_SetDamage( damageInfo, damage - victim.GetShieldHealth() )
 		victim.SetShieldHealth( 0 )
-		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 2.0, 2.0 )
-		EmitSoundOnEntityOnlyToPlayer( victim, victim, "titan_energyshield_down_1P" )
+		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 2.0, 1.0 )
+		EmitSoundOnEntity( victim, "titan_energyshield_down" )
+		if( victim.s.GUIClose )
+			SendHudMessage( victim, "护盾损坏\n0/"+ victim.GetShieldHealthMax(), -1, -0.4, 255, 100, 100, 255, 0, 1.0, 1.0 )
 		return
 	}
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( victim.GetShieldHealth(), victim.GetShieldHealthMax(), 0, 0.1, 1.0 ), 2.0, 2.0 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( victim.GetShieldHealth(), victim.GetShieldHealthMax(), 0, 0.1, 1.0 ), 2.0, 1.0 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
+	if( victim.s.GUIClose )
+		SendHudMessage( victim, "护盾受击\n"+ max( 0, victim.GetShieldHealth() - damage ) +"/"+ victim.GetShieldHealthMax(), -1, -0.4, 255, 255, 100, 255, 0, 1.0, 1.0 )
 }
 
-void function OnPlayerRespawned( entity player )
+void function OnPlayerClassChanged( entity player )
 {
 	if( !KillStreakEnable() )
 		return
@@ -62,14 +70,21 @@ void function TryUseShieldBattery( entity player )
 	wait 0.5
 
 	player.Signal( "StopUseShieldBattery" )
+	player.Signal( "SendingNewGUI" )
 	player.EndSignal( "StopUseShieldBattery" )
-
-	if( player.GetShieldHealth() == player.GetShieldHealthMax() )
-		return
-
 	entity battery = GetBatteryOnBack( player )
-	if( !IsValid( battery ) )
+
+	if( player.GetShieldHealth() == player.GetShieldHealthMax() || !IsValid( battery ) )
+	{
+		player.HolsterWeapon()
+		player.DeployWeapon()
+		if( IsValid( player.GetOffhandWeapon( OFFHAND_INVENTORY ) ) )
+			if( player.GetOffhandWeapon( OFFHAND_INVENTORY ).GetWeaponInfoFileKeyField( "fire_mode" ) == "offhand_hybrid" )
+				if( IsValid( activeWeapon ) && IsAlive( player ) )
+					player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
 		return
+	}
+
 	battery.EndSignal( "OnDestroy" )
 
 	table results = {}
@@ -117,7 +132,11 @@ void function TryUseShieldBattery( entity player )
 	player.s.GUIDisable = true
 
 	bool isAmped = IsAmpedBattery( battery )
-	float useTime = 2
+	if( isAmped )
+		SendHudMessage( player, "正在取出电池...\n", -1, -0.4, 255, 255, 100, 255, 0, 1.0, 0.0 )
+	else
+		SendHudMessage( player, "正在取出电池...\n", -1, -0.4, 100, 255, 100, 255, 0, 1.0, 0.0 )
+	float useTime = isAmped ? 1.5 : 1.0
 
 	player.HolsterWeapon()
 	player.Server_TurnOffhandWeaponsDisabledOn()
@@ -125,7 +144,7 @@ void function TryUseShieldBattery( entity player )
 	battery.ClearParent()
 	battery.SetParent( player, "PROPGUN" )
 	battery.SetAngles( < 0,90,90 > )
-	EmitSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "Weapon_EnergySyphon_Charge_1P" )
 
 	float startTime = Time()
 	while( startTime + useTime > Time() )
@@ -133,9 +152,9 @@ void function TryUseShieldBattery( entity player )
 		player.HolsterWeapon() // defensive fix
 		player.Server_TurnOffhandWeaponsDisabledOn()
 		if( isAmped )
-			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n松开按键以取消", -1, 0.3, 255, 255, 100, 255, 0, 0.2, 0 )
+			SendHudMessage( player, "正在使用电池  松开按键以取消\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]", -1, -0.4, 255, 255, 100, 255, 0, 0.2, 0 )
 		else
-			SendHudMessage( player, "正在使用电池\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]\n松开按键以取消", -1, 0.3, 100, 255, 100, 255, 0, 0.2, 0 )
+			SendHudMessage( player, "正在使用电池  松开按键以取消\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]", -1, -0.4, 100, 255, 100, 255, 0, 0.2, 0 )
 
 		if( !PlayerHasMaxBatteryCount( player ) )
 			return
@@ -148,6 +167,10 @@ void function TryUseShieldBattery( entity player )
 	player.Signal( "DoneUseShieldBattery" )
 	results.canceledUsage = false
 	player.SetShieldHealth( player.GetShieldHealthMax() )
+	if( isAmped )
+		SendHudMessage( player, "护盾恢复\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax(), -1, -0.4, 255, 255, 100, 255, 0, 1.0, 1.0 )
+	else
+		SendHudMessage( player, "护盾恢复\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax(), -1, -0.4, 100, 255, 100, 255, 0, 1.0, 1.0 )
 
 	entity shieldFXHandle = StartParticleEffectOnEntity_ReturnEntity( player, GetParticleSystemIndex( $"P_xo_armor_body_CP" ), FX_PATTACH_POINT_FOLLOW, player.LookupAttachment( "CHESTFOCUS" ) )
 
@@ -161,7 +184,6 @@ void function TryUseShieldBattery( entity player )
 
 	shieldFXHandle.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY | ENTITY_VISIBLE_TO_FRIENDLY
 
-	EmitSoundOnEntityExceptToPlayer( player, player, "ui_titanbattery_pilot_give_titanbattery" )
 	MessageToPlayer( player, eEventNotifications.Rodeo_PilotAppliedBatteryToYou, player, isAmped )
 
 	entity newestBattery = Rodeo_TakeBatteryAwayFromPilot( player )
@@ -174,11 +196,11 @@ void function TryUseShieldBattery( entity player )
 
 string function CreateHudProgressBarThroughTime( float nowGlobalTime, float startGlobalTime, float totalTime )
 {
-	int sysbolNum = int( GraphCapped( nowGlobalTime, startGlobalTime, startGlobalTime + totalTime, 0, 16 ) ) + 1
+	int sysbolNum = int( GraphCapped( nowGlobalTime, startGlobalTime, startGlobalTime + totalTime, 0, 32 ) ) + 1
 	string text = ""
 	for( int i = sysbolNum; i > 0; i-- )
 		text += "/"
-	for( int i = 16 - sysbolNum; i > 0; i-- )
+	for( int i = 32 - sysbolNum; i > 0; i-- )
 		text += "-"
 	return text
 }
