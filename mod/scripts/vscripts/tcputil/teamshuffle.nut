@@ -30,7 +30,7 @@ const string ANSI_COLOR_ENEMY = "\x1b[38;5;208m"
 struct
 {
 	bool hasShuffled = false
-	float unBalanceTime = 0
+	float unBalanceTime = -1
 } file
 
 void function TeamShuffle_Init()
@@ -148,7 +148,7 @@ void function CheckPlayerDisconnect( entity player )
 	if( abs ( imcTeamSize - mltTeamSize ) <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
 		return
 
-	if( file.unBalanceTime + 60 < Time() )
+	if( file.unBalanceTime == -1 )
 		file.unBalanceTime = Time()
 
 	int weakTeam = imcTeamSize > mltTeamSize ? TEAM_MILITIA : TEAM_IMC
@@ -242,7 +242,7 @@ void function WaitForPlayerRespawnThenNotify( entity player )
 
 void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 {
-	if( file.unBalanceTime + 60 > Time() )
+	if( file.unBalanceTime + 90 > Time() )
 		return
 	// general check
   	if ( !CanChangeTeam() )
@@ -251,6 +251,7 @@ void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 	// Compare victims teams size
 	if ( GetPlayerArrayOfTeam( victim.GetTeam() ).len() < GetPlayerArrayOfTeam( GetOtherTeam( victim.GetTeam() ) ).len() )
 		return
+
 
 	// We passed all checks, balance the teams
 	PlayerTrySwitchTeam( victim )
@@ -313,6 +314,9 @@ bool function PlayerTrySwitchTeam( entity player, bool fixRespawn = false )
 	// destroy all leeched npcs so server won't crash on next leeching
 	foreach ( entity npc in GetLeechedEnts( player ) )
 		npc.Die()
+
+	if ( !CanChangeTeam() )
+		file.unBalanceTime = -1
 
 	return true
 }

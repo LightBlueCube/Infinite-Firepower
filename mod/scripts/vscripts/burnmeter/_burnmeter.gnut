@@ -221,6 +221,12 @@ void function PhaseRewindLifetime( entity player )
 
 	while ( true )
 	{
+		if( player.s.usingCruiseMissile )
+		{
+			wait PHASE_REWIND_PATH_SNAPSHOT_INTERVAL
+			continue
+		}
+
 		PhaseRewindData rewindData
 		rewindData.origin = player.GetOrigin()
 		rewindData.angles = < 0, player.EyeAngles().y, 0 >

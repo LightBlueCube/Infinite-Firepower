@@ -37,6 +37,8 @@ void function PlayerUsesNukeBurncardThreaded( entity player )
 {
 	Point spawnpoint = GetTitanReplacementPoint( player, false )
 	entity titan = CreateOgre( TEAM_UNASSIGNED, spawnpoint.origin, spawnpoint.angles )
+	titan.EndSignal( "OnDestroy" )
+
 	SetTeam( titan, player.GetTeam() )
 	DispatchSpawn( titan )
 
