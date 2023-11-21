@@ -314,7 +314,7 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 		missile.SetSpeed( missileSpeed )
 		missile.SetHomingSpeeds( homingSpeed, homingSpeed )
 		if( target.IsHuman() && target.IsPlayer() )
-			missile.SetHomingSpeeds( 50, 50 )
+			missile.SetHomingSpeeds( 80, 80 )
 		SetTeam( missile, player.GetTeam() )
 
 		if ( target )

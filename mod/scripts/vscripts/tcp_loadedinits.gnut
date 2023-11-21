@@ -14,7 +14,7 @@ void function InfiniteFirepower_Init()
 
 	AntiAFK_Init()	//反挂机
 
-	ColorfulChat_Init()	//炫彩聊天文字
+	//ColorfulChat_Init()	//炫彩聊天文字
 
 	PilotShield_Init()	//Apex like 铁驭护盾
 

@@ -22,7 +22,9 @@ void function OnClientConnected( entity player )
 
 void function OnPlayerDamaged( entity victim, var damageInfo )
 {
-	if( victim.GetShieldHealth() == 0 || !victim.IsHuman() )
+	float curr = float( victim.GetShieldHealth() )
+	float total = float( victim.GetShieldHealthMax() )
+	if( curr == 0 || !victim.IsHuman() )
 		return
 
 	float damage = DamageInfo_GetDamage( damageInfo )
@@ -31,20 +33,23 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 
 	DamageInfo_AddCustomDamageType( damageInfo, DF_SHIELD_DAMAGE )
 
-	if( damage >= victim.GetShieldHealth() )
+	if( damage >= curr )
 	{
-		DamageInfo_SetDamage( damageInfo, damage - victim.GetShieldHealth() )
+		DamageInfo_SetDamage( damageInfo, damage - curr )
 		victim.SetShieldHealth( 0 )
-		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 2.0, 1.0 )
+		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 1.0, 0.5 )
 		EmitSoundOnEntity( victim, "titan_energyshield_down" )
-		if( victim.s.GUIClose )
-			SendHudMessage( victim, "护盾损坏\n0/"+ victim.GetShieldHealthMax(), -1, -0.4, 255, 100, 100, 255, 0, 1.0, 1.0 )
+		if( victim.s.GUIClose && damage - curr < victim.GetHealth() )
+			SendHudMessage( victim, "护盾损坏\n0/"+ total, -1, -0.4, 255, 100, 100, 255, 0, 1.0, 1.0 )
 		return
 	}
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( victim.GetShieldHealth(), victim.GetShieldHealthMax(), 0, 0.1, 1.0 ), 2.0, 1.0 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( curr, total, 0, 0.1, 0.6 ), GraphCapped( damage, 0, total, 1.0, 2.0 ), 1.0 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
 	if( victim.s.GUIClose )
-		SendHudMessage( victim, "护盾受击\n"+ max( 0, victim.GetShieldHealth() - damage ) +"/"+ victim.GetShieldHealthMax(), -1, -0.4, 255, 255, 100, 255, 0, 1.0, 1.0 )
+	{
+		int afterHealth = int( curr - damage )
+		SendHudMessage( victim, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, 255, int( GraphCapped( afterHealth, total, 0, 255, 100 ) ), 100, 255, 0, 1.0, 1.0 )
+	}
 }
 
 void function OnPlayerClassChanged( entity player )
