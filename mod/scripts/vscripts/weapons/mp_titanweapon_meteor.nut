@@ -79,7 +79,7 @@ function MpTitanweaponMeteor_Init()
 
 	MpTitanweaponFlameWall_Init()
 
-	RegisterWeaponDamageSource( "mp_titanweapon_firewall_shotgun", "龍息霰彈槍" )
+	RegisterWeaponDamageSource( "mp_titanweapon_firewall_shotgun", "龍息彈" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_meteor, Meteor_DamagedTarget )
 }
 
@@ -587,7 +587,7 @@ entity function FireWallShotGun_CreatePhysicsThermiteTrail( vector origin, entit
 	prop_physics.SetOwner( owner )
 	AI_CreateDangerousArea( prop_physics, projectile, METEOR_THERMITE_DAMAGE_RADIUS_DEF, TEAM_INVALID, true, false )
 
-	thread FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( prop_physics, inflictor, damageSourceId, 2, 8 )
+	thread FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( prop_physics, inflictor, damageSourceId, 4, 8 )
 
 	return prop_physics
 }
@@ -639,8 +639,8 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 			SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,					// explosion flags
 			0, 													// distanceFromAttacker
 			0, 													// explosionForce
-			0,													// damage flags
-			damageSourceId | DF_STOPS_TITAN_REGEN				// damage source id
+			DF_STOPS_TITAN_REGEN,								// damage flags
+			damageSourceId										// damage source id
 		)
 
 		originLastFrame = trail.GetOrigin()
