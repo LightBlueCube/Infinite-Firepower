@@ -32,6 +32,12 @@ void function CheckPlayerMove( entity player )
         else
             afkTime = 0
 
+		if( player.GetPlayerSettings() == "spectator" )
+		{
+			afkTime = 0
+			continue
+		}
+
         if( afkTime >= 40 )
             Chat_ServerPrivateMessage( player, "\x1b[31m!!!!!!!!请不要挂机!!!!!!!!", false )
         if( afkTime >= 90 && GetPlayerArray().len() > 10 )
