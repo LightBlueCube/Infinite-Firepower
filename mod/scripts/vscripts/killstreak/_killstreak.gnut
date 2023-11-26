@@ -1,16 +1,17 @@
 untyped
 global function KillStreak_Init
 global function GetKillStreakData
+global function SetKillStreakData
 global function KillStreakEnable
 global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
 
-struct{
-	int nukeTitan = 4
-	int cruiseMissile = 15
-	int vtol = 20
-	int nuclearBomb = 30
-}file
+table<int> file = {
+	nukeTitan = 4
+	cruiseMissile = 15
+	vtol = 20
+	nuclearBomb = 30
+}
 
 bool KILL_STREAK_ENABLE = true
 
@@ -29,14 +30,14 @@ void function KillStreak_Init()
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 }
 
-table function GetKillStreakData()
+table<int> function GetKillStreakData()
 {
-	return {
-		nukeTitan = file.nukeTitan,
-		cruiseMissile = file.cruiseMissile,
-		vtol = file.vtol,
-		nuclearBomb = file.nuclearBomb
-	}
+	return file
+}
+
+void function SetKillStreakData( table<int> input )
+{
+	file = input
 }
 
 bool function KillStreakEnable()

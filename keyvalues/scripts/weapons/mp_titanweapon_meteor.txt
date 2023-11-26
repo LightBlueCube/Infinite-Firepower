@@ -1,0 +1,40 @@
+WeaponData
+{
+	Mods
+	{
+		pas_scorch_weapon
+		{
+		}
+		fd_wpn_upgrade_1
+		{
+		}
+		fd_wpn_upgrade_2
+		{
+		}
+		fd_fire_damage_upgrade
+		{
+
+		}
+		fd_hot_streak
+		{
+
+		}
+
+		tcp_shotgun
+		{
+		    "damage_near_distance"							"1500"		// 1500
+			"damage_far_distance" 							"3000"		// 3000
+			"damage_near_value"   							"15"		// 310
+			"damage_far_value"								"15"		// 310
+			"damage_near_value_titanarmor"					"150"		// 900
+			"damage_far_value_titanarmor" 					"150"		// 900
+
+			"explosion_damage"								"2"		// 150
+			"explosion_damage_heavy_armor"					"8"		// 150
+
+			"projectile_launch_speed"						"4400"
+			"projectile_gravity_scale"						"2.25"
+			"projectile_lifetime"							"2.0"
+		}
+	}
+}

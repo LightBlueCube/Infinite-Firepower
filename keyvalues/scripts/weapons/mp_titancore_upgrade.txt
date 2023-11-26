@@ -1,10 +1,27 @@
 WeaponData
 {
+	// modified callbacks
+	"OnWeaponChargeBegin"							"OnCoreCharge_UpgradeCore"
+	"OnWeaponChargeEnd"								"OnCoreChargeEnd_UpgradeCore"
+
+	// vanilla missing npc usage
+	"npc_min_range"   								"0"
+	"npc_max_range"   								"4000"
+	"npc_min_burst"   								"1"
+	"npc_max_burst"   								"1"
+	"npc_rest_time_between_bursts_expedite"			"1.0" //should be less than npc_rest_time_between_bursts_max. if npc is interrupted waiting for rest time through damage, wait this long instead
+
+	"npc_reload_enabled"  							"0"
+
 	Mods
 	{
-		tcp_ammo_core
+		// from Super.Mixed.Game!
+		shield_core
 		{
-			//给nut做识别
+			"charge_time" 								"1.0"
+			"core_duration"								"12.0"
+			"charge_cooldown_delay"   					"12.0" // equal as "core_duration"
+			"charge_cooldown_time"						"14.0" // should be "core_duration" + "charge_time" + 1.0
 		}
 	}
 }

@@ -17,7 +17,7 @@ global enum eFirstPersonSequenceForce1PSetting
 {
 	DISABLED,
 	ENABLED, // force all embark/execution anims to 1p
-	
+
 	// assume these are above ENABLED
 	CLASSIC_EXECUTION, // don't force any animations to 1p, but use the tf1 animations for titan executions (tf1 necksnap is not ingame unfortunately)
 	CLASSIC_EXECUTION_CUSTOM_EMBARK // use the classic animations for executions, but force everything else to 1p
@@ -86,21 +86,21 @@ Forced1PSequenceData function FirstPersonSequenceForce1P( FirstPersonSequenceStr
 	if ( player.IsTitan() )
 	{
 		attachment = FORCE1P_TITAN_1P_ATTACHMENT
-		hiddenBodygroup = FORCE1P_TITAN_1P_HIDDEN_BODYGROUP	
+		hiddenBodygroup = FORCE1P_TITAN_1P_HIDDEN_BODYGROUP
 		entityclass	= FORCE1P_TITAN_ENTITYCLASS
 	}
-			
+
 	// hide player from everyone, unlike VisibilityFlags, this won't hide children, which is way easier to deal with
 	player.Hide()
-	
+
 	Forced1PSequenceData cleanupData
 	cleanupData.player = player
-	
+
 	// for some melee sequences, player.GetAngles() will be the angles the player had before they began the melee, which can cause desyncs
 	// eyeangles are fine though
 	vector angles = player.GetAngles()
 	angles.y = player.EyeAngles().y
-	
+
 	// create the first proxy entity, this should visually be identical to the player, but only visible to them, and with head/torso hidden
 	// this is an npc because some firstpersonsequences use animation features that only work on npcs and pilots, not props, so need to do this
 	entity ownerProxy = CreateEntity( entityclass ) //CreatePropDynamic( player.GetModelName(), player.GetOrigin(), player.GetAngles() )
@@ -120,15 +120,15 @@ Forced1PSequenceData function FirstPersonSequenceForce1P( FirstPersonSequenceStr
 	ownerProxy.SetInvulnerable()
 	HideName( ownerProxy )
 	cleanupData.ownerProxy = ownerProxy
-	
+
 	int bodygroupValue = 1
 	if ( hiddenBodygroup == "torso" )
 		bodygroupValue = 2
-	
+
 	// hide annoying bodygroup
 	ownerProxy.SetBodygroup( ownerProxy.FindBodyGroup( hiddenBodygroup ), bodygroupValue )
 	// don't play anim until later so we can do cleanup stuff
-		
+
 	// create the second proxy entity, this visible to everyone else
 	entity thirdPersonProxy = CreateEntity( entityclass ) //CreatePropDynamic( player.GetModelName(), player.GetOrigin(), player.GetAngles() )
 	thirdPersonProxy.SetModel( player.GetModelName() )
@@ -147,14 +147,14 @@ Forced1PSequenceData function FirstPersonSequenceForce1P( FirstPersonSequenceStr
 	thirdPersonProxy.SetInvulnerable()
 	HideName( thirdPersonProxy )
 	cleanupData.thirdPersonProxy = thirdPersonProxy
-	
+
 	if ( player.IsTitan() )
 		Highlight_SetEnemyHighlight( thirdPersonProxy, "enemy_titan" )
 	else
 		Highlight_SetEnemyHighlight( thirdPersonProxy, "enemy_player" )
-	
+
 	thread FirstPersonSequence( sequence, thirdPersonProxy, other )
-	
+
 	// create the viewpoint entity
 	entity camera = CreateEntity( "point_viewcontrol" )
 	camera.SetParent( ownerProxy, attachment )
@@ -167,7 +167,7 @@ Forced1PSequenceData function FirstPersonSequenceForce1P( FirstPersonSequenceStr
 	// entity e = CreatePropDynamic($"models/weapons/arms/pov_titan_light_cockpit.mdl"); e.SetParent(GetPlayerArray()[0].GetPetTitan(), "HATCH_HEAD"); e.SetOrigin(<0.75,0,-195>)
 	// this is so we get a cockpit in these anims, issue with it is that the cockpit seems to break alot of rendering stuff
 	// which really sucks since it'd be awesome to have a cockpit over these anims, really makes them better, even the client func to render through cockpits doesn't seem to work for it, just makes stuff rendering through the cockpit invisible rather than rendering in a broken way
-	
+
 	Remote_CallFunction_NonReplay( player, "ServerCallback_HideHudForFPHackAnim" )
 	// play this anim now, so we can cleanup after it's done
 	thread CleanupForced1PSequenceAfterAnimDone( sequence, ownerProxy, other, cleanupData )
@@ -201,7 +201,7 @@ void function FakeFirstPersonSequence( entity player )
 {
 	if ( !player.IsPlayer() )
 		return
-		
+
 	player.EndSignal( "OnDeath" ) // clean up when death
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "OnAnimationInterrupted" )
@@ -220,7 +220,7 @@ void function FakeFirstPersonSequence( entity player )
 	int attachID = player.LookupAttachment( attachment )
 	if ( attachID < 0 ) // don't have attachment?
 		return
-	
+
 	if ( IsPlayerEmbarking( player ) ) // fp embarking
 	{
 		//print( "player embarking!" )
@@ -272,7 +272,7 @@ void function FakeFirstPersonSequence( entity player )
 			if( IsValid( player ) )
 			{
 				player.ClearViewEntity()
-				RemoveCinematicFlag( player, CE_FLAG_HIDE_MAIN_HUD )
+				//RemoveCinematicFlag( player, CE_FLAG_HIDE_MAIN_HUD )
 			}
 			if( IsValid( camera ) )
 				camera.Destroy()
@@ -281,8 +281,8 @@ void function FakeFirstPersonSequence( entity player )
 
 	// this callback can cause RUIs gone forever if server crashes while player embarking
 	// also, it prevents screenfade from showing up...
-	//Remote_CallFunction_NonReplay( player, "ServerCallback_HideHudForFPHackAnim" )
-	AddCinematicFlag( player, CE_FLAG_HIDE_MAIN_HUD )
+	Remote_CallFunction_NonReplay( player, "ServerCallback_HideHudForFPHackAnim" )
+	//AddCinematicFlag( player, CE_FLAG_HIDE_MAIN_HUD )
 
 	WaitForever()
 
@@ -299,7 +299,7 @@ void function ServerCallback_HideHudForFPHackAnim()
 
 	if ( !GetConVarBool( "rui_drawEnable" ) )
 		return
-	
+
 	SetConVarBool( "rui_drawEnable", false )
 	thread EnableHudOnViewRestored()
 }
@@ -308,7 +308,7 @@ void function EnableHudOnViewRestored()
 {
 	while ( GetViewEntity() != GetLocalClientPlayer() )
 		WaitFrame()
-	
+
 	SetConVarBool( "rui_drawEnable", true )
 }
 #endif

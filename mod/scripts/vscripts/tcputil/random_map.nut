@@ -4,7 +4,7 @@ global function RandomMap
 void function RandomMap_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
-	if( [ "mp_rise", "mp_eden" ].contains( GetMapName() ) || RandomInt( 3 ) == 0 )
+	if( RandomInt( 3 ) == 0 )
 		AddCallback_OnClientConnected( OnClientConnected )
 }
 

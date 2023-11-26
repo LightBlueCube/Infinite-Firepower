@@ -75,8 +75,6 @@ global function Rodeo_SetBatteryIconsHide
 global function Rodeo_SetWorldBatteryMaxCount
 global function Rodeo_SetBatteryPickupAllowed
 
-global function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded
-
 #if DEV
 global function SetDebugRodeoPrint
 global function GetDebugRodeoPrint
@@ -1734,6 +1732,7 @@ entity function Rodeo_CreateBatteryPack( entity batteryOwner = null, bool isPick
 	batteryPack.kv.fadedist = 10000
 	DispatchSpawn( batteryPack )
 	batteryPack.SetModel( RODEO_BATTERY_MODEL )
+	batteryPack.s.createTime <- Time()
 	batteryPack.s.touchEnabledTime <- 0
 	batteryPack.s.batteryCarriedStatusEffect <- 0
 
@@ -1766,26 +1765,26 @@ entity function Rodeo_CreateBatteryPack( entity batteryOwner = null, bool isPick
 	// fix for nessie
 	if( batteryArray.len() > file.worldBatteryMaxCount )
 	{
+		int oldest = -1
+		var oldestTime = -1
 		for( int i = batteryArray.len() - 1; i > 0; i-- )
 		{
 			if( batteryArray[i].GetParent() ) // assuming this is a battery carried by players
 				continue
-			batteryArray[i].Destroy()
-			break
-		}
-
-		/* // never destroy batteries that player already carring
-		foreach( entity player in GetPlayerArray() )
-		{
-			while( GetPlayerBatteryCount( player ) > 0 )
+			if( !( "spawnTime" in batteryArray[i] ) )
 			{
-				entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
-				if( IsValid( battery ) )
-					battery.Destroy()
+				if( oldest == -1 )
+					oldest = i
+				continue
 			}
-			batteryArray[batteryArray.len()-1].Destroy()
+			if( batteryArray[i].s.spawnTime < oldestTime )
+			{
+				oldestTime = batteryArray[i].s.spawnTime
+				oldest = i
+			}
 		}
-		*/
+		if( oldest != -1 )
+			batteryArray[ oldest ].Destroy()
 	}
 
 	if ( HAS_BATTERY_THIEF_ICON && batteryOwner != null )
@@ -1959,7 +1958,6 @@ void function Rodeo_PilotPicksUpBattery_Silent( entity pilot, entity battery )
 	if ( GetPlayerBatteryCount( pilot ) == 1 )
 	{
 		battery.SetParent( pilot, "BATTERY_ATTACH" )
-		Battery_StartFX( battery )
 		battery.MarkAsNonMovingAttachment()
 		battery.RemoveFromSpatialPartition()
 		SetBatteryOnBack( pilot, battery )
@@ -1996,8 +1994,6 @@ entity function Rodeo_TakeBatteryAwayFromPilot( entity pilot )
 
 	// removing some of respawn's remaining code. "unreachable" and hardcodes never makes any sense
 	entity battery = GetBatteryOnBack( pilot )
-	printt( "bat"+ IsValid( battery ) )
-	printt( "ent"+ pilot )
 	// clear out exisiting battery network var
 	SetBatteryOnBack( pilot, null ) //Defensive fix for 209362. Set it to null before doing any other actions on it which might cause execution to jump somewhere else. I think doing PutEntityInSafeSpot() might cause this?
 
@@ -3496,45 +3492,8 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 		{
 			newBattery.SetSkin( 2 )
 		}
-		Battery_StopFX( newBattery )
-		thread ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( newBattery, true, 90 )
+		Battery_StartFX( newBattery )
 	}
-}
-
-void function ClassicRodeo_ClearDropBatteryInAfterTime_Threaded( entity battery, bool justDestroyIt = false, float time = 60, float destroyTime = 60 )
-{
-	float endTime = Time() + time
-	if( justDestroyIt )
-		endTime = Time() + destroyTime
-	while( Time() < endTime )
-	{
-		WaitFrame()
-		if( !IsValid( battery ) )
-			return
-		if( battery.GetParent() )
-			return
-	}
-
-	if( justDestroyIt )
-	{
-		battery.Destroy()
-		return
-	}
-
-	battery.SetSkin( 1 )
-	Battery_StartFX( battery )
-
-	endTime = Time() + destroyTime
-	while( Time() < endTime )
-	{
-		WaitFrame()
-		if( !IsValid( battery ) )
-			return
-		if( battery.GetParent() )
-			return
-	}
-
-	battery.Destroy()
 }
 
 void function ClassicRodeo_UpdateBatteryContainer( entity player, entity titan )

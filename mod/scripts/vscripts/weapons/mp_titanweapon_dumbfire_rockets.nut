@@ -16,10 +16,16 @@ void function MpTitanWeaponDumbfireRocket_Init()
 	// stun impact
 	RegisterWeaponDamageSource( "mp_titanweapon_stun_impact", "電漿爆破彈" )
     AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_stun_impact, ImpactStun_OnDamagedTarget )
+	// charge ball
+	RegisterWeaponDamageSource( "mp_titanweapon_charge_ball", "球狀閃電" )
+    AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_charge_ball, ChargeBall_OnDamagedTarget )
+	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_charge_ball ) // doing check in stun laser damagesourceID
 }
 
 var function OnWeaponPrimaryAttack_titanweapon_multi_cluster( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
+	if( weapon.HasMod( "charge_ball" ) )
+		return OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( weapon, attackParams )
 	if ( weapon.HasMod( "archon_stun_impact" ) )
 		return OnWeaponPrimaryAttack_titanweapon_stun_impact( weapon, attackParams )
 
@@ -47,6 +53,8 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_dumbfire_rockets( entity 
 
 var function OnWeaponPrimaryAttack_titanweapon_dumbfire_rockets( entity weapon, WeaponPrimaryAttackParams attackParams )
 {
+	if( weapon.HasMod( "charge_ball" ) )
+		return OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( weapon, attackParams )
 	if ( weapon.HasMod( "archon_stun_impact" ) )
 		return OnWeaponPrimaryAttack_titanweapon_stun_impact( weapon, attackParams )
 
@@ -202,3 +210,201 @@ void function DelayedFixTrailEffect( entity projectile )
 	}
 }
 #endif
+
+// ChargeBall //
+
+var function OnWeaponPrimaryAttack_weapon_MpTitanWeaponChargeBall( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	entity weaponOwner = weapon.GetWeaponOwner()
+
+
+	#if SERVER
+		if ( weaponOwner.IsPlayer() )
+		{
+			vector angles = VectorToAngles( weaponOwner.GetViewVector() )
+			vector up = AnglesToUp( angles )
+			PlayerUsedOffhand( weaponOwner, weapon )
+
+			if ( weaponOwner.GetTitanSoulBeingRodeoed() != null )
+				attackParams.pos = attackParams.pos + up * 20
+			EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_ArcLauncher_Fire_1P" )
+		}
+	#endif
+
+	bool shouldPredict = weapon.ShouldPredictProjectiles()
+
+	var fireMode = weapon.GetWeaponInfoFileKeyField( "fire_mode" )
+
+	vector attackPos = attackParams.pos
+	vector attackDir = attackParams.dir
+
+	if ( fireMode == "offhand_instant" )
+	{
+		// Get missile firing information
+		entity owner = weapon.GetWeaponOwner()
+		if ( owner.IsPlayer() )
+			attackDir = GetVectorFromPositionToCrosshair( owner, attackParams.pos )
+	}
+
+	float angleoffset = 0.05
+
+	vector rightVec = AnglesToRight(VectorToAngles(attackDir))
+
+	ChargeBall_FireArcBall( weapon, attackPos, attackDir, shouldPredict, BALL_LIGHTNING_DAMAGE, false, true )
+	weapon.EmitWeaponSound_1p3p( "Weapon_ArcLauncher_Fire_1P", "Weapon_ArcLauncher_Fire_3P" )
+	weapon.EmitWeaponNpcSound( LOUD_WEAPON_AI_SOUND_RADIUS_MP, 0.2 )
+	if( weaponOwner.IsPlayer() )
+		EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_ArcLauncher_Fire_1P" )
+
+	weapon.SetWeaponPrimaryClipCountAbsolute( 0 )
+
+	return false
+}
+
+entity function ChargeBall_FireArcBall( entity weapon, vector pos, vector dir, bool shouldPredict, float damage = BALL_LIGHTNING_DAMAGE, bool isCharged = false, bool forceVisualFix = false )
+{
+	entity owner = weapon.GetWeaponOwner()
+
+	float speed = 400.0
+
+	if ( owner.IsPlayer() )
+	{
+		vector myVelocity = owner.GetVelocity()
+
+		float mySpeed = Length( myVelocity )
+
+		myVelocity = Normalize( myVelocity )
+
+		float dotProduct = DotProduct( myVelocity, dir )
+
+		dotProduct = max( 0, dotProduct )
+
+		speed = speed + ( mySpeed*dotProduct )
+	}
+
+	int team = TEAM_UNASSIGNED
+	if ( IsValid( owner ) )
+		team = owner.GetTeam()
+
+	entity projectile = weapon.FireWeaponMissile( pos, dir, speed, damageTypes.arcCannon | DF_IMPACT, damageTypes.arcCannon | DF_IMPACT, false, shouldPredict )
+	if ( projectile )
+    {
+		projectile.kv.gravity = 0
+		projectile.kv.rendercolor = "0 0 0"
+		projectile.kv.renderamt = 0
+		projectile.kv.fadedist = 1
+		projectile.kv.lifetime = 16.0
+		//projectile.SetVelocity( dir * speed )
+		projectile.SetModel( $"models/dev/empty_model.mdl" )
+		SetTeam( projectile, team )
+
+
+		ChargeBall_AttachBallLightning( weapon, projectile )
+		entity ballLightning = expect entity( projectile.s.ballLightning )
+		ballLightning.e.ballLightningData.damage = damage
+		thread DelayedStartParticleSystem( projectile )
+	}
+
+	return projectile
+}
+
+// trail fix
+#if SERVER
+void function DelayedStartParticleSystem( entity bolt )
+{
+    WaitFrame()
+    if( IsValid( bolt ) )
+	{
+        StartParticleEffectOnEntity( bolt, GetParticleSystemIndex( $"P_wpn_arcball_trail" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+		EmitSoundOnEntity( bolt, "weapon_arc_ball_loop" )
+	}
+}
+#endif
+
+function ChargeBall_AttachBallLightning( entity weapon, entity projectile )
+{
+	Assert( !( "ballLightning" in projectile.s ) )
+
+	entity owner
+
+	if ( weapon.IsProjectile() )
+		owner = weapon.GetOwner()
+	else
+		owner = weapon.GetWeaponOwner()
+
+	entity ball = ChargeBall_CreateBallLightning( owner, projectile.GetOrigin(), projectile.GetAngles() )
+	ball.SetParent( projectile )
+	projectile.s.ballLightning <- ball
+}
+
+entity function ChargeBall_CreateBallLightning( entity owner, vector origin, vector angles )
+{
+	entity ballLightning = CreateScriptMover( origin, angles )
+	ballLightning.SetOwner( owner )
+	SetTeam( ballLightning, owner.GetTeam() )
+
+	thread ChargeBall_BallLightningThink( ballLightning )
+	return ballLightning
+}
+
+void function ChargeBall_BallLightningThink( entity ballLightning )
+{
+	ballLightning.EndSignal( "OnDestroy" )
+
+	EmitSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
+
+	OnThreadEnd(
+		function() : ( ballLightning )
+		{
+			if ( IsValid( ballLightning ) )
+				StopSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
+		}
+	)
+
+	int inflictorTeam = ballLightning.GetTeam()
+	ballLightning.e.ballLightningTargetsIdx = CreateScriptManagedEntArray()
+
+	WaitEndFrame()
+
+	while( 1 )
+	{
+		for( int i=0; i<BALL_LIGHTNING_BURST_NUM; i++ )
+		{
+			vector origin = ballLightning.GetOrigin()
+			BallLightningData fxData = ballLightning.e.ballLightningData
+			RadiusDamage(
+		    	origin,							// origin
+		    	ballLightning.GetOwner(),		// owner
+		    	ballLightning,		 			// inflictor
+		    	fxData.damageToPilots,			// normal damage
+		    	fxData.damage,					// heavy armor damage
+		    	fxData.radius,							// inner radius
+		    	fxData.radius,							// outer radius
+		    	SF_ENVEXPLOSION_NO_DAMAGEOWNER,	// explosion flags
+		    	0, 								// distanceFromAttacker
+		    	0, 								// explosionForce
+		    	fxData.deathPackage,			// damage flags
+		    	eDamageSourceId.mp_titanweapon_charge_ball					// damage source id
+			)
+		}
+		wait BALL_LIGHTNING_BURST_DELAY
+	}
+}
+
+void function ChargeBall_OnDamagedTarget( entity target, var damageInfo )
+{
+	entity attacker = DamageInfo_GetAttacker( damageInfo )
+	if( !IsValid( attacker ) && !IsValid( target ) )
+		return
+	if( attacker.GetTeam() == target.GetTeam() || !attacker.IsTitan() || attacker == target || target.GetArmorType() != ARMOR_TYPE_HEAVY )
+		return
+	entity soul = attacker.GetTitanSoul()
+	if( !IsValid( soul ) )
+		return
+
+	int shieldRestoreAmount = 150
+	soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
+	if( !attacker.IsPlayer() )
+		return
+	MessageToPlayer( attacker, eEventNotifications.VANGUARD_ShieldGain, attacker )
+}

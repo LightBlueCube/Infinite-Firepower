@@ -4,51 +4,6 @@ WeaponData
 	{
 		accelerator
 		{
-			"fire_rate"						"4"
-			"fire_rate_max"					"17"
-			"fire_rate_max_time_speedup"	"5.0"
-			"fire_rate_max_time_cooldown"	"0.1"
-			"ammo_clip_size"   				"60"
-			"ammo_stockpile_max"			"1200"
-			"ammo_default_total"			"1200"
-			"vortex_drain"									"0.01"
-
-			"damage_near_value"   							"49"
-			"damage_far_value"								"34"
-			"damage_near_value_titanarmor"					"140"
-			"damage_far_value_titanarmor" 					"120"
-
-			"reload_time" 									"4.6"
-			"reload_time_late1"								"3.65"
-			"reload_time_late2"								"1.68"
-			"reload_time_late3"								"0.7"
-			"reloadempty_time"								"4.6"
-			"reloadempty_time_late1"						"3.65"
-			"reloadempty_time_late2"						"1.68"
-			"reload_time_late3"								"0.7"
-
-			"viewkick_scale_min_hipfire"  					"1.5"//0.6
-			"viewkick_scale_max_hipfire"  					"2.0"//1.0
-			"viewkick_scale_min_ads"  						"0.6"//0.3
-			"viewkick_scale_max_ads"  						"1.6"//0.8
-			"viewkick_scale_valuePerShot" 					"1"
-			"viewkick_scale_valueLerpStart"   				"50"
-			"viewkick_scale_valueLerpEnd" 					"150"
-
-			"viewkick_pitch_base" 							"-0.05"
-			"viewkick_pitch_random"   						"0.65"
-			"viewkick_pitch_hardScale"						"*1.5"
-
-			"viewkick_yaw_base"   							"0.05"
-			"viewkick_yaw_random" 							"0.30"
-			"viewkick_yaw_hardScale"  						"*1.5"
-
-			"spread_stand_ads"								"0.8"
-			"spread_crouch_ads"   							"0.8"
-			"spread_air_ads"  								"0.8"
-
-			"fire_sound_1_player_1p"						"Weapon_XO16_SingleAccel_1P"
-			"fire_sound_1_player_3p"						"Weapon_XO16_SingleAccel_3P"
 		}
 		electric_rounds
 		{

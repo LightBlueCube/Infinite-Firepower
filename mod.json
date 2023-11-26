@@ -1,116 +1,124 @@
 {
-    "Name": "Infinite-Firepower",
-    "LoadPriority": 101,
-    "Scripts": [
+	"Name": "Infinite-Firepower",
+	"LoadPriority": 101,
+	"Scripts": [
 
-        // custom loaded inits //
-        {
-            "Path": "tcp_loadedinits.gnut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "After": "InfiniteFirepower_Init"
-            }
-        },
+		// custom loaded inits //
+		{
+			"Path": "tcp_loadedinits.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "InfiniteFirepower_Init"
+			}
+		},
 
-        // LoadoutChange //
+		// modify //
+		{
+			"Path": "modify/_titanchange.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "modify/_skillchange.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "modify/_pilotshield.gnut",
+			"RunOn": "SERVER && MP"
+		},
 
-        {
-            "Path": "loadout_change/_titanchange.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "loadout_change/_skillchange.gnut",
-            "RunOn": "SERVER && MP"
-        },
-
-        // KillStreak //
-
-        {
-            "Path": "killstreak/_killstreak.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "killstreak/_ksgui.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "killstreak/sh_apply.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "killstreak/sh_nuke_titan.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "killstreak/cruise_missile.gnut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "After": "CruiseMissile_Init"
-            }
-        },
-        {
-            "Path": "killstreak/nuclear_bomb.gnut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "After": "NuclearBomb_Init"
-            }
-        },
-
-		// PilotShield //
+		// KillStreak //
 
 		{
-            "Path": "pilotshield/_pilotshield.gnut",
-            "RunOn": "SERVER && MP"
-        },
+			"Path": "killstreak/_killstreak.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "killstreak/_ksgui.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "killstreak/sh_apply.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "killstreak/sh_nuke_titan.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "killstreak/cruise_missile.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "CruiseMissile_Init"
+			}
+		},
+		{
+			"Path": "killstreak/nuclear_bomb.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "NuclearBomb_Init"
+			}
+		},
 
-        // utilitys //
+		// utilitys //
 
-        {
-            "Path": "tcputil/random_map.nut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/better_respawn_point.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/anti_afk.nut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/teamshuffle.nut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/sh_night_sky.gnut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/colorful_chat.nut",
-            "RunOn": "SERVER && MP"
-        },
-        {
-            "Path": "tcputil/sh_chatcommand.gnut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "After": "ChatCommand_Init"
-            }
-        },
+		{
+			"Path": "tcputil/random_map.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/better_respawn_point.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/anti_afk.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/teamshuffle.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/sh_night_sky.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/colorful_chat.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/sh_timeutil.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/auto_shutdown.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/sh_chatcommand.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "ChatCommand_Init"
+			}
+		},
 
-        // modded weapons //
+		// modded weapons //
 
-        {
-            "Path": "weapons/mod_weapon_inits.nut",
-            "RunOn": "SERVER && MP",
-            "ServerCallback": {
-                "After": "ModWeaponInit"
-            }
-        }
-    ],
-    "ConVars": [
-        {
-            "Name": "random_killstreak_players",
-            "DefaultValue": ""
-        }
-    ]
+		{
+			"Path": "weapons/mod_weapon_inits.nut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "ModWeaponInit"
+			}
+		}
+	],
+	"ConVars": [
+		{
+			"Name": "random_killstreak_players",
+			"DefaultValue": ""
+		},
+		{
+			"Name": "is_server_frist_start",
+			"DefaultValue": "1"
+		}
+	]
 }

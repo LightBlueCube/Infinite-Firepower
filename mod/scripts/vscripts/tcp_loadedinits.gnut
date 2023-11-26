@@ -4,7 +4,7 @@ void function InfiniteFirepower_Init()
 {
 	RandomMap_Init()    //随机换图
 
-	TitanChange_Init()    //至尊泰坦替换，神盾血
+	TitanChange_Init()    //至尊泰坦替换
 
 	KillStreak_Init()    //连杀系统
 
@@ -12,17 +12,17 @@ void function InfiniteFirepower_Init()
 
 	BetterRespawnPoint_Init()	//更好的重生点
 
-	AntiAFK_Init()	//反挂机
+	AntiAFK_Init( 10, [ "1012451615950" ] )	//反挂机，第一个参数为达到多少人才开始踢出挂机玩家，第二个参数为反挂机忽略的玩家的uid
 
 	//ColorfulChat_Init()	//炫彩聊天文字
 
 	PilotShield_Init()	//Apex like 铁驭护盾
 
-	thread UseTimeCheck()
+	AutoShutdown_Init()	//如果服务器无人则自动重启服务器
 }
 
 
-//// dev ////
+//// dev unused ////
 
 void function UseTimeCheck()
 {

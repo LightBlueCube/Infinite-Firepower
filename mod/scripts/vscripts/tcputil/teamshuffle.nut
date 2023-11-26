@@ -158,6 +158,16 @@ void function CheckPlayerDisconnect( entity player )
 
 void function ShuffleTeams()
 {
+	bool gamemodeDisable = SWITCH_DISABLED_GAMEMODES.contains(GAMETYPE) || IsFFAGame()
+	bool mapDisable = DISABLED_MAPS.contains(GetMapName())
+
+	// Blacklist guards
+  	if ( gamemodeDisable )
+		return
+
+  	if ( mapDisable )
+		return
+
 	TeamShuffleThink()
 }
 

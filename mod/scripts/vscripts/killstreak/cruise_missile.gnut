@@ -48,6 +48,8 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		{
 			if( !IsValid( owner ) )
 				return
+
+			Remote_CallFunction_NonReplay( owner, "ServerCallback_ResetMapSettings" )
 			owner.s.usingCruiseMissile = false
 			owner.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 			owner.ClearInvulnerable()
@@ -56,9 +58,9 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 			owner.SetPhysics( MOVETYPE_WALK )
 			Remote_CallFunction_Replay( owner, "ServerCallback_TitanEMP", 0.4, 0.4, 0.4 )
 			ScreenFade( owner, 0, 0, 0, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) )
-
 			if( !IsAlive( owner ) )
 				return
+
 			owner.SetOrigin( owner.s.cmBeforeOrigin )
 			FindNearestSafeSpotAndPutEntity( owner, 5 )
 			PlayFXOnEntity( $"P_phase_shift_main", owner )
@@ -78,6 +80,8 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		WaitFrame()
 		if( !owner.s.usingCruiseMissile )
 			return
+
+		Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
 		vector origin = cmFireOrigin
 		origin.z += 200
 		owner.SetOrigin( origin )

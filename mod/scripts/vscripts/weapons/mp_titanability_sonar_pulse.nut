@@ -100,12 +100,12 @@ void function OnProjectileCollision_titanability_sonar_pulse( entity projectile,
 
 void function SonarSmoke( entity projectile, entity owner )
 {
-	entity inflictor = CreateScriptMover( projectile.GetOrigin() )
+	/*entity inflictor = CreateScriptMover( projectile.GetOrigin() )
 	SetTeam( inflictor, projectile.GetTeam() )
-	inflictor.SetOwner( projectile.GetOwner() )
-	thread TitanSonarSmokescreen( inflictor, owner )
-	wait 5
-	inflictor.Destroy()
+	inflictor.SetOwner( projectile.GetOwner() )*/
+	waitthread TitanSonarSmokescreen( projectile, owner )
+	if( IsValid( projectile ) )
+		projectile.Destroy()
 }
 
 #if SERVER
@@ -483,6 +483,10 @@ void function GravityNodeExplodeOnDamage( entity target, var damageInfo )
 void function TitanSonarSmokescreen( entity ent, entity owner )
 {
 	SmokescreenStruct smokescreen
+	smokescreen.lifetime = 8.0
+	smokescreen.smokescreenFX = FX_ELECTRIC_SMOKESCREEN_BURN
+	smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
+	smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P
 	smokescreen.isElectric = true
 	smokescreen.ownerTeam = ent.GetTeam()
 	smokescreen.attacker = owner
@@ -493,8 +497,6 @@ void function TitanSonarSmokescreen( entity ent, entity owner )
 	smokescreen.dpsPilot = 45
 	smokescreen.dpsTitan = 850
 	smokescreen.damageDelay = 1.0
-	smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
-	smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P
 
 	vector eyeAngles = <0.0, ent.EyeAngles().y, 0.0>
 	smokescreen.angles = eyeAngles
