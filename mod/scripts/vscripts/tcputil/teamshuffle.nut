@@ -36,6 +36,7 @@ struct
 void function TeamShuffle_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Prematch, ShuffleTeams )
+	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 	AddCallback_OnClientDisconnected( CheckPlayerDisconnect )
 	if ( BALANCE_ON_DEATH )
 		AddCallback_OnPlayerKilled( CheckTeamBalance )
@@ -156,6 +157,16 @@ void function CheckPlayerDisconnect( entity player )
 		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍当前不平衡，可通过输入 !switch 切换队伍。", false )
 }
 
+void function GameStateEnter_Postmatch()
+{
+	thread ShuffleTeams_Waiting()
+}
+void function ShuffleTeams_Waiting()
+{
+	wait GAME_POSTMATCH_LENGTH - 0.1
+	TeamShuffleThink()
+}
+
 void function ShuffleTeams()
 {
 	bool gamemodeDisable = SWITCH_DISABLED_GAMEMODES.contains(GAMETYPE) || IsFFAGame()
@@ -168,6 +179,7 @@ void function ShuffleTeams()
   	if ( mapDisable )
 		return
 
+	file.hasShuffled = false
 	TeamShuffleThink()
 }
 
