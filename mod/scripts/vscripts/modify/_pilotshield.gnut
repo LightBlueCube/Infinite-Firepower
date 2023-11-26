@@ -173,7 +173,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 	bool isAmped = IsAmpedBattery( battery )
 	float r = isAmped ? 255.0 : 100.0
 	string text = attackButtonCancel ? "按攻击键取消" : "松开按键取消"
-	thread SendKsGUI_Threaded( player, "正在取出电池...\n" + text, < r, 255, 100 >, 1.0, 0.0, null, -0.4 )
+	thread SendKsGUI_Threaded( player, "正在取出电池\n" + text, < r, 255, 100 >, 1.0, 0.0, null, -0.4 )
 	float useTime = isAmped ? 1.5 : 1.0
 
 	if( attackButtonCancel )

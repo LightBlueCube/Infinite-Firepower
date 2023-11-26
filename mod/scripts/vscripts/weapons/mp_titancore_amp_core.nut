@@ -217,10 +217,9 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 				if( owner.GetMainWeapons().len() != 0 )
 				{
 					entity weapon = owner.GetMainWeapons()[0]
-					foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
-					{
-						weapon.RemoveMod( mod )
-					}
+					if( !weapon.HasMod( "tcp_no_gravity" ) )
+						foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
+							weapon.RemoveMod( mod )
 				}
 			}
 

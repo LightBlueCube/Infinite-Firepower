@@ -29,7 +29,7 @@ global function OnWeaponNpcPrimaryAttack_dome_shield
 global const SP_PARTICLE_WALL_DURATION = 8.0
 global const MP_PARTICLE_WALL_DURATION = 6.0
 
-global const BRUTE4_DOME_SHIELD_HEALTH = 1500	//2500
+global const BRUTE4_DOME_SHIELD_HEALTH = 2500
 global const PAS_DOME_SHIELD_HEALTH = 2000
 global const BRUTE4_DOME_SHIELD_MELEE_MOD = 2.5
 
@@ -972,7 +972,7 @@ var function OnWeaponPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryAtta
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	float duration = 6
+	float duration = 8
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -986,7 +986,7 @@ var function OnWeaponNpcPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryA
 	if ( IsValid( soul ) && IsValid( soul.soul.bubbleShield ))
 		return 0
 
-	float duration = 6
+	float duration = 8
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1

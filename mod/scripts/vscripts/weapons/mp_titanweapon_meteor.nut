@@ -496,8 +496,17 @@ var function OnWeaponPrimaryAttack_FireWallShotGun( entity weapon, WeaponPrimary
 	float spacing = 0.03
 	float randomSize = 0.02
 	for( float yaw = spacing; yaw >= -spacing; yaw -= spacing )
+	{
 		for( float pitch = spacing; pitch >= -spacing; pitch -= spacing )
+		{
+			if( IsNearly( fabs( 0 - pitch ), spacing ) && IsNearly( fabs( 0 - yaw ), spacing ) )
+				continue
 			offsets.append( dir + right * RandomFloatRange( yaw - randomSize, yaw + randomSize ) + up * RandomFloatRange( pitch - randomSize, pitch + randomSize ) )
+		}
+	}
+	//    *
+	// *  *  *
+	//    *
 
 	foreach( vel in offsets )
 	{
@@ -521,7 +530,7 @@ bool function IsNearly( float num1, float num2 )
 
 void function OnProjectileCollision_FireWallShotGun( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	for( int i = 3; i > 0; i-- )
+	for( int i = 4; i > 0; i-- )
 	{
 		vector velocity = projectile.GetVelocity()
 		float speed = min( Length( velocity ), 2500 )
