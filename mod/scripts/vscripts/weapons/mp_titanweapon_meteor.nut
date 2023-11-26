@@ -442,7 +442,7 @@ void function OnProjectileCollision_Meteor( entity projectile, vector pos, vecto
 {
 	#if SERVER
 	if( projectile.ProjectileGetMods().contains( "tcp_shotgun" ) )
-		return OnProjectileCollision_FireWallShotGun( projectile, pos, normal, hitEnt, hitbox, isCritical )
+		return OnProjectileCollision_FireWallShotGun( projectile )
 
 	if ( projectile.proj.projectileBounceCount > 0 )
 		return
@@ -493,20 +493,23 @@ var function OnWeaponPrimaryAttack_FireWallShotGun( entity weapon, WeaponPrimary
 	vector ang = VectorToAngles( dir )
 	vector right = AnglesToRight( ang )
 	vector up = AnglesToUp( ang )
-	float spacing = 0.03
+	float spacing = 0.02
 	float randomSize = 0.02
 	for( float yaw = spacing; yaw >= -spacing; yaw -= spacing )
 	{
 		for( float pitch = spacing; pitch >= -spacing; pitch -= spacing )
 		{
-			if( IsNearly( fabs( 0 - pitch ), spacing ) && IsNearly( fabs( 0 - yaw ), spacing ) )
-				continue
+			//if( IsNearly( fabs( 0 - pitch ), spacing ) && IsNearly( fabs( 0 - yaw ), spacing ) )
+			//	continue
+
 			offsets.append( dir + right * RandomFloatRange( yaw - randomSize, yaw + randomSize ) + up * RandomFloatRange( pitch - randomSize, pitch + randomSize ) )
 		}
 	}
-	//    *
+	//
 	// *  *  *
-	//    *
+	// *  *  *
+	// *  *  *
+	//
 
 	foreach( vel in offsets )
 	{
@@ -515,22 +518,31 @@ var function OnWeaponPrimaryAttack_FireWallShotGun( entity weapon, WeaponPrimary
 		{
 			EmitSoundOnEntity( bolt, "weapon_thermitelauncher_projectile_3p" )
 			bolt.SetModel( $"models/dev/empty_physics.mdl" )
+			thread FireWallShotGunAirburst( bolt )
 		}
 	}
 
 	return
 }
 
+void function FireWallShotGunAirburst( entity bolt )
+{
+	bolt.EndSignal( "OnDestroy" )
+	bolt.GetOwner().EndSignal( "OnDestroy" )
+	wait 1.5
+	OnProjectileCollision_FireWallShotGun( bolt )
+}
+
 bool function IsNearly( float num1, float num2 )
 {
-	if( fabs( num1 - num2 ) < 0.000001 )
+	if( fabs( num1 - num2 ) < 0.00001 )
 		return true
 	return false
 }
 
-void function OnProjectileCollision_FireWallShotGun( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+void function OnProjectileCollision_FireWallShotGun( entity projectile )
 {
-	for( int i = 4; i > 0; i-- )
+	for( int i = 3; i > 0; i-- )
 	{
 		vector velocity = projectile.GetVelocity()
 		float speed = min( Length( velocity ), 2500 )
@@ -544,7 +556,7 @@ void function OnProjectileCollision_FireWallShotGun( entity projectile, vector p
 		Assert( IsValid( owner ) )
 
 		float thermiteLifetimeMin = 2.0
-		float thermiteLifetimeMax = 2.5
+		float thermiteLifetimeMax = 4.0
 
 		entity inflictor = CreateOncePerTickDamageInflictorHelper( thermiteLifetimeMax )
 
@@ -559,6 +571,7 @@ void function OnProjectileCollision_FireWallShotGun( entity projectile, vector p
 		trailAngles = VectorToAngles( v )
 		prop.SetAngles( trailAngles )
 	}
+	projectile.Destroy()
 }
 
 entity function FireWallShotGun_CreatePhysicsThermiteTrail( vector origin, entity owner, entity inflictor, entity projectile, vector velocity, float killDelay, asset overrideFX = METEOR_FX_TRAIL, int damageSourceId = eDamageSourceId.mp_titanweapon_meteor_thermite )
@@ -625,7 +638,7 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 		}
 	)
 
-	wait 0.3
+	wait 0.5
 
 	vector originLastFrame = trail.GetOrigin()
 

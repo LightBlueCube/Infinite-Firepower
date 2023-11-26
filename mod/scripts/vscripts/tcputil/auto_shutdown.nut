@@ -5,9 +5,9 @@ void function AutoShutdown_Init()
 	RegisterSignal( "AutoShutdownCountdown" )
 	AddCallback_OnClientConnecting( StopCountdown )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
-	if( GetConVarBool( "is_server_frist_start" ) )
+	if( GetConVarString( "is_server_frist_start" ) == "1" )
 	{
-		SetConVarBool( "is_server_frist_start", false )
+		SetConVarString( "is_server_frist_start", "0" )
 		thread WaitBeforeStartCountdown( 60 * 60 )	// 60 minutes
 		return
 	}
