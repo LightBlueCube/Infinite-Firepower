@@ -587,7 +587,7 @@ entity function FireWallShotGun_CreatePhysicsThermiteTrail( vector origin, entit
 	prop_physics.SetOwner( owner )
 	AI_CreateDangerousArea( prop_physics, projectile, METEOR_THERMITE_DAMAGE_RADIUS_DEF, TEAM_INVALID, true, false )
 
-	thread FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( prop_physics, inflictor, damageSourceId, 4, 8 )
+	thread FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( prop_physics, inflictor, damageSourceId, 8, 8 )
 
 	return prop_physics
 }
