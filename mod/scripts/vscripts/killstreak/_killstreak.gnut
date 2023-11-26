@@ -2,6 +2,7 @@ untyped
 global function KillStreak_Init
 global function GetKillStreakData
 global function SetKillStreakData
+global function SetRandomKillStreakData
 global function KillStreakEnable
 global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
@@ -17,10 +18,13 @@ bool KILL_STREAK_ENABLE = true
 
 array<string> RandomKillStreakPlayers = []
 
+void functionref( entity ) randomKillStreakFunc
+
 void function KillStreak_Init()
 {
 	KsGUI_Init()
 
+	randomKillStreakFunc = RandomKillStreak
 	RandomKillStreakPlayers = GetStringArrayFromConVar( "random_killstreak_players" )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
@@ -33,6 +37,18 @@ void function KillStreak_Init()
 table<int> function GetKillStreakData()
 {
 	return file
+}
+
+void function SetRandomKillStreakData( void functionref( entity ) func )
+{
+	randomKillStreakFunc = func
+}
+
+void function RandomKillStreak( entity player )
+{
+	player.s.NukeTitan += RandomInt( 8 ) + 1
+	if( player.s.NukeTitan <= 8 )
+		player.s.CruiseMissile += 1
 }
 
 void function SetKillStreakData( table<int> input )
@@ -95,9 +111,7 @@ void function RestoreKillStreak( entity player )
 		if( player.s.GiveRandomKillStreak )
 		{
 			thread RandomKillStreak_MsgShared( player )
-			player.s.NukeTitan += RandomInt( 8 ) + 1
-			if( player.s.NukeTitan <= 4 )
-				player.s.CruiseMissile += 1
+			randomKillStreakFunc( player )
 
 			player.s.GiveRandomKillStreak <- false
 			RandomKillStreakPlayers.removebyvalue( player.GetUID() )

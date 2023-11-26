@@ -402,7 +402,7 @@ void function ChargeBall_OnDamagedTarget( entity target, var damageInfo )
 	if( !IsValid( soul ) )
 		return
 
-	int shieldRestoreAmount = 150
+	int shieldRestoreAmount = 250
 	soul.SetShieldHealth( min( soul.GetShieldHealth() + shieldRestoreAmount, soul.GetShieldHealthMax() ) )
 	if( !attacker.IsPlayer() )
 		return
