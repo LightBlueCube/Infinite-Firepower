@@ -1,3 +1,4 @@
+untyped
 //TODO: FIX REARM WHILE FIRING SALVO ROCKETS
 
 global function OnWeaponPrimaryAttack_titanability_rearm
@@ -15,8 +16,7 @@ var function OnWeaponPrimaryAttack_titanability_rearm( entity weapon, WeaponPrim
 
 	if( weapon.HasMod( "tcp_no_gravity" ) )
 	{
-		thread NoGravity40cm( weaponOwner )
-		weapon.SetWeaponPrimaryClipCount( 0 )
+		thread NoGravity40cm( weaponOwner, weapon )
 		return 0
 	}
 	entity ordnance = weaponOwner.GetOffhandWeapon( OFFHAND_RIGHT )
@@ -39,17 +39,14 @@ var function OnWeaponPrimaryAttack_titanability_rearm( entity weapon, WeaponPrim
 	return 0
 }
 
-void function NoGravity40cm( entity owner )
+void function NoGravity40cm( entity owner, entity weapon )
 {
+	weapon.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "DisembarkingTitan" )
 	owner.EndSignal( "TitanEjectionStarted" )
 
-	if( !IsValid( owner ) )
-		return
-	if( !IsValid( owner.GetTitanSoul() ) )
-		return
 	if( !owner.IsTitan() )
 		return
 	if( owner.GetMainWeapons().len() == 0 )
@@ -58,8 +55,13 @@ void function NoGravity40cm( entity owner )
 	mainWeapon.EndSignal( "OnDestroy" )
 
 	OnThreadEnd(
-		function() : ( mainWeapon, owner )
+		function() : ( mainWeapon, owner, weapon )
 		{
+			if( !IsValid( weapon ) )
+				return
+			weapon.RemoveMod( "tcp_no_regen" )
+			weapon.SetWeaponPrimaryClipCount( 0 )
+
 			if( !IsValid( mainWeapon ) )
 				return
 			if( !IsValid( owner ) )
@@ -71,25 +73,28 @@ void function NoGravity40cm( entity owner )
 				return
 
 			foreach( mod in GetWeaponBurnMods( mainWeapon.GetWeaponClassName() ) )
-			{
 				if( mainWeapon.HasMod( mod ) )
 					mainWeapon.RemoveMod( mod )
-			}
 		}
 	)
 
 	if( !TitanCoreInUse( owner ) )
-	{
 		foreach( mod in GetWeaponBurnMods( mainWeapon.GetWeaponClassName() ) )
-		{
 			mainWeapon.AddMod( mod )
-		}
-	}
 
 	mainWeapon.RemoveMod( "mortar_shots" )
 	mainWeapon.AddMod( "tcp_no_gravity" )
 
-	wait 8
+	int shots = 6
+	mainWeapon.s.leftShots <- shots
+	weapon.AddMod( "tcp_no_regen" )
+	for( ;; )
+	{
+		if( mainWeapon.s.leftShots <= 0 )
+			return
+		weapon.SetWeaponPrimaryClipCountAbsolute( GraphCapped( mainWeapon.s.leftShots, 0, shots, 0, weapon.GetWeaponPrimaryClipCountMax() - 10 ) )
+		WaitFrame()
+	}
 }
 
 #if SERVER

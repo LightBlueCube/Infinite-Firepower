@@ -21,6 +21,9 @@ WeaponData
 			"explosion_inner_radius"  						"10"
 			"explosionradius" 								"225"
 
+			"viewkick_pitch_base" 							"--4"
+			"viewkick_yaw_random" 							"++5"
+
 			"damage_near_value"   							"200"
 			"damage_far_value"								"200"
 			"damage_near_value_titanarmor"					"800"
@@ -70,6 +73,9 @@ WeaponData
 			"explosion_inner_radius"  						"10"
 			"explosionradius" 								"225"
 
+			"viewkick_pitch_base" 							"--4"
+			"viewkick_yaw_random" 							"++5"
+
 			"damage_near_value"   							"200"
 			"damage_far_value"								"200"
 			"damage_near_value_titanarmor"					"800"
@@ -81,7 +87,6 @@ WeaponData
 
 			"ammo_clip_size"   								"6"
 			"fire_mode"										"auto"
-
 		}
 	}
 }

@@ -33,6 +33,9 @@ void function ClassicRodeo_InitPlaylistVars()
 // UTILITY
 entity function CreateClassicRodeoWeakpoint( entity player, entity titan )
 {
+	if( titan.IsHuman() )
+		return null
+
 	entity weakpoint = CreatePropScript( RODEO_WEAKPOINT_HITBOX_MODEL )//
 	weakpoint.SetParent( titan, "RODEO_BATTERY" )
 	weakpoint.SetLocalOrigin( < 0, -4, 0 > ) // < 0, 0, 0 > for ammobox

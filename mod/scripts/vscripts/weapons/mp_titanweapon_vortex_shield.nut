@@ -283,6 +283,10 @@ bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weap
 	#if CLIENT
 		return true
 	#else
+
+		if( projectile.ProjectileGetMods().contains( "tcp_shotgun" ) )
+			return false
+
 		if ( !ValidateVortexImpact( vortexSphere, projectile ) )
 			return false
 
@@ -442,7 +446,7 @@ void function TrackSharedEnergyOnVortexOn( entity owner, entity weapon )
 
 		if( owner.GetSharedEnergyCount() + amount > owner.GetSharedEnergyTotal() - 1 )
 		{
-			owner.AddSharedEnergy( max( 0, ( owner.GetSharedEnergyTotal() - 1 ) - owner.GetSharedEnergyCount() ) )
+			owner.AddSharedEnergy( max( 0, ( owner.GetSharedEnergyTotal() - 50 ) - owner.GetSharedEnergyCount() ) )
 			continue
 		}
 		owner.AddSharedEnergy( amount )

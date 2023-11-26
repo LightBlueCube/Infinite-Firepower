@@ -39,131 +39,164 @@ void function NuclearBombAnimThink( entity owner )
 	SetBattleChatterEnabled_Northstar( false )
 	SetShouldPlayDefaultMusic( false )
 	SetServerVar( "gameEndTime", Time() + 120.0 )
-
 	WaitFrame()
+
 	array<string> a = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" ]
 	PlayBeepSound( owner )
 	a.append( "IBM System/370 Model 168" )
 	HudMsgSend( a, owner )
 	wait 0.5
+
 	PlayBeepSound( owner )
 	a.append( "" )
-	HudMsgSend( a, owner )
 	a.append( "MVSLaunch v2.1" )
-	HudMsgSend( a, owner )
 	a.append( "IBM Corporation 1975" )
 	HudMsgSend( a, owner )
 	wait 1
+
 	PlayBeepSound( owner )
 	a.append( "BEGIN LAUNCH SEQUENCE." )
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "BEGIN LAUNCH SEQUENCE.."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "BEGIN LAUNCH SEQUENCE..."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "BEGIN LAUNCH SEQUENCE...[Done]"
-	a.append( "LAUNCH CODES ENTERED:" )
 	HudMsgSend( a, owner )
+	wait 0.8
+
+	PlayBeepSound( owner )
+	a.append( "LAUNCH CODES ENTERED:" )
 	a.append( "" )
 	HudMsgSend( a, owner )
 	wait 0.5
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "*"
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "**"
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "***"
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "****"
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "*****"
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "******"
 	HudMsgSend( a, owner )
 	wait 1.0
+
 	PlayBeepSound( owner )
 	a.append( "VERIFYING LAUNCH CODES." )
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "VERIFYING LAUNCH CODES.."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "VERIFYING LAUNCH CODES..."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
-	a[ a.len() - 1 ] = "VERIFYING LAUNCH CODES"
+	a[ a.len() - 1 ] = "VERIFYING LAUNCH CODES...[Done]"
 	a.append( "LAUNCH CODES ACCEPTED" )
 	HudMsgSend( a, owner )
 	wait 1.0
+
 	PlayBeepSound( owner )
 	a.append( "INITIALIZING TARGETING MATRIX." )
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "INITIALIZING TARGETING MATRIX.."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	PlayBeepSound( owner )
 	a[ a.len() - 1 ] = "INITIALIZING TARGETING MATRIX..."
 	HudMsgSend( a, owner )
 	wait 0.8
+
 	waitthread RandomStringAnim( owner )
-	wait 0.1
-	PlayBeepSound( owner )
+
 	a[ a.len() - 1 ] = "INITIALIZING TARGETING MATRIX...[Done]"
+	HudMsgSend( a, owner )
+	wait 0.8
+
+	PlayBeepSound( owner )
 	a.append( "TARGETING MATRIX ONLINE" )
 	HudMsgSend( a, owner )
 	wait 1
+
 	a.append( "FOLD WEAPON SUCCESSFULLY LAUNCHED" )
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	a = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "", "FOLD WEAPON SUCCESSFULLY LAUNCHED" ]
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	a[ a.len() - 1 ] = "FOLD WEAPON SUCCESSFULLY LAUNCHED"
 	PlayFinishBeepSound( owner )
 	HudMsgSend( a, owner, true )
 	wait 0.3
+
 	a[ a.len() - 1 ] = ""
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	a[ a.len() - 1 ] = "FOLD WEAPON SUCCESSFULLY LAUNCHED"
 	PlayFinishBeepSound( owner )
 	HudMsgSend( a, owner, true )
 	wait 0.3
+
 	a[ a.len() - 1 ] = ""
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	a[ a.len() - 1 ] = "FOLD WEAPON SUCCESSFULLY LAUNCHED"
 	PlayFinishBeepSound( owner )
 	HudMsgSend( a, owner, true )
 	wait 0.3
+
 	a[ a.len() - 1 ] = ""
 	HudMsgSend( a, owner )
 	wait 0.2
+
 	a[ a.len() - 1 ] = "FOLD WEAPON SUCCESSFULLY LAUNCHED"
 	PlayFinishBeepSound( owner )
 	HudMsgSend( a, owner, true )
 	wait 0.3
+
 	a[ a.len() - 1 ] = ""
 	HudMsgSend( a, owner )
 
@@ -418,17 +451,18 @@ void function NukeFX( entity player )
 {
 	player.EndSignal( "OnDestroy" )
 
-	float endTime = Time() + 2.1
+	float endTime = Time() + 2.2
 	float bloomScale = 1.0
 	float sunScale = -1.0
 	while ( Time() < endTime )
 	{
 		Remote_CallFunction_Replay( player, "ServerCallback_ScreenShake", 200, 100, 0.5 )
 		Remote_CallFunction_NonReplay( player, "ServerCallback_SetMapSettings", bloomScale, false, 1.0, 1.0, 1.0, 0, 0, sunScale, 1.0 )
-		bloomScale *= 1.25
-		sunScale *= 1.5
+		bloomScale *= 1.5
+		sunScale *= 2.0
 		WaitFrame()
 	}
+	Remote_CallFunction_NonReplay( player, "ServerCallback_ResetMapSettings" )
 }
 
 void function FakeShellShock_Threaded( entity victim, float duration )

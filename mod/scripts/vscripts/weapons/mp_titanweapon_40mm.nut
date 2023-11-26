@@ -1,3 +1,4 @@
+untyped
 global function MpTitanweapon40mm_Init
 
 global function OnWeaponOwnerChanged_titanweapon_40mm
@@ -87,6 +88,9 @@ int function FireWeaponPlayerAndNPC( WeaponPrimaryAttackParams attackParams, boo
 
 	if ( shouldCreateProjectile )
 	{
+		if( weapon.HasMod( "tcp_no_gravity" ) && "leftShots" in weapon.s )
+			weapon.s.leftShots -= 1
+
 		float speed = PROJECTILE_SPEED_40MM
 
 		bool hasMortarShotMod = weapon.HasMod( "mortar_shots" )

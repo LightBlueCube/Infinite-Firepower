@@ -14,5 +14,10 @@ WeaponData
 		{
 			"regen_ammo_refill_rate"						"10"
 		}
+
+		tcp_no_regen
+		{
+			"regen_ammo_refill_rate"						"--10"
+		}
 	}
 }

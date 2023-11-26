@@ -1,0 +1,74 @@
+untyped
+global function GetUnixTimeParts_BeijingTime
+
+int function Daily_GetCurrentTime_BeijingTime()
+{
+	// Returns the unix timestap offset to the timezone we want to use
+	return GetUnixTimestamp() + 8 * SECONDS_PER_HOUR
+}
+
+table function GetUnixTimeParts_BeijingTime()
+{
+	// Chad's function to convert unix time to month, day, year, hours, minutes, seconds. Used for ranked play seasons
+
+	table timeParts = {}
+	timeParts["year"] <- null
+	timeParts["month"] <- null
+	timeParts["day"] <- null
+	timeParts["hour"] <- null
+	timeParts["minute"] <- null
+	timeParts["second"] <- null
+
+	var unixtime = Daily_GetCurrentTime_BeijingTime()
+
+	// Get hours / minutes / seconds
+
+	timeParts["second"] = unixtime % 60
+	unixtime /= 60
+
+	timeParts["minute"] = unixtime % 60
+	unixtime /= 60
+
+	timeParts["hour"] = unixtime % 24
+	unixtime /= 24
+
+	// unixtime is now days since 01/01/1970 UTC * Rebaseline to the Common Era
+
+	unixtime += 719499
+
+	// Roll forward looking for the year. Have to start at 1969 because the year we calculate here
+	// runs from March, so January and February 1970 will come out as 1969
+
+	for ( timeParts["year"] = 1969 ; unixtime > __YearToDays( timeParts["year"] + 1 ) + 30 ; timeParts["year"]++ )
+	{
+	}
+
+	// We have our "year", so subtract off the days accounted for by full years.
+	unixtime -= __YearToDays( timeParts["year"] )
+
+	// unixtime is now number of days we are into the year (remembering that March 1 is the first day of the "year" still)
+
+	// Roll forward looking for the month. 1 = March through to 12 = February
+	for ( timeParts["month"] = 1 ; timeParts["month"] < 12 && unixtime > 367 * ( timeParts["month"] + 1 ) / 12 ; timeParts["month"]++ )
+	{
+	}
+
+	// Subtract off the days accounted for by full months
+	unixtime -= 367 * timeParts["month"] / 12
+
+	// unixtime is now number of days we are into the month
+
+	// Adjust the month/year so that 1 = January, and years start where we usually expect them to
+	timeParts["month"] += 2
+	if ( timeParts["month"] > 12 )
+	{
+		timeParts["month"] -= 12
+		timeParts["year"]++
+	}
+
+	timeParts["day"] = unixtime
+
+	//printt( "Current Date and Time:" )
+	//printt( "    ", timeParts["month"] + "/" + timeParts["day"] + "/" + timeParts["year"], "-", timeParts["hour"] + ":" + timeParts["minute"] + ":" + timeParts["second"] )
+	return timeParts
+}

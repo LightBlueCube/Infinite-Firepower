@@ -1,5 +1,6 @@
 untyped
 global function PilotShield_Init
+global function UseShieldBattery
 
 void function PilotShield_Init()
 {
@@ -8,7 +9,8 @@ void function PilotShield_Init()
     RegisterSignal( "DoneUseShieldBattery" )
 
 	AddCallback_OnClientConnected( OnClientConnected )
-	AddCallback_PlayerClassChanged( OnPlayerClassChanged )
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddCallback_OnTitanBecomesPilot( OnTitanBecomesPilot )
 	AddDamageCallback( "player", OnPlayerDamaged )
 }
 
@@ -33,26 +35,51 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 
 	DamageInfo_AddCustomDamageType( damageInfo, DF_SHIELD_DAMAGE )
 
+	int damageSourceId = DamageInfo_GetDamageSourceIdentifier( damageInfo )
+	if( [ eDamageSourceId.mp_titanability_smoke, eDamageSourceId.mp_weapon_grenade_electric_smoke ].contains( damageSourceId ) )
+	{
+		int health = victim.GetHealth()
+		if( damage / 2 >= health )
+		{
+			victim.SetShieldHealth( 0 )
+			return
+		}
+		victim.SetHealth( health - damage / 2 )
+	}
+	if( [ eDamageSourceId.mp_weapon_grenade_emp ].contains( damageSourceId ) )
+	{
+		if( damage - curr <= 0 )
+		{
+			DamageInfo_SetDamage( damageInfo, curr )
+			damage = curr
+		}
+	}
+
 	if( damage >= curr )
 	{
 		DamageInfo_SetDamage( damageInfo, damage - curr )
 		victim.SetShieldHealth( 0 )
 		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 1.0, 0.5 )
 		EmitSoundOnEntity( victim, "titan_energyshield_down" )
-		if( victim.s.GUIClose && damage - curr < victim.GetHealth() )
-			SendHudMessage( victim, "护盾损坏\n0/"+ total, -1, -0.4, 255, 100, 100, 255, 0, 1.0, 1.0 )
+		if( !victim.s.GUIActive && damage - curr < victim.GetHealth() )
+			thread SendKsGUI_Threaded( victim, "护盾损坏\n0/"+ total, < 255, 0, 0 >, 1.0, 1.0, null, -0.4 )
 		return
 	}
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( curr, total, 0, 0.1, 0.6 ), GraphCapped( damage, 0, total, 1.0, 2.0 ), 1.0 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( damage, 0, total / 2, 0.2, 0.6 ), GraphCapped( curr, total, 0, 1.0, 2.0 ), 1.0 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
-	if( victim.s.GUIClose )
+	if( !victim.s.GUIActive )
 	{
 		int afterHealth = int( curr - damage )
-		SendHudMessage( victim, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, 255, int( GraphCapped( afterHealth, total, 0, 255, 100 ) ), 100, 255, 0, 1.0, 1.0 )
+		thread SendKsGUI_Threaded( victim, "护盾受击\n"+ afterHealth +"/"+ total, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, 1.0, 1.0, null, -0.4 )
 	}
 }
 
-void function OnPlayerClassChanged( entity player )
+void function OnTitanBecomesPilot( entity player, entity titan )
+{
+    OnPlayerRespawned( player )
+}
+
+void function OnPlayerRespawned( entity player )
 {
 	if( !KillStreakEnable() )
 		return
@@ -73,13 +100,7 @@ void function TryUseShieldBattery( entity player )
 	player.EndSignal( "OnDeath" )
 	entity activeWeapon = player.GetActiveWeapon()
 	wait 0.5
-
-	player.Signal( "StopUseShieldBattery" )
-	player.Signal( "SendingNewGUI" )
-	player.EndSignal( "StopUseShieldBattery" )
-	entity battery = GetBatteryOnBack( player )
-
-	if( player.GetShieldHealth() == player.GetShieldHealthMax() || !IsValid( battery ) )
+	if( player.GetShieldHealth() == player.GetShieldHealthMax() || !IsValid( GetBatteryOnBack( player ) ) )
 	{
 		player.HolsterWeapon()
 		player.DeployWeapon()
@@ -89,7 +110,24 @@ void function TryUseShieldBattery( entity player )
 					player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
 		return
 	}
+	OnThreadEnd(
+		function() : ( activeWeapon, player )
+		{
+			if( IsValid( player ) )
+				if( IsValid( player.GetOffhandWeapon( OFFHAND_INVENTORY ) ) )
+					if( player.GetOffhandWeapon( OFFHAND_INVENTORY ).GetWeaponInfoFileKeyField( "fire_mode" ) == "offhand_hybrid" )
+						if( IsValid( activeWeapon ) && IsAlive( player ) )
+							player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
+		}
+	)
+	UseShieldBattery( player, false )
+}
 
+void function UseShieldBattery( entity player, bool attackButtonCancel = true )
+{
+	player.Signal( "StopUseShieldBattery" )
+	player.EndSignal( "StopUseShieldBattery" )
+	entity battery = GetBatteryOnBack( player )
 	battery.EndSignal( "OnDestroy" )
 
 	table results = {}
@@ -98,7 +136,7 @@ void function TryUseShieldBattery( entity player )
 	int statusEffectHandle = StatusEffect_AddEndless( player, eStatusEffect.move_slow, 0.3 )
 
 	OnThreadEnd(
-		function(): ( player, battery, statusEffectHandle, activeWeapon, results )
+		function(): ( player, battery, statusEffectHandle, results )
 		{
 			if( !IsValid( player ) )
 				return
@@ -107,10 +145,6 @@ void function TryUseShieldBattery( entity player )
 
 			player.DeployWeapon()
 			player.Server_TurnOffhandWeaponsDisabledOff()
-			if( IsValid( player.GetOffhandWeapon( OFFHAND_INVENTORY ) ) )
-				if( player.GetOffhandWeapon( OFFHAND_INVENTORY ).GetWeaponInfoFileKeyField( "fire_mode" ) == "offhand_hybrid" )
-					if( IsValid( activeWeapon ) && IsAlive( player ) )
-						player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
 
 			StopSoundOnEntity( player, "Weapon_EnergySyphon_Charge_1P" )
 			StatusEffect_Stop( player, statusEffectHandle )
@@ -137,11 +171,13 @@ void function TryUseShieldBattery( entity player )
 	player.s.GUIDisable = true
 
 	bool isAmped = IsAmpedBattery( battery )
-	if( isAmped )
-		SendHudMessage( player, "正在取出电池...\n", -1, -0.4, 255, 255, 100, 255, 0, 1.0, 0.0 )
-	else
-		SendHudMessage( player, "正在取出电池...\n", -1, -0.4, 100, 255, 100, 255, 0, 1.0, 0.0 )
+	float r = isAmped ? 255.0 : 100.0
+	string text = attackButtonCancel ? "按攻击键取消" : "松开按键取消"
+	thread SendKsGUI_Threaded( player, "正在取出电池...\n" + text, < r, 255, 100 >, 1.0, 0.0, null, -0.4 )
 	float useTime = isAmped ? 1.5 : 1.0
+
+	if( attackButtonCancel )
+		thread ButtonCancelCheck( player, useTime + 0.6 )
 
 	player.HolsterWeapon()
 	player.Server_TurnOffhandWeaponsDisabledOn()
@@ -156,10 +192,7 @@ void function TryUseShieldBattery( entity player )
 	{
 		player.HolsterWeapon() // defensive fix
 		player.Server_TurnOffhandWeaponsDisabledOn()
-		if( isAmped )
-			SendHudMessage( player, "正在使用电池  松开按键以取消\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]", -1, -0.4, 255, 255, 100, 255, 0, 0.2, 0 )
-		else
-			SendHudMessage( player, "正在使用电池  松开按键以取消\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]", -1, -0.4, 100, 255, 100, 255, 0, 0.2, 0 )
+		thread SendKsGUI_Threaded( player, "正在使用电池  "+ text +"\n[" + CreateHudProgressBarThroughTime( Time(), startTime, useTime ) + "]", < r, 255, 100 >, 0.2, 0.0, null, -0.4 )
 
 		if( !PlayerHasMaxBatteryCount( player ) )
 			return
@@ -172,10 +205,7 @@ void function TryUseShieldBattery( entity player )
 	player.Signal( "DoneUseShieldBattery" )
 	results.canceledUsage = false
 	player.SetShieldHealth( player.GetShieldHealthMax() )
-	if( isAmped )
-		SendHudMessage( player, "护盾恢复\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax(), -1, -0.4, 255, 255, 100, 255, 0, 1.0, 1.0 )
-	else
-		SendHudMessage( player, "护盾恢复\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax(), -1, -0.4, 100, 255, 100, 255, 0, 1.0, 1.0 )
+	thread SendKsGUI_Threaded( player, "护盾恢复\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax(), < r, 255, 100 >, 1.0, 1.0, null, -0.4 )
 
 	entity shieldFXHandle = StartParticleEffectOnEntity_ReturnEntity( player, GetParticleSystemIndex( $"P_xo_armor_body_CP" ), FX_PATTACH_POINT_FOLLOW, player.LookupAttachment( "CHESTFOCUS" ) )
 
@@ -208,4 +238,30 @@ string function CreateHudProgressBarThroughTime( float nowGlobalTime, float star
 	for( int i = 32 - sysbolNum; i > 0; i-- )
 		text += "-"
 	return text
+}
+
+void function ButtonCancelCheck( entity player, float maxTime )
+{
+    player.Signal( "StartButtonCancelCheck" )
+    player.EndSignal( "OnDestroy" )
+    player.EndSignal( "OnDeath" )
+    player.EndSignal( "StartButtonCancelCheck" )
+    player.EndSignal( "DoneUseShieldBattery" )
+    player.EndSignal( "StopUseShieldBattery" )
+
+    OnThreadEnd(
+        function(): ( player )
+        {
+            if( IsValid( player ) )
+                RemoveButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+        }
+    )
+
+    AddButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+    wait maxTime
+}
+
+void function InterruptShieldBattery( entity player )
+{
+    player.Signal( "StopUseShieldBattery" )
 }

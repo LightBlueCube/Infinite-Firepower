@@ -4,6 +4,11 @@ global function OnProjectileCollision_ClusterRocket
 void function OnProjectileCollision_ClusterRocket( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
 	array<string> mods = projectile.ProjectileGetMods()
+	if( mods.contains( "charge_ball" ) )
+	{
+		EmitSoundAtPosition( TEAM_UNASSIGNED, projectile.GetOrigin(), "Explo_ProximityEMP_Impact_3P" )
+		return
+	}
 	if ( mods.contains( "archon_stun_impact" ) )
 		return OnProjectileCollision_titanweapon_stun_impact( projectile, pos, normal, hitEnt, hitbox, isCritical )
 

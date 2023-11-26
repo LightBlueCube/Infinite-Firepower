@@ -197,8 +197,8 @@ void function OnTitanfall( entity titan )
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
 		titan.SetSharedEnergyRegenRate( 200 )
 		soul.s.SharedEnergyRegenRate <- 200
-		titan.SetSharedEnergyRegenDelay( 1.0 )
-		soul.s.SharedEnergyRegenDelay <- 1.0
+		titan.SetSharedEnergyRegenDelay( 3.0 )
+		soul.s.SharedEnergyRegenDelay <- 3.0
 
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
@@ -300,15 +300,15 @@ void function OnTitanfall( entity titan )
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.GiveWeapon( "mp_titanweapon_xo16_shorty", [ "accelerator" ] )
+        titan.GiveWeapon( "mp_titanweapon_meteor", [ "tcp_shotgun" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
         titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "brute4_bubble_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER, [ "tcp_smoke" ] )
-		titan.GiveOffhandWeapon( "mp_titanweapon_stun_laser", OFFHAND_ORDNANCE, [ "charge_ball" ] )
-		titan.GiveOffhandWeapon( "mp_titancore_upgrade", OFFHAND_EQUIPMENT, [ "tcp_ammo_core" ] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "charge_ball" ] )
+		titan.GiveOffhandWeapon( "mp_titancore_upgrade", OFFHAND_EQUIPMENT, [ "shield_core" ] )
 
 		array<int> passives = [ ePassives.PAS_LEGION_CHARGESHOT,
 								ePassives.PAS_LEGION_GUNSHIELD,

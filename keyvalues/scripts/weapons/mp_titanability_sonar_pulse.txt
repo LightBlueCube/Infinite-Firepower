@@ -16,6 +16,7 @@ WeaponData
 
 		tcp_smoke
 		{
+			"projectile_trail_effect_0"						"P_wpn_grenade_smoke_trail"
 		}
 		tcp_gravity
 		{
