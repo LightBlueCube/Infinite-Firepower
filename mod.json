@@ -94,6 +94,10 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "tcputil/dev_tarck_usage.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
 			"Path": "tcputil/sh_chatcommand.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
