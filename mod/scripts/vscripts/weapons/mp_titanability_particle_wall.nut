@@ -972,7 +972,7 @@ var function OnWeaponPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryAtta
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	float duration = 8
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -986,7 +986,7 @@ var function OnWeaponNpcPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryA
 	if ( IsValid( soul ) && IsValid( soul.soul.bubbleShield ))
 		return 0
 
-	float duration = 8
+	float duration = 6
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1

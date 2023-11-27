@@ -141,8 +141,6 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 
 	if( !IsValid( attacker ) )
 		return
-	if( victim.IsTitan() && attacker.IsTitan() )
-		printt( " kill+1 "+ attacker.GetModelName() + attacker.GetCamo() + attacker.GetSkin() +" dead+1 "+ victim.GetModelName() + victim.GetCamo() + victim.GetSkin() )
 
 	if( attacker.IsNPC() && attacker.IsTitan() )
 	{

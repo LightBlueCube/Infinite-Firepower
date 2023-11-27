@@ -24,8 +24,8 @@ WeaponData
 		{
 			"damage_near_value"   							"15"
 			"damage_far_value"								"15"
-			"damage_near_value_titanarmor"					"200"
-			"damage_far_value_titanarmor" 					"200"
+			"damage_near_value_titanarmor"					"140"
+			"damage_far_value_titanarmor" 					"140"
 
 			"reload_time"									"*1.25"
 			"reload_time_late1"								"*1.25"

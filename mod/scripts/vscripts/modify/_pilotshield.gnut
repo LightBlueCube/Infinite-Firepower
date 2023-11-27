@@ -65,13 +65,11 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 			thread SendKsGUI_Threaded( victim, "护盾损坏\n0/"+ total, < 255, 0, 0 >, 1.0, 1.0, null, -0.4 )
 		return
 	}
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( damage, 0, total / 2, 0.2, 0.6 ), GraphCapped( curr, total, 0, 1.0, 2.0 ), 1.0 )
+	int afterHealth = int( curr - damage )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( damage, 0, total / 2, 0.2, 0.6 ), GraphCapped( afterHealth, total, 0, 1.0, 2.0 ), 1.0 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
 	if( !victim.s.GUIActive )
-	{
-		int afterHealth = int( curr - damage )
 		thread SendKsGUI_Threaded( victim, "护盾受击\n"+ afterHealth +"/"+ total, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, 1.0, 1.0, null, -0.4 )
-	}
 }
 
 void function OnTitanBecomesPilot( entity player, entity titan )
