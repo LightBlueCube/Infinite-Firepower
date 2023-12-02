@@ -29,16 +29,28 @@ bool function IsNuclearBombDisable()
 	return NUCLEAR_BOMB_DISABLE
 }
 
+void function ForceStuckGameEndTime()
+{
+	svGlobal.levelEnt.EndSignal( "NukeExplode" )
+
+	for( ;; )
+	{
+		SetServerVar( "gameEndTime", Time() + 0.5 )
+		WaitFrame()
+	}
+}
+
 void function NuclearBombAnimThink( entity owner )
 {
 	if( IsNuclearBombDisable() )
 		return
 	SetNuclearBombDisable()
 
+	svGlobal.levelEnt.Signal( "NukeStart" )
 	SetShouldPlayFactionDialogue( false )
 	SetBattleChatterEnabled_Northstar( false )
 	SetShouldPlayDefaultMusic( false )
-	SetServerVar( "gameEndTime", Time() + 120.0 )
+	thread ForceStuckGameEndTime()
 	WaitFrame()
 
 	array<string> a = [ "", "", "", "", "", "", "", "", "", "", "", "", "", "", "" ]
@@ -308,7 +320,6 @@ void function SendNuclearWarn( string msg )
 
 void function NuclearBombThink( entity owner )
 {
-	svGlobal.levelEnt.Signal( "NukeStart" )
 	string ownerName
 	if( IsValid( owner ) )
 		ownerName = owner.GetPlayerName()

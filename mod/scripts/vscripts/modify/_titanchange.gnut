@@ -197,8 +197,8 @@ void function OnTitanfall( entity titan )
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
 		titan.SetSharedEnergyRegenRate( 200 )
 		soul.s.SharedEnergyRegenRate <- 200
-		titan.SetSharedEnergyRegenDelay( 3.0 )
-		soul.s.SharedEnergyRegenDelay <- 3.0
+		titan.SetSharedEnergyRegenDelay( 4.0 )
+		soul.s.SharedEnergyRegenDelay <- 4.0
 
         foreach( weapon in titan.GetMainWeapons() )
             titan.TakeWeaponNow( weapon.GetWeaponClassName() )

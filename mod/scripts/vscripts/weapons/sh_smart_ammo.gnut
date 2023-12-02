@@ -313,7 +313,7 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 
 		missile.SetSpeed( missileSpeed )
 		missile.SetHomingSpeeds( homingSpeed, homingSpeed )
-		if( target.IsHuman() && target.IsPlayer() )
+		if( target.IsHuman() && target.IsPlayer() && weapon.HasMod( "tcp_sp_base" ) )
 			missile.SetHomingSpeeds( 80, 80 )
 		SetTeam( missile, player.GetTeam() )
 
@@ -327,9 +327,48 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 
 		if ( "missileThinkThread" in weapon.s )
 			thread weapon.s.missileThinkThread( weapon, missile )
+
+		if( weapon.HasMod( "tcp_push_back" ) )
+		{
+			missile.Destroy()
+
+			vector vel = player.GetOrigin() - target.GetOrigin()
+			if( Length( vel ) > 4000 )
+				vel = Normalize( vel ) * 4000
+			target.SetVelocity( vel + < 0, 0, 400 > )
+			StatusEffect_AddTimed( target, eStatusEffect.emp, 1.0, 1.0, 2.0 )
+
+			string tag = GetEntityCenterTag( target )
+			int index = target.LookupAttachment( tag )
+			if ( index == 0 )
+				continue
+
+			BallLightningData fxData
+			thread BallLightningZapConnectionFX( player, target, tag, fxData )
+			for( int i = 4; i > 0; i-- )
+				BallLightningZapFX( player, target, tag, fxData )
+		}
 	}
 
 	return firedMissiles.len()
+}
+
+string function GetEntityCenterTag( entity target )
+{
+	string tag = "center"
+
+	if ( IsHumanSized( target ) )
+		tag = "CHESTFOCUS"
+	else if ( target.IsTitan() )
+		tag = "HIJACK"
+	else if ( IsSuperSpectre( target ) || IsAirDrone( target ) )
+		tag = "CHESTFOCUS"
+	else if ( IsDropship( target ) )
+		tag = "ORIGIN"
+	else if ( target.GetClassName() == "npc_turret_mega" )
+		tag = "ATTACH"
+
+	return tag
 }
 
 /******************************************/

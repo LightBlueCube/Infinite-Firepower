@@ -65,11 +65,17 @@ void function KsGUI( entity player )
 		{
 			if( !IsValid( player ) || result.timeOut )
 				return
+			if( player.s.usingCruiseMissile || player.s.GUIDisable || !player.IsHuman() )
+				return
+
 			KsGUI_SwitchL1( player )
 		}
 	)
 
 	wait 0.3
+	if( player.s.usingCruiseMissile || player.s.GUIDisable || !player.IsHuman() )
+		return
+
 	if( player.s.GUIClose && PlayerHasMaxBatteryCount( player ) )
 	{
 		result.timeOut <- true
@@ -82,10 +88,12 @@ void function KsGUI( entity player )
 	KsGUI_SelectL1( player )
 }
 
-const array<string> KSGUI_L1_TEXT =	[ "丢出电池", "使用电池", "核武泰坦", "巡弋飞弹", "VTOL", "折叠时空武器" ]
+const array<string> KSGUI_L1_TEXT =	[ "核武泰坦", "巡弋飞弹", "VTOL", "折叠时空武器", "丢出电池", "使用电池" ]
 
 void function KsGUI_SwitchL1( entity player )
 {
+	if( player.s.GUIClose && [ 4, 5 ].contains( expect int( player.s.KsGUIL1 ) ) )
+		player.s.KsGUIL1 = 0
 	if( player.s.GUIActive )
 	{
 		if( player.s.KsGUIL1 < KSGUI_L1_TEXT.len() - 1 )
@@ -93,24 +101,28 @@ void function KsGUI_SwitchL1( entity player )
 		else
 			player.s.KsGUIL1 = 0
 	}
-	if( player.s.KsGUIL1 == -1 )
-		player.s.KsGUIL1 = 0
 
 	player.s.GUIActive = true
 	player.s.GUIClose = false
+	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
+	thread SendKsGUI_Threaded( player, "", < 200, 200, 255 >, 2, 1, KsGUIL1TextChange )
+}
+
+string function KsGUIL1TextChange( entity player, string baseText, string text )
+{
 
 	array<var> skipL1Elem = []
-	if( !PlayerHasMaxBatteryCount( player ) )
-		skipL1Elem.append( 0 )
-	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
-		skipL1Elem.append( 1 )
 	if( player.s.NukeTitan == 0 )
-		skipL1Elem.append( 2 )
+		skipL1Elem.append( 0 )
 	if( player.s.CruiseMissile == 0 )
-		skipL1Elem.append( 3 )
+		skipL1Elem.append( 1 )
     if( !player.s.HaveVTOL )
-		skipL1Elem.append( 4 )
+		skipL1Elem.append( 2 )
 	if( !player.s.HaveNuclearBomb )
+		skipL1Elem.append( 3 )
+	if( !PlayerHasMaxBatteryCount( player ) )
+		skipL1Elem.append( 4 )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skipL1Elem.append( 5 )
 
 	if( skipL1Elem.len() == KSGUI_L1_TEXT.len() )
@@ -118,6 +130,12 @@ void function KsGUI_SwitchL1( entity player )
 		player.s.KsGUIL1 = -1
 		player.s.GUIActive = false
 	}
+	else if( player.s.KsGUIL1 == -1 )
+		player.s.KsGUIL1 = 0
+
+	bool onlyShowBatteryElem = false
+	if( skipL1Elem.contains( 0 ) && skipL1Elem.contains( 1 ) &&/* skipL1Elem.contains( 2 ) &&*/ skipL1Elem.contains( 3 ) )
+		onlyShowBatteryElem = true
 
 	foreach( i in skipL1Elem )
 	{
@@ -148,6 +166,13 @@ void function KsGUI_SwitchL1( entity player )
 		if( skipL1Elem.contains( i ) )
 			continue
 
+		if( i == 4 )
+		{
+			isFristElem = true
+			if( !onlyShowBatteryElem )
+				text += "\n"
+		}
+
 		// ◆text1(03)◆ "-" ◇text2◇
 		if( !isFristElem )
 			text += "-"
@@ -166,9 +191,9 @@ void function KsGUI_SwitchL1( entity player )
 		text += KSGUI_L1_TEXT[i]
 
 		// ◆text1"(03)"◆ - ◇text2◇
-		if( i == 2 )
+		if( i == 0 )
 			text += "("+ player.s.NukeTitan +")"
-		if( i == 3 )
+		if( i == 1 )
 			text += "("+ player.s.CruiseMissile +")"
 
 		// ◆text1(03)"◆" - ◇text2"◇"
@@ -180,10 +205,17 @@ void function KsGUI_SwitchL1( entity player )
 		// ◆text1(03)◆" "- ◇text2◇" "
 		text += " "
 	}
-	text += "\n\n\n\n\n\n\n"
+	if( onlyShowBatteryElem || ( skipL1Elem.contains( 4 ) && skipL1Elem.contains( 5 ) ) )
+		text += "\n"
+	text += "\n\n\n\n\n\n"
 
-	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
-	thread SendKsGUI_Threaded( player, text, < 200, 200, 255 >, 2, 1, KsGUITextChange )
+	table<int> ksData = GetKillStreakData()
+	text += "铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"    护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	text += "\n====== 连杀奖励获取进度 ======\n"
+	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
+	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
+	text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
+	return text
 }
 
 void function KsGUI_SelectL1( entity player )
@@ -192,17 +224,17 @@ void function KsGUI_SelectL1( entity player )
 
 	local l1 = player.s.KsGUIL1
 	if( l1 == 0 )
-		return ApplyDropBattery( player )
-	if( l1 == 1 )
-		return ApplyShieldBattery( player )
-	if( l1 == 2 )
 		return KeepingApplyNukeTitan( player )
-	if( l1 == 3 )
+	if( l1 == 1 )
 		return ApplyCruiseMissile( player )
-    if( l1 == 4 )
+    if( l1 == 2 )
         return ApplyVTOL( player )
-	if( l1 == 5 )
+	if( l1 == 3 )
 		return ApplyNuclearBomb( player )
+	if( l1 == 4 )
+		return ApplyDropBattery( player )
+	if( l1 == 5 )
+		return ApplyShieldBattery( player )
 }
 
 void function KeepingApplyNukeTitan( entity player )
@@ -214,17 +246,6 @@ void function KeepingApplyNukeTitan( entity player )
 		wait GraphCapped( applytimes, 0, 3, 0.5, 0.2 )
 		applytimes++
 	}
-}
-
-string function KsGUITextChange( entity player, string baseText, string text )
-{
-	table<int> ksData = GetKillStreakData()
-	baseText += "铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"    护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
-	baseText += "\n====== 连杀奖励获取进度 ======\n"
-	baseText += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
-	baseText += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
-	baseText += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
-	return baseText
 }
 
 string function GetProgress( int val, int endVal )

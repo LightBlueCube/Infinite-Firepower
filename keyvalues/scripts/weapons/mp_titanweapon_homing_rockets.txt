@@ -28,7 +28,7 @@ WeaponData
 
 		tcp_push_back
 		{
-			"burst_fire_delay"   									"16"
+			"burst_fire_delay"   							"16"
 			"smart_ammo_max_targeted_burst"					"1"
 			"smart_ammo_targeting_time_min"					"1.0"
 			"smart_ammo_targeting_time_max"					"1.0"

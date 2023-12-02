@@ -22,6 +22,7 @@ void function CruiseMissile_Init()
 void function OnClientConnected( entity player )
 {
 	player.s.cmBeforeOrigin <- < 0, 0, 0 >
+	player.s.cmSpeedUp <- false
 	player.s.usingCruiseMissile <- false
 	player.s.dropShipAlive <- true
 }
@@ -293,33 +294,37 @@ void function DropShipSonar( entity owner, int sonarTeam, vector cmFireOrigin )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "CruiseMissileExplode" )
 
-	array<entity> sonarEnt = []
-
-	foreach( ent in GetNPCArray() )
-	{
-		sonarEnt.append( ent )
-		DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
-	}
-	foreach( ent in GetPlayerArray() )
-	{
-		sonarEnt.append( ent )
-		DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
-	}
+	// can not use array<entity>, cuz its wont update at OnThreadEnd()
+	table< string,array<entity> > result
+	result.sonarEnt <- []
 
 	OnThreadEnd(
-		function() : ( sonarTeam, sonarEnt )
+		function() : ( sonarTeam, result )
 		{
-			foreach( ent in sonarEnt )
+			foreach( ent in result.sonarEnt )
 			{
 				DropShipSonarEnd( ent, sonarTeam )
 			}
 		}
 	)
-	for( ;; )
+
+	while( owner.s.dropShipAlive )
 	{
-		if( !owner.s.dropShipAlive )
-			break
-		WaitFrame()
+		foreach( ent in GetNPCArray() )
+		{
+			if( result.sonarEnt.contains( ent ) )
+				continue
+			result.sonarEnt.append( ent )
+			DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
+		}
+		foreach( ent in GetPlayerArray() )
+		{
+			if( result.sonarEnt.contains( ent ) )
+				continue
+			result.sonarEnt.append( ent )
+			DropShipSonarStart( ent, sonarTeam, cmFireOrigin )
+		}
+		wait 0.5
 	}
 }
 void function DropShipSonarStart( entity ent, int sonarTeam, vector cmFireOrigin )
@@ -469,12 +474,18 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 		}
 	)
 
+	AddButtonPressedPlayerInputCallback( weaponOwner, IN_ATTACK, CruiseMissileSpeedUp )
+
 	OnThreadEnd(
 		function(): ( weapon, weaponOwner, turret )
 		{
 			if ( IsValid( weaponOwner ) )
 			{
 				weaponOwner.Signal( "CruiseMissileExplode" )
+
+				RemoveButtonPressedPlayerInputCallback( weaponOwner, IN_ATTACK, CruiseMissileSpeedUp )
+				weaponOwner.s.cmSpeedUp = false
+
 				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_widow_engage_warp_speed" )
 				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_seyar_flyby" )
 
@@ -509,7 +520,7 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 		sec--
 		if( !IsValid( weaponOwner ) )
 			break
-		if( ( weaponOwner.IsInputCommandHeld( IN_ATTACK ) || sec == 0 ) && !HasAppendSpeed )
+		if( ( weaponOwner.s.cmSpeedUp || sec == 0 ) && !HasAppendSpeed )
 		{
 			missile.SetVelocity( missile.GetForwardVector() * 6000 )
 			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_TitanEMP", 0.1, 0.5, 0.5 )
@@ -539,6 +550,11 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 
 		WaitFrame()
 	}
+}
+
+void function CruiseMissileSpeedUp( entity player )
+{
+	player.s.cmSpeedUp = true
 }
 
 void function CruiseMissileExplode( vector origin, entity owner )

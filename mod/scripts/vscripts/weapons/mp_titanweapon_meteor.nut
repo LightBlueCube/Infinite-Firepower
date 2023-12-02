@@ -2,6 +2,7 @@ untyped
 
 global function MpTitanweaponMeteor_Init
 global function OnProjectileCollision_Meteor
+global function OnProjectileCollision_FireWallShotGun
 global function OnWeaponPrimaryAttack_Meteor
 global function OnWeaponActivate_Meteor
 global function OnWeaponDeactivate_Meteor
@@ -528,8 +529,7 @@ var function OnWeaponPrimaryAttack_FireWallShotGun( entity weapon, WeaponPrimary
 void function FireWallShotGunAirburst( entity bolt )
 {
 	bolt.EndSignal( "OnDestroy" )
-	bolt.GetOwner().EndSignal( "OnDestroy" )
-	wait 1.5
+	wait 1
 	OnProjectileCollision_FireWallShotGun( bolt )
 }
 
