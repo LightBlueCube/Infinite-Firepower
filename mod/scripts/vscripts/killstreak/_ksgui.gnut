@@ -92,7 +92,7 @@ const array<string> KSGUI_L1_TEXT =	[ "核武泰坦", "巡弋飞弹", "VTOL", "�
 
 void function KsGUI_SwitchL1( entity player )
 {
-	if( player.s.GUIClose && [ 4, 5 ].contains( expect int( player.s.KsGUIL1 ) ) )
+	if( player.s.GUIClose )
 		player.s.KsGUIL1 = 0
 	if( player.s.GUIActive )
 	{
