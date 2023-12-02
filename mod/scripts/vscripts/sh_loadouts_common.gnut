@@ -416,6 +416,8 @@ void function GiveTitanLoadout( entity titan, TitanLoadoutDef loadout )
 			weapon.SetCamo( -1 )
 		}
 	}
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
+		titan.GiveWeapon( "mp_titanweapon_meteor" )
 
 	if ( loadout.ordnance != "" )
 		titan.GiveOffhandWeapon( loadout.ordnance, OFFHAND_ORDNANCE, loadout.ordnanceMods )
