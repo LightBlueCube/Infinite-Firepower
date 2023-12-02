@@ -1,0 +1,5 @@
+WeaponData
+{
+	"damage_near_value_titanarmor"					"100"
+	"damage_far_value_titanarmor" 					"80"
+}

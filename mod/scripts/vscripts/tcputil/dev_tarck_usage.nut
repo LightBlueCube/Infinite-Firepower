@@ -100,6 +100,7 @@ void function TrackUsageTime()
 			while( val >= 60 )
 			{
 				printt( "[devUsage] min "+ key )
+				USAGE_TIME[ key ] -= 60
 				val -= 60
 			}
 		}

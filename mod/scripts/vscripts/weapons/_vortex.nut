@@ -649,21 +649,21 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 	if( hasVortexRegen )
 	{
 		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
 		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
+			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) )
 
 		if( amount <= 0 )
 		{
 			if ( projectile )
-				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
+				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage ) )
 			else
-				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
+				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage ) )
 		}
 
 		entity owner = vortexWeapon.GetWeaponOwner()
 		int currentEnergy = owner.GetSharedEnergyCount()
-		int val = int( amount / 5 )
+		int val = int( amount / 3 )
 		if( currentEnergy - val <= 0 )
 			val = currentEnergy
 		if( val >= 0 )
@@ -1844,11 +1844,8 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 			case eDamageSourceId.mp_titanweapon_dumbfire_rockets:
 				vector normal = projectile.GetVelocity() * -1
 				normal = Normalize( normal )
-				if( !( projectile.ProjectileGetMods().contains( "tcp_arc_bomb" ) ) )
-				{
-					ClusterRocket_Detonate( projectile, normal )
-					CreateNoSpawnArea( TEAM_INVALID, TEAM_INVALID, contactPos, ( CLUSTER_ROCKET_BURST_COUNT / 5.0 ) * 0.5 + 1.0, CLUSTER_ROCKET_BURST_RANGE + 100 )
-				}
+				ClusterRocket_Detonate( projectile, normal )
+				CreateNoSpawnArea( TEAM_INVALID, TEAM_INVALID, contactPos, ( CLUSTER_ROCKET_BURST_COUNT / 5.0 ) * 0.5 + 1.0, CLUSTER_ROCKET_BURST_RANGE + 100 )
 				break
 
 			case eDamageSourceId.mp_weapon_grenade_electric_smoke:

@@ -25,6 +25,9 @@ void function MpTitanWeaponHomingRockets_Init()
 
 void function OnWeaponOwnerChanged_titanweapon_homing_rockets( entity weapon, WeaponOwnerChangedParams changeParams )
 {
+	if( weapon.HasMod( "tcp_push_back" ) )
+		return
+
 	Init_titanweapon_homing_rockets( weapon )
 }
 
@@ -32,16 +35,6 @@ function Init_titanweapon_homing_rockets( entity weapon )
 {
 	if ( !( "initialized" in weapon.s ) )
 	{
-		if( weapon.HasMod( "tcp_push_back" ) )
-		{
-			weapon.s.initialized <- true
-			SmartAmmo_SetMissileSpeed( weapon, 1600 )
-			SmartAmmo_SetMissileHomingSpeed( weapon, 1600 )
-			SmartAmmo_SetUnlockAfterBurst( weapon, true )
-			SmartAmmo_SetDisplayKeybinding( weapon, false )
-			SmartAmmo_SetExpandContract( weapon, 3, true, 5, 0.2, 0.0, -5, 0.0, -1.0 )
-			return
-		}
 		weapon.s.initialized <- true
 		SmartAmmo_SetMissileSpeed( weapon, HOMINGROCKETS_MISSILE_SPEED )
 		SmartAmmo_SetMissileHomingSpeed( weapon, 250 )
@@ -74,17 +67,5 @@ void function HomingRocketsOnDamage( entity target, var damageInfo )
 		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.1, 1.0, 1.0 )
 
 	entity attacker = DamageInfo_GetAttacker( damageInfo )
-	if( !IsValid( attacker ) )
-		return
-	if( !attacker.IsNPC() && !attacker.IsPlayer() )
-		return
-	if( !IsValid( attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ) ) )
-		return
-	if( !attacker.GetOffhandWeapon( OFFHAND_ORDNANCE ).HasMod( "tcp_push_back" ) )
-		return
-	if( target.GetTeam() == attacker.GetTeam() )
-		return
-
-	target.SetVelocity( ( Normalize( attacker.GetOrigin() - target.GetOrigin() ) * 1600 ) + < 0, 0, 400 > )
 }
 

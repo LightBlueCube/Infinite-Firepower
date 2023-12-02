@@ -116,6 +116,12 @@ void function ApplyCruiseMissile( entity player )
         EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
         return
     }
+	if( player.s.usingCruiseMissile )
+	{
+        thread SendKsGUI_Threaded( player, "\n你正在使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+        return
+	}
 
     thread CruiseMissileAnim_ThinkBefore( player )
     thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
