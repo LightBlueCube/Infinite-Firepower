@@ -120,6 +120,7 @@ int function round( float num )
 void function LastMinThink()
 {
 	svGlobal.levelEnt.EndSignal( "NukeStart" )
+	svGlobal.levelEnt.EndSignal( "GameStateChanged" )
 
 	string music = lastMinMusic[ RandomInt( lastMinMusic.len() ) ]
 	OnThreadEnd(
