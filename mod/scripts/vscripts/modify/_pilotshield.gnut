@@ -73,7 +73,7 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 			victim.SetShieldHealth( 0 )
 		}
 		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 1.0, 1.0 )
-		EmitSoundOnEntity( victim, "titan_energyshield_down" )
+		//EmitSoundOnEntity( victim, "titan_energyshield_down" )	// early have play this in health_regen.gnut
 		if( !victim.s.GUIActive && damage - curr < victim.GetHealth() )
 			thread SendKsGUI_Threaded( victim, "护盾损坏\n0/"+ total, < 255, 0, 0 >, 1.0, 1.0, null, -0.4 )
 		return
