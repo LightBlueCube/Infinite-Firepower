@@ -3,7 +3,7 @@ global function GetsBetterSpawnPointByTeam
 global function BetterRespawnPointEnable
 global function SetBetterRespawnPointEnable
 
-bool BETTER_RESPAWN_POINT_ENABLE = false
+bool BETTER_RESPAWN_POINT_ENABLE = true
 
 void function BetterRespawnPoint_Init()
 {
@@ -25,12 +25,14 @@ void function BetterRespawnPoint_Pilot( entity player )
 {
 	if( !BetterRespawnPointEnable() )
 		return
-	if ( GetGameState() <= eGameState.Prematch )
+	if ( GetGameState() < eGameState.Playing )
 		return
 	if( player.IsTitan() )
 		return
 
-	player.SetOrigin( GetsBetterSpawnPointByTeam( player.GetTeam(), false, 1500 ).GetOrigin() )
+	entity point = GetsBetterSpawnPointByTeam( player.GetTeam(), false, 2000 )
+	player.SetOrigin( point.GetOrigin() )
+	player.SetAngles( point.GetAngles() )
 }
 
 entity function BetterRespawnPoint_Titan( entity player, entity spawnPoint )
@@ -38,20 +40,20 @@ entity function BetterRespawnPoint_Titan( entity player, entity spawnPoint )
 	if( !BetterRespawnPointEnable() )
 		return spawnPoint
 
-	return GetsBetterSpawnPointByTeam( player.GetTeam(), true, 1500 )
+	return GetsBetterSpawnPointByTeam( player.GetTeam(), true, 2000 )
 }
 
 entity function GetsBetterSpawnPointByTeam( int team, bool isTitan, float distance, int callTimes = 0 )
 {
 	int i = 0
 	int nearPlayer = 0
-	float distance = 0
 	int nearPlayerSave = 0
+	float totalDistance = 0
 	float distanceSave = 0
 	int arrayNum = -1
 	array<entity> points = isTitan ? SpawnPoints_GetTitan() : SpawnPoints_GetPilot()
 
-	if( callTimes >= 10 )
+	if( callTimes >= 10 || GetPlayerArrayOfTeam( team ).len() <= 1 )
 		return points[ RandomInt( points.len() ) ]
 
 	foreach( point in points )
@@ -62,25 +64,29 @@ entity function GetsBetterSpawnPointByTeam( int team, bool isTitan, float distan
 				continue
 			if( ent.GetTeam() != team )
 			{
-				if( distance < Distance( ent.GetOrigin(), point.GetOrigin() ) )
-					distance = Distance( ent.GetOrigin(), point.GetOrigin() )
+				if( Distance( ent.GetOrigin(), point.GetOrigin() ) <= distance / 2 )
+					totalDistance += distance * 2
+				else
+					totalDistance -= distance / 2
 				continue
 			}
-			if( Distance( ent.GetOrigin(), point.GetOrigin() ) < distance )
+			if( Distance( ent.GetOrigin(), point.GetOrigin() ) <= distance )
 			{
 				nearPlayer++
+				totalDistance += Distance( ent.GetOrigin(), point.GetOrigin() )
 			}
 		}
 
-		if( nearPlayer > nearPlayerSave || ( nearPlayer == nearPlayerSave && distance > distanceSave ) )
+		if( nearPlayer > nearPlayerSave || ( nearPlayer == nearPlayerSave && totalDistance < distanceSave ) )
 		{
 			nearPlayerSave = nearPlayer
-			distanceSave = distance
+			distanceSave = totalDistance
 			arrayNum = i
 		}
+
 		i++
 		nearPlayer = 0
-		distance = 0
+		totalDistance = 0
 	}
 
 	if( arrayNum < 0 || distance < 500 )
