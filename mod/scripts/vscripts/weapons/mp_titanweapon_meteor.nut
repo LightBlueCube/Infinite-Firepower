@@ -574,7 +574,7 @@ void function OnProjectileCollision_FireWallShotGun( entity projectile )
 	projectile.Destroy()
 }
 
-entity function FireWallShotGun_CreatePhysicsThermiteTrail( vector origin, entity owner, entity inflictor, entity projectile, vector velocity, float killDelay, asset overrideFX = METEOR_FX_TRAIL, int damageSourceId = eDamageSourceId.mp_titanweapon_meteor_thermite )
+entity function FireWallShotGun_CreatePhysicsThermiteTrail( vector origin, entity owner, entity inflictor, entity projectile, vector velocity, float killDelay, asset overrideFX, int damageSourceId )
 {
 	Assert( IsValid( owner ) )
 	entity prop_physics = CreateEntity( "prop_physics" )
