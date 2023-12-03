@@ -163,7 +163,7 @@ void function GameStateEnter_Postmatch()
 }
 void function ShuffleTeams_Waiting()
 {
-	wait GAME_POSTMATCH_LENGTH - 0.1
+	wait GAME_POSTMATCH_LENGTH - 0.2
 	TeamShuffleThink()
 }
 
