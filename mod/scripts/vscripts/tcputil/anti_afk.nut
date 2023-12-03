@@ -38,7 +38,7 @@ void function CheckPlayerMove( entity player )
 			continue
 		}
 
-        if( afkTime >= 40 )
+        if( afkTime >= 60 )
             Chat_ServerPrivateMessage( player, "\x1b[31m!!!!!!!!请不要挂机!!!!!!!!", false )
         if( afkTime >= 90 && GetPlayerArray().len() > 10 )
             ServerCommand( "kickid "+ player.GetUID() )
