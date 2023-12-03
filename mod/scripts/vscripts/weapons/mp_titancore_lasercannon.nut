@@ -386,7 +386,7 @@ void function GravityCoreThink( entity weapon, entity owner )
 				mover.Destroy()
 			if( !IsValid( owner ) )
 				return
-			owner.s.flyingSlow <- false
+			delete owner.s.flyingSlow
 			owner.DeployWeapon()
 			RadiusDamage(
 				owner.GetOrigin(),											// origin

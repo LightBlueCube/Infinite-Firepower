@@ -21,6 +21,7 @@ var function OnWeaponPrimaryAttack_TitanHover( entity weapon, WeaponPrimaryAttac
 {
 	if( weapon.HasMod( "tcp_super_hover" ) )
 		return OnWeaponPrimaryAttack_SuperHover( weapon, attackParams )
+
 	entity flyer = weapon.GetWeaponOwner()
 	if ( !IsAlive( flyer ) )
 		return
@@ -226,11 +227,11 @@ var function OnWeaponPrimaryAttack_SuperHover( entity weapon, WeaponPrimaryAttac
 		return
 
 
-	if( "flying" in flyer.s )
+	if( "flying" in weapon.s )
 	{
-		if( flyer.s.flying )
+		if( weapon.s.flying )
 		{
-			flyer.s.flying <- false
+			weapon.s.flying <- false
 			flyer.Signal( "StopFlying" )
 			return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 		}
@@ -251,6 +252,7 @@ var function OnWeaponPrimaryAttack_SuperHover( entity weapon, WeaponPrimaryAttac
 		soundInfo.landing_1p = "core_ability_land_1p"
 		soundInfo.landing_3p = "core_ability_land_3p"
 
+		flyer.SetVelocity( < 0, 0, 0 > )
 		thread FlyerSuperHovers( flyer, soundInfo, 500.0, weapon )
 	#endif
 
@@ -262,7 +264,7 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "TitanEjectionStarted" )
 	player.EndSignal( "StopFlying" )
-	player.s.flying <- true
+	weapon.s.flying <- true
 
 	thread AirborneThink( player, soundInfo )
 	if ( player.IsPlayer() )
@@ -294,15 +296,17 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 		{
 			if ( IsValid( player ) )
 			{
-				if( IsValid( weapon ) && player.s.flying )
+				if( IsValid( weapon ) )
 				{
-					//PlayerUsedOffhand( player, weapon )
-					thread TakeWeaponClip( weapon )
+					if( weapon.s.flying )
+					{
+						thread TakeWeaponClip( weapon )
+						weapon.s.flying <- false
+					}
 				}
 				EmitSoundOnEntityOnlyToPlayer( player, player, soundInfo.descent_1p )
 				EmitSoundOnEntityExceptToPlayer( player, player, soundInfo.descent_3p )
 				player.Signal( "StopFlying" )
-				player.s.flying <- false
 				StopSoundOnEntity( player, soundInfo.hover_1p )
 				StopSoundOnEntity( player, soundInfo.hover_3p )
 				player.SetGroundFrictionScale( 1 )
