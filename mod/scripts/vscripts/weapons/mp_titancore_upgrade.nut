@@ -599,8 +599,8 @@ void function ShieldCoreThink( entity weapon, float coreDuration )
 		}
 	)
 
-	const int SHILED_CORE_REGEN_RATE = 150
-	const float SHIELD_CORE_REGEN_TICKRATE = 0.1 // 1500 shields per second
+	const int SHILED_CORE_REGEN_RATE = 200
+	const float SHIELD_CORE_REGEN_TICKRATE = 0.1 // 2000 shields per second
 	float startTime = Time()
 	while( Time() < startTime + coreDuration )
 	{
