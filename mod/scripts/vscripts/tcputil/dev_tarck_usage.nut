@@ -1,4 +1,7 @@
 global function DevTrackUsage_Init
+global function SavingUsageData
+
+string HTTP_IO_URL = ""
 
 table<string,asset> TITAN_ID = {	// the key only can use type string, its sucks
 
@@ -29,32 +32,93 @@ table<string,asset> TITAN_ID = {	// the key only can use type string, its sucks
 	m6 = $"models/titans/heavy/titan_heavy_legion_prime.mdl"
 }
 
-table<string,int> USAGE_TIME = {
+table<string,int> USAGE_DATA = {
 
 	v1 = 0
+	v1_k = 0
+	v1_d = 0
 	v2 = 0
+	v2_k = 0
+	v2_d = 0
 	v3 = 0
+	v3_k = 0
+	v3_d = 0
 	v4 = 0
+	v4_k = 0
+	v4_d = 0
 	v5 = 0
+	v5_k = 0
+	v5_d = 0
 	v6 = 0
+	v6_k = 0
+	v6_d = 0
 	v7 = 0
+	v7_k = 0
+	v7_d = 0
 
 	m1 = 0
+	m1_k = 0
+	m1_d = 0
 	m2 = 0
+	m2_k = 0
+	m2_d = 0
 	m3 = 0
+	m3_k = 0
+	m3_d = 0
 	m4 = 0
+	m4_k = 0
+	m4_d = 0
 	m5 = 0
+	m5_k = 0
+	m5_d = 0
 	m6 = 0
+	m6_k = 0
+	m6_d = 0
 	m7 = 0
-
-	none = 0
+	m7_k = 0
+	m7_d = 0
 }
 
 void function DevTrackUsage_Init()
 {
+	HTTP_IO_URL = "192.168.50.2:1145"
+
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
+	AddCallback_GameStateEnter( eGameState.Postmatch, SavingUsageData )
 	thread TrackUsageTime()
+}
+
+void function SavingUsageData()
+{
+	if( HTTP_IO_URL == "" )
+		return
+
+	HttpRequest request
+	request.method = HttpRequestMethod.GET
+	request.url = HTTP_IO_URL + "/read_data"
+	NSHttpRequest( request, LoadUsage, debugFunc )
+}
+
+void function debugFunc( HttpRequestFailure response )
+{
+	printt( "faild to get request / error code:"+ response.errorCode )
+	printt( "error message: "+ response.errorMessage )
+}
+
+void function LoadUsage( HttpRequestResponse response )
+{
+	printt( "get request / status code:"+ response.statusCode )
+	table data = DecodeJSON( response.body )
+
+	foreach( string k, int v in USAGE_DATA )
+	{
+		if( !( k in data ) )
+			data[ k ] <- 0
+		data[ k ] = string( data[ k ] ).tointeger() + v
+	}
+
+	thread NSHttpPostBody( HTTP_IO_URL + "/write_data", EncodeJSON( data ) )
 }
 
 string function GetTitanID( entity titan )
@@ -90,19 +154,10 @@ void function TrackUsageTime()
 				if( !IsValid( player ) )
 					continue
 			}
-			USAGE_TIME[ GetTitanID( player ) ] += 5
-		}
-
-		foreach( string key, int val in USAGE_TIME )
-		{
-			if( val < 60 )
+			string id = GetTitanID( player )
+			if( id == "none" )
 				continue
-			while( val >= 60 )
-			{
-				printt( "[devUsage] min "+ key )
-				USAGE_TIME[ key ] -= 60
-				val -= 60
-			}
+			USAGE_DATA[ id ] += 5
 		}
 	}
 }
@@ -121,6 +176,10 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 				return
 	}
 
-	printt( "[devUsage] kill "+ GetTitanID( attacker ) )
-	printt( "[devUsage] death "+ GetTitanID( victim ) )
+	string id = GetTitanID( attacker )
+	if( id != "none" )
+		USAGE_DATA[ id + "_k" ] += 1
+	id = GetTitanID( victim )
+	if( id != "none" )
+		USAGE_DATA[ id + "_d" ] += 1
 }

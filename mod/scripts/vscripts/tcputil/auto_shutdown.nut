@@ -38,6 +38,8 @@ void function StartCountdown( entity client )
 	svGlobal.levelEnt.Signal( "AutoShutdownCountdown" )
 	svGlobal.levelEnt.EndSignal( "AutoShutdownCountdown" )
 	wait 60
+	SavingUsageData()
+	wait 1
 	foreach( player in GetPlayerArray() )
 	{
 		if( player == client || !IsValid( player ) )
