@@ -1,0 +1,129 @@
+untyped
+global function VTOL_Init
+global function PlayerUsingVTOL
+global function VTOLIntro	// debug, dont forget remove it
+
+vector VTOL_CENTER = < 0, 0, 5000 >
+
+void function VTOL_Init()
+{
+	AddCallback_OnClientConnected( OnClientConnected )
+
+	if( GetMapName() == "mp_grave" )
+		VTOL_CENTER = < 0, 0, 4500 >
+	if( GetMapName() == "mp_wargames" )
+		VTOL_CENTER = < 0, 0, 4000 >
+}
+
+void function OnClientConnected( entity player )
+{
+	player.s.usingVTOL <- false
+	player.s.VTOLIntroDone <- false
+}
+
+void function PlayerUsingVTOL( entity owner )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.s.usingVTOL = true
+	owner.kv.VisibilityFlags = 0
+	PhaseShift( owner, 0, 1.2 )
+	HolsterAndDisableWeapons( owner )
+	owner.SetOrigin( owner.GetOrigin() )
+	FindNearestSafeSpotAndPutEntity( owner, 5 )
+	owner.FreezeControlsOnServer()
+	owner.SetInvulnerable()
+	vector beforeOrigin = owner.GetOrigin()
+
+	OnThreadEnd(
+		function() : ( owner, beforeOrigin )
+		{
+			if( !IsValid( owner ) )
+				return
+			Remote_CallFunction_NonReplay( owner, "ServerCallback_ResetMapSettings" )
+			owner.s.usingVTOL = false
+			owner.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
+			owner.ClearInvulnerable()
+			DeployAndEnableWeapons( owner )
+			owner.UnfreezeControlsOnServer()
+			Remote_CallFunction_Replay( owner, "ServerCallback_TitanEMP", 0.4, 0.4, 0.4 )
+			ScreenFade( owner, 0, 0, 0, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) )
+
+			if( !IsAlive( owner ) )
+				return
+			owner.SetOrigin( beforeOrigin )
+			FindNearestSafeSpotAndPutEntity( owner, 5 )
+			PlayFXOnEntity( $"P_phase_shift_main", owner )
+			EmitSoundOnEntityOnlyToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_1P" )
+			EmitSoundOnEntityExceptToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_3P" )
+		}
+	)
+
+	ScreenFadeToBlack( owner, 1.0, 0.8 )
+	wait 1.0
+	WaitFrame()
+	thread VTOLIntro( owner )
+
+	vector validOrigin = GetEnt( "spaceNode" ).GetOrigin()
+	for( ;; )
+	{
+		WaitFrame()
+		if( !owner.s.usingVTOL )
+			return
+
+		owner.SetOrigin( validOrigin )
+		owner.SetVelocity( < 0, 0, 0 > )
+		if( owner.s.VTOLIntroDone )
+			Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
+	}
+}
+
+void function FindNearestSafeSpotAndPutEntity( entity ent, int severity )
+{
+	vector baseOrigin = ent.GetOrigin()
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y+severity, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y-severity, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x+severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x-severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z+severity >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z-severity >, baseOrigin ) )
+		return
+
+	return FindNearestSafeSpotAndPutEntity( ent, severity+5 )
+}
+
+void function VTOLIntro( entity owner )
+{
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+
+	vector circle = < 0, RandomInt( 360 ), 0 >
+	vector shipAng = AnglesToRight( circle )
+	vector circleDir = AnglesToForward( circle )
+	vector shipDir = AnglesToForward( shipAng )
+
+	vector center = VTOL_CENTER
+	vector pos = center + circleDir * 1000
+	vector introPos = pos + shipDir * -1000
+
+	entity mover = CreateScriptMover( introPos, shipAng )
+	mover.SetModel( $"models/vehicle/straton/straton_imc_gunship_01.mdl" )
+	mover.NonPhysicsMoveTo( pos, 10.0, 0.0, 0.0 )
+}
+
+
+
+
+
+

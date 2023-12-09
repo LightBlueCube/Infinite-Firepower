@@ -131,7 +131,67 @@ void function ApplyCruiseMissile( entity player )
 
 void function ApplyVTOL( entity player )
 {
-	//feature  ¯\_( ͡° ͜ʖ ͡°)_/¯
+	if( !player.s.HaveVTOL )
+	{
+		thread SendKsGUI_Threaded( player, "\n无VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !IsAlive( player ) )
+	{
+		thread SendKsGUI_Threaded( player, "\n死亡时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( IsValid( player.GetTitanSoulBeingRodeoed() ) )
+	{
+		thread SendKsGUI_Threaded( player, "\n训牛时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( player.GetParent() )
+	{
+		thread SendKsGUI_Threaded( player, "\n在有绑定的父级实体时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !player.IsHuman() )
+	{
+		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( player.IsPhaseShifted() )
+	{
+		thread SendKsGUI_Threaded( player, "\n你需要离开相位才能使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( !player.IsOnGround() )
+	{
+		thread SendKsGUI_Threaded( player, "\n你需要站在地上才能使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	if( player.s.usingVTOL )
+	{
+		thread SendKsGUI_Threaded( player, "\n你正在使用VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+	foreach( ent in GetPlayerArray() )
+	{
+		if( !ent.s.usingVTOL )
+			continue
+		thread SendKsGUI_Threaded( player, "\n场上已存在一个VTOL", < 255, 100, 100 >, 2, 1 )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
+		return
+	}
+
+	thread VTOLIntro( player )
+	thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+	player.s.HaveVTOL = false
 }
 
 void function ApplyNuclearBomb( entity player )
