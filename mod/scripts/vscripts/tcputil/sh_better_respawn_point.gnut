@@ -1,0 +1,100 @@
+global function GetBetterSpawnPoint
+global function BetterRespawnPointEnable
+global function SetBetterRespawnPointEnable
+
+bool BETTER_RESPAWN_POINT_ENABLE = false
+
+bool function BetterRespawnPointEnable()
+{
+	return BETTER_RESPAWN_POINT_ENABLE
+}
+
+void function SetBetterRespawnPointEnable( bool state )
+{
+	BETTER_RESPAWN_POINT_ENABLE = state
+}
+
+entity function GetBetterSpawnPoint( int team, array<entity> points, float range = 2000, int callTimes = 0 )
+{
+	array<vector> friendlyPos
+	array<vector> emenyPos
+	bool hasAlivePlayer = false
+	foreach( player in GetPlayerArray() )
+	{
+		if( !IsAlive( player ) )
+			continue
+		hasAlivePlayer = true
+		if( player.GetTeam() == team )
+			friendlyPos.append( player.GetOrigin() )
+		else
+			emenyPos.append( player.GetOrigin() )
+	}
+	if( !hasAlivePlayer || callTimes >= 10 || GetPlayerArray().len() <= 1 )
+		return points[ RandomInt( points.len() ) ]
+
+
+	float weightSave = 0
+	int arrayNum = -1
+	int target = -1
+	foreach( point in points )
+	{
+		arrayNum++
+		vector pointPos = point.GetOrigin()
+		bool haveFriendly = false
+		bool haveEmeny = false
+		float weight = 0
+
+		foreach( pos in emenyPos )
+		{
+
+			float distance = Distance( pos, pointPos )
+			if( distance > range )
+				continue
+			if( distance <= range * 0.5 )
+				weight += -4
+			else if( distance <= range )
+			{
+				if( haveEmeny )
+				{
+					weight += -1
+					continue
+				}
+
+				haveEmeny = true
+				weight += 2
+				weight += GraphCapped( distance, range * 0.5, range, 0, 0.1 )
+			}
+		}
+		foreach( pos in friendlyPos )
+		{
+			float distance = Distance( pos, pointPos )
+			if( distance > range )
+				continue
+			haveFriendly = true
+			if( haveEmeny )
+			{
+				weight += 1
+				weight += GraphCapped( distance, range, 0, 0, 0.1 )
+			}
+			else
+			{
+				weight += 0.6
+				weight += GraphCapped( fabs( distance - range * 0.5 ), range * 0.5, 0, 0, 0.9 )
+			}
+
+		}
+		if( !haveFriendly )
+			weight += -1
+
+		if( weight > weightSave )
+		{
+			weightSave = weight
+			target = arrayNum
+		}
+	}
+
+	if( target < 0 )
+		return GetBetterSpawnPoint( team, points, range + 500, callTimes + 1 )
+
+	return points[ target ]
+}

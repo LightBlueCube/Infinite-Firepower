@@ -2,23 +2,25 @@ global function InfiniteFirepower_Init
 
 void function InfiniteFirepower_Init()
 {
-	RandomMap_Init()    //随机换图
+	RandomMap_Init()	//随机换图
 
-	TitanChange_Init()    //至尊泰坦替换
+	TitanChange_Init()	//至尊泰坦替换
 
-	KillStreak_Init()    //连杀系统
+	KillStreak_Init()	//连杀系统
 
-	TeamShuffle_Init()    //打乱队伍
+	TeamShuffle_Init()	//打乱队伍
 
-	BetterRespawnPoint_Init()	//更好的重生点
+	SetBetterRespawnPointEnable( true )	//启用更好的重生点
 
-	AntiAFK_Init( 12, [ "1012451615950" ] )	//反挂机，第一个参数为达到多少人才开始踢出挂机玩家，第二个参数为反挂机忽略的玩家的uid
+	AntiAFK_Init()	//反挂机
+	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )	//达到多少人才开始踢出挂机玩家
+	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )	//反挂机忽略的玩家的uid
 
-	//ColorfulChat_Init()	//炫彩聊天文字
+	//ColorfulChat_Init()	//炫彩聊天文字，已fuck up
 
 	PilotShield_Init()	//Apex like 铁驭护盾
 
 	AutoShutdown_Init()	//如果服务器无人则自动重启服务器
 
-	DevTrackUsage_Init() //DEV: 跟踪泰坦使用频次和记录各泰坦的kd
+	DevTrackUsage_Init()	//DEV: 跟踪泰坦使用频次和记录各泰坦的kd
 }

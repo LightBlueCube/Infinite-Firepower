@@ -320,6 +320,8 @@ void function SendNuclearWarn( string msg )
 
 void function NuclearBombThink( entity owner )
 {
+	SetKillcamsEnabled( false )
+
 	string ownerName
 	if( IsValid( owner ) )
 		ownerName = owner.GetPlayerName()

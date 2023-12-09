@@ -10,7 +10,7 @@ void function RandomMap_Init()
 
 void function OnClientConnected( entity player )
 {
-    thread SetPlayerToNightSky( player )
+	thread SetPlayerToNightSky( player )
 }
 
 void function GameStateEnter_Postmatch()

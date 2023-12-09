@@ -11,7 +11,7 @@ void function CruiseMissile_Init()
 	RegisterSignal( "CalculateCruiseMissilePoint" )
 	RegisterSignal( "CruiseMissileExplode" )
 
-    AddCallback_OnClientConnected( OnClientConnected )
+	AddCallback_OnClientConnected( OnClientConnected )
 
 	if( GetMapName() == "mp_grave" )
 		FIRE_HIGHER = 4500
@@ -49,19 +49,17 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		{
 			if( !IsValid( owner ) )
 				return
-
 			Remote_CallFunction_NonReplay( owner, "ServerCallback_ResetMapSettings" )
 			owner.s.usingCruiseMissile = false
 			owner.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 			owner.ClearInvulnerable()
 			DeployAndEnableWeapons( owner )
 			owner.UnfreezeControlsOnServer()
-			owner.SetPhysics( MOVETYPE_WALK )
 			Remote_CallFunction_Replay( owner, "ServerCallback_TitanEMP", 0.4, 0.4, 0.4 )
 			ScreenFade( owner, 0, 0, 0, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) )
+
 			if( !IsAlive( owner ) )
 				return
-
 			owner.SetOrigin( owner.s.cmBeforeOrigin )
 			FindNearestSafeSpotAndPutEntity( owner, 5 )
 			PlayFXOnEntity( $"P_phase_shift_main", owner )
@@ -72,10 +70,10 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 
 	ScreenFadeToBlack( owner, 1.0, 0.8 )
 	wait 1.0
-	owner.SetPhysics( MOVETYPE_NOCLIP )	//防止玩家因为逃离战场而去世
-    WaitFrame()
+	WaitFrame()
 	thread CruiseMissileAnim_Think( owner, cmFireOrigin, cmFireAngles )
 
+	vector validOrigin = GetEnt( "spaceNode" ).GetOrigin()
 	for( ;; )
 	{
 		WaitFrame()
@@ -83,9 +81,8 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 			return
 
 		Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
-		vector origin = cmFireOrigin
-		origin.z += 200
-		owner.SetOrigin( origin )
+		owner.SetOrigin( validOrigin )
+		owner.SetVelocity( < 0, 0, 0 > )
 	}
 }
 
@@ -93,25 +90,25 @@ void function FindNearestSafeSpotAndPutEntity( entity ent, int severity )
 {
 	vector baseOrigin = ent.GetOrigin()
 
-    if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y+severity, baseOrigin.z >, baseOrigin ) )
-        return
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y+severity, baseOrigin.z >, baseOrigin ) )
+		return
 
-    if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y-severity, baseOrigin.z >, baseOrigin ) )
-        return
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y-severity, baseOrigin.z >, baseOrigin ) )
+		return
 
-    if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x+severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-        return
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x+severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
+		return
 
 	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x-severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-        return
+		return
 
 	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z+severity >, baseOrigin ) )
-        return
+		return
 
 	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z-severity >, baseOrigin ) )
-        return
+		return
 
-    return FindNearestSafeSpotAndPutEntity( ent, severity+5 )
+	return FindNearestSafeSpotAndPutEntity( ent, severity+5 )
 }
 
 void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector cmFireAngles )
@@ -387,7 +384,7 @@ void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin, vector
 
 	if ( missile )
 	{
-        missile.kv.modelscale = 4.0
+		missile.kv.modelscale = 4.0
 		EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_Archer_Fire_1P" )
 		thread CruiseMissileThink( weapon, weaponOwner, missile )
 	}

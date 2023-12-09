@@ -4,14 +4,14 @@ global function UseShieldBattery
 
 void function PilotShield_Init()
 {
-    RegisterSignal( "StartButtonCancelCheck" )
-    RegisterSignal( "StopUseShieldBattery" )
-    RegisterSignal( "DoneUseShieldBattery" )
+	RegisterSignal( "StartButtonCancelCheck" )
+	RegisterSignal( "StopUseShieldBattery" )
+	RegisterSignal( "DoneUseShieldBattery" )
 
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 	AddCallback_OnTitanBecomesPilot( OnTitanBecomesPilot )
-	AddDamageCallback( "player", OnPlayerDamaged )
+	AddDamageFinalCallback( "player", OnPlayerFinalDamaged )
 }
 
 void function OnClientConnected( entity player )
@@ -22,18 +22,11 @@ void function OnClientConnected( entity player )
 	AddPlayerHeldButtonEventCallback( player, IN_OFFHAND4, TryUseShieldBattery, 0.0 )
 }
 
-void function OnPlayerDamaged( entity victim, var damageInfo )
+void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 {
 	float curr = float( victim.GetShieldHealth() )
 	float total = float( victim.GetShieldHealthMax() )
 	if( curr == 0 || !victim.IsHuman() )
-		return
-	entity attacker = DamageInfo_GetAttacker( damageInfo )
-	int damageSourceId = DamageInfo_GetDamageSourceIdentifier( damageInfo )
-	if( IsValid( attacker ) )
-		if( attacker != victim && attacker.GetTeam() == victim.GetTeam() )
-			return
-	if( damageSourceId == eDamageSourceId.mp_titanability_smoke && attacker == victim )
 		return
 
 	float damage = DamageInfo_GetDamage( damageInfo )
@@ -42,6 +35,7 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 
 	DamageInfo_AddCustomDamageType( damageInfo, DF_SHIELD_DAMAGE )
 
+	int damageSourceId = DamageInfo_GetDamageSourceIdentifier( damageInfo )
 	if( [ eDamageSourceId.mp_titanability_smoke, eDamageSourceId.mp_weapon_grenade_electric_smoke ].contains( damageSourceId ) )
 	{
 		int health = victim.GetHealth()
@@ -88,7 +82,7 @@ void function OnPlayerDamaged( entity victim, var damageInfo )
 void function OnTitanBecomesPilot( entity player, entity titan )
 {
 	player.SetShieldHealth( 0 )
-    OnPlayerRespawned( player )
+	OnPlayerRespawned( player )
 }
 
 void function OnPlayerRespawned( entity player )
@@ -254,26 +248,26 @@ string function CreateHudProgressBarThroughTime( float nowGlobalTime, float star
 
 void function ButtonCancelCheck( entity player, float maxTime )
 {
-    player.Signal( "StartButtonCancelCheck" )
-    player.EndSignal( "OnDestroy" )
-    player.EndSignal( "OnDeath" )
-    player.EndSignal( "StartButtonCancelCheck" )
-    player.EndSignal( "DoneUseShieldBattery" )
-    player.EndSignal( "StopUseShieldBattery" )
+	player.Signal( "StartButtonCancelCheck" )
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "StartButtonCancelCheck" )
+	player.EndSignal( "DoneUseShieldBattery" )
+	player.EndSignal( "StopUseShieldBattery" )
 
-    OnThreadEnd(
-        function(): ( player )
-        {
-            if( IsValid( player ) )
-                RemoveButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
-        }
-    )
+	OnThreadEnd(
+		function(): ( player )
+		{
+			if( IsValid( player ) )
+				RemoveButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+		}
+	)
 
-    AddButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
-    wait maxTime
+	AddButtonPressedPlayerInputCallback( player, IN_ATTACK, InterruptShieldBattery )
+	wait maxTime
 }
 
 void function InterruptShieldBattery( entity player )
 {
-    player.Signal( "StopUseShieldBattery" )
+	player.Signal( "StopUseShieldBattery" )
 }
