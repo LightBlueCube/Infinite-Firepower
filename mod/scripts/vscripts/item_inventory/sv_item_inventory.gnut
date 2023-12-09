@@ -10,7 +10,7 @@ global function PlayerInventory_PushInventoryItemByBurnRef
 global function PlayerInventory_PopInventoryItem
 global function PlayerInventory_TakeAllInventoryItems
 global function PlayerInventory_CountBurnRef
-global function PlayerInventory_GetPlayerInventoryStack
+global function PlayerInventory_AddInventoryItemIntoPlayerInventoryStack
 
 struct
 {
@@ -175,7 +175,7 @@ void function PlayerInventory_EndCriticalSectionForWeaponOnEndFrame( entity weap
 
 }
 
-array<InventoryItem> function PlayerInventory_GetPlayerInventoryStack( entity player )
+void function PlayerInventory_AddInventoryItemIntoPlayerInventoryStack( entity player, InventoryItem inventoryItem )
 {
-	return file.playerInventoryStacks[ player ]
+	file.playerInventoryStacks[ player ].append( inventoryItem )
 }

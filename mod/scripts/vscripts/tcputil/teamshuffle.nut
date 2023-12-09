@@ -56,13 +56,13 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 	bool mapDisable = DISABLED_MAPS.contains(GetMapName());
 
 	// Blacklist guards
-  	if ( gamemodeDisable )
+	if ( gamemodeDisable )
 	{
 		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前模式不可切换队伍", false ) // chathook has been fucked up
 		return true
 	}
 
-  	if ( mapDisable )
+	if ( mapDisable )
 	{
 		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前地图不可切换队伍", false ) // chathook has been fucked up
 		return true
@@ -126,10 +126,10 @@ void function CheckPlayerDisconnect( entity player )
 	bool mapDisable = DISABLED_MAPS.contains(GetMapName())
 
 	// Blacklist guards
-  	if ( gamemodeDisable )
+	if ( gamemodeDisable )
 		return
 
-  	if ( mapDisable )
+	if ( mapDisable )
 		return
 
 	if ( GetPlayerArray().len() == 1 )
@@ -173,10 +173,10 @@ void function ShuffleTeams()
 	bool mapDisable = DISABLED_MAPS.contains(GetMapName())
 
 	// Blacklist guards
-  	if ( gamemodeDisable )
+	if ( gamemodeDisable )
 		return
 
-  	if ( mapDisable )
+	if ( mapDisable )
 		return
 
 	file.hasShuffled = false
@@ -190,25 +190,25 @@ void function TeamShuffleThink()
  	if ( GetPlayerArray().len() == 0 )
 		return
 
-  	// Set team to TEAM_UNASSIGNED
-  	foreach ( player in GetPlayerArray() )
+	// Set team to TEAM_UNASSIGNED
+	foreach ( player in GetPlayerArray() )
 		SetTeam ( player, TEAM_UNASSIGNED )
 
-  	int maxTeamSize = GetPlayerArray().len() / 2
+	int maxTeamSize = GetPlayerArray().len() / 2
 
-  	// Assign teams
-  	foreach ( player in GetPlayerArray() )
-  	{
+	// Assign teams
+	foreach ( player in GetPlayerArray() )
+	{
 		if( !IsValid( player ) )
-	  		continue
+			continue
 
 		// Get random team
 		int team = RandomIntRange( TEAM_IMC, TEAM_MILITIA + 1 )
 		// Gueard for team size
 		if ( GetPlayerArrayOfTeam( team ).len() >= maxTeamSize )
 		{
-	  		SetTeam( player, GetOtherTeam( team ) )
-	  			continue
+			SetTeam( player, GetOtherTeam( team ) )
+				continue
 		}
 	//
 		SetTeam( player, team )
@@ -222,7 +222,7 @@ void function FixShuffle()
 	int mltTeamSize = GetPlayerArrayOfTeam( TEAM_MILITIA ).len()
 	int imcTeamSize = GetPlayerArrayOfTeam( TEAM_IMC ).len()
 	int teamSizeDifference = abs( mltTeamSize - imcTeamSize )
-  	if( teamSizeDifference <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
+	if( teamSizeDifference <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
 		return
 
 	if ( GetPlayerArray().len() == 1 )
@@ -267,7 +267,7 @@ void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 	if( file.unBalanceTime + 90 > Time() )
 		return
 	// general check
-  	if ( !CanChangeTeam() )
+	if ( !CanChangeTeam() )
 		return
 
 	// Compare victims teams size
@@ -288,10 +288,10 @@ bool function CanChangeTeam()
 	bool mapDisable = DISABLED_MAPS.contains(GetMapName());
 
 	// Blacklist guards
-  	if ( gamemodeDisable )
+	if ( gamemodeDisable )
 		return false
 
-  	if ( mapDisable )
+	if ( mapDisable )
 		return false
 
 	// Check if difference is smaller than 2 ( dont balance when it is 0 or 1 )

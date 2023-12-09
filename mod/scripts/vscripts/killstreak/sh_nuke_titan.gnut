@@ -8,7 +8,7 @@ void function PlayerInventory_GiveNukeTitan( entity player )
 	inventoryItem.burnReward = BurnReward_GetByRef( "burnmeter_nuke_titan" )
 	inventoryItem.weaponRef = inventoryItem.burnReward.weaponName
 
-	PlayerInventory_GetPlayerInventoryStack( player ).append( inventoryItem )
+	PlayerInventory_AddInventoryItemIntoPlayerInventoryStack( player, inventoryItem )
 	player.SetPlayerNetInt( "itemInventoryCount", SvPlayerInventory_ItemCount( player ) )
 
 	array<string> mods = []

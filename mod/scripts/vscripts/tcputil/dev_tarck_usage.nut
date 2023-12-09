@@ -21,6 +21,7 @@ table<string,asset> TITAN_ID = {	// the key only can use type string, its sucks
 	浪人
 	强力
 	军团
+	帝王
 	*/
 
 	// modify titan //
@@ -35,46 +36,74 @@ table<string,asset> TITAN_ID = {	// the key only can use type string, its sucks
 table<string,int> USAGE_DATA = {
 
 	v1 = 0
+	v1_gd = 0
+	v1_td = 0
 	v1_k = 0
 	v1_d = 0
 	v2 = 0
+	v2_gd = 0
+	v2_td = 0
 	v2_k = 0
 	v2_d = 0
 	v3 = 0
+	v3_gd = 0
+	v3_td = 0
 	v3_k = 0
 	v3_d = 0
 	v4 = 0
+	v4_gd = 0
+	v4_td = 0
 	v4_k = 0
 	v4_d = 0
 	v5 = 0
+	v5_gd = 0
+	v5_td = 0
 	v5_k = 0
 	v5_d = 0
 	v6 = 0
+	v6_gd = 0
+	v6_td = 0
 	v6_k = 0
 	v6_d = 0
 	v7 = 0
+	v7_gd = 0
+	v7_td = 0
 	v7_k = 0
 	v7_d = 0
 
 	m1 = 0
+	m1_gd = 0
+	m1_td = 0
 	m1_k = 0
 	m1_d = 0
 	m2 = 0
+	m2_gd = 0
+	m2_td = 0
 	m2_k = 0
 	m2_d = 0
 	m3 = 0
+	m3_gd = 0
+	m3_td = 0
 	m3_k = 0
 	m3_d = 0
 	m4 = 0
+	m4_gd = 0
+	m4_td = 0
 	m4_k = 0
 	m4_d = 0
 	m5 = 0
+	m5_gd = 0
+	m5_td = 0
 	m5_k = 0
 	m5_d = 0
 	m6 = 0
+	m6_gd = 0
+	m6_td = 0
 	m6_k = 0
 	m6_d = 0
 	m7 = 0
+	m7_gd = 0
+	m7_td = 0
 	m7_k = 0
 	m7_d = 0
 }
@@ -86,7 +115,34 @@ void function DevTrackUsage_Init()
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.Postmatch, SavingUsageData )
+	AddDamageFinalCallback( "player", OnPlayerFinalDamaged )
 	thread TrackUsageTime()
+}
+
+void function OnPlayerFinalDamaged( entity victim, var damageInfo )
+{
+	entity attacker = DamageInfo_GetAttacker( damageInfo )
+	foreach( entity ent in [ attacker, victim ] )
+	{
+		if( !IsValid( ent ) )
+			return
+
+		if( !ent.IsTitan() )
+			return
+		if( ent.IsNPC() )
+			return
+	}
+	if( attacker.GetTeam() == victim.GetTeam() || attacker == victim )
+		return
+
+	string id = GetTitanID( attacker )
+	int damage = int( DamageInfo_GetDamage( damageInfo ) )
+	if( id != "none" )
+		USAGE_DATA[ id + "_gd" ] += damage
+	id = GetTitanID( victim )
+	if( id != "none" )
+		USAGE_DATA[ id + "_td" ] += damage
+
 }
 
 void function SavingUsageData()
@@ -172,9 +228,10 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 		if( !ent.IsTitan() )
 			return
 		if( ent.IsNPC() )
-			if( !IsValid( GetPetTitanOwner( ent ) ) )
-				return
+			return
 	}
+	if( attacker.GetTeam() == victim.GetTeam() || attacker == victim )
+		return
 
 	string id = GetTitanID( attacker )
 	if( id != "none" )

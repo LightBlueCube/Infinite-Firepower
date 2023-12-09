@@ -68,7 +68,7 @@ void function SetKillStreakEnable( bool state )
 
 void function OnWinnerDetermined()
 {
-    SetNuclearBombDisable()
+	SetNuclearBombDisable()
 	if( KillStreakEnable() )
 		RandomKillStreakPlayers = []
 }
@@ -195,23 +195,23 @@ void function GiveRandomKillStreakInNextMatch( entity player )
 
 array<string> function GetStringArrayFromConVar( string convar )
 {
-    return split( GetConVarString( convar ), "," )
+	return split( GetConVarString( convar ), "," )
 }
 
 // 用于更新整个ConVar数组
 string function StoreStringArrayIntoConVar( string convar, array<string> arrayToStore )
 {
-    string builtString = ""
-    foreach ( string item in arrayToStore )
-    {
-        if ( builtString == "" ) // 第一个元素，不添加逗号
-            builtString = item
-        else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
-            builtString += "," + item
-    }
+	string builtString = ""
+	foreach ( string item in arrayToStore )
+	{
+		if ( builtString == "" ) // 第一个元素，不添加逗号
+			builtString = item
+		else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
+			builtString += "," + item
+	}
 
-    // 更新ConVar
-    SetConVarString( convar, builtString )
-    // 返回构造好的字符串
-    return builtString
+	// 更新ConVar
+	SetConVarString( convar, builtString )
+	// 返回构造好的字符串
+	return builtString
 }

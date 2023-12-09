@@ -43,12 +43,12 @@ void function ApplyFDHealthUpgrades( entity player, TitanLoadoutDef loadout )
 
 void function OnPilotBecomesTitan( entity player, entity titan )
 {
-    InitTitanTitle( player )
-    InitSharedEnergy( player )
+	InitTitanTitle( player )
+	InitSharedEnergy( player )
 }
 void function OnTitanBecomesPilot( entity player, entity titan )
 {
-    InitSharedEnergy( titan )
+	InitSharedEnergy( titan )
 }
 
 void function InitTitanTitle( entity titan )
@@ -57,14 +57,14 @@ void function InitTitanTitle( entity titan )
 	if( !IsValid( soul ) )
 		return
 	if( !( "titanTitle" in soul.s ) )
-        return
+		return
 
-    if( soul.s.classicRodeoBatteryCount == 0 )
-    {
-        titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
-        return
-    }
-    titan.SetTitle( soul.s.titanTitle )
+	if( soul.s.classicRodeoBatteryCount == 0 )
+	{
+		titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
+		return
+	}
+	titan.SetTitle( soul.s.titanTitle )
 }
 void function InitSharedEnergy( entity titan )
 {
@@ -99,17 +99,17 @@ void function OnTitanfall( entity titan )
 		soul.s.titanTitle <- "野獸四號"
 		soul.soul.titanLoadout.titanExecution = "execution_northstar_prime"
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
-        titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_brute" ] )
-	  	titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "tcp_dash_shield" ] )
+		titan.GiveWeapon( "mp_titanweapon_rocketeer_rocketstream", [ "tcp_brute" ] )
+		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "tcp_dash_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_hover", OFFHAND_TITAN_CENTER, [ "tcp_super_hover" ] )
-        titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_ORDNANCE, [ "tcp_gravity" ] )
+		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_ORDNANCE, [ "tcp_gravity" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tcp_gravity" ] )
 
 		array<int> passives = [ ePassives.PAS_NORTHSTAR_WEAPON,
@@ -130,17 +130,17 @@ void function OnTitanfall( entity titan )
 		titan.SetSharedEnergyRegenRate( 333.3 )
 		soul.s.SharedEnergyRegenRate <- 333.3
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveWeapon( "mp_titanweapon_xo16_shorty", [ "tcp_sp_base" ] )
-		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL,["tcp_sp_base"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, [ "tcp_sp_base" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER )
-		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE,["tcp_sp_base"] )
+		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE, [ "tcp_sp_base" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
 
 		array<int> passives = [ ePassives.PAS_VANGUARD_COREMETER,
@@ -166,12 +166,12 @@ void function OnTitanfall( entity titan )
 		soul.s.titanTitle <- "野牛"
 		soul.soul.titanLoadout.titanExecution = "execution_scorch_prime"
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "tcp_parent_shield" ] )
@@ -200,13 +200,13 @@ void function OnTitanfall( entity titan )
 		titan.SetSharedEnergyRegenDelay( 4.0 )
 		soul.s.SharedEnergyRegenDelay <- 4.0
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.GiveWeapon( "mp_titanweapon_arc_cannon", [ "capacitor" ] )
+		titan.GiveWeapon( "mp_titanweapon_arc_cannon", [ "capacitor" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "mp_titanweapon_vortex_shield_ion", OFFHAND_SPECIAL, [ "tcp_vortex", "burn_mod_titan_vortex_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_laser_trip", OFFHAND_TITAN_CENTER, [ "pas_ion_tripwire", "tcp_arc_trip" ] )
@@ -230,19 +230,19 @@ void function OnTitanfall( entity titan )
 		soul.s.shouldFPEmbark <- true
 		soul.s.classicExecution <- true
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "rolling_rounds" ] )
+		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "rolling_rounds" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.TakeOffhandWeapon( OFFHAND_MELEE )
 		titan.GiveOffhandWeapon( "mp_ability_swordblock", OFFHAND_SPECIAL )
 		titan.GiveOffhandWeapon( "mp_titanability_smoke", OFFHAND_TITAN_CENTER, [ "tcp_emp" ])
 		titan.GiveOffhandWeapon( "mp_titanweapon_homing_rockets", OFFHAND_ORDNANCE )
-		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, ["tcp_dash_core"] )
+		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_dash_core" ] )
 		titan.GiveOffhandWeapon( "melee_titan_punch_northstar", OFFHAND_MELEE )
 
 		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
@@ -265,18 +265,18 @@ void function OnTitanfall( entity titan )
 		titan.SetSharedEnergyRegenRate( 30 )
 		soul.s.SharedEnergyRegenRate <- 30
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.GiveWeapon( "mp_titanweapon_sticky_40mm", [ "mortar_shots" ] )
+		titan.GiveWeapon( "mp_titanweapon_sticky_40mm", [ "mortar_shots" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "tcp_color_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_rearm", OFFHAND_TITAN_CENTER, [ "tcp_no_gravity" ] )
 		titan.GiveOffhandWeapon( "mp_titanweapon_laser_lite", OFFHAND_ORDNANCE, [ "tcp_mark_laser" ] )
-		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT, ["damage_core"] )
+		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT, [ "damage_core" ] )
 
 
 
@@ -297,13 +297,13 @@ void function OnTitanfall( entity titan )
 		soul.s.classicExecution <- true
 		soul.SetTitanSoulNetInt( "upgradeCount", 4 )
 
-        foreach( weapon in titan.GetMainWeapons() )
-            titan.TakeWeaponNow( weapon.GetWeaponClassName() )
+		foreach( weapon in titan.GetMainWeapons() )
+			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
 
-        titan.GiveWeapon( "mp_titanweapon_meteor", [ "tcp_shotgun" ] )
+		titan.GiveWeapon( "mp_titanweapon_meteor", [ "tcp_shotgun" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
-        titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		titan.TakeOffhandWeapon( OFFHAND_EQUIPMENT )
 		titan.GiveOffhandWeapon( "mp_titanability_particle_wall", OFFHAND_SPECIAL, [ "brute4_bubble_shield" ] )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_TITAN_CENTER, [ "tcp_smoke" ] )
@@ -351,7 +351,7 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "軍團"
 	}
-    else
-        return
-    soul.s.TitanHasBeenChanged <- true
+	else
+		return
+	soul.s.TitanHasBeenChanged <- true
 }

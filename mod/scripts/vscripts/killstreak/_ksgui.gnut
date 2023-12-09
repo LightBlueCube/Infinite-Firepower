@@ -116,7 +116,7 @@ string function KsGUIL1TextChange( entity player, string baseText, string text )
 		skipL1Elem.append( 0 )
 	if( player.s.CruiseMissile == 0 )
 		skipL1Elem.append( 1 )
-    if( !player.s.HaveVTOL )
+	if( !player.s.HaveVTOL )
 		skipL1Elem.append( 2 )
 	if( !player.s.HaveNuclearBomb )
 		skipL1Elem.append( 3 )
@@ -210,7 +210,7 @@ string function KsGUIL1TextChange( entity player, string baseText, string text )
 	text += "\n\n\n\n\n\n"
 
 	table<int> ksData = GetKillStreakData()
-	text += "铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"    护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	text += "铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
 	text += "\n====== 连杀奖励获取进度 ======\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
@@ -227,8 +227,8 @@ void function KsGUI_SelectL1( entity player )
 		return KeepingApplyNukeTitan( player )
 	if( l1 == 1 )
 		return ApplyCruiseMissile( player )
-    if( l1 == 2 )
-        return ApplyVTOL( player )
+	if( l1 == 2 )
+		return ApplyVTOL( player )
 	if( l1 == 3 )
 		return ApplyNuclearBomb( player )
 	if( l1 == 4 )
