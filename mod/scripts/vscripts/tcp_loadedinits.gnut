@@ -16,6 +16,8 @@ void function InfiniteFirepower_Init()
 	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )	//达到多少人才开始踢出挂机玩家
 	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )	//反挂机忽略的玩家的uid
 
+	AntiInsult_Init()	// 反侮辱，目前只有反蹲起
+
 	//ColorfulChat_Init()	//炫彩聊天文字，已fuck up
 
 	PilotShield_Init()	//Apex like 铁驭护盾
