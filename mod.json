@@ -52,6 +52,13 @@
 			}
 		},
 		{
+			"Path": "killstreak/vtol.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "VTOL_Init"
+			}
+		},
+		{
 			"Path": "killstreak/nuclear_bomb.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
