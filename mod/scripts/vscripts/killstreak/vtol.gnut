@@ -118,10 +118,87 @@ void function VTOLIntro( entity owner )
 	vector introPos = pos + shipDir * -1000
 
 	entity mover = CreateScriptMover( introPos, shipAng )
-	mover.SetModel( $"models/vehicle/straton/straton_imc_gunship_01.mdl" )
-	mover.NonPhysicsMoveTo( pos, 10.0, 0.0, 0.0 )
+
+
+
+	// though animation can add some offset to gunship, it's still needed we add more
+	// otherwise they can collide with map obstacles very often
+
+
+	// pick an random model and we keep using it for current gunship spawn think
+	asset gunshipModel = owner.GetTeam() == TEAM_IMC ? $"models/vehicle/straton/straton_imc_gunship_01.mdl" : $"models/vehicle/hornet/hornet_fighter.mdl"
+
+	// first gunship: only for playing animation
+	// its a hack! gunship after animation stops thinking for some reason
+	// needs to spawn a new one
+	entity animGunship = CreateNPC( "npc_gunship", owner.GetTeam(), introPos, shipAng )
+	// for other files can recognize this is a gunship that only used for playing animation
+	// removing. "npc_gunship_scripted" is a separented class, not the same as "npc_gunship"
+	//SetSpawnOption_AISettings( animGunship, "npc_gunship_scripted" )
+	HideName( animGunship ) // this gunship will be deleted soon, never show it's name
+
+	DispatchSpawn( animGunship )
+
+	// setup visual
+	SetDefaultMPEnemyHighlight( animGunship )
+
+	// dont let AI titan get enemies while flying. Don't do trigger checks, become invulnerable
+	animGunship.SetEfficientMode( true )
+	animGunship.SetTouchTriggers( false )
+	animGunship.SetAimAssistAllowed( false )
+	animGunship.SetInvulnerable()
+	animGunship.SetNoTarget( true ) // notarget bind together with invulnerablility
+	// handled by DelayedDestroyAnimGunship()
+	//animGunship.NotSolid()
+
+	// fly in
+	thread PlayAnim( animGunship, "st_AngelCity_IMC_Win_ComeIn" ) // flying anim
+	// warp effect
+	thread WarpInEffectGunship( animGunship )
+    WaittillAnimDone( animGunship )
+
+	vector offset = < 0, 0, -30 > // actual spawnpoint is not identical as animation's origin( doesn't really affects )
+	vector spawnpoint = animGunship.GetOrigin() + offset
+	vector spawnang = animGunship.GetAngles()
+
+	// replacement gunship
+	// its a hack! gunship after animation stops thinking for some reason
+	// needs to spawn a new one
+	if ( !IsValid( animGunship ) ) // if gunship already destroyed for some reason
+		return // don't run following replacement code
+	//gunship.Destroy() // might be a little weird because it's trail gonna disappear immediately
+	// now using delayed destroy, so we can wait for trail fadeout normally
+
 }
 
+void function WarpInEffectGunship( entity gunship )
+{
+	gunship.EndSignal( "OnDestroy" )
+	gunship.Hide() // this still shows it's lights
+	//gunship.kv.VisibilityFlags = ENTITY_VISIBLE_TO_NOBODY
+
+	float sfxWait = 0.1
+	float totalTime = WARPINFXTIME
+	float preWaitTime = 0.16 // give it some time so it's actually playing anim, and we can get it's "origin" attatch
+	string sfx = "dropship_warpin"
+
+	wait preWaitTime
+
+	int attach = gunship.LookupAttachment( "origin" )
+	vector origin = gunship.GetAttachmentOrigin( attach )
+	vector angles = gunship.GetAttachmentAngles( attach )
+
+	gunship.Show()
+	//gunship.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
+	entity fx = PlayFX( FX_GUNSHIP_CRASH_EXPLOSION_ENTRANCE, origin, angles )
+	fx.FXEnableRenderAlways()
+	fx.DisableHibernation()
+
+	wait sfxWait
+	EmitSoundAtPosition( TEAM_UNASSIGNED, origin, sfx )
+
+	wait totalTime - sfxWait
+}
 
 
 

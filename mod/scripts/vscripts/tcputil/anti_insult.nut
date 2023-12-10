@@ -1,6 +1,11 @@
 untyped
 global function AntiInsult_Init
 
+const int FAR_CHECK_RANGE = 100
+const int CLOSE_CHECK_RANGE = 20
+const int MAX_CHECK_RANGE = 1000
+const float THRESHLOD = 2.5
+
 void function AntiInsult_Init()
 {
 	RegisterWeaponDamageSource( "anti_insult", "喜歡蹲起" )
@@ -54,7 +59,7 @@ void function PlayerDuckCheck( entity player )
 	for( int i = 40; i > 0; i-- )
 	{
 		WaitFrame()
-		if( Distance( origin, player.GetOrigin() ) > 1000 )
+		if( Distance( origin, player.GetOrigin() ) > MAX_CHECK_RANGE )
 			return
 		if( player.s.validDuckNum > savedValidDuck )
 		{
@@ -76,15 +81,17 @@ void function OnPlayerDuckToggle( entity player )
 
 void function OnPlayerDuck( entity player, float num )
 {
-	if( player.s.validDuckNum == 0 || Distance2D( player.s.duckOriginSave, player.GetOrigin() ) >= 100 )
+	if( player.s.validDuckNum == 0 || Distance2D( player.s.duckOriginSave, player.GetOrigin() ) >= FAR_CHECK_RANGE )
 	{
 		player.s.duckOriginSave = player.GetOrigin()
 		player.s.validDuckNum += num
 		return
 	}
-	if( Distance2D( player.s.duckOriginSave, player.GetOrigin() ) < 100 )
+	if( Distance2D( player.s.duckOriginSave, player.GetOrigin() ) < FAR_CHECK_RANGE )
 		player.s.validDuckNum += num
-	if( player.s.validDuckNum < 1.5 )
+	if( Distance2D( player.s.duckOriginSave, player.GetOrigin() ) < CLOSE_CHECK_RANGE )
+		player.s.validDuckNum += num
+	if( player.s.validDuckNum < THRESHLOD )
 		return
 	printt( "[AntiInsult] Name "+ player.GetPlayerName() +" UID "+ player.GetUID() )
 	if( player.s.hasDuckChecked )
