@@ -1,4 +1,4 @@
-
+untyped
 global function MpTitanAbilityBasicBlock_Init
 
 global function OnWeaponActivate_titanability_basic_block
@@ -126,6 +126,7 @@ void function OnDeactivate( entity weapon, int blockType )
 bool function OnAttemptOffhandSwitch( entity weapon, int blockType )
 {
 	bool allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
+	weapon.s.quickBlockCheckMe <- Time()
 	return allowSwitch
 }
 
@@ -318,12 +319,17 @@ void function BasicBlock_OnDamage( entity blockingEnt, var damageInfo )
 {
 	if ( !blockingEnt.e.blockActive )
 		return
-
 	float damageScale = HandleBlockingAndCalcDamageScaleForHit( blockingEnt, damageInfo )
 	if ( damageScale == 1.0 )
 		return
 
 	entity weapon = blockingEnt.GetOffhandWeapon( OFFHAND_LEFT )
+	if( "quickBlockCheckMe" in weapon.s )
+	{
+		if( weapon.s.quickBlockCheckMe + 0.5 > Time() )
+			return
+	}
+
 	if ( blockingEnt.IsPlayer() && weapon.HasMod( "fd_sword_block" ) )
 	{
 		float meterReward = DamageInfo_GetDamage( damageInfo ) * (1.0 - damageScale) * CORE_BUILD_PERCENT_FROM_TITAN_DAMAGE_INFLICTED * 0.015 * file.earn_meter_titan_multiplier
