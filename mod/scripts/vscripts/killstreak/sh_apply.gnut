@@ -167,12 +167,12 @@ void function ApplyVTOL( entity player )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 		return
 	}
-	if( !player.IsOnGround() )
+	/*if( !player.IsOnGround() )
 	{
 		thread SendKsGUI_Threaded( player, "\n你需要站在地上才能使用VTOL", < 255, 100, 100 >, 2, 1 )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 		return
-	}
+	}*/
 	if( player.s.usingVTOL )
 	{
 		thread SendKsGUI_Threaded( player, "\n你正在使用VTOL", < 255, 100, 100 >, 2, 1 )
