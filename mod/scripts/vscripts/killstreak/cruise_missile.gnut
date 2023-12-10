@@ -72,7 +72,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	WaitFrame()
 	thread CruiseMissileAnim_Think( owner, cmFireOrigin, cmFireAngles )
 
-	vector validOrigin = GetEnt( "spaceNode" ).GetOrigin()
+	vector validOrigin = GetEvacSpaceNode().GetOrigin()
 	for( ;; )
 	{
 		WaitFrame()
