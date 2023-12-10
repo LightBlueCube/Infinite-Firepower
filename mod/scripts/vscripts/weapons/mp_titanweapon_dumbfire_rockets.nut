@@ -156,11 +156,11 @@ int function FireStunImpactProjectile( entity weapon, WeaponPrimaryAttackParams 
 	float STUN_IMPACT_PROJECTILE_FUSE_TIME = 5.0
 	int STUN_IMPACT_DAMAGE_FLAGS = DF_RAGDOLL | DF_EXPLOSION | DF_ELECTRICAL
 	entity projectile = weapon.FireWeaponGrenade( attackParams.pos, attackParams.dir, < 0, 0, 0 >, STUN_IMPACT_PROJECTILE_FUSE_TIME, STUN_IMPACT_DAMAGE_FLAGS, STUN_IMPACT_DAMAGE_FLAGS, shouldPredict, true, false )
-	projectile.kv.gravity = 0.1
-	projectile.SetVelocity( attackParams.dir * 2000 )
 	weapon.SetWeaponChargeFractionForced( 1.0 ) // this will end the pod sequence immediately
     if ( projectile )
     {
+		projectile.kv.gravity = 0.1
+		projectile.SetVelocity( attackParams.dir * 2000 )
         projectile.SetModel( $"models/weapons/grenades/arc_grenade_projectile.mdl" )
         #if SERVER
             projectile.ProjectileSetDamageSourceID( eDamageSourceId.mp_titanweapon_stun_impact )
