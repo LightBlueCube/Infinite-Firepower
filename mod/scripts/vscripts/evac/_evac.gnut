@@ -2,6 +2,7 @@ untyped
 global function Evac_Init
 global function AddEvacNode
 global function SetEvacSpaceNode
+global function GetEvacSpaceNode
 global function IsEvacDropship
 
 global function EvacEpilogueSetup
@@ -96,6 +97,11 @@ void function AddEvacNode( entity evacNode )
 void function SetEvacSpaceNode( entity spaceNode )
 {
 	file.spaceNode = spaceNode
+}
+
+entity function GetEvacSpaceNode()
+{
+	return file.spaceNode
 }
 
 bool function IsEvacDropship( entity ent )
