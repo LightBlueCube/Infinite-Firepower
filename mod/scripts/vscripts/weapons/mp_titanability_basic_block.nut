@@ -126,7 +126,7 @@ void function OnDeactivate( entity weapon, int blockType )
 bool function OnAttemptOffhandSwitch( entity weapon, int blockType )
 {
 	bool allowSwitch = weapon.GetWeaponChargeFraction() < 0.9
-	weapon.s.quickBlockCheckMe <- Time()
+	weapon.s.quickBlockCheck <- Time()
 	return allowSwitch
 }
 
@@ -324,9 +324,9 @@ void function BasicBlock_OnDamage( entity blockingEnt, var damageInfo )
 		return
 
 	entity weapon = blockingEnt.GetOffhandWeapon( OFFHAND_LEFT )
-	if( "quickBlockCheckMe" in weapon.s )
+	if( "quickBlockCheck" in weapon.s )
 	{
-		if( weapon.s.quickBlockCheckMe + 0.5 > Time() )
+		if( weapon.s.quickBlockCheck + 0.5 > Time() )
 			return
 	}
 
