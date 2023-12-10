@@ -661,7 +661,7 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 			SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,					// explosion flags
 			0, 													// distanceFromAttacker
 			0, 													// explosionForce
-			DF_STOPS_TITAN_REGEN,								// damage flags
+			DF_EXPLOSION,								// damage flags
 			damageSourceId										// damage source id
 		)
 

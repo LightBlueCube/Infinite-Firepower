@@ -54,6 +54,7 @@ void function PlayerDuckCheck( entity player )
 	AddButtonPressedPlayerInputCallback( player, IN_DUCK, OnPlayerDuckHeld )
 	AddButtonPressedPlayerInputCallback( player, IN_DUCKTOGGLE, OnPlayerDuckToggle )
 
+	player.s.validDuckNum = 0.0
 	vector origin = player.GetOrigin()
 	float savedValidDuck = 0
 	for( int i = 40; i > 0; i-- )
@@ -81,6 +82,9 @@ void function OnPlayerDuckToggle( entity player )
 
 void function OnPlayerDuck( entity player, float num )
 {
+	if( !IsAlive( player ) || player.GetParent() )
+		return
+
 	if( player.s.validDuckNum == 0 || Distance2D( player.s.duckOriginSave, player.GetOrigin() ) >= FAR_CHECK_RANGE )
 	{
 		player.s.duckOriginSave = player.GetOrigin()
@@ -104,13 +108,18 @@ void function KillAndRespawnPlayer( entity player )
 {
 	player.EndSignal( "OnDestroy" )
 	wait 0.5
+	if( IsAlive( player ) )
+	{
+		player.Die( null, null, { damageSourceId = eDamageSourceId.anti_insult } )
+		WaitFrame()
+	}
 
-	for( int i = 40; i > 0; i-- )
+	for( int i = 50; i > 0; i-- )
 	{
 		WaitFrame()
 		thread SendKsGUI_Threaded( player, "\n喜欢蹲起?", < 255, 0, 0 >, 5, 1 )
 		if( !IsAlive( player ) )
-			RespawnAsPilot( player )
+			player.RespawnPlayer( null )
 		if( IsAlive( player ) )
 			player.Die( null, null, { damageSourceId = eDamageSourceId.anti_insult } )
 	}
