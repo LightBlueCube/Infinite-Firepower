@@ -1,11 +1,12 @@
 global function Vote_SkipMatch_Init
+global function VoteToSkipMatch
 
 void function Vote_SkipMatch_Init()
 {
-	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+	AddCallback_GameStateEnter( eGameState.Playing, VoteToSkipMatch )
 }
 
-void function OnPlaying()
+void function VoteToSkipMatch()
 {
 	VoteEventStruct voteEvent
 	voteEvent.voteReleaseFunc = Vote_OnRelease
