@@ -3,16 +3,14 @@ global function VTOL_Init
 global function PlayerUsingVTOL
 global function VTOLIntro	// debug, dont forget remove it
 
-vector VTOL_CENTER = < 0, 0, 5000 >
+vector VTOL_CENTER = < 0, 0, 3000 >
 
 void function VTOL_Init()
 {
 	AddCallback_OnClientConnected( OnClientConnected )
 
 	if( GetMapName() == "mp_grave" )
-		VTOL_CENTER = < 0, 0, 4500 >
-	if( GetMapName() == "mp_wargames" )
-		VTOL_CENTER = < 0, 0, 4000 >
+		VTOL_CENTER = < 0, 0, 3000 >
 }
 
 void function OnClientConnected( entity player )
@@ -26,6 +24,7 @@ void function PlayerUsingVTOL( entity owner )
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
 	owner.s.usingVTOL = true
+	owner.s.DisableGUI = true
 	owner.kv.VisibilityFlags = 0
 	PhaseShift( owner, 0, 1.2 )
 	HolsterAndDisableWeapons( owner )
@@ -42,6 +41,7 @@ void function PlayerUsingVTOL( entity owner )
 				return
 			Remote_CallFunction_NonReplay( owner, "ServerCallback_ResetMapSettings" )
 			owner.s.usingVTOL = false
+			owner.s.DisableGUI = false
 			owner.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 			owner.ClearInvulnerable()
 			DeployAndEnableWeapons( owner )
@@ -64,7 +64,11 @@ void function PlayerUsingVTOL( entity owner )
 	WaitFrame()
 	thread VTOLIntro( owner )
 
-	vector validOrigin = GetEnt( "spaceNode" ).GetOrigin()
+	entity evacSpaceNode = GetEvacSpaceNode()
+	if( !IsValid( evacSpaceNode ) )
+		evacSpaceNode = GetEnt( "spaceNode" )
+	vector validOrigin = evacSpaceNode.GetOrigin()
+	validOrigin.z += 500
 	for( ;; )
 	{
 		WaitFrame()
@@ -82,67 +86,44 @@ void function VTOLIntro( entity owner )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
-
 	vector circle = < 0, RandomInt( 360 ), 0 >
+	vector center = VTOL_CENTER
 	vector shipAng = AnglesToRight( circle )
 	vector circleDir = AnglesToForward( circle )
-	vector shipDir = AnglesToForward( shipAng )
+	vector newPos = center + circleDir * 1000
+	entity mover = CreateScriptMover( newPos, AnglesToRight( circle ) )
 
-	vector center = VTOL_CENTER
-	vector pos = center + circleDir * 1000
-	vector introPos = pos + shipDir * -1000
+	entity gunship = CreateDropship( owner.GetTeam(), newPos, shipAng )
+	asset shipMdl = owner.GetTeam() == TEAM_IMC ? $"models/vehicle/straton/straton_imc_gunship_01.mdl" : $"models/vehicle/hornet/hornet_fighter.mdl"
+	gunship.SetValueForModelKey( shipMdl )
+	gunship.SetMaxHealth( 15000 )
+	gunship.SetHealth( 15000 )
+	gunship.SetModel( shipMdl )
 
-	entity mover = CreateScriptMover( introPos, shipAng )
+	gunship.EndSignal( "OnDestroy" )
 
-
-
-	// though animation can add some offset to gunship, it's still needed we add more
-	// otherwise they can collide with map obstacles very often
-
-
-	// pick an random model and we keep using it for current gunship spawn think
-	asset gunshipModel = owner.GetTeam() == TEAM_IMC ? $"models/vehicle/straton/straton_imc_gunship_01.mdl" : $"models/vehicle/hornet/hornet_fighter.mdl"
-
-	// first gunship: only for playing animation
-	// its a hack! gunship after animation stops thinking for some reason
-	// needs to spawn a new one
-	entity animGunship = CreateNPC( "npc_gunship", owner.GetTeam(), introPos, shipAng )
-	// for other files can recognize this is a gunship that only used for playing animation
-	// removing. "npc_gunship_scripted" is a separented class, not the same as "npc_gunship"
-	//SetSpawnOption_AISettings( animGunship, "npc_gunship_scripted" )
-	HideName( animGunship ) // this gunship will be deleted soon, never show it's name
-
-	DispatchSpawn( animGunship )
+	DispatchSpawn( gunship )
 
 	// setup visual
-	SetDefaultMPEnemyHighlight( animGunship )
-
-	// dont let AI titan get enemies while flying. Don't do trigger checks, become invulnerable
-	animGunship.SetEfficientMode( true )
-	animGunship.SetTouchTriggers( false )
-	animGunship.SetAimAssistAllowed( false )
-	animGunship.SetInvulnerable()
-	animGunship.SetNoTarget( true ) // notarget bind together with invulnerablility
-	// handled by DelayedDestroyAnimGunship()
-	//animGunship.NotSolid()
+	SetDefaultMPEnemyHighlight( gunship )
 
 	// fly in
-	thread PlayAnim( animGunship, "st_AngelCity_IMC_Win_ComeIn" ) // flying anim
+	thread PlayAnim( gunship, "st_AngelCity_IMC_Win_ComeIn" ) // flying anim
 	// warp effect
-	thread WarpInEffectGunship( animGunship )
-    WaittillAnimDone( animGunship )
+	thread WarpInEffectGunship( gunship )
+    WaittillAnimDone( gunship )
 
-	vector offset = < 0, 0, -30 > // actual spawnpoint is not identical as animation's origin( doesn't really affects )
-	vector spawnpoint = animGunship.GetOrigin() + offset
-	vector spawnang = animGunship.GetAngles()
-
-	// replacement gunship
-	// its a hack! gunship after animation stops thinking for some reason
-	// needs to spawn a new one
-	if ( !IsValid( animGunship ) ) // if gunship already destroyed for some reason
-		return // don't run following replacement code
-	//gunship.Destroy() // might be a little weird because it's trail gonna disappear immediately
-	// now using delayed destroy, so we can wait for trail fadeout normally
+	gunship.SetParent( mover, "", true )
+	for( ;; )
+	{
+		WaitFrame()
+		circle.y -= 1
+		shipAng = AnglesToRight( circle )
+		circleDir = AnglesToForward( circle )
+		newPos = center + circleDir * 1000
+		mover.NonPhysicsMoveTo( newPos, 0.1, 0.0, 0.0 )
+		mover.NonPhysicsRotateTo( shipAng, 0.1, 0.0, 0.0 )
+	}
 
 }
 

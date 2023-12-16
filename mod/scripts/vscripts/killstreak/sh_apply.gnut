@@ -96,13 +96,13 @@ void function ApplyVTOL( entity player )
 		return ApplyFalied( player, "\n你需要处于铁驭状态才能使用VTOL" )
 	if( player.IsPhaseShifted() )
 		return ApplyFalied( player, "\n你需要离开相位才能使用VTOL" )
-	if( !player.IsOnGround() || player.IsWallRunning() || player.IsWallHanging() )
+	/*if( !player.IsOnGround() || player.IsWallRunning() || player.IsWallHanging() )
 		return ApplyFalied( player, "\n你需要站在地上才能使用VTOL" )
 	if( player.s.usingVTOL )
 		return ApplyFalied( player, "\n你正在使用VTOL" )
 	foreach( ent in GetPlayerArray() )
 		if( ent.s.usingVTOL )
-			return ApplyFalied( player, "\n场上已存在一个VTOL" )
+			return ApplyFalied( player, "\n场上已存在一个VTOL" )*/
 
 	player.s.HaveVTOL = false
 	thread VTOLIntro( player )
