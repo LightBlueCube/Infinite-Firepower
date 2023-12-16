@@ -191,7 +191,7 @@ bool function Vote_ShouldEarlyEnd( VoteEventStruct voteEvent )
 {
 	if( voteEvent.voteYesCount > float( GetPlayerArray().len() ) / 2 )
 		return true
-	if( voteEvent.voteNoCount > float( GetPlayerArray().len() ) / 2 )
+	if( voteEvent.voteNoCount >= float( GetPlayerArray().len() ) / 2 )
 		return true
 	if( voteEvent.voteYesCount + voteEvent.voteNoCount == GetPlayerArray().len() )
 		return true
