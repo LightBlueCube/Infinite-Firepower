@@ -5,7 +5,7 @@ const float FAR_CHECK_RANGE = 75
 const float NEAR_CHECK_RANGE = 10
 const float TITAN_CHECK_RANGE_MULTIPLIER = 2.0	// only multiple FAR_CHECK_RANGE and NEAR_CHECK_RANGE, not work for MAX_CHECK_RANGE
 const float MAX_CHECK_RANGE = 1000
-const float THRESHLOD = 2.1
+const float THRESHLOD = 1.6
 
 void function AntiInsult_Init()
 {
@@ -117,7 +117,7 @@ void function OnPlayerDuck( entity player, float num )
 	player.s.validDuckNum += num
 	if( distance2d <= near )
 	{
-		if( player.s.nearDuckNum >= 1.0 )
+		if( player.s.nearDuckNum >= 0.5 )
 			player.s.validDuckNum = THRESHLOD
 		player.s.nearDuckNum += num
 	}

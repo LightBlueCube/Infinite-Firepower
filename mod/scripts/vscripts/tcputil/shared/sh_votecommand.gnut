@@ -38,6 +38,7 @@ const string NO_VOTE_TEXT = "当前无投票"
 
 void function VoteCommand_Init()
 {
+	AddClientCommandCallback( "vote", VoteCommand )
 	AddChatCommandCallback( "!vote", VoteCommand )
 	AddChatCommandCallback( "！vote", VoteCommand )
 }
