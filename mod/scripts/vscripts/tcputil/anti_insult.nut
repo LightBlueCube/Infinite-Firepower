@@ -2,7 +2,7 @@ untyped
 global function AntiInsult_Init
 
 const float FAR_CHECK_RANGE = 75
-const float NEAR_CHECK_RANGE = 10
+const float NEAR_CHECK_RANGE = 15
 const float TITAN_CHECK_RANGE_MULTIPLIER = 2.0	// only multiple FAR_CHECK_RANGE and NEAR_CHECK_RANGE, not work for MAX_CHECK_RANGE
 const float MAX_CHECK_RANGE = 1000
 const float THRESHLOD = 1.6
@@ -22,6 +22,7 @@ void function OnClientConnected( entity player )
 	player.s.validDuckNum <- 0.0
 	player.s.nearDuckNum <- 0.0
 	player.s.duckOriginSave <- < 0, 0, 0 >
+	player.s.dontShowTips <- false
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -134,6 +135,7 @@ void function FuckUpPlayer( entity player )
 	player.Signal( "FuckUpPlayer" )
 	player.EndSignal( "FuckUpPlayer" )
 	player.EndSignal( "OnDestroy" )
+	SendHudMessage( player, "喜欢蹲起？", -1, 0.4, 255, 0, 0, 255, 0, 5, 1 )
 	wait 0.5
 	if( player.IsTitan() )
 	{
@@ -144,6 +146,7 @@ void function FuckUpPlayer( entity player )
 			titan.Destroy()
 	}
 
+	player.s.dontShowTips <- true
 	for( int i = 25; i > 0; i-- )
 	{
 		WaitFrame()
@@ -156,6 +159,7 @@ void function FuckUpPlayer( entity player )
 			player.AddToPlayerGameStat( PGS_DEATHS, -1 )
 		}
 	}
+	player.s.dontShowTips <- false
 	WaitFrame()
 	DeployAndEnableWeapons( player )
 }

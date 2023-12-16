@@ -238,15 +238,17 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	}
 	if( onlyShowBatteryElem || ( skippedElem.contains( 4 ) && skippedElem.contains( 5 ) ) )
 		text += "\n"
-	text += "\n\n\n\n\n\n"
+	text += "\n\n\n\n\n\n\n"
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )
+	table<string,string> timeTable
 	foreach( k, v in timeParts )
 	{
+		timeTable[ string( k ) ] <- string( v )
 		if( v < 10 )
-			v = "0"+ v
+			timeTable[ string( k ) ] = "0"+ string( v )
 	}
-	text += timeParts["year"] +"/"+ timeParts["month"] +"/"+ timeParts["day"] +" "+ timeParts["hour"] +":"+ timeParts["minute"] +":"+ timeParts["second"] +"\n"
+	text += timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
 
 	table<int> ksData = GetKillStreakData()
 	text += "\n铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
