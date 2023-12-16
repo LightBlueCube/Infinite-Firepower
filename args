@@ -15,6 +15,7 @@ ifp stable
 ifp rotation
 
 -allowlocalhttp
++setplaylistvaroverrides "max_players 10"
 +ns_should_return_to_lobby 0
 +sv_max_props_multiplayer 500000
 +sv_max_prop_data_dwords_multiplayer 800000

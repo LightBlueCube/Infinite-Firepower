@@ -90,7 +90,7 @@ void function OnClientConnected( entity player )
 
 void function RestoreKillStreak( entity player )
 {
-	if( !KillStreakEnable() )
+	if( !KillStreakEnable() || player.s.dontShowTips )
 		return
 
 	if( player.s.HaveNuclearBomb == true )
