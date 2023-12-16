@@ -1153,7 +1153,8 @@ void function ChangeTitanTitleWhenBatteryMoved( entity titan, bool battery )
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
-	printt( titan +"-"+ soul )
+	if( !( "titanTitle" in soul.s ) )
+		return
 	if( battery )
 	{
 		titan.SetTitle( soul.s.titanTitle )

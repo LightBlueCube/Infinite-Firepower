@@ -1,0 +1,26 @@
+global function FindNearestSafeSpotAndPutEntity
+
+void function FindNearestSafeSpotAndPutEntity( entity ent, int severity = 5 )
+{
+	vector baseOrigin = ent.GetOrigin()
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y + severity, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y - severity, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x + severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x - severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z + severity >, baseOrigin ) )
+		return
+
+	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z - severity >, baseOrigin ) )
+		return
+
+	return FindNearestSafeSpotAndPutEntity( ent, severity + 5 )
+}

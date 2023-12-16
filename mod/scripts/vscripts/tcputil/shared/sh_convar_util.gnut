@@ -1,0 +1,23 @@
+global function StoreStringArrayIntoConVar
+global function GetStringArrayFromConVar
+
+string function StoreStringArrayIntoConVar( array<string> arrayToStore, string convar = "" )
+{
+	string builtString = ""
+	foreach ( string item in arrayToStore )
+	{
+		if ( builtString == "" )
+			builtString = item
+		else
+			builtString += "," + item
+	}
+	if( convar != "" )
+		SetConVarString( convar, builtString )
+
+	return builtString
+}
+
+array<string> function GetStringArrayFromConVar( string convar )
+{
+	return split( GetConVarString( convar ), "," )
+}

@@ -1,108 +1,124 @@
 global function RandomMap_Init
 global function RandomMap
+global function ShowCustomTextOnPostmatch
+
+const array<string> MAPS_ALL = [
+	"mp_black_water_canal",
+	"mp_complex3",
+	"mp_crashsite3",
+	"mp_drydock",
+	"mp_eden",
+	"mp_forwardbase_kodai",
+	"mp_grave",
+	"mp_homestead",
+	"mp_thaw",
+	"mp_angel_city",
+	"mp_colony02",
+	"mp_relic02",
+	"mp_wargames",
+	"mp_glitch",
+	"mp_rise" ]
+
+struct{
+	array<string> mapPlaylist = []
+	string customText = ""
+}file
 
 void function RandomMap_Init()
 {
+	file.mapPlaylist = GetStringArrayFromConVar( "random_map_playlist" )
+	if( file.mapPlaylist.len() == 0 )
+	{
+		thread RandomMap()
+		return
+	}
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
-	if( RandomInt( 3 ) == 0 )
-		AddCallback_OnClientConnected( OnClientConnected )
 }
 
-void function OnClientConnected( entity player )
+void function ShowCustomTextOnPostmatch( string text )
 {
-	thread SetPlayerToNightSky( player )
+	file.customText = text
 }
 
 void function GameStateEnter_Postmatch()
 {
-	thread RandomMapWaiting()
+	thread RandomMap()
 }
-void function RandomMapWaiting()
-{
-	wait GAME_POSTMATCH_LENGTH - 0.1
-	RandomMap()
-}
+
 void function RandomMap()
 {
-	int RandomInt = RandomInt( 15 )
-	switch( RandomInt )
+	int i = 0
+	foreach( map in file.mapPlaylist )
 	{
-		case 0:
-			if( GetMapName() == "mp_black_water_canal" )
-				return RandomMap()
-			ServerCommand( "map mp_black_water_canal" )
+		if( GetMapName() == map )
 			break
-		case 1:
-			if( GetMapName() == "mp_complex3" )
-				return RandomMap()
-			ServerCommand( "map mp_complex3" )
-			break
-		case 2:
-			if( GetMapName() == "mp_crashsite3" )
-				return RandomMap()
-			ServerCommand( "map mp_crashsite3" )
-			break
-		case 3:
-			if( GetMapName() == "mp_drydock" )
-				return RandomMap()
-			ServerCommand( "map mp_drydock" )
-			break
-		case 4:
-			if( GetMapName() == "mp_eden" )
-				return RandomMap()
-			ServerCommand( "map mp_eden" )
-			break
-		case 5:
-			if( GetMapName() == "mp_forwardbase_kodai" )
-				return RandomMap()
-			ServerCommand( "map mp_forwardbase_kodai" )
-			break
-		case 6:
-			if( GetMapName() == "mp_grave" )
-				return RandomMap()
-			ServerCommand( "map mp_grave" )
-			break
-		case 7:
-			if( GetMapName() == "mp_homestead" )
-				return RandomMap()
-			ServerCommand( "map mp_homestead" )
-			break
-		case 8:
-			if( GetMapName() == "mp_thaw" )
-				return RandomMap()
-			ServerCommand( "map mp_thaw" )
-			break
-		case 9:
-			if( GetMapName() == "mp_angel_city" )
-				return RandomMap()
-			ServerCommand( "map mp_angel_city" )
-			break
-		case 10:
-			if( GetMapName() == "mp_colony02" )
-				return RandomMap()
-			ServerCommand( "map mp_colony02" )
-			break
-		case 11:
-			if( GetMapName() == "mp_relic02" )
-				return RandomMap()
-			ServerCommand( "map mp_relic02" )
-			break
-		case 12:
-			if( GetMapName() == "mp_wargames" )
-				return RandomMap()
-			ServerCommand( "map mp_wargames" )
-			break
-		case 13:
-			if( GetMapName() == "mp_glitch" )
-				return RandomMap()
-			ServerCommand( "map mp_glitch" )
-			break
-		case 14:
-			if( GetMapName() == "mp_rise" )
-				return RandomMap()
-			ServerCommand( "map mp_rise" )
-			break
-		default:
-			break
+		i++
 	}
+
+	if( file.mapPlaylist.len() - 1 == i || file.mapPlaylist.len() == 0 )
+	{
+		file.mapPlaylist = RandomArrayElem( MAPS_ALL )
+		i = 0
+	}
+	else
+		i++
+
+	string map = file.mapPlaylist[i]
+	SendHudMessageToAll( "下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
+
+	wait GAME_POSTMATCH_LENGTH - 0.1
+
+	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
+	ServerCommand( "map "+ map )
+}
+
+array<string> function RandomArrayElem( array<string> a )
+{
+	array<string> b = a
+	array<string> c = []
+	while( b.len() > 0 )
+	{
+		string randElem = b[ RandomInt( b.len() ) ]
+		b.removebyvalue( randElem )
+		c.append( randElem )
+	}
+	return c
+}
+
+string function GetMapTitleName( string map )
+{
+	switch( map )
+	{
+		case "mp_black_water_canal":
+			return "黑水運河"
+		case "mp_angel_city":
+			return "天使城"
+		case "mp_drydock":
+			return "乾塢"
+		case "mp_eden":
+			return "伊甸"
+		case "mp_colony02":
+			return "殖民地"
+		case "mp_relic02":
+			return "遺跡"
+		case "mp_grave":
+			return "新興城鎮"
+		case "mp_thaw":
+			return "係外行星"
+		case "mp_glitch":
+			return "異常"
+		case "mp_homestead":
+			return "家園"
+		case "mp_wargames":
+			return "戰爭游戲"
+		case "mp_forwardbase_kodai":
+			return "虎大前進基地"
+		case "mp_complex3":
+			return "綜合設施"
+		case "mp_rise":
+			return "崛起"
+		case "mp_crashsite3":
+			return "墜機現場"
+	}
+	return "UNKNOWN"
 }

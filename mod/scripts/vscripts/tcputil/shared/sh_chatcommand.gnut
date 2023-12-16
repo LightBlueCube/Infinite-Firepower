@@ -1,12 +1,14 @@
 global function ChatCommand_Init
 global function AddChatCommandCallback
+global function RemoveChatCommandCallback
+
 global function AddCallback_OnReceivedSayTextMessage_AfterChatCommand
 
 struct
 {
 	table<string, bool functionref( entity, array<string> )> chatCommandCallbacks
-	array<ClServer_MessageStruct functionref(ClServer_MessageStruct)> afterChatCommandCallbacks
-} file
+	array<ClServer_MessageStruct functionref( ClServer_MessageStruct )> afterChatCommandCallbacks
+}file
 
 void function ChatCommand_Init()
 {
@@ -22,6 +24,11 @@ void function AddChatCommandCallback( string cmd, bool functionref( entity, arra
 	}
 
 	file.chatCommandCallbacks[ cmd ] <- callbackFunc
+}
+
+void function RemoveChatCommandCallback( string cmd )
+{
+	delete file.chatCommandCallbacks[ cmd ]
 }
 
 void function AddCallback_OnReceivedSayTextMessage_AfterChatCommand( ClServer_MessageStruct functionref( ClServer_MessageStruct ) callbackFunc )
@@ -46,8 +53,7 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 	if( cmd in file.chatCommandCallbacks )
 	{
 		msgStruct.shouldBlock = file.chatCommandCallbacks[ cmd ]( msgStruct.player, args )
-		if( msgStruct.shouldBlock )
-			return msgStruct
+		return msgStruct
 	}
 
 	foreach ( callbackFunc in file.afterChatCommandCallbacks )

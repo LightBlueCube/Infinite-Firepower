@@ -2,7 +2,9 @@ untyped
 global function CruiseMissile_Init
 global function CruiseMissileAnim_ThinkBefore
 
-float FIRE_HIGHER = 5000
+struct{
+	float cruiseMissileFireHigher = 5000
+}file
 
 void function CruiseMissile_Init()
 {
@@ -14,9 +16,9 @@ void function CruiseMissile_Init()
 	AddCallback_OnClientConnected( OnClientConnected )
 
 	if( GetMapName() == "mp_grave" )
-		FIRE_HIGHER = 4500
+		file.cruiseMissileFireHigher = 4500
 	if( GetMapName() == "mp_wargames" )
-		FIRE_HIGHER = 4000
+		file.cruiseMissileFireHigher = 4000
 }
 
 void function OnClientConnected( entity player )
@@ -30,17 +32,19 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "CruiseMissileExplode" )
 	owner.s.usingCruiseMissile = true
+	owner.s.DisableGUI = true
 	owner.kv.VisibilityFlags = 0
 	PhaseShift( owner, 0, 1.2 )
 	HolsterAndDisableWeapons( owner )
 	owner.SetOrigin( owner.GetOrigin() )
-	FindNearestSafeSpotAndPutEntity( owner, 5 )
+	FindNearestSafeSpotAndPutEntity( owner )
 	owner.FreezeControlsOnServer()
 	owner.SetInvulnerable()
 	vector beforeOrigin = owner.GetOrigin()
 	vector cmFireOrigin = owner.GetOrigin()
-	cmFireOrigin.z = FIRE_HIGHER
+	cmFireOrigin.z = file.cruiseMissileFireHigher
 	vector cmFireAngles = < 0, RandomInt( 360 ), 0 >
 
 	OnThreadEnd(
@@ -50,6 +54,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 				return
 			Remote_CallFunction_NonReplay( owner, "ServerCallback_ResetMapSettings" )
 			owner.s.usingCruiseMissile = false
+			owner.s.DisableGUI = false
 			owner.kv.VisibilityFlags = ENTITY_VISIBLE_TO_EVERYONE
 			owner.ClearInvulnerable()
 			DeployAndEnableWeapons( owner )
@@ -60,7 +65,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 			if( !IsAlive( owner ) )
 				return
 			owner.SetOrigin( beforeOrigin )
-			FindNearestSafeSpotAndPutEntity( owner, 5 )
+			FindNearestSafeSpotAndPutEntity( owner )
 			PlayFXOnEntity( $"P_phase_shift_main", owner )
 			EmitSoundOnEntityOnlyToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_1P" )
 			EmitSoundOnEntityExceptToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_3P" )
@@ -76,6 +81,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	if( !IsValid( evacSpaceNode ) )
 		evacSpaceNode = GetEnt( "spaceNode" )
 	vector validOrigin = evacSpaceNode.GetOrigin()
+	validOrigin.z += 500
 	for( ;; )
 	{
 		WaitFrame()
@@ -86,31 +92,6 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		owner.SetOrigin( validOrigin )
 		owner.SetVelocity( < 0, 0, 0 > )
 	}
-}
-
-void function FindNearestSafeSpotAndPutEntity( entity ent, int severity )
-{
-	vector baseOrigin = ent.GetOrigin()
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y+severity, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y-severity, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x+severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x-severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z+severity >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z-severity >, baseOrigin ) )
-		return
-
-	return FindNearestSafeSpotAndPutEntity( ent, severity+5 )
 }
 
 void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector cmFireAngles )
@@ -184,8 +165,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 					owner.s.usingCruiseMissile = false
 					EmitSoundOnEntityOnlyToPlayer( owner, owner, "goblin_dropship_explode" )
 				}
-				if( !result.timeOut2 )
-					owner.s.dropShipAlive = false
+				owner.s.dropShipAlive = false
 				StopSoundOnEntity( owner, "scr_s2s_intro_crow_engage_warp_speed" )
 			}
 		}
@@ -195,7 +175,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_start", mover )	//fly in
 	EmitSoundOnEntity( dropship, "Goblin_IMC_Evac_Flyin" )
-	EmitSoundOnEntityOnlyToPlayer( owner, owner, "scr_s2s_intro_crow_engage_warp_speed" )
+	EmitSoundOnEntityOnlyToPlayer( turret, owner, "scr_s2s_intro_crow_engage_warp_speed" )
 	float sequenceDuration = dropship.GetSequenceDuration( "cd_dropship_rescue_side_start" )
 	float cycleFrac = dropship.GetScriptedAnimEventCycleFrac( "cd_dropship_rescue_side_start", "ReadyToLoad" )
 	wait ( sequenceDuration * cycleFrac ) - 0.3
@@ -222,9 +202,6 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	mover.SetOrigin( cmFireOrigin )
 
 	owner.WaitSignal( "CruiseMissileExplode" )
-
-	owner.s.dropShipAlive = false
-	result.timeOut2 <- true
 }
 
 void function DropShipFlyOut( entity dropship, entity mover )
@@ -419,9 +396,6 @@ void function CalculateCruiseMissilePoint( entity weapon, entity weaponOwner )
 
 	while ( true )
 	{
-		if ( !IsValid_ThisFrame( weaponOwner ) || !IsValid_ThisFrame( weapon ) )
-			return
-
 		TraceResults result = GetViewTrace( weaponOwner )
 		info_target.SetOrigin( result.endPos )
 
@@ -484,6 +458,7 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 
 				RemoveButtonPressedPlayerInputCallback( weaponOwner, IN_ATTACK, CruiseMissileSpeedUp )
 				weaponOwner.s.cmSpeedUp = false
+				weaponOwner.s.usingCruiseMissile = false
 
 				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_widow_engage_warp_speed" )
 				StopSoundOnEntity( weaponOwner, "scr_s2s_intro_seyar_flyby" )
@@ -498,8 +473,6 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 					weaponOwner.Die( weaponOwner, weaponOwner, { damageSourceId = damagedef_suicide } )
 				else
 					thread CruiseMissileExplode( turret.GetOrigin(), weaponOwner )
-
-				weaponOwner.s.usingCruiseMissile = false
 			}
 
 			if ( IsValid( turret ) )
@@ -511,21 +484,18 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 	)
 
 	EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "scr_s2s_intro_seyar_flyby" )
-	GivePassive( weaponOwner, ePassives.PAS_AUTO_SONAR )
 	bool HasAppendSpeed = false
 	int sec = 50
 	for( ;; )
 	{
 		sec--
-		if( !IsValid( weaponOwner ) )
-			break
 		if( ( weaponOwner.s.cmSpeedUp || sec == 0 ) && !HasAppendSpeed )
 		{
 			missile.SetVelocity( missile.GetForwardVector() * 6000 )
-			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_TitanEMP", 0.1, 0.5, 0.5 )
+			GivePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
+			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_TitanEMP", 0.4, 0.5, 0.5 )
 			StopSoundOnEntity( weaponOwner, "scr_s2s_intro_seyar_flyby" )
 			EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "scr_s2s_intro_widow_engage_warp_speed" )
-
 			HasAppendSpeed = true
 		}
 
@@ -533,7 +503,6 @@ void function CruiseMissileThink( entity weapon, entity weaponOwner, entity miss
 		{
 			StatusEffect_AddTimed( weaponOwner, eStatusEffect.stim_visual_effect, 1.0, 0.1, 0 )
 			Remote_CallFunction_Replay( weaponOwner, "ServerCallback_ScreenShake", 400, 200, 0.2 )
-			GivePassive( weaponOwner, ePassives.PAS_FUSION_CORE )
 			if( weaponOwner.s.dropShipAlive )
 				SendHudMessage( weaponOwner, "投放艇战区扫描标记信息系统在线\n//////////////// 动力段已启动 ////////////////\n巡弋飞弹自毁倒计时 T-"+ float( sec + 70 ) / 10 +"s", -1, -0.3, 255, 0, 0, 255, 0, 0.2, 0 )
 			else

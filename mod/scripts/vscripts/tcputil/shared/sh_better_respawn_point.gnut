@@ -2,16 +2,18 @@ global function GetBetterSpawnPoint
 global function BetterRespawnPointEnable
 global function SetBetterRespawnPointEnable
 
-bool BETTER_RESPAWN_POINT_ENABLE = false
+struct{
+	bool betterRespawnPointEnable = false
+}file
 
 bool function BetterRespawnPointEnable()
 {
-	return BETTER_RESPAWN_POINT_ENABLE
+	return file.betterRespawnPointEnable
 }
 
 void function SetBetterRespawnPointEnable( bool state )
 {
-	BETTER_RESPAWN_POINT_ENABLE = state
+	file.betterRespawnPointEnable = state
 }
 
 entity function GetBetterSpawnPoint( int team, array<entity> points, float range = 2000, int callTimes = 0 )

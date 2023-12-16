@@ -1,4 +1,15 @@
+global function NightSky_Init
 global function SetPlayerToNightSky
+
+void function NightSky_Init()
+{
+	AddCallback_OnClientConnected( OnClientConnected )
+}
+
+void function OnClientConnected( entity player )
+{
+	thread SetPlayerToNightSky( player )
+}
 
 void function SetPlayerToNightSky( entity player )
 {

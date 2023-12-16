@@ -5,19 +5,9 @@ const array<string> SHUFFLE_DISABLED_GAMEMODES = ["private_match", "lts", "cp", 
 const array<string> SWITCH_DISABLED_GAMEMODES = ["private_match", "lts", "cp", "fw", "at"] // gamemodes that can't update it's team-colored rui shouldn't have shuffle
 const array<string> DISABLED_MAPS = ["mp_lobby"]
 
-const array<string> MANUAL_SWITCH_COMMANDS = // chat command will append a "!"
+const array<string> MANUAL_SWITCH_COMMANDS =
 [
-	"switch",
-	"!switch",
-	"！switch",
-
-	"SWITCH",
-	"!SWITCH",
-	"！SWITCH",
-
-	"Switch",
-	"!Switch",
-	"！Switch",
+	"switch"
 ]
 
 const int BALANCE_ALLOWED_TEAM_DIFFERENCE = 1
@@ -45,7 +35,8 @@ void function TeamShuffle_Init()
 	foreach ( string command in MANUAL_SWITCH_COMMANDS )
 	{
 		AddClientCommandCallback( command, CC_TrySwitchTeam )
-		AddChatCommandCallback( command, CC_TrySwitchTeam )
+		AddChatCommandCallback( "!"+ command, CC_TrySwitchTeam )
+		AddChatCommandCallback( "！"+ command, CC_TrySwitchTeam )
 	}
 }
 
@@ -58,7 +49,7 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 	// Blacklist guards
 	if ( gamemodeDisable )
 	{
-		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前模式不可切换队伍", false ) // chathook has been fucked up
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ERROR + "当前模式不可切换队伍，原因：切换队伍后会导致不可逆的ui故障", false ) // chathook has been fucked up
 		return true
 	}
 
@@ -106,14 +97,6 @@ bool function CC_TrySwitchTeam( entity player, array<string> args )
 	return true
 }
 
-ClServer_MessageStruct function Chat_TrySwitchTeam( ClServer_MessageStruct msgStruct )
-{
-	entity sender = msgStruct.player
-	CC_TrySwitchTeam( sender, [] )
-	msgStruct.shouldBlock = true // always block the message
-	return msgStruct
-}
-
 void function CheckPlayerDisconnect( entity player )
 {
 	// since this player may not being destroyed, should do a new check here
@@ -154,7 +137,7 @@ void function CheckPlayerDisconnect( entity player )
 
 	int weakTeam = imcTeamSize > mltTeamSize ? TEAM_MILITIA : TEAM_IMC
 	foreach ( entity player in GetPlayerArrayOfTeam( GetOtherTeam( weakTeam ) ) )
-		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍当前不平衡，可通过输入 !switch 切换队伍。", false )
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍人数不平衡，可通过输入 !switch 切换队伍。", false )
 }
 
 void function GameStateEnter_Postmatch()
@@ -164,6 +147,7 @@ void function GameStateEnter_Postmatch()
 void function ShuffleTeams_Waiting()
 {
 	wait GAME_POSTMATCH_LENGTH - 0.2
+	file.hasShuffled = false
 	TeamShuffleThink()
 }
 
