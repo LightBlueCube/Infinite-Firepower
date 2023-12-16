@@ -31,10 +31,10 @@ WeaponData
 		{
 			"damage_near_value"   							"200"
 			"damage_far_value"								"200"
-			"damage_near_value_titanarmor"					"300"
-			"damage_far_value_titanarmor" 					"300"
+			"damage_near_value_titanarmor"					"200"
+			"damage_far_value_titanarmor" 					"200"
 			"explosionradius" 								"200"
-			"explosion_damage"								"60"
+			"explosion_damage"								"40"
 			"explosion_damage_heavy_armor"					"100"
 			"reload_time_late1" 							"2.0"
 			"reloadempty_time_late1" 						"2.0"
