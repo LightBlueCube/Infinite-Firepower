@@ -30,7 +30,7 @@ void function PlayerUsingVTOL( entity owner )
 	PhaseShift( owner, 0, 1.2 )
 	HolsterAndDisableWeapons( owner )
 	owner.SetOrigin( owner.GetOrigin() )
-	FindNearestSafeSpotAndPutEntity( owner, 5 )
+	FindNearestSafeSpotAndPutEntity( owner )
 	owner.FreezeControlsOnServer()
 	owner.SetInvulnerable()
 	vector beforeOrigin = owner.GetOrigin()
@@ -52,7 +52,7 @@ void function PlayerUsingVTOL( entity owner )
 			if( !IsAlive( owner ) )
 				return
 			owner.SetOrigin( beforeOrigin )
-			FindNearestSafeSpotAndPutEntity( owner, 5 )
+			FindNearestSafeSpotAndPutEntity( owner )
 			PlayFXOnEntity( $"P_phase_shift_main", owner )
 			EmitSoundOnEntityOnlyToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_1P" )
 			EmitSoundOnEntityExceptToPlayer( owner, owner, "Pilot_PhaseShift_WarningToEnd_3P" )
@@ -76,31 +76,6 @@ void function PlayerUsingVTOL( entity owner )
 		if( owner.s.VTOLIntroDone )
 			Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
 	}
-}
-
-void function FindNearestSafeSpotAndPutEntity( entity ent, int severity )
-{
-	vector baseOrigin = ent.GetOrigin()
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y+severity, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y-severity, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x+severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x-severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z+severity >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z-severity >, baseOrigin ) )
-		return
-
-	return FindNearestSafeSpotAndPutEntity( ent, severity+5 )
 }
 
 void function VTOLIntro( entity owner )

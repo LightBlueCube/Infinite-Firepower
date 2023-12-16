@@ -2,27 +2,56 @@ global function InfiniteFirepower_Init
 
 void function InfiniteFirepower_Init()
 {
-	RandomMap_Init()	//随机换图
+	// 随机换图
+	RandomMap_Init()
+	// 设置对局结束时显示在换图提示下方的文字
+	ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式\nQQ群:150381961 @LightBlueCube" )
 
-	TitanChange_Init()	//至尊泰坦替换
+	// 如果注释了RandomMap_Init()，请务必将此处一并注释
+	// 如果获取到的随机地图播放列表为空，终止操作，等待RandomMap_Init()初始化播放列表并换图
+	if( GetConVarString( "random_map_playlist" ) == "" )
+		return
 
-	KillStreak_Init()	//连杀系统
+	// 开局时会有一个投票，投票成功会跳过此对局
+	Vote_SkipMatch_Init()
 
-	TeamShuffle_Init()	//打乱队伍
+	if( RandomInt( 2 ) == 0 )
+	{
+		// 夜间模式
+		NightSky_Init()
+	}
 
-	SetBetterRespawnPointEnable( true )	//启用更好的重生点
+	// 至尊泰坦替换
+	TitanChange_Init()
 
-	AntiAFK_Init()	//反挂机
-	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )	//达到多少人才开始踢出挂机玩家
-	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )	//反挂机忽略的玩家的uid
+	// 连杀系统
+	KillStreak_Init()
 
-	AntiInsult_Init()	// 反侮辱，目前只有反蹲起
+	// 打乱队伍
+	TeamShuffle_Init()
 
-	//ColorfulChat_Init()	//炫彩聊天文字，已fuck up
+	// 启用更好的重生点
+	SetBetterRespawnPointEnable( true )
 
-	PilotShield_Init()	//Apex like 铁驭护盾
+	// 反挂机
+	AntiAFK_Init()
+	// 达到多少人才开始踢出挂机玩家
+	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )
+	// 反挂机忽略的玩家的uid
+	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )
 
-	AutoShutdown_Init()	//如果服务器无人则自动重启服务器
+	// 反蹲起
+	AntiInsult_Init()
 
-	DevTrackUsage_Init()	//DEV: 跟踪泰坦使用频次和记录各泰坦的kd
+	// 炫彩聊天文字，已fuck up
+	// ColorfulChat_Init()
+
+	// Apex like 铁驭护盾
+	PilotShield_Init()
+
+	// 如果服务器无人则自动重启服务器
+	AutoShutdown_Init()
+
+	// DEV: 跟踪泰坦使用频次和记录各泰坦的kd
+	DevTrackUsage_Init()
 }

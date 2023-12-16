@@ -4,10 +4,12 @@ global function AntiAFK_SetIgnorePlayers
 global function AntiAFK_SetKickWarningTime
 global function AntiAFK_SetKickTime
 
-array<string> noKickPlayers = []
-int kickNeededPlayer = 0
-int warnTime = 60
-int kickTime = 90
+struct{
+	array<string> ignorePlayers = []
+	int kickNeededPlayer = 0
+	int warnTime = 60
+	int kickTime = 90
+}file
 
 void function AntiAFK_Init()
 {
@@ -16,19 +18,19 @@ void function AntiAFK_Init()
 
 void function AntiAFK_SetKickNeededPlayer( int input )
 {
-	kickNeededPlayer = input
+	file.kickNeededPlayer = input
 }
 void function AntiAFK_SetIgnorePlayers( array<string> input )
 {
-	noKickPlayers = input
+	file.ignorePlayers = input
 }
 void function AntiAFK_SetKickWarningTime( int input )
 {
-	warnTime = input
+	file.warnTime = input
 }
 void function AntiAFK_SetKickTime( int input )
 {
-	kickTime = input
+	file.kickTime = input
 }
 
 void function OnClientConnected( entity player )
@@ -53,9 +55,9 @@ void function CheckPlayerMove( entity player )
 		else
 			afkTime = 0
 
-		if( afkTime >= warnTime )
-			thread SendKsGUI_Threaded( player, "!!!!!!!!请不要挂机!!!!!!!!", < 255, 0, 0 >, 1.1, 1, null, 0.4 )
-		if( afkTime >= kickTime && GetPlayerArray().len() > kickNeededPlayer && !noKickPlayers.contains( player.GetUID() ) )
+		if( afkTime >= file.warnTime )
+			SendHudMessage( player, "!!!!请不要挂机!!!!", -1, 0.4, 255, 0, 0, 255, 0, 0.5, 1 )
+		if( afkTime >= file.kickTime && GetPlayerArray().len() > file.kickNeededPlayer && !file.ignorePlayers.contains( player.GetUID() ) )
 			ServerCommand( "kickid "+ player.GetUID() )
 	}
 }

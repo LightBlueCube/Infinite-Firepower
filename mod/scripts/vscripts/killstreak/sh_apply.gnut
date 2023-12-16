@@ -10,23 +10,11 @@ global function ApplyShieldBattery
 void function ApplyDropBattery( entity player )
 {
 	if( !player.IsHuman() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能扔出电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能扔出电池" )
 	if( !IsAlive( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n死亡时不可丢出电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n死亡时不可丢出电池" )
 	if( !PlayerHasMaxBatteryCount( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n你没有电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你没有电池" )
 
 	DropBattery( player )
 }
@@ -55,192 +43,103 @@ void function DropBattery( entity player )
 void function ApplyNukeTitan( entity player )
 {
 	if( player.s.NukeTitan <= 0 )
-	{
-		thread SendKsGUI_Threaded( player, "\n你没有核武泰坦!", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你没有核武泰坦" )
 	if( !player.IsHuman() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能交付核武泰坦", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付核武泰坦" )
+
 	player.s.NukeTitan -= 1
+	PlayerInventory_GiveNukeTitan( player )
 	thread SendKsGUI_Threaded( player, "按住以持续交付核武泰坦\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-	PlayerInventory_GiveNukeTitan( player )
 }
 
 void function ApplyCruiseMissile( entity player )
 {
 	if( player.s.CruiseMissile <= 0 )
-	{
-		thread SendKsGUI_Threaded( player, "\n无巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你没有巡弋飞弹" )
 	if( !IsAlive( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n死亡时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
-	if( IsValid( player.GetTitanSoulBeingRodeoed() ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n训牛时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n死亡时不可使用巡弋飞弹" )
+	if( player.GetTitanSoulBeingRodeoed() )
+		return ApplyFalied( player, "\n训牛时不可使用巡弋飞弹" )
+	if( player.Anim_IsActive() )
+		return ApplyFalied( player, "\n在播放动画时不可使用巡弋飞弹" )
 	if( player.GetParent() )
-	{
-		thread SendKsGUI_Threaded( player, "\n在有绑定的父级实体时不可使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n在有绑定的父级实体时不可使用巡弋飞弹" )
 	if( !player.IsHuman() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能使用巡弋飞弹" )
 	if( player.IsPhaseShifted() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要离开相位才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
-	if( !player.IsOnGround() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要站在地上才能使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要离开相位才能使用巡弋飞弹" )
+	if( !player.IsOnGround() || player.IsWallRunning() || player.IsWallHanging() )
+		return ApplyFalied( player, "\n你需要站在地上才能使用巡弋飞弹" )
 	if( player.s.usingCruiseMissile )
-	{
-		thread SendKsGUI_Threaded( player, "\n你正在使用巡弋飞弹", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你正在使用巡弋飞弹" )
 
+	player.s.CruiseMissile -= 1
 	thread CruiseMissileAnim_ThinkBefore( player )
 	thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-	player.s.CruiseMissile -= 1
 }
 
 void function ApplyVTOL( entity player )
 {
 	if( !player.s.HaveVTOL )
-	{
-		thread SendKsGUI_Threaded( player, "\n无VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你没有VTOL" )
 	if( !IsAlive( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n死亡时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
-	if( IsValid( player.GetTitanSoulBeingRodeoed() ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n训牛时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n死亡时不可使用VTOL" )
+	if( player.GetTitanSoulBeingRodeoed() )
+		return ApplyFalied( player, "\n训牛时不可使用VTOL" )
+	if( player.Anim_IsActive() )
+		return ApplyFalied( player, "\n在播放动画时不可使用巡弋飞弹" )
 	if( player.GetParent() )
-	{
-		thread SendKsGUI_Threaded( player, "\n在有绑定的父级实体时不可使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n在有绑定的父级实体时不可使用VTOL" )
 	if( !player.IsHuman() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能使用VTOL" )
 	if( player.IsPhaseShifted() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要离开相位才能使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
-	/*if( !player.IsOnGround() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要站在地上才能使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}*/
+		return ApplyFalied( player, "\n你需要离开相位才能使用VTOL" )
+	if( !player.IsOnGround() || player.IsWallRunning() || player.IsWallHanging() )
+		return ApplyFalied( player, "\n你需要站在地上才能使用VTOL" )
 	if( player.s.usingVTOL )
-	{
-		thread SendKsGUI_Threaded( player, "\n你正在使用VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你正在使用VTOL" )
 	foreach( ent in GetPlayerArray() )
-	{
-		if( !ent.s.usingVTOL )
-			continue
-		thread SendKsGUI_Threaded( player, "\n场上已存在一个VTOL", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		if( ent.s.usingVTOL )
+			return ApplyFalied( player, "\n场上已存在一个VTOL" )
 
+	player.s.HaveVTOL = false
 	thread VTOLIntro( player )
 	thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-	player.s.HaveVTOL = false
 }
 
 void function ApplyNuclearBomb( entity player )
 {
 	if( !player.s.HaveNuclearBomb )
-	{
-		thread SendKsGUI_Threaded( player, "\n折叠时空武器离线", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n折叠时空武器离线" )
 	if( IsNuclearBombDisable() )
-	{
-		thread SendKsGUI_Threaded( player, "\n已有在途的折叠时空武器打击", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n已有在途的折叠时空武器打击" )
 
-	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	thread NuclearBombAnimThink( player )
+	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
 void function ApplyShieldBattery( entity player )
 {
 	if( !player.IsHuman() )
-	{
-		thread SendKsGUI_Threaded( player, "\n你需要处于铁驭状态才能使用电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能使用电池" )
 	if( !IsAlive( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n死亡时不可使用电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n死亡时不可使用电池" )
 	if( !PlayerHasMaxBatteryCount( player ) )
-	{
-		thread SendKsGUI_Threaded( player, "\n你没有电池", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n你没有电池" )
 	if( player.GetShieldHealth() == player.GetShieldHealthMax() )
-	{
-		thread SendKsGUI_Threaded( player, "\n护盾已满", < 255, 100, 100 >, 2, 1 )
-		EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
-		return
-	}
+		return ApplyFalied( player, "\n护盾已满" )
+
+	thread UseShieldBattery( player )
 	thread SendKsGUI_Threaded( player, " ", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
-	thread UseShieldBattery( player )
+}
+
+void function ApplyFalied( entity player, string text )
+{
+	thread SendKsGUI_Threaded( player, text, < 255, 100, 100 >, 2, 1 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 }

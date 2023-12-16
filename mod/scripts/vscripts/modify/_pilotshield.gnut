@@ -147,7 +147,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 			if( !IsValid( player ) )
 				return
 
-			player.s.GUIDisable = false
+			player.s.DisableGUI = false
 
 			player.DeployWeapon()
 			player.Server_TurnOffhandWeaponsDisabledOff()
@@ -174,7 +174,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 			}
 		}
 	)
-	player.s.GUIDisable = true
+	player.s.DisableGUI = true
 
 	bool isAmped = IsAmpedBattery( battery )
 	float r = isAmped ? 255.0 : 100.0

@@ -2,7 +2,7 @@ untyped
 global function KillStreak_Init
 global function GetKillStreakData
 global function SetKillStreakData
-global function SetRandomKillStreakData
+global function SetRandomKillStreakFunction
 global function KillStreakEnable
 global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
@@ -24,8 +24,8 @@ void function KillStreak_Init()
 {
 	KsGUI_Init()
 
-	randomKillStreakFunc = RandomKillStreak
 	RandomKillStreakPlayers = GetStringArrayFromConVar( "random_killstreak_players" )
+	SetRandomKillStreakFunction( RandomKillStreak )
 	AddCallback_OnClientConnected( OnClientConnected )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
@@ -39,7 +39,7 @@ table<int> function GetKillStreakData()
 	return file
 }
 
-void function SetRandomKillStreakData( void functionref( entity ) func )
+void function SetRandomKillStreakFunction( void functionref( entity ) func )
 {
 	randomKillStreakFunc = func
 }
@@ -128,9 +128,7 @@ void function RandomKillStreak_MsgShared( entity player )
 	player.EndSignal( "OnDeath" )
 	WaitFrame()
 	while( player.GetParent() )
-	{
 		WaitFrame()
-	}
 	NSSendAnnouncementMessageToPlayer( player, "在上一對局成功撤離，給予隨機連殺獎勵！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 }
 
@@ -183,35 +181,11 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 
 void function GameStateEnter_Postmatch()
 {
-	StoreStringArrayIntoConVar( "random_killstreak_players", RandomKillStreakPlayers )
+	StoreStringArrayIntoConVar( RandomKillStreakPlayers, "random_killstreak_players" )
 }
 
 void function GiveRandomKillStreakInNextMatch( entity player )
 {
 	RandomKillStreakPlayers.append( player.GetUID() )
 	NSSendAnnouncementMessageToPlayer( player, "成功撤離！將在下一對局給予隨機連殺獎勵", "", < 50, 50, 225 >, 255, 5 )
-}
-
-
-array<string> function GetStringArrayFromConVar( string convar )
-{
-	return split( GetConVarString( convar ), "," )
-}
-
-// 用于更新整个ConVar数组
-string function StoreStringArrayIntoConVar( string convar, array<string> arrayToStore )
-{
-	string builtString = ""
-	foreach ( string item in arrayToStore )
-	{
-		if ( builtString == "" ) // 第一个元素，不添加逗号
-			builtString = item
-		else // 后续元素，在开头添加一个逗号用来分隔，通过GetStringArrayFromConVar()可以将其转化为数组
-			builtString += "," + item
-	}
-
-	// 更新ConVar
-	SetConVarString( convar, builtString )
-	// 返回构造好的字符串
-	return builtString
 }

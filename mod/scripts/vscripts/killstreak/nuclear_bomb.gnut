@@ -4,7 +4,9 @@ global function NuclearBombAnimThink
 global function IsNuclearBombDisable
 global function SetNuclearBombDisable
 
-bool NUCLEAR_BOMB_DISABLE = false
+struct{
+	bool nuclearBombDisable = false
+}file
 
 void function NuclearBomb_Init()
 {
@@ -15,7 +17,7 @@ void function NuclearBomb_Init()
 
 void function SetNuclearBombDisable()
 {
-	NUCLEAR_BOMB_DISABLE = true
+	file.nuclearBombDisable = true
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
@@ -26,7 +28,7 @@ void function SetNuclearBombDisable()
 
 bool function IsNuclearBombDisable()
 {
-	return NUCLEAR_BOMB_DISABLE
+	return file.nuclearBombDisable
 }
 
 void function ForceStuckGameEndTime()
@@ -276,7 +278,7 @@ void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 {
 	if( !IsValid( owner ) )
 		return
-	if( !owner.s.GUIClose || owner.s.GUIDisable )
+	if( !owner.s.GUIClose || owner.s.DisableGUI )
 		return
 
 	string msg = ""
@@ -312,7 +314,7 @@ void function SendNuclearWarn( string msg )
 	{
 		if( !IsValid( player ) )
 			continue
-		if( !player.s.GUIClose || player.s.GUIDisable )
+		if( !player.s.GUIClose || player.s.DisableGUI )
 			continue
 		SendHudMessage( player, msg, -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
 	}

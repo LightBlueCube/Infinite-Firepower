@@ -22,6 +22,10 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "modify/loadout_tips.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
 			"Path": "modify/_pilotshield.gnut",
 			"RunOn": "SERVER && MP"
 		},
@@ -66,14 +70,39 @@
 			}
 		},
 
+		// util shared //
+
+		{
+			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/shared/sh_convar_util.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/shared/sh_entity_util.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/shared/sh_votecommand.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "VoteCommand_Init"
+			}
+		},
+		{
+			"Path": "tcputil/shared/sh_chatcommand.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "ChatCommand_Init"
+			}
+		},
+
 		// utilitys //
 
 		{
 			"Path": "tcputil/random_map.nut",
-			"RunOn": "SERVER && MP"
-		},
-		{
-			"Path": "tcputil/sh_better_respawn_point.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
@@ -85,15 +114,11 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/sh_night_sky.gnut",
+			"Path": "tcputil/night_sky.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
 			"Path": "tcputil/colorful_chat.nut",
-			"RunOn": "SERVER && MP"
-		},
-		{
-			"Path": "tcputil/sh_timeutil.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
@@ -109,11 +134,8 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/sh_chatcommand.gnut",
-			"RunOn": "SERVER && MP",
-			"ServerCallback": {
-				"After": "ChatCommand_Init"
-			}
+			"Path": "tcputil/vote_skipmatch.nut",
+			"RunOn": "SERVER && MP"
 		},
 
 		// modded weapons //
@@ -127,6 +149,10 @@
 		}
 	],
 	"ConVars": [
+		{
+            "Name": "random_map_playlist",
+            "DefaultValue": ""
+        },
 		{
 			"Name": "random_killstreak_players",
 			"DefaultValue": ""
