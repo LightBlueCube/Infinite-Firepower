@@ -40,7 +40,7 @@ struct {
 
 	table<string, NoSpawnArea> noSpawnAreas
 
-	userdata libsvmData
+	var model
 } file
 
 void function Spawn_Init()
@@ -77,7 +77,7 @@ void function Spawn_Init()
 	{
 		libsvmPointDatas.append( PointToTable( point ) )
 	}
-	file.libsvmData = NSSvmTrain( libsvmPointDatas )
+	file.model = NSSvmTrain( libsvmPointDatas )
 }
 
 table function PointToTable( entity point, int team = -1 )
@@ -85,12 +85,12 @@ table function PointToTable( entity point, int team = -1 )
 	if( team == -1 )
 	{
 		return {
-			vector origin = point.GetOrigin()
+			origin = point.GetOrigin()
 		}
 	}
 	return {
-		vector origin = point.GetOrigin()
-		int team = team
+		origin = point.GetOrigin()
+		team = team
 	}
 }
 
@@ -266,7 +266,7 @@ bool function IsSpawnpointValid( entity spawnpoint, int team )
 	if ( HasSwitchedSides() && ( compareTeam == TEAM_MILITIA || compareTeam == TEAM_IMC ) )
 		compareTeam = GetOtherTeam( compareTeam )
 
-	if( NSSvmPredict( file.libsvmData, spawnPoint.GetOrigin() ) != compareTeam )
+	if( NSSvmPredict( file.model, spawnpoint.GetOrigin() ) != compareTeam )
 		return false
 
 	foreach ( bool functionref( entity, int ) customValidationRule in file.customSpawnpointValidationRules )

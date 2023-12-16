@@ -56,7 +56,7 @@ void function CheckPlayerMove( entity player )
 			afkTime = 0
 
 		if( afkTime >= file.warnTime )
-			SendHudMessage( player, "!!!!请不要挂机!!!!", -1, 0.4, 255, 0, 0, 255, 0, 0.5, 1 )
+			SendHudMessage( player, "!!!!请不要挂机!!!!", -1, 0.4, 255, 0, 0, 255, 0, 0.75, 1 )
 		if( afkTime >= file.kickTime && GetPlayerArray().len() > file.kickNeededPlayer && !file.ignorePlayers.contains( player.GetUID() ) )
 			ServerCommand( "kickid "+ player.GetUID() )
 	}
