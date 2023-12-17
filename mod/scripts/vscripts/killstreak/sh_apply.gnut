@@ -71,6 +71,8 @@ void function ApplyCruiseMissile( entity player )
 		return ApplyFalied( player, "\n你需要离开相位才能使用巡弋飞弹" )
 	if( !player.IsOnGround() || player.IsWallRunning() || player.IsWallHanging() )
 		return ApplyFalied( player, "\n你需要站在地上才能使用巡弋飞弹" )
+	if( player.GetOutOfBoundsDeadTime() >= Time() )
+		return ApplyFalied( player, "\n你需要返回战斗区域内才能使用巡弋飞弹" )
 	if( player.s.usingCruiseMissile )
 		return ApplyFalied( player, "\n你正在使用巡弋飞弹" )
 

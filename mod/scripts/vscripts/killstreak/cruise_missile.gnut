@@ -59,6 +59,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 			owner.ClearInvulnerable()
 			DeployAndEnableWeapons( owner )
 			owner.UnfreezeControlsOnServer()
+			owner.SetPhysics( MOVETYPE_WALK )
 			Remote_CallFunction_Replay( owner, "ServerCallback_TitanEMP", 0.4, 0.4, 0.4 )
 			ScreenFade( owner, 0, 0, 0, 255, 2, 0.2, (FFADE_IN | FFADE_PURGE) )
 
@@ -74,14 +75,12 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 
 	ScreenFadeToBlack( owner, 1.0, 0.8 )
 	wait 1.0
-	WaitFrame()
+	owner.SetPhysics( MOVETYPE_NOCLIP )	// sometimes player can be kill by escape map, so adding this
+    WaitFrame()
 	thread CruiseMissileAnim_Think( owner, cmFireOrigin, cmFireAngles )
 
-	entity evacSpaceNode = GetEvacSpaceNode()
-	if( !IsValid( evacSpaceNode ) )
-		evacSpaceNode = GetEnt( "spaceNode" )
-	vector validOrigin = evacSpaceNode.GetOrigin()
-	validOrigin.z += 500
+	vector validOrigin = cmFireOrigin
+	validOrigin.z += 200
 	for( ;; )
 	{
 		WaitFrame()
@@ -90,7 +89,6 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 
 		Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
 		owner.SetOrigin( validOrigin )
-		owner.SetVelocity( < 0, 0, 0 > )
 	}
 }
 
