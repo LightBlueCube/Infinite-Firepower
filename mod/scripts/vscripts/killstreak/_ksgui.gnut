@@ -166,7 +166,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	{
 		while( skippedElem.contains( player.s.GUIIndex ) )
 		{
-			if( !onlyShowBatteryElem && player.s.GUIIndex == 3 )
+			if( !onlyShowBatteryElem && player.s.GUIIndex == 4 )
 				break
 			if( player.s.GUIIndex < KSGUI_ELEM.len() - 1 )
 				player.s.GUIIndex += 1
