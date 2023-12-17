@@ -21,6 +21,9 @@ void function InfiniteFirepower_Init()
 		NightSky_Init()
 	}
 
+	// 禁止重生后更改pilot loadout，防止一些奇奇怪怪的问题
+	SetLoadoutGracePeriodEnabled( false )
+
 	// 至尊泰坦替换
 	TitanChange_Init()
 
