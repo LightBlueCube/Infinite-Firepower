@@ -88,7 +88,6 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 			return
 
 		Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
-		owner.SetOrigin( validOrigin )
 	}
 }
 
@@ -105,11 +104,11 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 			continue
 		if( player.GetTeam() == owner.GetTeam() )
 		{
-			NSSendLargeMessageToPlayer( player,"友方巡飛彈投放中！", "投放飛艇會標記出所有敵人的的位置！保護飛艇！", 7, "rui/callsigns/callsign_95_col" )
+			NSSendLargeMessageToPlayer( player,"友方巡飛彈投放中！", "投放飛艇會標記出所有敵人的的位置！", 7, "rui/callsigns/callsign_95_col" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "lstar_lowammowarning" )
 			continue
 		}
-		NSSendLargeMessageToPlayer( player,"巡飛彈來襲！", "注意頭頂！投放飛艇會標記出你的的位置！但你可以打掉飛艇！", 7, "rui/callsigns/callsign_95_col" )
+		NSSendLargeMessageToPlayer( player,"巡飛彈來襲！", "注意頭頂！投放飛艇會標記出你的的位置！", 7, "rui/callsigns/callsign_95_col" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "lstar_lowammowarning" )
 	}
 
@@ -173,7 +172,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 
 	thread PlayAnim( dropship, "cd_dropship_rescue_side_start", mover )	//fly in
 	EmitSoundOnEntity( dropship, "Goblin_IMC_Evac_Flyin" )
-	EmitSoundOnEntityOnlyToPlayer( turret, owner, "scr_s2s_intro_crow_engage_warp_speed" )
+	EmitSoundOnEntityOnlyToPlayer( dropship, owner, "scr_s2s_intro_crow_engage_warp_speed" )
 	float sequenceDuration = dropship.GetSequenceDuration( "cd_dropship_rescue_side_start" )
 	float cycleFrac = dropship.GetScriptedAnimEventCycleFrac( "cd_dropship_rescue_side_start", "ReadyToLoad" )
 	wait ( sequenceDuration * cycleFrac ) - 0.3
