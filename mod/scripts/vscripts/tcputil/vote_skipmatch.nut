@@ -37,7 +37,7 @@ void function Vote_OnEndFunc( VoteEventStruct voteEvent )
 	else if( yes > no )
 	{
 		voteEndText += "\x1b[36m同意票居多"
-		if( yes <= float( GetPlayerArray() ) * 0.25 )
+		if( yes <= float( GetPlayerArray().len() ) * 0.25 )
 			voteEndText += "，但未达到最低同意人数要求，按反对票居多处理"
 		else
 			vote = true
