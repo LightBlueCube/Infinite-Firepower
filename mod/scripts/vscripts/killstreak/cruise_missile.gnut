@@ -355,7 +355,7 @@ void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin, vector
 	vector missileSpawnOrigin = cmFireOrigin
 	missileSpawnOrigin.z -= 60
 	weaponOwner.SetOrigin( missileSpawnOrigin )
-	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, camAngles, speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
+	entity missile = weapon.FireWeaponMissile( missileSpawnOrigin, AnglesToForward( camAngles ), speed, damageTypes.projectileImpact | DF_IMPACT, damageTypes.explosive, false, shouldPredict )
 	weaponOwner.SetOrigin( beForeOrigin )
 
 	if ( missile )

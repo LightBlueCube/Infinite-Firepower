@@ -344,9 +344,11 @@ int function SmartAmmo_FireWeapon_HomingMissile( entity weapon, WeaponPrimaryAtt
 				continue
 
 			BallLightningData fxData
-			thread BallLightningZapConnectionFX( player, target, tag, fxData )
 			for( int i = 4; i > 0; i-- )
+			{
+				thread BallLightningZapConnectionFX( player, target, tag, fxData )
 				BallLightningZapFX( player, target, tag, fxData )
+			}
 		}
 	}
 

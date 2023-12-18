@@ -141,8 +141,8 @@ VoteEventStruct function GetVoteEvent( int id )
 
 void function Vote_EasyReleaseFunc( VoteEventStruct voteEvent )
 {
-	Chat_ServerBroadcast( "\n\x1b[32m一个新的投票ID为 \x1b[36m"+ voteEvent.id +"\x1b[32m 的名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票已被发布", false )
-	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote 投票ID y \x1b[32m投同意票\n输入 \x1b[36m!vote 投票ID n \x1b[32m投反对票", false )
+	Chat_ServerBroadcast( "\n\x1b[32m一个新的投票：\x1b[36m"+ voteEvent.voteName +"\x1b[32m 已被发布", false )
+	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false )
 }
 
 bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, bool vote )
@@ -158,14 +158,14 @@ bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, bool 
 	else
 		voteEvent.voteNoCount += 1
 
-	Chat_ServerBroadcast( "\n\x1b[32m投票ID为 \x1b[36m"+ voteEvent.id +"\x1b[32m 的名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false )
+	Chat_ServerBroadcast( "\n\x1b[32m名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false )
 	if( Vote_ShouldEarlyEnd( voteEvent ) )
 	{
 		EndVoteEvent( voteEvent, eVoteEndCode.complete )
 		return true
 	}
 
-	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote 投票ID y \x1b[32m投同意票\n输入 \x1b[36m!vote 投票ID n \x1b[32m投反对票", false )
+	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false )
 	return true
 }
 
