@@ -3,7 +3,7 @@ global function VoteToSkipMatch
 
 void function Vote_SkipMatch_Init()
 {
-	AddCallback_GameStateEnter( eGameState.Playing, VoteToSkipMatch )
+	AddCallback_GameStateEnter( eGameState.Prematch, VoteToSkipMatch )
 }
 
 void function VoteToSkipMatch()
@@ -20,8 +20,8 @@ void function VoteToSkipMatch()
 
 void function Vote_OnRelease( VoteEventStruct voteEvent )
 {
-	Chat_ServerBroadcast( "\n\x1b[32m系统发起了一个投票！投票ID为 \x1b[36m"+ voteEvent.id +"\x1b[32m\n投票名为 \x1b[36m"+ voteEvent.voteName, false )
-	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote 投票ID y \x1b[32m投同意票\n输入 \x1b[36m!vote 投票ID n \x1b[32m投反对票", false )
+	Chat_ServerBroadcast( "\n\x1b[32m系统发起了一个投票！\x1b[32m投票名为 \x1b[36m"+ voteEvent.voteName, false )
+	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false )
 }
 
 void function Vote_OnEndFunc( VoteEventStruct voteEvent )
