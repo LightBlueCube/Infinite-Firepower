@@ -263,6 +263,7 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 {
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "TitanEjectionStarted" )
+	player.EndSignal( "DisembarkingTitan" )
 	player.EndSignal( "StopFlying" )
 	weapon.s.flying <- true
 
