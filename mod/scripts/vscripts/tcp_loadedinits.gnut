@@ -24,7 +24,7 @@ void function InfiniteFirepower_Init()
 	// 禁止重生后更改pilot loadout，防止一些奇奇怪怪的问题
 	SetLoadoutGracePeriodEnabled( false )
 
-	// 至尊泰坦替换
+	// 泰坦替换
 	TitanChange_Init()
 
 	// 连杀系统
@@ -33,7 +33,7 @@ void function InfiniteFirepower_Init()
 	// 打乱队伍
 	TeamShuffle_Init()
 
-	// 启用更好的重生点
+	// 更好的重生点
 	SetBetterRespawnPointEnable( true )
 
 	// 反挂机
@@ -42,6 +42,10 @@ void function InfiniteFirepower_Init()
 	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )
 	// 反挂机忽略的玩家的uid
 	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )
+	// 警告阈值
+	AntiAFK_SetKickWarningTime( 90 )
+	// 踢出阈值
+	AntiAFK_SetKickTime( 120 )
 
 	// 反蹲起
 	AntiInsult_Init()

@@ -23,6 +23,10 @@ WeaponData
 			"charge_cooldown_delay"   					"12.0" // equal as "core_duration"
 			"charge_cooldown_time"						"14.0" // should be "core_duration" + "charge_time" + 1.0
 		}
+
+		tcp_full_level
+		{
+		}
 	}
 }
 

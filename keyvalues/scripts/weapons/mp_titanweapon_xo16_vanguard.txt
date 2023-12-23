@@ -1,5 +1,45 @@
 WeaponData
 {
-	"damage_near_value_titanarmor"					"100"
-	"damage_far_value_titanarmor" 					"80"
+	Mods
+	{
+		arc_rounds
+		{
+		}
+
+		arc_rounds_with_battle_rifle
+		{
+		}
+		battle_rifle_icon
+		{
+		}
+
+		battle_rifle
+		{
+		}
+
+		rapid_reload
+		{
+		}
+		fd_vanguard_utility_1
+		{
+		}
+		fd_vanguard_utility_2
+		{
+		}
+		fd_vanguard_weapon_1
+		{
+		}
+		fd_vanguard_weapon_2
+		{
+		}
+		fd_balance
+		{
+		}
+
+		tcp_balance
+		{
+			"damage_near_value_titanarmor"					"100"
+			"damage_far_value_titanarmor" 					"80"
+		}
+	}
 }

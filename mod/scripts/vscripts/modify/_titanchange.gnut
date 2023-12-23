@@ -327,6 +327,10 @@ void function OnTitanfall( entity titan )
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王
 	{
 		soul.s.titanTitle <- "帝王"
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
+			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "tcp_balance" )
+		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_full_level" )
+		titan.GetMainWeapons()[0].AddMod( "tcp_balance" )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
 	{
@@ -335,6 +339,7 @@ void function OnTitanfall( entity titan )
 	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
 	{
 		soul.s.titanTitle <- "烈焰"
+		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_balance" )
 	}
 	else if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
 	{
@@ -343,6 +348,8 @@ void function OnTitanfall( entity titan )
 	else if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
 	{
 		soul.s.titanTitle <- "浪人"
+		titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "tcp_balance" )
+		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_balance" )
 	}
 	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
 	{

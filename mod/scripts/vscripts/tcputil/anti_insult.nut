@@ -22,7 +22,6 @@ void function OnClientConnected( entity player )
 	player.s.validDuckNum <- 0.0
 	player.s.nearDuckNum <- 0.0
 	player.s.duckOriginSave <- < 0, 0, 0 >
-	player.s.dontShowTips <- false
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -159,7 +158,7 @@ void function FuckUpPlayer( entity player )
 			player.AddToPlayerGameStat( PGS_DEATHS, -1 )
 		}
 	}
-	player.s.dontShowTips <- false
+	delete player.s.dontShowTips
 	WaitFrame()
 	DeployAndEnableWeapons( player )
 }

@@ -32,7 +32,6 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
-	owner.EndSignal( "CruiseMissileExplode" )
 	owner.s.usingCruiseMissile = true
 	owner.s.DisableGUI = true
 	owner.kv.VisibilityFlags = 0

@@ -53,7 +53,7 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 
 		if( currentUpgradeCount <= 2 )
 			DefaultUpgrade( weapon, owner, soul )
-		else
+		else if( weapon.HasMod( "tcp_full_level" ) )
 			UpgradeThink( weapon, owner, soul )
 
 		soul.SetTitanSoulNetInt( "upgradeCount", currentUpgradeCount + 1 )

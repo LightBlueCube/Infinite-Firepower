@@ -207,8 +207,8 @@ void function IncrementChargeBlockAnim( entity blockingEnt, var damageInfo )
 	weapon.SetChargeAnimIndex( newIdx )
 }
 
-const float TITAN_BLOCK_DAMAGE_REDUCTION = 0.5
-const float SWORD_CORE_BLOCK_DAMAGE_REDUCTION = 0.3
+const float TITAN_BLOCK_DAMAGE_REDUCTION = 0.3
+const float SWORD_CORE_BLOCK_DAMAGE_REDUCTION = 0.15
 
 float function HandleBlockingAndCalcDamageScaleForHit( entity blockingEnt, var damageInfo )
 {
@@ -219,12 +219,17 @@ float function HandleBlockingAndCalcDamageScaleForHit( entity blockingEnt, var d
 			return 1.0
 		if ( shouldPassThroughDamage )
 			return 1.0
+		if( blockingEnt.GetOffhandWeapon( OFFHAND_SPECIAL ).GetWeaponClassName() == "mp_ability_swordblock" )
+			return 0.5
+		if( blockingEnt.GetOffhandWeapon( OFFHAND_SPECIAL ).HasMod( "tcp_balance" ) )
+		{
+			if ( blockingEnt.IsPlayer() && PlayerHasPassive( blockingEnt, ePassives.PAS_SHIFT_CORE ) )
+				return 0.5
+			return 0.3
+		}
 
 		if ( blockingEnt.IsPlayer() && PlayerHasPassive( blockingEnt, ePassives.PAS_SHIFT_CORE ) )
 			return SWORD_CORE_BLOCK_DAMAGE_REDUCTION
-
-		if( blockingEnt.GetOffhandWeapon( OFFHAND_SPECIAL ).GetWeaponClassName() == "mp_ability_swordblock" )
-			return 0.5
 
 		return TITAN_BLOCK_DAMAGE_REDUCTION
 	}

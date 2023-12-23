@@ -73,16 +73,19 @@
 		// util shared //
 
 		{
-			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
-			"RunOn": "SERVER && MP"
-		},
-		{
 			"Path": "tcputil/shared/sh_convar_util.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
 			"Path": "tcputil/shared/sh_entity_util.gnut",
 			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "BetterRespawnPoint_Init"
+			}
 		},
 		{
 			"Path": "tcputil/shared/sh_votecommand.gnut",
