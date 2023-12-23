@@ -228,7 +228,64 @@ string function GetSpawnpointGamemodeOverride()
 {
 	if ( file.spawnpointGamemodeOverride != "" )
 		return file.spawnpointGamemodeOverride
-	return GAMETYPE
+	return GetGamemodeSpawnpointName()
+}
+
+string function GetGamemodeSpawnpointName()
+{
+	string gameMode = GameRules_GetGameMode()
+	switch ( gameMode )
+	{
+		// These game modes have checkboxes in leveled
+		case LAST_TITAN_STANDING:
+		case TEAM_DEATHMATCH:
+		case ATTRITION:
+		case CAPTURE_POINT:
+		case CAPTURE_THE_FLAG:
+		case FORT_WAR:
+		case FFA:
+		case FD:
+			break
+
+		// These game modes use tdm spawns
+		case PILOT_SKIRMISH:
+		case WINGMAN_PILOT_SKIRMISH:
+		case MARKED_FOR_DEATH_PRO:
+		case MARKED_FOR_DEATH:
+		case T_DAY:
+		case AI_TDM:
+		case BOMB:
+		case HARDCORE_TDM:
+		case COLISEUM:
+		case HUNTED:
+		case DON:
+		case TITAN_BRAWL:
+		case SPEEDBALL:
+			gameMode = TEAM_DEATHMATCH
+			break
+
+		case RAID:
+		case ATCOOP:
+		case CONQUEST:
+		case PVE_SANDBOX:
+			gameMode = ATTRITION
+			break
+
+		case LTS_BOMB:
+		case WINGMAN_LAST_TITAN_STANDING:
+			gameMode = LAST_TITAN_STANDING
+			break
+
+		case FREE_AGENCY:
+			gameMode = FFA
+			break
+
+		default:
+			// If a game mode is not handled in here, spawnpoints won't have checkboxes that correspond to it, so all spawnpoints will be used in that mode, which is probably bad.
+			Assert( false, "Game mode " + gameMode + " not handled in GameModeRemove()" )
+	}
+
+	return gameMode
 }
 
 void function InitRatings( entity player, int team )
