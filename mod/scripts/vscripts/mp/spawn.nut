@@ -23,6 +23,34 @@ global function RateSpawnpoints_SpawnZones
 global function DecideSpawnZone_Generic
 global function DecideSpawnZone_CTF
 
+// modified: make a new function so ai gamemodes don't have to re-decide for each spawn
+global function GetCurrentSpawnZoneForTeam
+//global function FindSpawnPoint_ForDropPod
+
+//global function GetAllValidSpawnPointsInSpawnZone
+
+//global function FindSpawnPoint_WithCustomSpawnPointRule
+
+// generic no-spawn areas for IsSpawnpointValid() to use
+const float PLAYER_NOSPAWN_RADIUS = 1500
+const float PROJECTILE_NOSPAWN_RADIUS = 800
+const float NPC_NOSPAWN_RADIUS = 1000
+
+// modified: prevent spawning in friendly's deadly area
+const float DEADLY_AREA_DURATION = 20.0
+const int DEADLY_AREA_RADIUS = 1500 // try to spawn away from player's max damage range
+// ffa specifics
+const float DEADLY_AREA_DURATION_FFA = 10.0
+const int DEADLY_AREA_RADIUS_FFA = 1000
+
+// modified:  spawnpoint rating think
+const float FRIENDLY_SPAWN_RADIUS = 1000
+const float ENEMY_NOSPAWN_RADIUS = 2000 // most weapon's outer range, cause it less dangrous for player
+
+// modified: in ffa, try to spawn in fight areas, don't make players run across maps to have a fight
+const float FFA_NOSPAWN_RADIUS = 1000 // still don't too close to an enemy
+const float FFA_SPAWN_RADIUS = 2500
+
 struct NoSpawnArea
 {
 	string id
@@ -33,14 +61,13 @@ struct NoSpawnArea
 	float radius
 }
 
-struct {
+struct
+{
 	bool respawnsEnabled = true
 	string spawnpointGamemodeOverride
 	array< bool functionref( entity, int ) > customSpawnpointValidationRules
 
 	table<string, NoSpawnArea> noSpawnAreas
-
-	var model
 } file
 
 void function Spawn_Init()
@@ -57,46 +84,90 @@ void function Spawn_Init()
 	AddCallback_GameStateEnter( eGameState.Prematch, ResetSpawnzones )
 	AddSpawnCallbackEditorClass( "trigger_multiple", "trigger_mp_spawn_zone", AddSpawnZoneTrigger )
 
-	array<table> libsvmPointDatas
-	foreach( team in [ TEAM_IMC, TEAM_MILITIA ] )
-	{
-		foreach( point in SpawnPoints_GetPilotStart( team ) )
-		{
-			libsvmPointDatas.append( PointToTable( point, team ) )
-		}
-		foreach( point in SpawnPoints_GetTitanStart( team ) )
-		{
-			libsvmPointDatas.append( PointToTable( point, team ) )
-		}
-	}
-	foreach( point in SpawnPoints_GetTitan() )
-	{
-		libsvmPointDatas.append( PointToTable( point ) )
-	}
-	foreach( point in SpawnPoints_GetPilot() )
-	{
-		libsvmPointDatas.append( PointToTable( point ) )
-	}
-	file.model = NSSvmTrain( libsvmPointDatas )
+	// modified: prevent spawning in friendly's deadly area
+	AddCallback_OnPlayerKilled( AddNoSpawnAreaForBeingKilled )
 }
 
-table function PointToTable( entity point, int team = -1 )
+// modified: prevent spawning in friendly's deadly area
+void function AddNoSpawnAreaForBeingKilled( entity victim, entity attacker, var damageInfo )
 {
-	if( team == -1 )
+	// not suicide
+	if ( attacker != victim )
 	{
-		return {
-			origin = point.GetOrigin()
+		if ( IsFFAGame() )
+		{
+			// don't let any players spawn nearby, area is smaller than 2-team mode
+			// TEAM_INVALID means blocking all teams
+			CreateNoSpawnArea( victim.GetTeam(), TEAM_INVALID, victim.GetOrigin(), DEADLY_AREA_DURATION_FFA, DEADLY_AREA_RADIUS_FFA )
+		}
+		else
+		{
+			// don't let friendly players spawn nearby
+			CreateNoSpawnArea( victim.GetTeam(), victim.GetTeam(), victim.GetOrigin(), DEADLY_AREA_DURATION, DEADLY_AREA_RADIUS )
 		}
 	}
-	return {
-		origin = point.GetOrigin()
-		team = team
-	}
 }
+
+// modified: try to make spawnpoints near teammates and bit far from enemy
+bool function HasEnemyNearSpawnPoint( int team, entity spawnpoint, bool checkFFa = false )
+{
+	float noSpawnRadius = ENEMY_NOSPAWN_RADIUS
+	if ( checkFFa )
+		noSpawnRadius = FFA_NOSPAWN_RADIUS
+	foreach ( entity player in GetPlayerArrayOfEnemies_Alive( team ) )
+	{
+		if ( Distance2D( player.GetOrigin(), spawnpoint.GetOrigin() ) <= noSpawnRadius )
+			return true
+	}
+
+	// no enemy in area!
+	return false
+}
+
+bool function HasFriendlyNearSpawnPoint( int team, entity spawnpoint )
+{
+	foreach ( entity player in GetPlayerArrayOfTeam( team ) )
+	{
+		if ( Distance2D( player.GetOrigin(), spawnpoint.GetOrigin() ) <= FRIENDLY_SPAWN_RADIUS )
+			return true
+	}
+
+	// no friendly in area!
+	return false
+}
+
+// modified: in ffa, try to spawn in fight areas, don't make players run across maps to have a fight
+bool function FFA_IsGoodSpawnPoint( int team, entity spawnpoint )
+{
+	foreach ( entity player in GetPlayerArrayOfEnemies_Alive( team ) )
+	{
+		if ( Distance2D( player.GetOrigin(), spawnpoint.GetOrigin() ) < FFA_SPAWN_RADIUS
+			 && Distance2D( player.GetOrigin(), spawnpoint.GetOrigin() ) >= FFA_NOSPAWN_RADIUS )
+			return true
+	}
+
+	// no enemy nearby!
+	return false
+}
+
+// modified: prevent player spawn in places enemies can see!
+bool function EnemyCanSeeSpawnPoint( int team, entity spawnpoint )
+{
+	foreach ( entity player in GetPlayerArrayOfEnemies_Alive( team ) )
+	{
+		if ( PlayerCanSeePos( player, spawnpoint.GetOrigin(), true, 135 ) )
+			return true
+	}
+
+	// no enemy can see!
+	return false
+}
+
 
 void function InitSpawnpoint( entity spawnpoint )
 {
-	spawnpoint.s.lastUsedTime <- -999
+	if ( !( "lastUsedTime" in spawnpoint.s ) )
+		spawnpoint.s.lastUsedTime <- -999
 }
 
 void function SetRespawnsEnabled( bool enabled )
@@ -126,6 +197,11 @@ string function CreateNoSpawnArea( int blockSpecificTeam, int blockEnemiesOfTeam
 	// generate an id
 	noSpawnArea.id = UniqueString( "noSpawnArea" )
 
+	// northstar didn't append current created noSpawnArea to file.noSpawnAreas
+	// didn't tested yet, guess if we don't add this, noSpawnAreas will never work
+	file.noSpawnAreas[ noSpawnArea.id ] <- noSpawnArea
+	//
+
 	thread NoSpawnAreaLifetime( noSpawnArea )
 
 	return noSpawnArea.id
@@ -152,10 +228,7 @@ string function GetSpawnpointGamemodeOverride()
 {
 	if ( file.spawnpointGamemodeOverride != "" )
 		return file.spawnpointGamemodeOverride
-	else
-		return GAMETYPE
-
-	unreachable
+	return GAMETYPE
 }
 
 void function InitRatings( entity player, int team )
@@ -167,7 +240,7 @@ void function InitRatings( entity player, int team )
 entity function FindSpawnPoint( entity player, bool isTitan, bool useStartSpawnpoint )
 {
 	int team = player.GetTeam()
-	if ( HasSwitchedSides() )
+	if ( ( IsSwitchSidesBased() && HasSwitchedSides() == 1 ) )
 		team = GetOtherTeam( team )
 
 	array<entity> spawnpoints
@@ -207,7 +280,8 @@ entity function FindSpawnPoint( entity player, bool isTitan, bool useStartSpawnp
 	entity spawnpoint = GetBestSpawnpoint( player, spawnpoints )
 
 	spawnpoint.s.lastUsedTime = Time()
-	player.SetLastSpawnPoint( spawnpoint )
+	//player.SetLastSpawnPoint( spawnpoint )
+	player.p.lastSpawnPoint = spawnpoint // handled by DoRespawnPlayer(), but it's not enough
 
 	return spawnpoint
 }
@@ -218,6 +292,8 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 	array<entity> validSpawns
 	foreach ( entity spawnpoint in spawnpoints )
 	{
+		if ( player.p.lastSpawnPoint == spawnpoint ) // don't spawn on the same point as we last spawn!
+			continue
 		if ( IsSpawnpointValid( spawnpoint, player.GetTeam() ) )
 			validSpawns.append( spawnpoint )
 	}
@@ -237,7 +313,8 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 
 		if ( IsValid( start ) )
 		{
-			start.s.lastUsedTime <- -999
+			if ( !( "lastUsedTime" in start.s ) )
+				start.s.lastUsedTime <- -999
 			validSpawns.append( start )
 		}
 	}
@@ -250,6 +327,7 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 
 bool function IsSpawnpointValid( entity spawnpoint, int team )
 {
+	// was testing making ffa use normal points, don't do debug print if so! will delay the server
 	if ( !spawnpoint.HasKey( "ignoreGamemode" ) || ( spawnpoint.HasKey( "ignoreGamemode" ) && spawnpoint.kv.ignoreGamemode == "0" ) ) // used by script-spawned spawnpoints
 	{
 		if ( file.spawnpointGamemodeOverride != "" )
@@ -258,16 +336,49 @@ bool function IsSpawnpointValid( entity spawnpoint, int team )
 			if ( spawnpoint.HasKey( gamemodeKey ) && ( spawnpoint.kv[ gamemodeKey ] == "0" || spawnpoint.kv[ gamemodeKey ] == "" ) )
 				return false
 		}
-		else if ( GameModeRemove( spawnpoint ) )
-			return false
+		else
+		{
+			if ( IsFFAGame() )
+			{
+				string gamemodeKey = "gamemode_tdm" // some map don't have enough ffa points, maybe this will be better
+				if ( spawnpoint.HasKey( gamemodeKey ) && (spawnpoint.kv[gamemodeKey] == "0" || spawnpoint.kv[gamemodeKey] == "") )
+				{
+					gamemodeKey = "gamemode_ffa" // also save ffa spawnpoints
+					if ( spawnpoint.HasKey( gamemodeKey ) && (spawnpoint.kv[gamemodeKey] == "0" || spawnpoint.kv[gamemodeKey] == "") )
+					{
+						// printt( "Removing ent " + ent.GetClassName() + " with " + gamemodeKey + " = \"" + ent.kv[gamemodeKey] + "\" at " + ent.GetOrigin() )
+						spawnpoint.Destroy()
+						return false
+					}
+				}
+			}
+			else
+			{
+				if ( GameModeRemove( spawnpoint ) )
+					return false
+			}
+		}
 	}
+	/*
+	if ( !spawnpoint.HasKey( "ignoreGamemode" ) || ( spawnpoint.HasKey( "ignoreGamemode" ) && spawnpoint.kv.ignoreGamemode == "0" ) ) // used by script-spawned spawnpoints
+	{
+		if ( file.spawnpointGamemodeOverride != "" )
+		{
+			string gamemodeKey = "gamemode_" + file.spawnpointGamemodeOverride
+			if ( spawnpoint.HasKey( gamemodeKey ) && ( spawnpoint.kv[ gamemodeKey ] == "0" || spawnpoint.kv[ gamemodeKey ] == "" ) )
+				return false
+		}
+		else
+		{
+			if ( GameModeRemove( spawnpoint ) )
+				return false
+		}
+	}
+	*/
 
 	int compareTeam = spawnpoint.GetTeam()
-	if ( HasSwitchedSides() && ( compareTeam == TEAM_MILITIA || compareTeam == TEAM_IMC ) )
+	if ( ( IsSwitchSidesBased() && HasSwitchedSides() == 1 ) && ( compareTeam == TEAM_MILITIA || compareTeam == TEAM_IMC ) )
 		compareTeam = GetOtherTeam( compareTeam )
-
-	if( NSSvmPredict( file.model, spawnpoint.GetOrigin() ) != compareTeam )
-		return false
 
 	foreach ( bool functionref( entity, int ) customValidationRule in file.customSpawnpointValidationRules )
 		if ( !customValidationRule( spawnpoint, team ) )
@@ -282,22 +393,35 @@ bool function IsSpawnpointValid( entity spawnpoint, int team )
 	if ( Time() - spawnpoint.s.lastUsedTime <= 10.0 )
 		return false
 
-	foreach ( k, NoSpawnArea noSpawnArea in file.noSpawnAreas )
+	// noSpawnArea think
+	// only do it when RespawnsEnabled
+	if ( RespawnsEnabled() )
 	{
-		if ( Distance( noSpawnArea.position, spawnpoint.GetOrigin() ) > noSpawnArea.radius )
-			continue
+		foreach ( k, NoSpawnArea noSpawnArea in file.noSpawnAreas )
+		{
+			if ( Distance( noSpawnArea.position, spawnpoint.GetOrigin() ) > noSpawnArea.radius )
+				continue
 
-		if ( noSpawnArea.blockedTeam != TEAM_INVALID && noSpawnArea.blockedTeam == team )
-			return false
+			if ( noSpawnArea.blockedTeam != TEAM_INVALID && noSpawnArea.blockedTeam == team )
+				return false
 
-		if ( noSpawnArea.blockOtherTeams != TEAM_INVALID && noSpawnArea.blockOtherTeams != team )
-			return false
+			// blockOtherTeams == TEAM_INVALID may means "blocking all teams"?
+			//if ( noSpawnArea.blockOtherTeams != TEAM_INVALID && noSpawnArea.blockOtherTeams != team )
+			if ( noSpawnArea.blockOtherTeams == TEAM_INVALID || noSpawnArea.blockOtherTeams != team )
+				return false
+		}
 	}
 
-	array<entity> projectiles = GetProjectileArrayEx( "any", TEAM_ANY, TEAM_ANY, spawnpoint.GetOrigin(), 600 )
-	foreach ( entity projectile in projectiles )
-		if ( projectile.GetTeam() != team )
+	// in rsquirrel extend returns null unlike in vanilla squirrel
+	// check no spawn areas
+    array< entity > spawnBlockers = GetPlayerArrayEx( "any", TEAM_ANY, TEAM_ANY, spawnpoint.GetOrigin(), PLAYER_NOSPAWN_RADIUS )
+    spawnBlockers.extend( GetProjectileArrayEx( "any", TEAM_ANY, TEAM_ANY, spawnpoint.GetOrigin(), PROJECTILE_NOSPAWN_RADIUS ) )
+	spawnBlockers.extend( GetNPCArrayEx( "any", TEAM_ANY, TEAM_ANY, spawnpoint.GetOrigin(), NPC_NOSPAWN_RADIUS ) )
+	foreach ( entity blocker in spawnBlockers )
+	{
+		if ( blocker.GetTeam() != team )
 			return false
+	}
 
 	// los check
 	return !spawnpoint.IsVisibleToEnemies( team )
@@ -313,57 +437,60 @@ struct {
 
 void function RateSpawnpoints_Generic( int checkClass, array<entity> spawnpoints, int team, entity player )
 {
-	if ( !IsFFAGame() )
+	if ( checkClass == TD_TITAN && !IsFFAGame() ) // spawn as titan
 	{
+		//print( "respawning as titan!" )
 		// use frontline spawns in 2-team modes
 		RateSpawnpoints_Frontline( checkClass, spawnpoints, team, player )
 		return
 	}
-	else
-	{
-		// todo: ffa spawns :terror:
-	}
 
-	// old algo: keeping until we have a better ffa spawn algo
-
-	// i'm not a fan of this func, but i really don't have a better way to do this rn, and it's surprisingly good with los checks implemented now
-
-	// calculate ratings for preferred nodes
-	// this tries to prefer nodes with more teammates, then activity on them
-	// todo: in the future it might be good to have this prefer nodes with enemies up to a limit of some sort
-	// especially in ffa modes i could deffo see this falling apart a bit rn
-	// perhaps dead players could be used to calculate some sort of activity rating? so high-activity points with an even balance of friendly/unfriendly players are preferred
+	// now testing: use ffa points in 2-team modes
+	// modified checks...
 	array<float> preferSpawnNodeRatings
 	foreach ( vector preferSpawnNode in spawnStateGeneric.preferSpawnNodes )
 	{
 		float currentRating
 
-		// this seems weird, not using rn
-		//Frontline currentFrontline = GetCurrentFrontline( team )
-		//if ( !IsFFAGame() || currentFrontline.friendlyCenter != < 0, 0, 0 > )
-		//	currentRating += max( 0.0, ( 1000.0 - Distance2D( currentFrontline.origin, preferSpawnNode ) ) / 200 )
-
+		// modified checks...
 		foreach ( entity nodePlayer in GetPlayerArray() )
 		{
 			float currentChange = 0.0
 
+			bool sameTeam = nodePlayer.GetTeam() == player.GetTeam()
+			float maxFriendlyDist = FRIENDLY_SPAWN_RADIUS
+			float maxEnemyDist = ENEMY_NOSPAWN_RADIUS
+			if ( IsFFAGame() )
+				maxEnemyDist = FFA_SPAWN_RADIUS
+
 			// the closer a player is to a node the more they matter
 			float dist = Distance2D( preferSpawnNode, nodePlayer.GetOrigin() )
-			if ( dist > 600.0 )
+			if ( dist > maxFriendlyDist && sameTeam && !IsFFAGame() ) // only check friendlyDist if not ffa
+				continue
+			else if ( dist > maxEnemyDist && !sameTeam )
 				continue
 
-			currentChange = ( 600.0 - dist ) / 5
+			float currentDist = sameTeam ? maxFriendlyDist : maxEnemyDist
+			currentChange = ( currentDist - dist ) / 5
 			if ( player == nodePlayer )
 				currentChange *= -3 // always try to stay away from places we've already spawned
 			else if ( !IsAlive( nodePlayer ) ) // dead players mean activity which is good, but they're also dead so they don't matter as much as living ones
 				currentChange *= 0.6
-			if ( nodePlayer.GetTeam() != player.GetTeam() ) // if someone isn't on our team and alive they're probably bad
+
+			if( !sameTeam )  // if someone isn't on our team and alive they're probably bad
 			{
-				if ( IsFFAGame() ) // in ffa everyone is on different teams, so this isn't such a big deal
-					currentChange *= -0.2
+				if ( IsFFAGame() ) // in ffa everyone is on different teams, want to make players spawn near a battle area
+				{
+					if ( dist >= FFA_NOSPAWN_RADIUS && dist < FFA_SPAWN_RADIUS )
+						currentChange *= 2.0 // safe and battle zone, add more chance
+					else
+						currentChange *= -0.6 // try not to spawn too far or too close
+				}
 				else
 					currentChange *= -0.6
 			}
+			else // friendly team
+				currentChange *= 2.0 // try to spawn near a friendly player
 
 			currentRating += currentChange
 		}
@@ -384,28 +511,55 @@ void function RateSpawnpoints_Generic( int checkClass, array<entity> spawnpoints
 				petTitanModifier += 10.0
 
 			float dist = Distance2D( spawnpoint.GetOrigin(), spawnStateGeneric.preferSpawnNodes[ i ] )
-			if ( dist > 750.0 )
+			if ( dist > 5000.0 ) // really should set this extramely high to receive InitialBonus
 				continue
 
-			if ( dist < 600.0 && !spawnHasRecievedInitialBonus )
+			if ( dist < 4000.0 && !spawnHasRecievedInitialBonus )
 			{
 				currentRating += 10.0
 				spawnHasRecievedInitialBonus = true // should only get a bonus for simply being by a node once to avoid over-rating
 			}
 
-			currentRating += ( preferSpawnNodeRatings[ i ] * ( ( 750.0 - dist ) / 75 ) ) +  max( RandomFloat( 1.25 ), 0.9 )
-			if ( dist < 250.0 ) // shouldn't get TOO close to an active node
+			currentRating += ( preferSpawnNodeRatings[ i ] * ( ( 5000.0 - dist ) / 5000 ) ) * max( RandomFloat( 1.25 ), 0.9 )
+			if ( dist < 500.0 ) // shouldn't get TOO close to an active node
 				currentRating *= 0.7
 
 			if ( spawnpoint.s.lastUsedTime < 10.0 )
 				currentRating *= 0.7
 		}
 
-		float rating = spawnpoint.CalculateRating( checkClass, team, currentRating, currentRating + petTitanModifier )
-		//print( "spawnpoint at " + spawnpoint.GetOrigin() + " has rating: " +  )
+		// modified condition
+		if ( IsFFAGame() )
+		{
+			if ( FFA_IsGoodSpawnPoint( team, spawnpoint ) )
+			{
+				if ( currentRating > 0 )
+					currentRating *= 2.0
+			}
+			else if ( HasEnemyNearSpawnPoint( team, spawnpoint, true ) )
+				currentRating *= 0.0 // try not to spawn too close to enemy
+		}
+		else
+		{
+			if ( HasEnemyNearSpawnPoint( team, spawnpoint ) )
+				currentRating *= 0.0 // try not to spawn too close to enemy
+			else if ( HasFriendlyNearSpawnPoint( team, spawnpoint ) )
+			{
+				if ( currentRating > 0 ) // no rating yet
+					currentRating *= 2.0 // and mostly spawn near a friendly
+			}
+		}
 
-		if ( rating != 0.0 || currentRating != 0.0 )
-			print( "rating = " + rating + ", internal rating = " + currentRating )
+		if ( currentRating != 0 ) // check this or server will calculate too much
+		{
+			float rating = spawnpoint.CalculateRating( checkClass, team, currentRating, currentRating + petTitanModifier )
+			//print( "spawnpoint at " + spawnpoint.GetOrigin() + " has rating: " + rating )
+
+			//if ( rating != 0.0 || currentRating != 0.0 )
+				//print( "rating = " + rating + ", internal rating = " + currentRating )
+		}
+		//else
+		//	print( "spawnpoint at " + spawnpoint.GetOrigin() + " has no rating" )
 	}
 }
 
@@ -478,8 +632,10 @@ entity function CreateTeamSpawnZoneEntity( entity spawnzone, int team )
 {
 	entity minimapObj = CreatePropScript( $"models/dev/empty_model.mdl", spawnzone.GetOrigin() )
 	SetTeam( minimapObj, team )
-	minimapObj.Minimap_SetObjectScale( 100.0 / Distance2D( < 0, 0, 0 >, spawnzone.GetBoundingMaxs() ) )
+	//minimapObj.Minimap_SetObjectScale( Distance2D( < 0, 0, 0 >, spawnzone.GetBoundingMaxs() ) / 20000.0 )
+	minimapObj.Minimap_SetObjectScale( 0.05 ) // proper map icon. though vanilla doesn't seem like this
 	minimapObj.Minimap_SetAlignUpright( true )
+	minimapObj.Minimap_SetClampToEdge( false ) // vanilla doesn't seem like you can see enemy's spawnpoint across map
 	minimapObj.Minimap_AlwaysShow( TEAM_IMC, null )
 	minimapObj.Minimap_AlwaysShow( TEAM_MILITIA, null )
 	minimapObj.Minimap_SetHeightTracking( true )
@@ -518,12 +674,32 @@ void function RateSpawnpoints_SpawnZones( int checkClass, array<entity> spawnpoi
 	{
 		float rating = 0.0
 		float distance = Distance2D( spawn.GetOrigin(), spawnzone.GetOrigin() )
-		if ( distance < Distance2D( < 0, 0, 0 >, spawnzone.GetBoundingMaxs() ) )
+		float radius = Distance2D( < 0, 0, 0 >, spawnzone.GetBoundingMaxs() )
+		//print( "spawnzone radius:" + string( radius ) )
+		if ( distance < radius )
 			rating = 100.0
 		else // max 35 rating if not in zone, rate by closest
 			rating = 35.0 * ( 1 - ( distance / 5000.0 ) )
 
-		spawn.CalculateRating( checkClass, player.GetTeam(), rating, rating )
+		// modified over here
+		if ( HasEnemyNearSpawnPoint( team, spawn ) )
+		{
+			if ( rating > 0 )
+				rating *= -0.6 // try not to spawn too close to enemy
+		}
+		else if ( HasFriendlyNearSpawnPoint( team, spawn ) )
+		{
+			if ( rating > 0 )
+				rating = fabs ( rating * 2.0 ) // and mostly spawn near a friendly
+		}
+
+		if ( rating != 0 )
+		{
+			float calcedRating = spawn.CalculateRating( checkClass, player.GetTeam(), rating, rating )
+			//print( "spawnpoint at " + spawn.GetOrigin() + " has rating: " + calcedRating )
+		}
+		//else
+			//print( "spawnpoint at " + spawn.GetOrigin() + " has no rating" )
 	}
 }
 
@@ -534,7 +710,7 @@ entity function DecideSpawnZone_Generic( array<entity> spawnzones, int team )
 
 	// get average team startspawn positions
 	int spawnCompareTeam = team
-	if ( HasSwitchedSides() )
+	if ( ( IsSwitchSidesBased() && HasSwitchedSides() == 1 ) )
 		spawnCompareTeam = GetOtherTeam( team )
 
 	array<entity> startSpawns = SpawnPoints_GetPilotStart( spawnCompareTeam )
@@ -618,8 +794,8 @@ entity function DecideSpawnZone_Generic( array<entity> spawnzones, int team )
 
 			// don't choose spawnzones that are closer to enemy base than friendly base
 			// note: vanilla spawns might not necessarily require this, worth checking
-			if ( !spawnzoneEvil && Distance2D( spawnzone.GetOrigin(), averageFriendlySpawns ) > Distance2D( spawnzone.GetOrigin(), averageEnemySpawns ) )
-				spawnzoneEvil = true
+			//if ( !spawnzoneEvil && Distance2D( spawnzone.GetOrigin(), averageFriendlySpawns ) > Distance2D( spawnzone.GetOrigin(), averageEnemySpawns ) )
+			//	spawnzoneEvil = true
 
 			if ( spawnzoneEvil )
 				continue
@@ -684,7 +860,7 @@ entity function DecideSpawnZone_CTF( array<entity> spawnzones, int team )
 
 	// get average team startspawn positions
 	int spawnCompareTeam = team
-	if ( HasSwitchedSides() )
+	if ( ( IsSwitchSidesBased() && HasSwitchedSides() == 1 ) )
 		spawnCompareTeam = GetOtherTeam( team )
 
 	array<entity> startSpawns = SpawnPoints_GetPilotStart( spawnCompareTeam )
@@ -805,5 +981,13 @@ entity function DecideSpawnZone_CTF( array<entity> spawnzones, int team )
 
 	spawnStateSpawnzones.activeTeamSpawnzones[ team ] <- chosenZone
 
+	return spawnStateSpawnzones.activeTeamSpawnzones[ team ]
+}
+
+// modified: make a new function so ai gamemodes don't have to re-decide for each spawn
+entity function GetCurrentSpawnZoneForTeam( int team )
+{
+	if ( !( team in spawnStateSpawnzones.activeTeamSpawnzones ) )
+		return null
 	return spawnStateSpawnzones.activeTeamSpawnzones[ team ]
 }

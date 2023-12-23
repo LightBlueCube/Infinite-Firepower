@@ -30,5 +30,9 @@ WeaponData
 			"core_duration"								"0.6" //Needs to match charge_cooldown_delay
 			"charge_cooldown_delay"   					"0.6"
 		}
+
+		tcp_balance
+		{
+		}
 	}
 }

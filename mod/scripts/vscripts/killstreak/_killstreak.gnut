@@ -90,8 +90,12 @@ void function OnClientConnected( entity player )
 
 void function RestoreKillStreak( entity player )
 {
-	if( !KillStreakEnable() || player.s.dontShowTips )
+	if( !KillStreakEnable() )
 		return
+
+	if( "dontShowTips" in player.s )
+		if( player.s.dontShowTips )
+			return
 
 	if( player.s.HaveNuclearBomb == true )
 		NSSendAnnouncementMessageToPlayer( player, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 225, 50, 60 >, 255, 6 )

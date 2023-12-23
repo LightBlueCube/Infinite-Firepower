@@ -13,7 +13,7 @@ void function OnPlayerRespawned( entity player )
 	printt( player.GetModelName() )
 }
 
-void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )	//玩家在重生后切换了配装，这时候我们还得拿掉一次村规武器
+void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )
 {
 	return OnPlayerRespawned( player )
 }

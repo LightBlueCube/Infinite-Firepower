@@ -1,3 +1,4 @@
+global function BetterRespawnPoint_Init
 global function GetBetterSpawnPoint
 global function BetterRespawnPointEnable
 global function SetBetterRespawnPointEnable
@@ -5,6 +6,31 @@ global function SetBetterRespawnPointEnable
 struct{
 	bool betterRespawnPointEnable = false
 }file
+
+void function BetterRespawnPoint_Init()
+{
+	AddSpawnpointValidationRule( CustomRespawnpointValidationRule )
+}
+
+bool function CustomRespawnpointValidationRule( entity spawnpoint, int team )
+{
+	if( BetterRespawnPointEnable() && NSSvmPredict( NSSvmTrain( GetSvmTrainData() ), spawnpoint.GetOrigin() ) != team && spawnpoint.GetTeam() <= 0 )
+		return false
+	return true
+}
+
+array<table> function GetSvmTrainData()
+{
+	array<table> data
+	foreach( player in GetPlayerArray() )
+	{
+		data.append({
+			pos = player.GetOrigin(),
+			team = player.GetTeam()
+		})
+	}
+	return data
+}
 
 bool function BetterRespawnPointEnable()
 {

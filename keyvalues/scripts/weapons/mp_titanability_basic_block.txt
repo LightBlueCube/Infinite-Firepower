@@ -1,0 +1,21 @@
+WeaponData
+{
+	Mods
+	{
+		npc_normal_difficulty
+		{
+		}
+
+        modelset_prime
+        {
+        }
+
+        fd_sword_block
+        {
+        }
+
+		tcp_balance
+		{
+		}
+	}
+}
