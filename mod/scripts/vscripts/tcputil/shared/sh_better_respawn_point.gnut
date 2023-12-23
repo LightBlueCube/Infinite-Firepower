@@ -45,7 +45,7 @@ void function SetBetterRespawnPointEnable( bool state )
 entity function GetBetterSpawnPoint( int team, array<entity> points, float range = 2000, int callTimes = 0 )
 {
 	array<vector> friendlyPos
-	array<vector> emenyPos
+	array<vector> enemyPos
 	bool hasAlivePlayer = false
 	foreach( player in GetPlayerArray() )
 	{
@@ -55,7 +55,7 @@ entity function GetBetterSpawnPoint( int team, array<entity> points, float range
 		if( player.GetTeam() == team )
 			friendlyPos.append( player.GetOrigin() )
 		else
-			emenyPos.append( player.GetOrigin() )
+			enemyPos.append( player.GetOrigin() )
 	}
 	if( !hasAlivePlayer || callTimes >= 10 || GetPlayerArray().len() <= 1 )
 		return points[ RandomInt( points.len() ) ]
@@ -72,7 +72,7 @@ entity function GetBetterSpawnPoint( int team, array<entity> points, float range
 		bool haveEmeny = false
 		float weight = 0
 
-		foreach( pos in emenyPos )
+		foreach( pos in enemyPos )
 		{
 
 			float distance = Distance( pos, pointPos )

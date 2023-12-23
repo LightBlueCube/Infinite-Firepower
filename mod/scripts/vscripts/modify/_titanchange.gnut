@@ -94,6 +94,8 @@ void function OnTitanfall( entity titan )
 	if( "TitanHasBeenChanged" in soul.s )
 		if( soul.s.TitanHasBeenChanged )
 			return
+	if( !IsValid( GetPetTitanOwner( titan ) ) )
+		return
 
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
 	{
