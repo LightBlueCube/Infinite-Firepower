@@ -1,6 +1,10 @@
 global function Vote_SkipMatch_Init
 global function VoteToSkipMatch
 
+struct{
+	bool hasVoted = false
+}file
+
 void function Vote_SkipMatch_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Prematch, VoteToSkipMatch )
@@ -8,6 +12,10 @@ void function Vote_SkipMatch_Init()
 
 void function VoteToSkipMatch()
 {
+	if( file.hasVoted )
+		return
+	file.hasVoted = true
+
 	VoteEventStruct voteEvent
 	voteEvent.voteReleaseFunc = Vote_OnRelease
 	voteEvent.onVoteFunc = Vote_EasyVoteFunc
