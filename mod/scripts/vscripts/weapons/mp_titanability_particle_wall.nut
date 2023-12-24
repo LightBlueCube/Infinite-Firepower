@@ -21,7 +21,6 @@ function MpTitanabilityBubbleShield_Init()
 	    PrecacheHUDMaterial( $"vgui/hud/dpad_bubble_shield_charge_1" )
 	    PrecacheHUDMaterial( $"vgui/hud/dpad_bubble_shield_charge_2" )
     #endif
-	RegisterWeaponDamageSource( "script_damage_pass", "" )
 
 	RegisterWeaponDamageSource( "mp_titanability_dash_shield", "牽引護盾" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanability_dash_shield, DashShieldDamaged )

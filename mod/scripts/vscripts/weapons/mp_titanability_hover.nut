@@ -267,7 +267,7 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 	player.EndSignal( "StopFlying" )
 	weapon.s.flying <- true
 
-	thread AirborneThink( player, soundInfo )
+	thread SuperHoverAirborneThink( player, soundInfo )
 	if ( player.IsPlayer() )
 	{
 		player.Server_TurnDodgeDisabledOn()
@@ -332,7 +332,6 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 			if( IsValid( soul ) )
 			{
 				StatusEffect_Stop( soul, statusEffectHandle )
-				StatusEffect_AddTimed( soul, eStatusEffect.dodge_speed_slow, 0.65, 0.75, 0.75 )
 			}
 
 			foreach ( fx in activeFX )
@@ -392,6 +391,40 @@ void function FlyerSuperHovers( entity player, HoverSounds soundInfo, float hori
 		vel = LimitVelocityHorizontal( vel, horizVel + 50 )
 		player.SetVelocity( vel )
 		WaitFrame()
+	}
+}
+
+void function SuperHoverAirborneThink( entity player, HoverSounds soundInfo )
+{
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "TitanEjectionStarted" )
+	player.EndSignal( "DisembarkingTitan" )
+
+	if ( player.IsPlayer() )
+		player.SetTitanDisembarkEnabled( false )
+
+	OnThreadEnd(
+	function() : ( player )
+		{
+			if ( IsValid( player ) && player.IsPlayer() )
+				player.SetTitanDisembarkEnabled( true )
+		}
+	)
+	wait LERP_IN_FLOAT
+
+	while( !player.IsOnGround() )
+	{
+		wait 0.1
+	}
+
+	if ( player.IsPlayer() )
+	{
+		EmitSoundOnEntityOnlyToPlayer( player, player, soundInfo.landing_1p )
+		EmitSoundOnEntityExceptToPlayer( player, player, soundInfo.landing_3p )
+	}
+	else
+	{
+		EmitSoundOnEntity( player, soundInfo.landing_3p )
 	}
 }
 
