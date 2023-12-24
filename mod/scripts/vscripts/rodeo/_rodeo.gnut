@@ -441,6 +441,7 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 
 	velocity = velocity * frac
 	velocity.z += 400
+	velocity += rodeoTarget.GetVelocity()
 
 	player.SetVelocity( velocity )
 	player.JumpedOffRodeo()

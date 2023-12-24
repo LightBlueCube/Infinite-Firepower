@@ -92,6 +92,8 @@ const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "折�
 
 void function KsGUI_Switch( entity player )
 {
+	if( player.s.GUIClose && player.s.GUIIndex >= 4 )
+		player.s.GUIIndex = 0
 	if( player.s.GUIActive )
 	{
 		if( player.s.GUIIndex < KSGUI_ELEM.len() - 1 )
