@@ -417,7 +417,7 @@ var function OnWeaponPrimaryAttack_titancore_ground_slam( entity weapon, WeaponP
     CreatePhysExplosion( damageOrigin + < 0,0,10 >, 512, PHYS_EXPLOSION_LARGE, 15 )
     //PlayHotdropImpactFX( weaponOwner ) // this one also trigger a titanfall damagedef????
     EmitDifferentSoundsAtPositionForPlayerAndWorld( "core_ability_land_1p", "core_ability_land_3p", damageOrigin, weaponOwner, weaponOwner.GetTeam())
-    for( int i = 0; i < 3; i ++ )
+    for( int i = 0; i < 3; i++ )
 		EmitDifferentSoundsAtPositionForPlayerAndWorld( "Titan_1P_Warpfall_WarpToLanding_fast", "Titan_3P_Warpfall_WarpToLanding_fast", damageOrigin, weaponOwner, weaponOwner.GetTeam())
     RadiusDamage(
         damageOrigin + < 0,0,10 >,						    // center
