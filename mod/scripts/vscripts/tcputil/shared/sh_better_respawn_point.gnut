@@ -1,5 +1,5 @@
-global function TryFindBestPoint
-global function TryFindBestPointWithSettings
+global function TryFindBestRespawnPoint
+global function TryFindBestRespawnPointWithSettings
 global function BetterRespawnPointEnable
 global function SetBetterRespawnPointEnable
 
@@ -17,7 +17,7 @@ void function SetBetterRespawnPointEnable( bool state )
 	file.betterRespawnPointEnable = state
 }
 
-entity function TryFindBestPoint( int team, array<entity> points, float range = 2000 )
+entity function TryFindBestRespawnPoint( int team, array<entity> points, float range = 2000 )
 {
 	array<table> svmTrainData
 	array<vector> friendlyPos
@@ -40,10 +40,10 @@ entity function TryFindBestPoint( int team, array<entity> points, float range = 
 	var svmUserdata = NSSvmTrain( svmTrainData )
 	if( !hasAlivePlayer || GetPlayerArray().len() <= 1 )
 		return points[ RandomInt( points.len() ) ]
-	return TryFindBestPointWithSettings( team, points, range, svmUserdata, friendlyPos, enemyPos )
+	return TryFindBestRespawnPointWithSettings( team, points, range, svmUserdata, friendlyPos, enemyPos )
 }
 
-entity function TryFindBestPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos )
+entity function TryFindBestRespawnPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos )
 {
 	array<entity> bestPoints = points
 	float weightSave = 0
