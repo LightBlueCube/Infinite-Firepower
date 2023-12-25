@@ -35,8 +35,6 @@ void function InfiniteFirepower_Init()
 
 	// 使用此函数来关闭更好的重生点选点
 	//SetBetterRespawnPointEnable( false )
-	// 使用此函数来关闭重生点Svm预测阵营筛选
-	//SetSvmPredictEnable( false )
 
 	// 反挂机
 	AntiAFK_Init()

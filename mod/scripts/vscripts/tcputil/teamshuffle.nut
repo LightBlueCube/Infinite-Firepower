@@ -220,7 +220,7 @@ void function FixShuffle()
 	entity poorGuy
 	int oldTeam
 	// fix shuffle is done before match start, no need to use PlayerTrySwitchTeam()
-	for( int i = 0; i < timeShouldBeDone; i ++ )
+	for( int i = 0; i < timeShouldBeDone; i++ )
 	{
 		poorGuy = largerTeamPlayers[ largerTeamIndex ]
 		largerTeamIndex += 1
