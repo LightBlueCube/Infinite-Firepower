@@ -377,7 +377,7 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 	}
 
 	if( BetterRespawnPointEnable() )
-		return TryFindBestPoint( player.GetTeam(), validSpawns )
+		return TryFindBestRespawnPoint( player.GetTeam(), validSpawns )
 	else
 		return validSpawns[ RandomInt( min( 3, validSpawns.len() ) ) ]
 }
