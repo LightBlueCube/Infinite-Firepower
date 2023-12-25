@@ -355,20 +355,6 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 			validSpawns.append( spawnpoint )
 	}
 
-	if( validSpawns.len() == 0 && SvmPredictEnable() )
-	{
-		printt( "found no valid spawns! trying get valid points without svm predict" )
-		SetSvmPredictEnable( false )
-		foreach ( entity spawnpoint in spawnpoints )
-		{
-			if ( player.p.lastSpawnPoint == spawnpoint ) // don't spawn on the same point as we last spawn!
-				continue
-			if ( IsSpawnpointValid( spawnpoint, player.GetTeam() ) )
-				validSpawns.append( spawnpoint )
-		}
-		SetSvmPredictEnable( true )
-	}
-
 	if ( validSpawns.len() == 0 )
 	{
 		// no valid spawns, very bad, so dont care about spawns being valid anymore
@@ -391,7 +377,7 @@ entity function GetBestSpawnpoint( entity player, array<entity> spawnpoints )
 	}
 
 	if( BetterRespawnPointEnable() )
-		return GetBetterSpawnPoint( player.GetTeam(), validSpawns )
+		return TryFindBestPoint( player.GetTeam(), validSpawns )
 	else
 		return validSpawns[ RandomInt( min( 3, validSpawns.len() ) ) ]
 }

@@ -1,50 +1,11 @@
-global function BetterRespawnPoint_Init
-global function GetBetterSpawnPoint
-global function SvmPredictEnable
-global function SetSvmPredictEnable
+global function TryFindBestPoint
+global function TryFindBestPointWithSettings
 global function BetterRespawnPointEnable
 global function SetBetterRespawnPointEnable
 
 struct{
-	bool svmPredictEnable = true
 	bool betterRespawnPointEnable = true
 }file
-
-void function BetterRespawnPoint_Init()
-{
-	AddSpawnpointValidationRule( CustomRespawnpointValidationRule )
-}
-
-bool function CustomRespawnpointValidationRule( entity spawnpoint, int team )
-{
-	if( SvmPredictEnable() && spawnpoint.GetTeam() <= 0 )
-		if( NSSvmPredict( NSSvmTrain( GetSvmTrainData() ), spawnpoint.GetOrigin() ) != team )
-		return false
-	return true
-}
-
-array<table> function GetSvmTrainData()
-{
-	array<table> data
-	foreach( player in GetPlayerArray() )
-	{
-		data.append({
-			pos = player.GetOrigin()
-			team = player.GetTeam()
-		})
-	}
-	return data
-}
-
-bool function SvmPredictEnable()
-{
-	return file.svmPredictEnable
-}
-
-void function SetSvmPredictEnable( bool state )
-{
-	file.betterRespawnPointEnable = state
-}
 
 bool function BetterRespawnPointEnable()
 {
@@ -56,8 +17,9 @@ void function SetBetterRespawnPointEnable( bool state )
 	file.betterRespawnPointEnable = state
 }
 
-entity function GetBetterSpawnPoint( int team, array<entity> points, float range = 2000, int callTimes = 0 )
+entity function TryFindBestPoint( int team, array<entity> points, float range = 2000 )
 {
+	array<table> svmTrainData
 	array<vector> friendlyPos
 	array<vector> enemyPos
 	bool hasAlivePlayer = false
@@ -66,29 +28,35 @@ entity function GetBetterSpawnPoint( int team, array<entity> points, float range
 		if( !IsAlive( player ) )
 			continue
 		hasAlivePlayer = true
+		svmTrainData.append({
+			pos = player.GetOrigin()
+			team = player.GetTeam()
+		})
 		if( player.GetTeam() == team )
 			friendlyPos.append( player.GetOrigin() )
 		else
 			enemyPos.append( player.GetOrigin() )
 	}
-	if( !hasAlivePlayer || callTimes >= 10 || GetPlayerArray().len() <= 1 )
+	var svmUserdata = NSSvmTrain( svmTrainData )
+	if( !hasAlivePlayer || GetPlayerArray().len() <= 1 )
 		return points[ RandomInt( points.len() ) ]
+	return TryFindBestPointWithSettings( team, points, range, svmUserdata, friendlyPos, enemyPos )
+}
 
-
+entity function TryFindBestPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos )
+{
+	array<entity> bestPoints = points
 	float weightSave = 0
-	int arrayNum = -1
-	int target = -1
 	foreach( point in points )
 	{
-		arrayNum++
 		vector pointPos = point.GetOrigin()
+		bool svmPredictSameTeam = NSSvmPredict( svmUserdata, pointPos ) == team
 		bool haveFriendly = false
-		bool haveEmeny = false
+		bool haveEnemy = false
 		float weight = 0
 
 		foreach( pos in enemyPos )
 		{
-
 			float distance = Distance( pos, pointPos )
 			if( distance > range )
 				continue
@@ -96,14 +64,14 @@ entity function GetBetterSpawnPoint( int team, array<entity> points, float range
 				weight += -4
 			else if( distance <= range )
 			{
-				if( haveEmeny )
+				if( haveEnemy )
 				{
 					weight += -1
 					continue
 				}
 
-				haveEmeny = true
-				weight += 2
+				haveEnemy = true
+				weight += 1.9
 				weight += GraphCapped( distance, range * 0.5, range, 0, 0.1 )
 			}
 		}
@@ -113,30 +81,27 @@ entity function GetBetterSpawnPoint( int team, array<entity> points, float range
 			if( distance > range )
 				continue
 			haveFriendly = true
-			if( haveEmeny )
-			{
-				weight += 1
-				weight += GraphCapped( distance, range, 0, 0, 0.1 )
-			}
-			else
-			{
-				weight += 0.6
-				weight += GraphCapped( fabs( distance - range * 0.5 ), range * 0.5, 0, 0, 0.9 )
-			}
-
+			weight += 1
+			weight += GraphCapped( distance, range, 0, 0, 0.1 )
 		}
-		if( !haveFriendly )
+		if( svmPredictSameTeam )
+			weight += 2.5
+		if( svmPredictSameTeam && haveEnemy )
+			weight += -1.5
+		if( !haveEnemy && !haveFriendly )
+		{
+			if( svmPredictSameTeam )
+				weight += -1
 			weight += -1
+		}
 
 		if( weight > weightSave )
 		{
 			weightSave = weight
-			target = arrayNum
+			bestPoints = [ point ]
 		}
+		else if( weight == weightSave )
+			bestPoints.append( point )
 	}
-
-	if( target < 0 )
-		return GetBetterSpawnPoint( team, points, range + 500, callTimes + 1 )
-
-	return points[ target ]
+	return bestPoints[ RandomInt( bestPoints.len() ) ]
 }
