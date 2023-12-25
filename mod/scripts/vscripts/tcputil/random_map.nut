@@ -64,7 +64,7 @@ void function RandomMap()
 		i++
 
 	string map = file.mapPlaylist[i]
-	SendHudMessageToAll( "下一局地图为："+ GetMapTitleName( map ) +"\n\n如果你发现了任何bug（或疑似）\n请务必反馈给我！这很重要！", -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
+	SendHudMessageToAll( "下一局地图为："+ GetMapTitleName( map ) +"\n\n"+ file.customText, -1, 0.3, 200, 200, 255, 0, 0.5, 10, 0 )
 
 	wait GAME_POSTMATCH_LENGTH - 0.1
 

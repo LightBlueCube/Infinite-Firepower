@@ -17,7 +17,8 @@ void function BetterRespawnPoint_Init()
 
 bool function CustomRespawnpointValidationRule( entity spawnpoint, int team )
 {
-	if( SvmPredictEnable() && NSSvmPredict( NSSvmTrain( GetSvmTrainData() ), spawnpoint.GetOrigin() ) != team && spawnpoint.GetTeam() <= 0 )
+	if( SvmPredictEnable() && spawnpoint.GetTeam() <= 0 )
+		if( NSSvmPredict( NSSvmTrain( GetSvmTrainData() ), spawnpoint.GetOrigin() ) != team )
 		return false
 	return true
 }
@@ -28,7 +29,7 @@ array<table> function GetSvmTrainData()
 	foreach( player in GetPlayerArray() )
 	{
 		data.append({
-			pos = player.GetOrigin(),
+			pos = player.GetOrigin()
 			team = player.GetTeam()
 		})
 	}

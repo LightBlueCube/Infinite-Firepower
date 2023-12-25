@@ -81,6 +81,13 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "BetterRespawnPoint_Init"
+			}
+		},
+		{
 			"Path": "tcputil/shared/sh_votecommand.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
@@ -132,13 +139,6 @@
 		{
 			"Path": "tcputil/vote_skipmatch.nut",
 			"RunOn": "SERVER && MP"
-		},
-		{
-			"Path": "tcputil/better_respawn_point.nut",
-			"RunOn": "SERVER && MP",
-			"ServerCallback": {
-				"After": "BetterRespawnPoint_Init"
-			}
 		},
 
 		// modded weapons //
