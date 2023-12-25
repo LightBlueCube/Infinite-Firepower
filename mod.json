@@ -82,10 +82,7 @@
 		},
 		{
 			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
-			"RunOn": "SERVER && MP",
-			"ServerCallback": {
-				"After": "BetterRespawnPoint_Init"
-			}
+			"RunOn": "SERVER && MP"
 		},
 		{
 			"Path": "tcputil/shared/sh_votecommand.gnut",
