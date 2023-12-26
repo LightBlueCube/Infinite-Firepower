@@ -83,7 +83,7 @@ void function GamemodeAITdm_Init()
 	ScoreEvent_SetEarnMeterValues( "KillSuperSpectre", 0.0, 0.2, 0.5 )
 }
 
-int function GetScoreAdditionFromTeam( int team, int score )
+int function ScoreAdditionFromTeam( int team, int score, int balanceAmount = 200 , float additionMin = 0.5 )
 {
 	float floatScore = float( score * teamScoreAddition )
 
@@ -91,30 +91,31 @@ int function GetScoreAdditionFromTeam( int team, int score )
 		return int( floatScore )
 
 	int otherTeam = GetOtherTeam( team )
-	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / 200
+	float addition = float( GameRules_GetTeamScore( otherTeam ) - GameRules_GetTeamScore( team ) ) / balanceAmount
 
-	if( addition >= 0 && addition <= 1)
+	if( addition >= 0 && addition <= 1 )
 		return int( floatScore )
 	if( addition >= 0 )
-		return round( floatScore * addition )
+		return round( floatScore * min( 10, addition ) )
 
-	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) ) / 200
-	if( addition == 0 )
+    if( GameRules_GetTeamScore( team ) - balanceAmount <= GameRules_GetTeamScore( otherTeam ) )
 		return int( floatScore )
+
+	addition = float( GameRules_GetTeamScore( team ) - GameRules_GetTeamScore( otherTeam ) + balanceAmount ) / ( balanceAmount *  2 )
 
 	addition = 1 / addition
-	if( addition >= 1 )
-		return int( floatScore )
 
+	if( addition < additionMin )
+		addition = additionMin
 	return round( floatScore * addition )
 }
 
 int function round( float num )
 {
-	int i = int( num )
-	if( num - i < 0.5)
-		return i
-	return i + 1
+	float i = floor( num )
+	if( num - i < 0.5 )
+		return int( i )
+	return int( i + 1 )
 }
 
 void function LastMinThink()
@@ -139,7 +140,7 @@ void function LastMinThink()
 	int timeLimit = GameMode_GetTimeLimit( GameRules_GetGameMode() ) * 60
 
 	wait timeLimit - 60
-	teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 50 + 2
+	teamScoreAddition = abs( GameRules_GetTeamScore( TEAM_MILITIA ) - GameRules_GetTeamScore( TEAM_IMC ) ) / 75 + 2
 	foreach( player in GetPlayerArray() )
 	{
 		if( !IsValid( player ) )
@@ -249,7 +250,7 @@ void function HandleScoreEvent( entity victim, entity attacker, var damageInfo )
 		teamScore = GetScoreLimit_FromPlaylist() - GameRules_GetTeamScore(attacker.GetTeam())
 
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( attacker.GetTeam(), GetScoreAdditionFromTeam( attacker.GetTeam(), teamScore ) )
+	AddTeamScore( attacker.GetTeam(), ScoreAdditionFromTeam( attacker.GetTeam(), teamScore ) )
 	if( !attacker.IsNPC() )
 	{
 		attacker.AddToPlayerGameStat( PGS_ASSAULT_SCORE, playerScore )
