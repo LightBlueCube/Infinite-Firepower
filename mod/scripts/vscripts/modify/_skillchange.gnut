@@ -40,7 +40,7 @@ void function OnPlayerRespawned( entity player )
 	if( modelName == $"models/humans/pilots/pilot_medium_stalker_f.mdl" )
 	{
 		entity weapon = player.GetOffhandWeapon( OFFHAND_SPECIAL )
-		float ammoFrac = weapon.GetWeaponPrimaryClipCount() / weapon.GetWeaponSettingInt( eWeaponVar.ammo_stockpile_max )
+		float ammoFrac = weapon.GetWeaponPrimaryClipCount() / float( weapon.GetWeaponSettingInt( eWeaponVar.ammo_stockpile_max ) )
 		player.TakeOffhandWeapon( OFFHAND_SPECIAL )
 		player.GiveOffhandWeapon( "mp_ability_shifter", OFFHAND_SPECIAL, [ "holoshift" ] )
 		weapon = player.GetOffhandWeapon( OFFHAND_SPECIAL )

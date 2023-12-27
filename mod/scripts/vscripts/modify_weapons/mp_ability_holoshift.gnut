@@ -4,6 +4,7 @@ global function MpAbilityHoloShift_Init
 global function OnWeaponPrimaryAttack_ability_holoshift
 
 const float PHASE_REWIND_PATH_SNAPSHOT_INTERVAL = 0.1
+const int HOLOSHIFT_DURATION = 18
 
 struct
 {
@@ -40,6 +41,7 @@ var function OnWeaponPrimaryAttack_ability_holoshift( entity weapon, WeaponPrima
 	else
 	{
 		entity decoy = CreateHoloPilotDecoys( weaponOwner, 1 )
+		decoy.SetTimeout( HOLOSHIFT_DURATION )
 		file.playerDecoyList[ weaponOwner ] <- decoy
 		thread HoloShiftTips( weaponOwner, weapon )
 		return 0.1
