@@ -3,13 +3,19 @@ global function LoadoutTips_Init
 
 void function LoadoutTips_Init()
 {
+	// custom titans //
 	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_OnClientConnected( OnClientConnected )
+
+	// pilot skills //
+	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
+	AddCallback_OnPlayerGetsNewPilotLoadout( OnPlayerGetsNewPilotLoadout )
 }
 
 void function OnClientConnected( entity player )
 {
-	player.s.lastTitanLoadout <- "init"
+	player.s.lastTitanLoadout <- ""
+	player.s.lastPilotLoadout <- ""
 }
 
 void function OnTitanfall( entity titan )
@@ -47,7 +53,7 @@ void function OnTitanfall( entity titan )
 		tips += "客制化泰坦"
 	tips += ": "+ GetSwitchedTitan( titan )
 
-	SendHudMessage( player, tips,  -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1 )
+	SendHudMessage( player, tips, -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1 )
 }
 
 string function GetTitanName( entity titan )
@@ -132,5 +138,124 @@ string function GetSwitchedTitan( entity titan )
 		return "巨妖"
 	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )
 		return "遠征"
+	unreachable
+}
+
+void function OnPlayerRespawned( entity player )
+{
+	if( player.IsTitan() )
+		return
+	asset modelName = player.GetModelName()
+	string tips = ""
+	if( player.s.lastPilotLoadout == GetCustomPilotSkillName( modelName ) )
+		return
+	player.s.lastPilotLoadout = GetCustomPilotSkillName( modelName )
+	tips += "当前技能"
+	if( IsCustomPilotSkill( modelName ) )
+		tips += "被替换"
+	tips += "为: "+ GetCustomPilotSkillName( modelName ) +"\n"
+
+	if( IsCustomPilotSkill( modelName ) )
+		tips += "选用男性铁驭"
+	else
+		tips += "选用女性铁驭"
+
+	tips += "以启用"
+	if( IsCustomPilotSkill( modelName ) )
+		tips += "原版技能"
+	else
+		tips += "客制化技能"
+	tips += ": "+ GetSwitchedCustomPilotSkillName( modelName )
+
+	SendHudMessage( player, tips, -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1 )
+}
+
+void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )
+{
+	return OnPlayerRespawned( player )
+}
+
+string function GetCustomPilotSkillName( asset modelName )
+{
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_f.mdl" )
+		return "滑索枪"
+	if( modelName == $"models/humans/pilots/pilot_light_ged_f.mdl" )
+		return "传送门"
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_f.mdl" )
+		return "隐身力场"
+	if( modelName == $"models/humans/pilots/pilot_light_jester_f.mdl" )
+		return "破坏球"
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_f.mdl" )
+		return "重力电梯"
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_f.mdl" )
+		return "幻影转移"
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_f.mdl" )
+		return "烟雾陷阱"
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_m.mdl" )
+		return "钩爪"
+	if( modelName == $"models/humans/pilots/pilot_light_ged_m.mdl" )
+		return "相位"
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_m.mdl" )
+		return "隐身"
+	if( modelName == $"models/humans/pilots/pilot_light_jester_m.mdl" )
+		return "激素"
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_m.mdl" )
+		return "脉冲刀"
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_m.mdl" )
+		return "幻影"
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_m.mdl" )
+		return "A盾"
+	unreachable
+}
+
+bool function IsCustomPilotSkill( asset modelName )
+{
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_light_ged_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_light_jester_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_f.mdl" )
+		return true
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_f.mdl" )
+		return true
+	return false
+}
+
+string function GetSwitchedCustomPilotSkillName( asset modelName )
+{
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_f.mdl" )
+		return "钩爪"
+	if( modelName == $"models/humans/pilots/pilot_light_ged_f.mdl" )
+		return "相位"
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_f.mdl" )
+		return "隐身"
+	if( modelName == $"models/humans/pilots/pilot_light_jester_f.mdl" )
+		return "激素"
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_f.mdl" )
+		return "脉冲刀"
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_f.mdl" )
+		return "幻影"
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_f.mdl" )
+		return "A盾"
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_m.mdl" )
+		return "滑索枪"
+	if( modelName == $"models/humans/pilots/pilot_light_ged_m.mdl" )
+		return "传送门"
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_m.mdl" )
+		return "隐身力场"
+	if( modelName == $"models/humans/pilots/pilot_light_jester_m.mdl" )
+		return "破坏球"
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_m.mdl" )
+		return "重力电梯"
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_m.mdl" )
+		return "幻影转移"
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_m.mdl" )
+		return "烟雾陷阱"
 	unreachable
 }

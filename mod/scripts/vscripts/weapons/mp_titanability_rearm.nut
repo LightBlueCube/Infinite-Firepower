@@ -59,7 +59,6 @@ void function NoGravity40cm( entity owner, entity weapon )
 		{
 			if( !IsValid( weapon ) )
 				return
-			weapon.RemoveMod( "tcp_no_regen" )
 			weapon.SetWeaponPrimaryClipCount( 0 )
 
 			if( !IsValid( mainWeapon ) )
@@ -87,7 +86,6 @@ void function NoGravity40cm( entity owner, entity weapon )
 
 	int shots = 6
 	mainWeapon.s.leftShots <- shots
-	weapon.AddMod( "tcp_no_regen" )
 	for( ;; )
 	{
 		if( mainWeapon.s.leftShots <= 0 )

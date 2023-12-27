@@ -10,6 +10,7 @@ void function CruiseMissile_Init()
 {
 	PrecacheModel( $"models/Robots/turret_rocket/turret_rocket.mdl" )
 	RegisterWeaponDamageSource( "mp_weapon_cruise_missile", "巡飛彈" )
+	RegisterSignal( "UsingCruiseMissile" )
 	RegisterSignal( "CalculateCruiseMissilePoint" )
 	RegisterSignal( "CruiseMissileExplode" )
 
@@ -32,6 +33,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 {
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
+	owner.Signal( "UsingCruiseMissile" )
 	owner.s.usingCruiseMissile = true
 	owner.s.DisableGUI = true
 	owner.kv.VisibilityFlags = 0
@@ -86,6 +88,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 		if( !owner.s.usingCruiseMissile )
 			return
 
+		owner.SetOrigin( validOrigin )
 		Remote_CallFunction_NonReplay( owner, "ServerCallback_SetMapSettings", 1.0, false, null, null, null, null, null, 0.0, 0.5 )
 	}
 }

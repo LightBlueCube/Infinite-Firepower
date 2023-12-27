@@ -89,7 +89,20 @@ int function FireWeaponPlayerAndNPC( WeaponPrimaryAttackParams attackParams, boo
 	if ( shouldCreateProjectile )
 	{
 		if( weapon.HasMod( "tcp_no_gravity" ) && "leftShots" in weapon.s )
+		{
 			weapon.s.leftShots -= 1
+			if( weapon.s.leftShots <= 0 )
+			{
+				weapon.RemoveMod( "tcp_no_gravity" )
+				weapon.AddMod( "mortar_shots" )
+				if( !TitanCoreInUse( owner ) )
+				{
+					foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
+						if( weapon.HasMod( mod ) )
+							weapon.RemoveMod( mod )
+				}
+			}
+		}
 
 		float speed = PROJECTILE_SPEED_40MM
 

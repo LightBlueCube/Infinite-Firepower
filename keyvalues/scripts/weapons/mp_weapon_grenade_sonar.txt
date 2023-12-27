@@ -1,0 +1,38 @@
+WeaponData
+{
+	"OnWeaponTossReleaseAnimEvent"					"OnWeaponTossReleaseAnimEvent_weapon_grenade_sonar"
+
+	Mods
+	{
+		bc_arc_refill
+		{
+		}
+		burn_mod_emp_grenade
+		{
+		}
+		spree_lvl1_grenade_sonar
+		{
+		}
+		spree_lvl2_grenade_sonar
+		{
+		}
+		spree_lvl3_grenade_sonar
+		{
+		}
+		pas_power_cell
+		{
+		}
+		amped_tacticals
+		{
+		}
+
+		// from Super.Mixed.Game, modify by me
+		// gravity lift
+		gravity_lift
+		{
+			"damage_near_value"								"*0"
+			"damage_far_value"								"*0"
+		}
+
+	}
+}

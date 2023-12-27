@@ -528,7 +528,7 @@ void function OnSpectreLeeched( entity spectre, entity player )
 	// Set Owner so we can filter in HandleScore
 	spectre.SetOwner( player )
 	// Add score + update network int to trigger the "Score +n" popup
-	AddTeamScore( player.GetTeam(), GetScoreAdditionFromTeam( player.GetTeam(), 1 ) )
+	AddTeamScore( player.GetTeam(), ScoreAdditionFromTeam( player.GetTeam(), 1 ) )
 	player.AddToPlayerGameStat( PGS_ASSAULT_SCORE, 1 )
 	player.SetPlayerNetInt("AT_bonusPoints", min( 1023, player.GetPlayerGameStat( PGS_ASSAULT_SCORE ) ) )
 }

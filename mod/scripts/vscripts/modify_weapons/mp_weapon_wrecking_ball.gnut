@@ -1,0 +1,654 @@
+global function MpWeaponWreckingBall_Init
+
+global function OnWeaponTossPrep_weapon_wrecking_ball
+global function OnWeaponTossReleaseAnimEvent_weapon_wrecking_ball
+global function OnWeaponPrimaryAttack_weapon_wrecking_ball
+global function OnProjectileCollision_weapon_wrecking_ball
+
+const asset WRECKING_BALL_MODEL = $"models/weapons/bullets/triple_threat_projectile.mdl" // $"models/weapons/bullets/projectile_arc_ball.mdl" // this having a freaking small collisionGroup
+const asset SPEED_PAD_PROJECTILE_MODEL = $"models/weapons/bullets/mgl_grenade.mdl"
+const asset SPEED_PAD_DEPLOYED_MODEL = $"models/robots/drone_frag/frag_drone_proj.mdl"
+
+const string WRECKING_BALL_SCRIPT_NAME = "wrecking_ball_projectile" // need this so speed pads won't spawn more of themselves
+const string SPEED_PAD_SCRIPT_NAME = "wrecking_ball_speed_pad"
+
+// most things of the wrecking ball is hardcoded here
+const asset WRECKING_BALL_TRAIL = $"P_wpn_arcball_trail" // better be in code
+const float WRECKING_BALL_LIFETIME = 10.0
+const float WRECKING_BALL_LIFETIME_PILOT = 8.0 // pilot one is nerfed
+const float WRECKING_BALL_GRAVITY = 4.0 // bit higher
+const float WRECKING_BALL_SPEED_PAD_SPAWN_INTERVAL = 0.5 // was 0.5, need match midair time
+const float WRECKING_BALL_LAUNCH_SPEED = 1100
+const float WRECKING_BALL_BOUNCE_SPEED_HORIZON = 600
+const float WRECKING_BALL_BOUNCE_SPEED_VERTICAL = 800
+const float WRECKING_BALL_SEARCH_BOUNCE_RADIUS = 640 // better be explosionradius * 2
+const float WRECKING_BALL_SEARCH_BOUNCE_RADIUS_PILOT = 300 // pilot one is nerfed
+const float WRECKING_BALL_BOUNCE_DOT = 0.7 // if bounceDot like this consider as it hit a wall
+const float WRECKING_BALL_SHELLSHOCK_DURATION = 2.0
+const float SPEED_PAD_LAUNCH_POWER = 200
+const float SPEED_PAD_LAUNCH_POWER_TITAN = 300
+const float SPEED_PAD_LAUNCH_POWER_EXPLOSION = 350
+const float SPEED_PAD_RADIUS = 48
+const float SPEED_PAD_LIFE_TIME = 12
+const float SPEED_PAD_LIFE_TIME_PILOT = 8 // pilot one is nerfed
+const float SPEED_PAD_STIM_EFFECT_SEVERITY = 0.3
+const float SPEED_PAD_STIM_EFFECT_SEVERITY_BISON = 0.4
+const float SPEED_PAD_STIM_DURATION = 2.0
+const int MAX_SPEED_PAD_COUNT_WORLD = 96
+
+// these should be in set
+//"projectile_launch_speed"						"1100"
+//"grenade_fuse_time"								"10"
+//"projectile_trail_effect_0" 					"P_wpn_arcball_trail"
+//"impact_effect_table" 							"exp_emp"
+
+//"damage_near_value"								"50"
+//"damage_far_value"								"50"
+//"damage_near_value_titanarmor"					"300"
+//"damage_far_value_titanarmor"					"300"
+//"explosion_damage"								"50"
+//"explosion_damage_heavy_armor"					"500"
+
+//"explosion_inner_radius"  						"120"
+//"explosionradius" 								"250"
+//"impulse_force"   								"500"
+//"impulse_force_explosions"						"50000"
+//"explosion_shake_radius"						"600"
+//"explosion_shake_amplitude"						"60"
+//"explosion_shake_frequency"						"45"
+//"explosion_shake_duration"						"1.0"
+
+void function MpWeaponWreckingBall_Init()
+{
+#if SERVER
+    PrecacheModel( $"models/dev/envballs.mdl" )
+    PrecacheModel( $"models/weapons/bullets/projectile_arc_ball.mdl" )
+    PrecacheModel( $"models/robots/drone_frag/frag_drone_proj.mdl" )
+    RegisterSignal( "WreckingBallFirstCollision" )
+    RegisterSignal( "EnterSpeedPad" )
+    RegisterSignal( "LeaveSpeedPad" )
+    AddCallback_OnClientConnected( OnClientConnected )
+    AddDamageCallbackSourceID( eDamageSourceId.proto_titanweapon_deathblossom, WreckingBall_DamagedTarget )
+#endif
+}
+
+#if SERVER
+void function OnClientConnected( entity player )
+{
+}
+#endif
+
+void function OnWeaponTossPrep_weapon_wrecking_ball( entity weapon, WeaponTossPrepParams prepParams )
+{
+	// fix sound!
+	string fpSound = string ( GetGrenadeDeploySound_1p( weapon ) )
+	string tpSound = string ( GetGrenadeDeploySound_3p( weapon ) )
+	weapon.EmitWeaponSound_1p3p( fpSound, tpSound )
+}
+
+// modded stim specific
+var function OnWeaponTossReleaseAnimEvent_weapon_wrecking_ball( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+    // fix sound!
+	string fpSound = string ( GetGrenadeThrowSound_1p( weapon ) )
+	string tpSound = string ( GetGrenadeThrowSound_3p( weapon ) )
+	weapon.EmitWeaponSound_1p3p( fpSound, tpSound )
+
+    return OnWeaponPrimaryAttack_weapon_wrecking_ball( weapon, attackParams )
+}
+
+var function OnWeaponPrimaryAttack_weapon_wrecking_ball( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+    entity weaponOwner = weapon.GetWeaponOwner()
+    if( !weaponOwner.IsPlayer() )
+        return
+    bool shouldPredict = weapon.ShouldPredictProjectiles()
+#if CLIENT // defensive fix
+    if ( !shouldPredict )
+        return 1
+#endif
+    vector angularVelocity = Vector( RandomFloatRange( -1200, 1200 ), 100, 0 )
+	entity nade = weapon.FireWeaponGrenade( attackParams.pos, attackParams.dir, angularVelocity, 0, damageTypes.explosive, damageTypes.explosive, true, true, false )
+
+    if ( nade )
+	{
+#if SERVER
+        //EmitSoundOnEntity( nade, "Weapon_MGL_Grenade_Emitter" )
+        // will set proj.onlyAllowSmartPistolDamage = true, which makes us cannot destroy it using normal weapons
+        nade.SetOwner( weaponOwner ) // required this to get owner's offhand
+        Grenade_Init( nade, weapon )
+        vector attackAngle = VectorToAngles( attackParams.dir )
+        nade.proj.savedAngles = < 0,attackAngle.y,0 >
+        nade.SetScriptName( WRECKING_BALL_SCRIPT_NAME ) // need this so speed pads won't spawn more of themselves
+        thread DelayedStartParticleSystem( nade, WRECKING_BALL_TRAIL )
+        //nade.SetGrenadeTimer( WRECKING_BALL_LIFETIME )
+        //EmitSoundOnEntity( nade, "TDay_MilitiaCharge_MissileTrail" )
+        thread WreckingBallThink( nade, weaponOwner )
+        nade.kv.gravity = WRECKING_BALL_GRAVITY
+        nade.ProjectileSetDamageSourceID( eDamageSourceId.proto_titanweapon_deathblossom ) // for better handle shellshocks
+#else
+        SetTeam( nade, weaponOwner.GetTeam() )
+#endif
+		nade.SetModel( WRECKING_BALL_MODEL )
+        // hardcoded launch speed!
+        vector attackVector = AnglesToForward( < 0,VectorToAngles( attackParams.dir ).y,0 > )
+        nade.SetVelocity( attackParams.dir * WRECKING_BALL_LAUNCH_SPEED )
+
+        return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
+    }
+}
+
+void function OnProjectileCollision_weapon_wrecking_ball( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+{
+#if SERVER
+    if( projectile.GetScriptName() == SPEED_PAD_SCRIPT_NAME ) // assuming these are speed pads
+        return OnProjectileCollision_weapon_deployable( projectile, pos, normal, hitEnt, hitbox, isCritical )
+    entity owner = projectile.GetOwner()
+    if( !owner.IsPlayer() )
+        return
+    projectile.proj.projectileBounceCount++
+    int curBounceCount = projectile.proj.projectileBounceCount
+    if( curBounceCount == 1 )
+    {
+        projectile.Signal( "WreckingBallFirstCollision" )
+        return
+    }
+    //if( curBounceCount > 2 ) // so owner won't receive loud noise, well it's still very noisy
+        //EmitSoundAtPosition( TEAM_UNASSIGNED, pos, "Android_ReaperMelee_Impact_3p_vs_3p" )
+    if( hitEnt.IsPlayer() || hitEnt.IsNPC() ) // actually this will never explode, since this grenade has bounced once
+    {
+        if( hitEnt.GetTeam() != projectile.GetTeam() )
+            WreckingBallExplode( projectile, owner, normal )
+    }
+    if ( hitEnt == GetEntByIndex( 0 ) ) // hitting a worldspawn
+	{
+		float dot = normal.Dot( Vector( 0, 0, 1 ) )
+
+		if ( dot < WRECKING_BALL_BOUNCE_DOT ) // if ball hits a wall...
+        {
+            // let it bounce along normal with no vertical speed added
+            vector wallAngle = VectorToAngles( normal )
+            projectile.proj.savedAngles = < 0,wallAngle.y,0 >
+            vector purVector = AnglesToForward( < 0,-wallAngle.y,0 > ) * WRECKING_BALL_BOUNCE_SPEED_HORIZON * 5 // do a multiplier since there's no additional vertical speed!
+            purVector.z = projectile.GetVelocity().z
+            projectile.SetVelocity( purVector )
+            return
+            /* // idk what to do, just make it bounce to owner now
+            vector targetVector = CalculateTargetVector( owner, projectile )
+            vector targetAngle = VectorToAngles( targetVector )
+            projectile.proj.savedAngles = < 0,targetAngle.y,0 >
+            vector purAngles = projectile.proj.savedAngles
+            vector purVector = AnglesToForward( < 0,purAngles.y,0 > ) * WRECKING_BALL_BOUNCE_SPEED_HORIZON
+            purVector.z = WRECKING_BALL_BOUNCE_SPEED_VERTICAL
+            projectile.SetVelocity( purVector )
+            return
+            */
+            /*
+            print( "Ball hit a wall!" )
+            vector wallAngle = VectorToAngles( normal )
+            vector projAngle = projectile.proj.savedAngles
+            float yawDiffer = fabs( wallAngle.y - projAngle.y )
+            vector newAngle = < 0,projAngle.y + yawDiffer * 2,0 >
+            projectile.proj.savedAngles = newAngle
+            //projectile.proj.savedAngles = < 0,-projectile.proj.savedAngles.y,0 >
+            */
+        }
+	}
+
+    // get nearest target and bounce to them
+    array<entity> targetArray
+    array<entity> enemyPlayers = GetPlayerArrayOfEnemies_Alive( projectile.GetTeam() )
+    if( enemyPlayers.len() > 0 )
+    {
+        foreach( entity player in enemyPlayers )
+        {
+            if( player.IsTitan() )
+            {
+                if( CanTetherTarget( player, projectile ) )
+                    targetArray.append( player )
+            }
+        }
+    }
+    array<entity> npcTitans = GetNPCArrayByClass( "npc_titan" )
+    if( npcTitans.len() > 0 )
+    {
+        foreach( entity titan in npcTitans )
+        {
+            if( titan.GetTeam() != projectile.GetTeam() )
+            {
+                if( CanTetherTarget( titan, projectile ) )
+                    targetArray.append( titan )
+            }
+        }
+    }
+    if( targetArray.len() > 0 )
+    {
+        float explodeRadius = projectile.GetProjectileWeaponSettingFloat( eWeaponVar.explosion_inner_radius )
+        entity explodeTarget = GetClosest( targetArray, projectile.GetOrigin(), explodeRadius )
+        if( IsValid( explodeTarget ) ) // target valid! make ball explode and return
+        {
+            WreckingBallExplode( projectile, owner )
+            return
+        }
+        float searchRadius = owner.IsTitan() ? WRECKING_BALL_SEARCH_BOUNCE_RADIUS : WRECKING_BALL_SEARCH_BOUNCE_RADIUS_PILOT
+        entity closestTarget = GetClosest( targetArray, projectile.GetOrigin(), searchRadius )
+        if( IsValid( closestTarget ) )
+        {
+            vector targetVector = CalculateTargetVector( closestTarget, projectile )
+            projectile.proj.savedAngles = VectorToAngles( < 0,targetVector.y,0 > )
+        }
+    }
+
+    vector purAngles = projectile.proj.savedAngles
+    vector purVector = AnglesToForward( < 0,purAngles.y,0 > ) * WRECKING_BALL_BOUNCE_SPEED_HORIZON
+    purVector.z = WRECKING_BALL_BOUNCE_SPEED_VERTICAL
+    projectile.SetVelocity( purVector )
+
+    //FireSpeedPad( owner, pos, purAngles, curBounceCount ) // should use a loop after projectile launched, not every time it collisions!
+
+    /* // normal bounce version, seems uncontrollable
+    projectile.proj.projectileBounceCount++
+    int curBounceCount = projectile.proj.projectileBounceCount
+    vector curVelocity = projectile.GetVelocity()
+    vector purAngles = VectorToAngles( curVelocity )
+    vector purVector = AnglesToForward( < 0,purAngles.y,0 > ) * WRECKING_BALL_BOUNCE_SPEED_HORIZON
+    array<entity> targetArray
+    array<entity> enemyPlayers = GetPlayerArrayOfEnemies_Alive( projectile.GetTeam() )
+    if( enemyPlayers.len() > 0 )
+    {
+        foreach( entity player in enemyPlayers )
+        {
+            if( player.IsTitan() )
+            {
+                if( CanTetherTarget( player, projectile ) )
+                    targetArray.append( player )
+            }
+        }
+    }
+    array<entity> npcTitans = GetNPCArrayByClass( "npc_titan" )
+    if( npcTitans.len() > 0 )
+    {
+        foreach( entity titan in npcTitans )
+        {
+            if( titan.GetTeam() != projectile.GetTeam() )
+            {
+                if( CanTetherTarget( titan, projectile ) )
+                    targetArray.append( titan )
+            }
+        }
+    }
+    if( targetArray.len() > 0 )
+    {
+        entity closestTarget = GetClosest( targetArray, projectile.GetOrigin(), WRECKING_BALL_SEARCH_BOUNCE_RADIUS )
+        if( IsValid( closestTarget ) )
+        {
+            vector tempVec = CalculateTargetVector( closestTarget, projectile )
+            vector tempAng = VectorToAngles( tempVec )
+            purVector = AnglesToForward( < 0,tempAng.y,0 > )
+        }
+    }
+    purVector.z = WRECKING_BALL_BOUNCE_SPEED_VERTICAL
+    projectile.SetVelocity( purVector )
+    FireSpeedPad( owner, pos, purAngles, curBounceCount )
+    */
+#endif
+}
+
+#if SERVER
+void function WreckingBallExplode( entity projectile, entity owner, vector expOrigin = < 0,0,0 > )
+{
+    //EmitSoundAtPosition( TEAM_UNASSIGNED, projectile.GetOrigin(), "beacon_straton_missilefire_rocketexplo" )
+    vector padAngles = projectile.proj.savedAngles
+    vector origin = projectile.GetOrigin()
+    FireSpeedPad( owner, origin, padAngles, 1, SPEED_PAD_LAUNCH_POWER_EXPLOSION )
+    FireSpeedPad( owner, origin, padAngles, 2, SPEED_PAD_LAUNCH_POWER_EXPLOSION )
+    projectile.GrenadeExplode( expOrigin )
+}
+
+void function WreckingBallThink( entity projectile, entity owner )
+{
+    projectile.EndSignal( "OnDestroy" )
+    owner.EndSignal( "OnDestroy" )
+    int bounceIndex = RandomIntRange( 1, 2 )
+    float startTime = Time()
+    projectile.WaitSignal( "WreckingBallFirstCollision" )
+    vector origin = projectile.GetOrigin()
+    FireSpeedPad( owner, origin, < 0,0,0 >, 0, 0 )
+    float ballLifeTime = owner.IsTitan() ? WRECKING_BALL_LIFETIME : WRECKING_BALL_LIFETIME_PILOT
+    wait WRECKING_BALL_SPEED_PAD_SPAWN_INTERVAL
+    while( true )
+    {
+        if( Time() > startTime + ballLifeTime )
+        {
+            WreckingBallExplode( projectile, owner )
+            return
+        }
+        bounceIndex++
+        vector padAngles = projectile.proj.savedAngles
+        vector origin = projectile.GetOrigin()
+        float throwPower = owner.IsTitan() ? SPEED_PAD_LAUNCH_POWER_TITAN : SPEED_PAD_LAUNCH_POWER
+        FireSpeedPad( owner, origin, padAngles, bounceIndex, throwPower )
+        wait WRECKING_BALL_SPEED_PAD_SPAWN_INTERVAL
+    }
+}
+
+void function FireSpeedPad( entity player, vector startOrigin, vector startAngles, int bounceCount, float throwPower = SPEED_PAD_LAUNCH_POWER )
+{
+    entity wreckinBallWeapon
+    foreach( entity offhand in player.GetOffhandWeapons() )
+    {
+        if( offhand.HasMod( "wrecking_ball" ) )
+            wreckinBallWeapon = offhand
+    }
+    if( !IsValid( wreckinBallWeapon ) )
+        return
+    bool shouldLaunchRight = bounceCount % 2 == 0 ? true : false
+    vector padVector = AnglesToRight( startAngles )
+    if( !shouldLaunchRight )
+        padVector = < -padVector.x, -padVector.y, padVector.z >
+    WeaponPrimaryAttackParams attackParams
+    //attackParams.pos = startOrigin
+    attackParams.pos = startOrigin
+    attackParams.dir = padVector
+
+    vector angularVelocity = Vector( 600, RandomFloatRange( -300, 300 ), 0 )
+
+    entity speedPad = wreckinBallWeapon.FireWeaponGrenade( attackParams.pos, attackParams.dir, angularVelocity, 0, damageTypes.explosive, damageTypes.explosive, false, true, true )
+    if( speedPad )
+    {
+        speedPad.SetVelocity( attackParams.dir * SPEED_PAD_LAUNCH_POWER )
+        thread WaitForSpeedPadDeployment( speedPad )
+        speedPad.SetModel( SPEED_PAD_PROJECTILE_MODEL )
+        speedPad.SetScriptName( SPEED_PAD_SCRIPT_NAME )
+        StartParticleEffectOnEntity( speedPad, GetParticleSystemIndex( $"wpn_grenade_frag_blue" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+    }
+}
+
+void function WaitForSpeedPadDeployment( entity speedPad )
+{
+    speedPad.EndSignal( "OnDestroy" )
+    speedPad.WaitSignal( "Planted" )
+
+    OnSpeedPadPlanted( speedPad )
+}
+
+void function OnSpeedPadPlanted( entity projectile )
+{
+    #if SERVER
+    vector origin = projectile.GetOrigin()
+    vector angles = projectile.proj.savedAngles
+    entity player = projectile.GetOwner()
+    if( !player.IsPlayer() )
+        return
+
+    vector endOrigin = origin - Vector( 0.0, 0.0, 32.0 )
+    vector surfaceAngles = < 0, angles.y, 0 >
+    vector oldUpDir = AnglesToUp( surfaceAngles )
+
+    TraceResults traceResult = TraceLine( origin, endOrigin, [], TRACE_MASK_SOLID, TRACE_COLLISION_GROUP_NONE )
+    if ( traceResult.fraction < 1.0 )
+    {
+        vector forward = AnglesToForward( angles )
+        surfaceAngles = AnglesOnSurface( traceResult.surfaceNormal, forward )
+
+        vector newUpDir = AnglesToUp( surfaceAngles )
+        if ( DotProduct( newUpDir, oldUpDir ) < 0.55 )
+            surfaceAngles = angles
+    }
+
+    int team = projectile.GetTeam()
+	entity tower = CreateEntity( "prop_dynamic" )
+	tower.SetModel( SPEED_PAD_DEPLOYED_MODEL ) //$"models/weapons/sentry_frag/sentry_frag_proj.mdl" // $"models/weapons/sentry_shield/sentry_shield_proj.mdl"
+	tower.SetOrigin( origin )
+    tower.SetOwner( player )
+	tower.SetAngles( surfaceAngles )
+    SetTeam( tower, team )
+	tower.kv.modelscale = 0.6//0.8
+
+	SpeedPadLimitThink()
+
+	thread SpeedPadThink( tower )
+
+    float padLifeTime = player.IsTitan() ? SPEED_PAD_LIFE_TIME : SPEED_PAD_LIFE_TIME_PILOT
+	thread CleanupSpeedPad( tower, padLifeTime )
+    projectile.Destroy()
+	#endif
+}
+
+void function SpeedPadThink( entity tower )
+{
+	tower.EndSignal( "OnDestroy" )
+    /*
+	entity trigger = CreateEntity( "trigger_cylinder" )
+	trigger.SetRadius( SPEED_PAD_RADIUS )
+	trigger.SetAboveHeight( 24 )
+	trigger.SetBelowHeight( -1 )
+
+	trigger.SetOrigin( tower.GetOrigin() )
+	trigger.kv.triggerFilterNpc = "none"
+	trigger.kv.triggerFilterPlayer = "all"
+
+	SetTeam( trigger, tower.GetTeam() )
+	DispatchSpawn( trigger )
+
+    trigger.SetEnterCallback( OnSpeedPadTriggerEnter )
+    trigger.SetLeaveCallback( OnSpeedPadTriggerLeave )
+    */
+
+    tower.EndSignal( "OnDestroy" )
+	entity trigger = CreateTriggerRadiusMultiple( tower.GetOrigin(), SPEED_PAD_RADIUS, [], TRIG_FLAG_PLAYERONLY | TRIG_FLAG_NO_PHASE_SHIFT, 24, -1 )
+	SetTeam( trigger, tower.GetTeam() )
+
+    AddCallback_ScriptTriggerEnter( trigger, OnSpeedPadTriggerEnter )
+    AddCallback_ScriptTriggerLeave( trigger, OnSpeedPadTriggerLeave )
+
+	ScriptTriggerSetEnabled( trigger, true )
+
+    array<entity> padFxs
+
+    entity cpColor = CreateEntity( "info_placement_helper" )
+	cpColor.SetOrigin( FRIENDLY_COLOR_FX )
+    SetTargetName( cpColor, UniqueString( "speedPad_cpColor" ) )
+	DispatchSpawn( cpColor )
+	padFxs.append( cpColor )
+
+	entity fxId1 = PlayFXWithControlPoint( $"harvester_base_noise", tower.GetOrigin() - < 0,0,36 >, cpColor )
+    padFxs.append( fxId1 )
+	entity fxId2 = PlayFXWithControlPoint( $"harvester_base_glowflat", tower.GetOrigin() - < 0,0,36 >, cpColor )
+    padFxs.append( fxId2 )
+
+	OnThreadEnd(
+		function(): ( trigger, padFxs )
+		{
+			if( IsValid( trigger ) )
+				trigger.Destroy()
+            foreach( entity fx in padFxs )
+            {
+                if( IsValid( fx ) )
+                    fx.Destroy()
+            }
+		}
+	)
+
+	WaitForever()
+}
+
+void function OnSpeedPadTriggerEnter( entity trigger, entity player )
+{
+    float severity = SPEED_PAD_STIM_EFFECT_SEVERITY
+    if( !player.IsHuman() )
+		return
+    thread SpeedPadStimThink( player, severity, SPEED_PAD_STIM_DURATION )
+
+}
+
+void function OnSpeedPadTriggerLeave( entity trigger, entity player )
+{
+    //print( "leaving trigger!" )
+    player.Signal( "LeaveSpeedPad" )
+}
+
+void function SpeedPadStimThink( entity player, float severity, float leaveDuration )
+{
+    // clean last sound
+    StopSoundOnEntity( player, "pilot_stimpack_deactivate_1P" )
+	StopSoundOnEntity( player, "pilot_stimpack_deactivate_3P" )
+    StopSoundOnEntity( player, "pilot_stimpack_loop_1P" )
+	StopSoundOnEntity( player, "pilot_stimpack_loop_3P" )
+    StopSoundOnEntity( player, "pilot_stimpack_activate_1P" )
+	StopSoundOnEntity( player, "pilot_stimpack_activate_3P" )
+    // emit new sound
+    EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_stimpack_loop_1P" ) // this sound will increase volume of all sounds playing, play it before stim sound
+	EmitSoundOnEntityExceptToPlayer( player, player, "pilot_stimpack_loop_3P" )
+    EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_stimpack_activate_1P" )
+	EmitSoundOnEntityExceptToPlayer( player, player, "pilot_stimpack_activate_3P" )
+
+    bool triggerLeft = false
+    player.Signal( "EnterSpeedPad" )
+    player.EndSignal( "OnDeath" )
+    player.EndSignal( "OnDestroy" )
+    player.EndSignal( "EnterSpeedPad" )
+    int speedBoostHandle = StatusEffect_AddEndless( player, eStatusEffect.speed_boost, severity )
+	GivePassive( player, ePassives.PAS_FUSION_CORE )
+
+    int attachmentIndex = player.LookupAttachment( "CHESTFOCUS" )
+	entity stimFX = StartParticleEffectOnEntity_ReturnEntity( player, PILOT_STIM_HLD_FX, FX_PATTACH_POINT_FOLLOW, attachmentIndex )
+	stimFX.SetOwner( player )
+	stimFX.kv.VisibilityFlags = (ENTITY_VISIBLE_TO_FRIENDLY | ENTITY_VISIBLE_TO_ENEMY) // not owner only
+
+    OnThreadEnd(
+        function(): ( player, stimFX, triggerLeft, speedBoostHandle )
+        {
+            if( IsValid( player ) )
+            {
+                StatusEffect_Stop( player, speedBoostHandle )
+				TakePassive( player, ePassives.PAS_FUSION_CORE )
+                StopSoundOnEntity( player, "pilot_stimpack_loop_1P" )
+                StopSoundOnEntity( player, "pilot_stimpack_loop_3P" )
+            }
+            if( IsValid( stimFX ) )
+                EffectStop( stimFX )
+        }
+    )
+    player.WaitSignal( "LeaveSpeedPad" )
+
+    triggerLeft = true
+    //StatusEffect_Stop( player, speedBoostHandle )
+    //StatusEffect_Stop( player, stimVisualHandle )
+    //StatusEffect_AddTimed( player, eStatusEffect.speed_boost, severity, leaveDuration + 0.5, 0.25 ) // sound is slightly off
+	// this one scales fov, sucks
+    //StatusEffect_AddTimed( player, eStatusEffect.stim_visual_effect, 1.0, leaveDuration, leaveDuration )
+
+    if( leaveDuration == 2 )
+    {
+        StopSoundOnEntity( player, "pilot_stimpack_deactivate_1P" )
+        StopSoundOnEntity( player, "pilot_stimpack_deactivate_3P" )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_stimpack_deactivate_1P" )
+        EmitSoundOnEntityExceptToPlayer( player, player, "pilot_stimpack_deactivate_3P" )
+        wait 2
+    }
+    else if( leaveDuration > 2 )
+    {
+        wait leaveDuration - 2
+        StopSoundOnEntity( player, "pilot_stimpack_deactivate_1P" )
+        StopSoundOnEntity( player, "pilot_stimpack_deactivate_3P" )
+        EmitSoundOnEntityOnlyToPlayer( player, player, "pilot_stimpack_deactivate_1P" )
+        EmitSoundOnEntityExceptToPlayer( player, player, "pilot_stimpack_deactivate_3P" )
+        wait 2
+    }
+    else if( leaveDuration > 0 )
+        wait leaveDuration
+}
+
+bool function CanTetherTarget( entity target, entity projectile )
+{
+    if( !IsValid( target ) || !IsValid( projectile ) )
+        return false
+    if( target.IsPhaseShifted() )
+        return false
+    vector targetPos = target.EyePosition()
+    targetPos.z = ( target.EyePosition().z + target.GetOrigin().z ) * 0.5
+    vector projPos = projectile.GetOrigin()
+
+    TraceResults traceResult = TraceLine( targetPos, projPos, [target, projectile], (TRACE_MASK_SHOT | CONTENTS_BLOCKLOS), TRACE_COLLISION_GROUP_NONE )
+    if( traceResult.hitEnt == null )
+        return true
+
+    return false
+}
+
+vector function CalculateTargetVector( entity target, entity projectile )
+{
+    vector targetPos = target.EyePosition()
+    targetPos.z = ( target.EyePosition().z + target.GetOrigin().z ) * 0.5 // this might get target's center part?
+    vector projPos = projectile.GetOrigin()
+    vector posDiffer = targetPos - projPos
+    vector moveAng = VectorToAngles( posDiffer )
+    vector moveVec = AnglesToForward( moveAng )
+    return moveVec
+}
+
+void function WreckingBall_DamagedTarget( entity victim, var damageInfo )
+{
+	// Seems like we need this since the invulnerability from phase shift has not kicked in at this point yet
+	if ( victim.IsPhaseShifted() )
+		return
+
+    entity inflictor = DamageInfo_GetInflictor( damageInfo )
+    if( !IsValid( inflictor ) )
+        return
+    if( !inflictor.IsProjectile() )
+        return
+    if( !inflictor.ProjectileGetMods().contains( "wrecking_ball" ) ) // modded weapon refire behavior
+        return
+
+    //if the attacker is a valid friendly set damage do zero.
+	//Note: We need the FF so we can trigger the shellshock effect.
+	entity attacker = DamageInfo_GetAttacker( damageInfo )
+	if ( IsValid( attacker ) )
+	{
+		if ( attacker.GetTeam() == victim.GetTeam() )
+			DamageInfo_ScaleDamage( damageInfo, 0 )
+	}
+
+	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 0.25 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 0.25 )
+}
+void function SpeedPadLimitThink()
+{
+    array<entity> speedPads = GetEntArrayByScriptName( "wrecking_ball_speed_pad" )
+	if( speedPads.len() >= MAX_SPEED_PAD_COUNT_WORLD )
+	{
+		if( IsValid( speedPads[0] ) )
+			speedPads[0].Destroy()
+		speedPads.remove(0)
+	}
+}
+
+void function CleanupSpeedPad( entity tower, float delay )
+{
+    wait delay
+    if( IsValid( tower ) )
+        tower.Destroy()
+}
+
+void function DelayedStartParticleSystem( entity projectile, asset fxAsset )
+{
+    if( fxAsset == $"" )
+        return
+    WaitFrame()
+    if( IsValid( projectile ) )
+        StartParticleEffectOnEntity( projectile, GetParticleSystemIndex( fxAsset ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+}
+
+bool function IsBison( entity player ) // bison check, hardcoded
+{
+    entity meleeWeapon = player.GetMeleeWeapon()
+    if( IsValid( meleeWeapon ) )
+    {
+        if( meleeWeapon.HasMod( "bison_punch" ) )
+            return true
+    }
+    return false
+}
+#endif

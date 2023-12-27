@@ -1,0 +1,99 @@
+global function OnWeaponPrimaryAttack_ability_cloak_field
+global function OnProjectileCollision_ability_cloak_field
+
+// better check after changing base_gametype
+const float CLOAK_FIELD_NO_REGEN_TIME = 27
+
+var function OnWeaponPrimaryAttack_ability_cloak_field( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	entity ownerPlayer = weapon.GetWeaponOwner()
+
+	entity deployable = ThrowDeployable( weapon, attackParams, DEPLOYABLE_THROW_POWER, OnDeployableCloakfieldPlanted )
+	#if SERVER
+		thread ModdedCloakCooldownThink( weapon, CLOAK_FIELD_NO_REGEN_TIME )
+	#endif
+
+	if ( deployable )
+	{
+		entity player = weapon.GetWeaponOwner()
+
+		#if SERVER
+			string projectileSound = GetGrenadeProjectileSound( weapon )
+			if ( projectileSound != "" )
+				EmitSoundOnEntity( deployable, projectileSound )
+
+			weapon.w.lastProjectileFired = deployable
+		#endif
+	}
+
+	PlayerUsedOffhand( ownerPlayer, weapon )
+
+	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+}
+
+void function OnProjectileCollision_ability_cloak_field( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+{
+	#if SERVER
+		entity owner = projectile.GetOwner()
+		if ( !IsAlive( owner ) ) // only deploy cloak field if owner still alive
+		{
+			if ( IsValid( projectile ) )
+			{
+				projectile.Destroy()
+				return
+			}
+		}
+	#endif
+
+	return OnProjectileCollision_weapon_deployable( projectile, pos, normal, hitEnt, hitbox, isCritical )
+}
+
+void function OnDeployableCloakfieldPlanted( entity projectile )
+{
+	#if SERVER
+		DeployCloakfield( projectile )
+	#endif
+}
+
+#if SERVER
+void function ModdedCloakCooldownThink( entity weapon, float cooldown )
+{
+	entity player = weapon.GetWeaponOwner()
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "OnDestroy" )
+
+	entity cloakWeapon
+	int offhandSlot
+	float endTime = Time() + cooldown
+	for ( int i = 0; i <= OFFHAND_MELEE; i++ ) // OFFHAND_MELEE is the largest
+	{
+		entity nowWeapon = player.GetOffhandWeapon( i )
+		if( IsValid( nowWeapon ))
+		{
+			if( nowWeapon.GetWeaponClassName() == "mp_ability_cloak" )
+			{
+				cloakWeapon = nowWeapon
+				offhandSlot = i
+			}
+		}
+	}
+
+	if( IsValid( cloakWeapon ) )
+	{
+		array<string> mods = cloakWeapon.GetMods()
+		// can't reset cooldown properly in script, let's give player a empty one
+		player.TakeWeapon( "mp_ability_cloak" ) // not using TakeWeaponNow() to fit vanilla behavior
+		player.GiveOffhandWeapon( "mp_ability_cloak", offhandSlot, mods )
+		cloakWeapon = player.GetOffhandWeapon( offhandSlot )
+		cloakWeapon.SetWeaponPrimaryClipCountAbsolute( 0 )
+	}
+	while( Time() < endTime )
+	{
+		weapon = player.GetOffhandWeapon( offhandSlot )
+		if( IsValid( weapon ) )
+			if( weapon.GetWeaponClassName() == "mp_ability_cloak" )
+				weapon.SetWeaponPrimaryClipCountAbsolute( GraphCapped( endTime - Time(), cooldown, 0, weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire ), 0 ) )
+		WaitFrame()
+	}
+}
+#endif
