@@ -1,0 +1,61 @@
+WeaponData
+{
+	Mods
+	{
+		pas_power_cell
+		{
+		}
+
+		dev_mod_low_recharge
+		{
+		}
+
+		long_last_shifter
+		{
+		}
+		short_shift
+		{
+		}
+		sp_shift
+		{
+		}
+		spree_lvl1_shifter
+		{
+		}
+		spree_lvl2_shifter
+		{
+		}
+		spree_lvl3_shifter
+		{
+		}
+
+		pm0
+		{
+		}
+		pm1
+		{
+		}
+		pm2
+		{
+		}
+		amped_tacticals
+		{
+		}
+		all_phase
+		{
+		}
+
+		// from Super.Mixed.Game
+		wraith_portal //use together with amped_tacticals
+		{
+			"regen_ammo_refill_rate"						"7.4074"
+		}
+
+		// from Super.Mixed.Game, modify by me
+		// holoshift
+		holoshift
+		{
+			"regen_ammo_refill_rate"						"10"
+		}
+	}
+}

@@ -10,7 +10,46 @@ void function OnPlayerRespawned( entity player )
 {
 	if( player.IsTitan() )
 		return
-	printt( player.GetModelName() )
+	asset modelName = player.GetModelName()
+	if( modelName == $"models/humans/pilots/pilot_medium_geist_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "zipline_gun" )
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "pm0" )
+
+		string setFile = player.GetPlayerSettings()
+		array<string> settingMods = player.GetPlayerSettingsMods()
+		settingMods.append( "zipline_gun_fast_regen" )
+		player.SetPlayerSettingsWithMods( setFile, settingMods )
+	}
+	if( modelName == $"models/humans/pilots/pilot_light_ged_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "wraith_portal" )
+	}
+	if( modelName == $"models/humans/pilots/pilot_heavy_drex_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "cloak_field" )
+	}
+	if( modelName == $"models/humans/pilots/pilot_light_jester_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "wrecking_ball" )
+	}
+	if( modelName == $"models/humans/pilots/pilot_medium_reaper_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "gravity_lift" )
+	}
+	if( modelName == $"models/humans/pilots/pilot_medium_stalker_f.mdl" )
+	{
+		entity weapon = player.GetOffhandWeapon( OFFHAND_SPECIAL )
+		float ammoFrac = weapon.GetWeaponPrimaryClipCount() / weapon.GetWeaponSettingInt( eWeaponVar.ammo_stockpile_max )
+		player.TakeOffhandWeapon( OFFHAND_SPECIAL )
+		player.GiveOffhandWeapon( "mp_ability_shifter", OFFHAND_SPECIAL, [ "holoshift" ] )
+		weapon = player.GetOffhandWeapon( OFFHAND_SPECIAL )
+		weapon.SetWeaponPrimaryClipCountAbsolute( ammoFrac * weapon.GetWeaponSettingInt( eWeaponVar.ammo_stockpile_max ) )
+	}
+	if( modelName == $"models/humans/pilots/pilot_heavy_roog_f.mdl" )
+	{
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "smoke_trap" )
+	}
 }
 
 void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )

@@ -1,0 +1,199 @@
+untyped
+global function MpAbilityHoloShift_Init
+
+global function OnWeaponPrimaryAttack_ability_holoshift
+
+const float PHASE_REWIND_PATH_SNAPSHOT_INTERVAL = 0.1
+
+struct
+{
+	// holoshift tables
+	table< entity > playerDecoyList //CUSTOM used to track the decoy the user will be teleported to
+} file
+
+void function MpAbilityHoloShift_Init()
+{
+	#if SERVER
+		RegisterSignal( "HoloShiftRewind" )
+		AddCallback_PlayerDecoyDie( HoloShiftCleanUp )
+		AddCallback_PlayerDecoyDissolve( HoloShiftCleanUp )
+	#endif
+}
+
+var function OnWeaponPrimaryAttack_ability_holoshift( entity weapon, WeaponPrimaryAttackParams attackParams )
+{
+	entity weaponOwner = weapon.GetWeaponOwner()
+	if ( !weaponOwner.IsPlayer() )
+		return 0
+
+	if ( !PlayerCanUseHoloShift( weapon ) )
+		return 0
+
+#if SERVER
+	if ( weaponOwner in file.playerDecoyList )
+	{
+	//	CreateHoloPilotDecoys( weaponOwner, 1 )
+		entity decoy = file.playerDecoyList[ weaponOwner ]
+		weapon.SetWeaponPrimaryClipCount( 0 )
+		PlayerUsesHoloRewind( weaponOwner, decoy )
+	}
+	else
+	{
+		entity decoy = CreateHoloPilotDecoys( weaponOwner, 1 )
+		file.playerDecoyList[ weaponOwner ] <- decoy
+		thread HoloShiftTips( weaponOwner, weapon )
+		return 0.1
+	}
+#endif
+
+	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
+}
+
+void function HoloShiftTips( entity player, entity weapon )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "HoloShiftRewind" )
+	weapon.EndSignal( "OnDestroy" )
+
+	float endTime = Time() + DECOY_DURATION
+	for( ;; )
+	{
+		if( IsPlayerEmbarking( player ) )
+			return
+		if( !( player in file.playerDecoyList ) )
+		{
+			if( player.s.GUIClose )
+				thread SendKsGUI_Threaded( player, "幻影相位锚被摧毁", < 255, 0, 0 >, 1.0, 1.0, null, -0.4 )
+			return
+		}
+		if( player.s.GUIClose )
+		{
+			vector rgb = < 0, 0, 0 >
+			float hasTime = DECOY_DURATION - ( endTime - Time() )
+			rgb.x = GraphCapped( hasTime, 0, DECOY_DURATION / 2, 0, 255 )
+			rgb.y = GraphCapped( hasTime, DECOY_DURATION / 2, DECOY_DURATION, 255, 0 )
+			thread SendKsGUI_Threaded( player, "再次使用技能以进行相位传送\n幻影相位锚在线中", rgb, 0.2, 0.0, null, -0.4 )
+		}
+		WaitFrame()
+	}
+}
+
+bool function PlayerCanUseHoloShift( entity weapon )
+{
+	if ( !PlayerCanUseDecoy( weapon ) ) // basic check
+		return false
+
+	// holoshift specifics
+	if ( weapon.GetWeaponPrimaryClipCount()<100 )
+	{
+		//#if SERVER
+		//SendHudMessage(ownerPlayer, "需要完全充满以使用幻影转移", -1, -0.35, 255, 255, 100, 255, 0, 3, 0)
+		//#endif
+		return false
+	}
+
+	if ( weapon.GetWeaponPrimaryClipCount() < 200 && !( IsValid( file.playerDecoyList ) ) )
+	{
+		//#if SERVER
+		//SendHudMessage(ownerPlayer, "场内无自身幻影!\n需要完全充满以使用幻影转移", -1, -0.35, 255, 255, 100, 255, 0, 3, 0)
+		//#endif
+		return false
+	}
+
+	// all checks passed
+	return true
+}
+
+#if SERVER
+void function HoloShiftCleanUp( entity decoy, int currentState )
+{
+	entity bossPlayer = decoy.GetBossPlayer()
+	if ( IsValid( bossPlayer ) )
+	{
+		// holoshift clean up
+		if( bossPlayer in file.playerDecoyList )
+		{
+			if( decoy == file.playerDecoyList[bossPlayer] )
+				delete file.playerDecoyList[bossPlayer]
+
+			for ( int i = 0; i <= OFFHAND_MELEE; i++ ) // OFFHAND_MELEE is the largest
+			{
+				entity weapon = bossPlayer.GetOffhandWeapon( i )
+				if( IsValid( weapon ) )
+					if( weapon.GetWeaponClassName() == "mp_ability_shifter" )
+						weapon.SetWeaponPrimaryClipCountAbsolute( 0 )
+			}
+		}
+	}
+}
+
+void function PlayerUsesHoloRewind( entity player, entity decoy )
+{
+	thread PlayerUsesHoloRewindThreaded( player, decoy )
+}
+
+void function PlayerUsesHoloRewindThreaded( entity player, entity decoy )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.Signal( "HoloShiftRewind" )
+	decoy.EndSignal( "OnDestroy" )
+	decoy.EndSignal( "OnDeath" )
+	entity mover = CreateScriptMover( player.GetOrigin(), player.GetAngles() )
+	player.SetParent( mover, "REF" )
+
+	//print( "should forceCrouch player: " + string( decoyData.forceCrouch ) )
+
+	OnThreadEnd(
+		function() : ( player, mover, decoy )
+		{
+			if ( IsValid( player ) )
+			{
+				CancelPhaseShift( player )
+				player.DeployWeapon()
+				player.SetPredictionEnabled( true )
+				player.ClearParent()
+				ViewConeFree( player )
+				FindNearestSafeSpotAndPutEntity( player )
+			}
+
+			if ( IsValid( mover ) )
+				mover.Destroy()
+
+			if ( IsValid( decoy ) )
+				CleanupExistingDecoy( decoy )
+		}
+	)
+
+	vector initial_origin = player.GetOrigin()
+	vector initial_angle = player.GetAngles()
+	array<PhaseRewindData> positions = clone player.p.burnCardPhaseRewindStruct.phaseRetreatSavedPositions
+
+	ViewConeZero( player )
+	player.HolsterWeapon()
+	player.SetPredictionEnabled( false )
+	PhaseShift( player, 0.0, 7 * PHASE_REWIND_PATH_SNAPSHOT_INTERVAL * 1.5 )
+
+	// this mean mover will try to catch up with decoy, 7 times
+	for ( float i = 7; i > 0; i-- )
+	{
+		initial_origin -= ( initial_origin - decoy.GetOrigin() ) * ( 1 / i )
+		initial_angle -= ( initial_angle - decoy.GetAngles() ) * ( 1 / i )
+		mover.NonPhysicsMoveTo( initial_origin, PHASE_REWIND_PATH_SNAPSHOT_INTERVAL, 0, 0 )
+		mover.NonPhysicsRotateTo( initial_angle, PHASE_REWIND_PATH_SNAPSHOT_INTERVAL, 0, 0 )
+		wait PHASE_REWIND_PATH_SNAPSHOT_INTERVAL
+	}
+
+	// final movement
+	mover.NonPhysicsMoveTo( decoy.GetOrigin(), PHASE_REWIND_PATH_SNAPSHOT_INTERVAL, 0, 0 )
+	mover.NonPhysicsRotateTo( decoy.GetAngles(), PHASE_REWIND_PATH_SNAPSHOT_INTERVAL, 0, 0 )
+	player.SetOrigin( decoy.GetOrigin() )
+	player.SetAngles( decoy.GetAngles() )
+	player.SetVelocity( decoy.GetVelocity() )
+
+	// clean up!
+	player.UnforceCrouch()
+	player.UnforceStand()
+}
+#endif

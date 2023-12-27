@@ -1,5 +1,57 @@
 WeaponData
 {
+	"OnWeaponTossPrep"								"OnWeaponTossPrep_ability_heal"
+	"OnWeaponTossReleaseAnimEvent"					"OnWeaponTossReleaseAnimEvent_ability_heal"
+	"OnProjectileCollision"							"OnProjectileCollision_ability_heal"
+
+	// Models
+	"offhand_toss"									"1"
+	"viewmodel"										"models/weapons/grenades/ptpov_sentry_shield.mdl"
+	"projectilemodel" 								"models/weapons/sentry_shield/sentry_shield_proj.mdl"
+	"offhand_default_inventory_slot"				"1"
+	"leveled_pickup"								"1"
+
+	// Effects
+	"bounce_effect_table"							"deployable_cover_bounce_table"
+	"impact_effect_table" 							"exp_deployable_cover"
+
+	// vortex
+	"vortex_refire_behavior"  						"absorb"
+
+	"projectile_adjust_to_gun_barrel"				"0"
+	"projectile_adjust_to_hand"						"1"
+
+	"sound_deploy_1p"								"weapon_sentryfragdrone_pinpull_1p"
+	"sound_deploy_3p"								"weapon_sentryfragdrone_pinpull_3p"
+	"sound_throw_1p"								"Pilot_Hardcover_Toss_1P"
+	"sound_throw_3p"								"weapon_sentryfragdrone_throw_3p"
+	"sound_grenade_projectile"						"weapon_sentryfragdrone_warmup"
+
+	// grenade
+	"grenade_disc_throw"							"1"
+	"projectile_gravity_scale"						"1"
+	"toss_pullout_time"								"0.1"
+	"toss_time"										"0.2"
+	"toss_overhead_time"							"0.2"
+
+	"grenade_bounce_vel_frac_shallow"				"0.5"
+	"grenade_bounce_vel_frac_sharp"					"0.3"
+	"grenade_bounce_vel_frac_along_normal"			"0.1"
+	"grenade_bounce_randomness"						"0.05"
+	"grenade_bounce_extra_vertical_randomness"		"0.0"
+	"grenade_roll_vel_frac_per_second"				"0.1"
+	"grenade_radius_vertical"						"5.0"
+	"grenade_radius_horizontal"						"16.0"
+	"projectile_launch_pitch_offset"				"2"
+
+	// some settings for scripted npc pilot to get
+	// usage
+	"npc_min_burst"									"1" // min use(s) between cooldown: 1
+	"npc_max_burst"									"1" // max use(s) between cooldown: ammo_clip_size(200) / ammo_per_shot(200)
+	// cooldown
+	"npc_rest_time_between_bursts_min"				"18.52" // min cooldown: ammo_per_shot(200) / regen_ammo_refill_rate with pas_power_cell(8*1.35)
+	"npc_rest_time_between_bursts_max"				"25.0" // max cooldown: ammo_per_shot(200) / regen_ammo_refill_rate(8)
+
 	Mods
 	{
 		bc_super_stim
@@ -52,5 +104,40 @@ WeaponData
         {
 			"fire_duration"									"0.1"
         }
+
+		// from Super.Mixed.Game
+		// wrecking ball
+		wrecking_ball
+		{
+			"fire_mode"										"offhand"
+			"viewmodel"										"models/weapons/grenades/ptpov_frag_grenade.mdl"
+			"bounce_effect_table"							"bounce_frag_drone"
+			// regen ammo
+			"grenade_fuse_time"								"0.0" // script handle this
+
+			// toss
+			"toss_pullout_time"								"++0.25" // 0.35
+			"toss_time"										"++0.13" // 0.33
+			"toss_overhead_time"							"++0.13" // 0.33
+
+			// most things hardcoded in script
+			"impact_effect_table" 							"exp_emp"
+
+			"explosion_damage"								"40"
+			"explosion_damage_heavy_armor"					"330"
+
+			"explosion_inner_radius"  						"250"
+			"explosionradius" 								"320"
+			"impulse_force"   								"500"
+			"impulse_force_explosions"						"50000"
+			"explosion_shake_radius"						"600"
+			"explosion_shake_amplitude"						"60"
+			"explosion_shake_frequency"						"45"
+			"explosion_shake_duration"						"1.0"
+
+			"grenade_roll_vel_frac_per_second"				"3.0"
+			"projectile_launch_pitch_offset"				"25"
+		}
+
 	}
 }

@@ -1,0 +1,22 @@
+WeaponData
+{
+	Mods
+	{
+		amped_wall
+		{
+
+		}
+		pas_power_cell
+		{
+		}
+
+		amped_tacticals
+		{
+		}
+
+		smoke_trap
+		{
+
+		}
+	}
+}

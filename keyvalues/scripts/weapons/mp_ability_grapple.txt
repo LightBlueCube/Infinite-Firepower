@@ -1,0 +1,59 @@
+WeaponData
+{
+	// grapple is hard to handle! may have to change classmod for better cooldown
+	"OnWeaponOwnerChanged"							"OnWeaponOwnerChange_ability_grapple"
+	"OnProjectileCollision"							"OnProjectileCollision_ability_grapple"
+
+	"projectilemodel"								"models/dev/empty_model.mdl"
+
+	"projectile_adjust_to_gun_barrel"				"1"
+
+	Mods
+	{
+		spree_lvl1_grapple
+		{
+		}
+		spree_lvl2_grapple
+		{
+		}
+		spree_lvl3_grapple
+		{
+		}
+		pas_power_cell
+		{
+		}
+
+		pm0
+		{
+			"grapple_power_required"	"0"
+			"grapple_power_use_rate"	"0"
+			"offhand_hold_enabled"		"1"
+			"fire_mode"   				"offhand_instant"
+			"instant_swap_to"			"1"
+			"instant_swap_from"			"1"
+		}
+		pm1
+		{
+		}
+		pm2
+		{
+		}
+
+		amped_tacticals
+		{
+		}
+
+		all_grapple
+		{
+		}
+
+		// from Super.Mixed.Game
+		zipline_gun // grapple is a bit special, regen ammo is setting in setFiles, hard to change, so not using StartForcedCooldownThinkForWeapon()
+		{
+			"fire_duration"				"0.9" // for HolsterWeaponForPilotInstants(), force holster for 0.9s
+			"grapple_power_required"	"++100"
+			"projectile_launch_speed"						"6000"
+			"projectile_first_person_offset_fraction"		"2"
+		}
+	}
+}

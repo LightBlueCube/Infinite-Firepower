@@ -138,7 +138,7 @@
 			"RunOn": "SERVER && MP"
 		},
 
-		// modded weapons //
+		// moddify weapons //
 
 		{
 			"Path": "weapons/mod_weapon_inits.nut",
@@ -146,6 +146,49 @@
 			"ServerCallback": {
 				"After": "ModWeaponInit"
 			}
+		},
+		{
+			"Path": "modify_weapons/mp_ability_zipline_gun.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "MpAbilityZiplineGun_Init"
+			}
+		},
+		{
+			"Path": "modify_weapons/mp_ability_wraith_portal.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "MpAbilityWraithPortal_Init"
+			}
+		},
+		{
+			"Path": "modify_weapons/mp_weapon_wrecking_ball.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "MpWeaponWreckingBall_Init"
+			}
+		},
+		{
+			"Path": "modify_weapons/mp_ability_gravity_lift.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "MpAbilityGravityLift_Init"
+			}
+		},
+		{
+			"Path": "modify_weapons/mp_ability_holoshift.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "MpAbilityHoloShift_Init"
+			}
+		},
+		{
+			"Path": "modify_weapons/mp_ability_somke_trap.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "modify_weapons/mp_ability_cloak_field.gnut",
+			"RunOn": "SERVER && MP"
 		}
 	],
 	"ConVars": [

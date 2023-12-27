@@ -1,0 +1,37 @@
+#base "pilot_base.set"
+"pilot_mp"
+{
+	"global"
+	{
+		ClassMods
+		{
+			pas_ads_hover
+			{
+			}
+			pas_power_cell
+			{
+			}
+			pas_wallhang
+			{
+			}
+			pas_fast_health_regen
+			{
+			}
+			disable_doublejump
+			{
+			}
+
+			disable_wallrun
+			{
+			}
+			r2_80
+			{
+			}
+
+			zipline_gun_fast_regen
+			{
+				grapple_power_regen_rate	*1.5
+			}
+		}
+	}
+}
