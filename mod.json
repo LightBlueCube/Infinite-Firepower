@@ -183,10 +183,6 @@
 			}
 		},
 		{
-			"Path": "modify_weapons/mp_ability_somke_trap.gnut",
-			"RunOn": "SERVER && MP"
-		},
-		{
 			"Path": "modify_weapons/mp_ability_cloak_field.gnut",
 			"RunOn": "SERVER && MP"
 		}
