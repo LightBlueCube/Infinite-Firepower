@@ -144,6 +144,8 @@ void function OnProjectileCollision_weapon_wrecking_ball( entity projectile, vec
     if( projectile.GetScriptName() == SPEED_PAD_SCRIPT_NAME ) // assuming these are speed pads
         return OnProjectileCollision_weapon_deployable( projectile, pos, normal, hitEnt, hitbox, isCritical )
     entity owner = projectile.GetOwner()
+	if( !IsValid( owner ) )
+		return
     if( !owner.IsPlayer() )
         return
     projectile.proj.projectileBounceCount++

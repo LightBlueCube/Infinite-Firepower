@@ -140,6 +140,14 @@ void function OnProjectileCollision_ability_gravity_lift( entity projectile, vec
 {
 	#if SERVER
 		entity owner = projectile.GetOwner()
+		if( !IsValid( owner ) )
+		{
+			if( IsValid( projectile ) ) // don't let a useless shuriken stay on ground
+			{
+				projectile.Destroy()
+				return
+			}
+		}
 		if( !IsAlive( owner ) )
 		{
 			if( IsValid( projectile ) ) // don't let a useless shuriken stay on ground

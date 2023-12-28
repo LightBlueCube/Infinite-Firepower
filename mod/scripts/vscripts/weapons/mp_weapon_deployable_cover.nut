@@ -326,7 +326,7 @@ void function SmokeTrapThink( entity projectile )
 
 	Smokescreen( smokescreen )
 
-	wait 2.0
+	wait 1.0
 
 	IncrementSonarPerTeam( team )
 	entity trigger = CreateEntity( "trigger_cylinder" )
