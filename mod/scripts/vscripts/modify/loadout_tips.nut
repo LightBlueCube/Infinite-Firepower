@@ -150,7 +150,7 @@ void function OnPlayerRespawned( entity player )
 	if( player.s.lastPilotLoadout == GetCustomPilotSkillName( modelName ) )
 		return
 	player.s.lastPilotLoadout = GetCustomPilotSkillName( modelName )
-	tips += "当前技能"
+	tips += "当前铁驭技能"
 	if( IsCustomPilotSkill( modelName ) )
 		tips += "被替换"
 	tips += "为: "+ GetCustomPilotSkillName( modelName ) +"\n"

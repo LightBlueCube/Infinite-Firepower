@@ -1,6 +1,6 @@
 {
 	"Name": "Infinite-Firepower",
-	"LoadPriority": 101,
+	"LoadPriority": 100,
 	"Scripts": [
 
 		// custom loaded inits //
