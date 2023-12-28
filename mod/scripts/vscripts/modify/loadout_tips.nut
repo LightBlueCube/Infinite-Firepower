@@ -53,7 +53,7 @@ void function OnTitanfall( entity titan )
 		tips += "客制化泰坦"
 	tips += ": "+ GetSwitchedTitan( titan )
 
-	SendHudMessage( player, tips, -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1 )
+	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 5.0, 1.0 > )
 }
 
 string function GetTitanName( entity titan )
@@ -167,7 +167,7 @@ void function OnPlayerRespawned( entity player )
 		tips += "客制化技能"
 	tips += ": "+ GetSwitchedCustomPilotSkillName( modelName )
 
-	SendHudMessage( player, tips, -1, 0.3, 200, 200, 225, 255, 0.15, 5, 1 )
+	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 5.0, 1.0 > )
 }
 
 void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )

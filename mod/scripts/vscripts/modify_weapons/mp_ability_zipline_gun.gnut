@@ -123,8 +123,7 @@ void function OnProjectileCollision_ability_zipline_gun( entity projectile, vect
 		#if SERVER
 		if( owner.IsPlayer() && IsValid( owner ) )
 		{
-			owner.s.GUIActive <- false
-			thread SendKsGUI_Threaded( owner, "滑索部署失败，充能返还", < 255, 100, 100 >, 2, 1, null, -0.4 )
+			SendHudMessageWithPriority( owner, 92, "滑索部署失败，充能返还", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 > )
 			owner.SetSuitGrapplePower( owner.GetSuitGrapplePower() + 100 )
 		}
 		#endif
@@ -261,8 +260,7 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 
 		if ( PlayerCanPlaceZipline( player, ignoredEnts, startPos, endPos ) )
 		{
-			if( player.s.GUIClose )
-				thread SendKsGUI_Threaded( player, "按住 开火键 放置" + cancelHint, < 100, 255, 100 >, 0.2, 0.0, null, -0.4 )
+			SendHudMessageWithPriority( player, 92, "按住 开火键 放置" + cancelHint, -1, -0.4, < 100, 255, 100 >, < 0, 0.2, 0 > )
 			proxyAnchorEnd.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, < 20, 20, 20 > ) // much more highlight it
 			if ( player.IsInputCommandHeld( IN_ATTACK ) ) // player wants to fire zipline
 			{
@@ -290,8 +288,7 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 			else if ( distance > ziplineMaxDist )
 				message += ": 位置过远"
 
-			if( player.s.GUIClose )
-				thread SendKsGUI_Threaded( player, message + cancelHint, < 255, 100, 100 >, 0.2, 0.0, null, -0.4 )
+			SendHudMessageWithPriority( player, 92, message + cancelHint, -1, -0.4, < 255, 100, 100 >, < 0, 0.2, 0 > )
 			proxyAnchorEnd.Highlight_SetParam( HIGHLIGHT_CONTEXT_NEUTRAL, 0, < 20, 0, 0 > ) // much more highlight it
 			if ( player.IsInputCommandHeld( IN_ATTACK ) ) // player wants to fire zipline
 				EmitSoundOnEntityOnlyToPlayer( player, player, "coop_sentrygun_deploymentdeniedbeep" )

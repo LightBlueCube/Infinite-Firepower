@@ -8,6 +8,11 @@ void function KsGUI_Init()
 	RegisterSignal( "SendingNewGUI" )
 }
 
+// KSGUI消息优先级： 发布时：100， 淡出时：90
+// 不建议将其他hud消息设置为比100更高的值，否则玩家可能看不到ksgui，但是他们依旧可以正常切换元素和使用元素
+// KSGUI message priority: on release: 100, on fadeout: 90
+// do not set other hudmsg`s priority higher then 100, else player will can not see ksgui, but they still can switch and use it
+
 void function SendKsGUI_Threaded( entity player, string text, vector rgb, float time, float fadeoutTime, string functionref( entity, string, string ) textChangeFunc = null, float pos = 0.3 )
 {
 	player.EndSignal( "OnDestroy" )
@@ -21,8 +26,7 @@ void function SendKsGUI_Threaded( entity player, string text, vector rgb, float 
 			output = textChangeFunc( player, text, output )
 		else
 			output = text
-
-		SendHudMessage( player, output, -1, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0.2, 0.0 )
+		SendHudMessageWithPriority( player, 100, output, -1, pos, rgb, < 0, 0.2, 0 > )
 		WaitFrame()
 	}
 	player.s.GUIActive = false
@@ -37,7 +41,7 @@ void function SendKsGUI_Threaded( entity player, string text, vector rgb, float 
 		else
 			output = text
 
-		SendHudMessage( player, output, -1, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0, float( i ) / 10 )
+		SendHudMessageWithPriority( player, 90, output, -1, pos, rgb, < 0, 0.2, 0 > )
 		WaitFrame()
 	}
 	player.s.GUIClose = true

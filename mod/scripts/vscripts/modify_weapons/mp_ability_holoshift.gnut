@@ -89,18 +89,14 @@ void function HoloShiftTips( entity player )
 			return
 		if( !( player in file.playerDecoyList ) )
 		{
-			if( player.s.GUIClose )
-				thread SendKsGUI_Threaded( player, "幻影相位锚被摧毁", < 255, 0, 0 >, 1.0, 1.0, null, -0.4 )
+			SendHudMessageWithPriority( player, 92, "幻影相位锚被摧毁", -1, -0.4, < 255, 0, 0 >, < 0, 2.0, 1.0 > )
 			return
 		}
-		if( player.s.GUIClose )
-		{
-			vector rgb = < 0, 0, 0 >
-			float hasTime = HOLOSHIFT_DURATION - ( endTime - Time() )
-			rgb.x = GraphCapped( hasTime, 0, HOLOSHIFT_DURATION / 2, 0, 255 )
-			rgb.y = GraphCapped( hasTime, HOLOSHIFT_DURATION / 2, HOLOSHIFT_DURATION, 255, 0 )
-			thread SendKsGUI_Threaded( player, "再次使用技能以进行相位传送\n幻影相位锚在线中", rgb, 0.2, 0.0, null, -0.4 )
-		}
+		vector rgb = < 0, 0, 0 >
+		float hasTime = HOLOSHIFT_DURATION - ( endTime - Time() )
+		rgb.x = GraphCapped( hasTime, 0, HOLOSHIFT_DURATION / 2, 0, 255 )
+		rgb.y = GraphCapped( hasTime, HOLOSHIFT_DURATION / 2, HOLOSHIFT_DURATION, 255, 0 )
+		SendHudMessageWithPriority( player, 92, "再次使用技能以进行相位传送\n幻影相位锚在线中", -1, -0.4, rgb, < 0, 0.2, 1.0 > )
 		WaitFrame()
 	}
 }
