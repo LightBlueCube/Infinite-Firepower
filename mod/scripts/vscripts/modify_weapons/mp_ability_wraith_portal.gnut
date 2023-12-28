@@ -97,8 +97,7 @@ var function OnWeaponPrimaryAttack_ability_wraith_portal( entity weapon, WeaponP
 	}
 	else if( !(player in file.playerPlacingPortal) )
 	{
-		player.s.GUIActive <- false
-		thread SendKsGUI_Threaded( player, "未能正常启动，已回复充能", < 255, 100, 100 >, 2, 1, null, -0.4 )
+		SendHudMessageWithPriority( player, 92, "未能正常启动，已回复充能", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 > )
 		weapon.SetWeaponPrimaryClipCount( ammoMax )
 	}
 	#endif
@@ -253,13 +252,10 @@ void function PortalStart( entity player, entity weapon )
 			string holsterTypeSuffix = ""
 			if ( forceHolster )
 				holsterTypeSuffix = "\n按住开火以结束放置"
-			if( player.s.GUIClose )
-			{
-				vector rgb = < 0, 0, 0 >
-				rgb.x = GraphCapped( portalPercentage, 100, 50, 0, 255 )
-				rgb.y = GraphCapped( portalPercentage, 50, 0, 255, 0 )
-				thread SendKsGUI_Threaded( player, string( portalPercentage ) +"%", rgb, PORTAL_TICKRATE + 0.1, 0.0, null, -0.4 )
-			}
+			vector rgb = < 0, 0, 0 >
+			rgb.x = GraphCapped( portalPercentage, 100, 50, 0, 255 )
+			rgb.y = GraphCapped( portalPercentage, 50, 0, 255, 0 )
+			SendHudMessageWithPriority( player, 92, portalPercentage +"%", -1, -0.4, rgb, < 0, PORTAL_TICKRATE + 0.1, 0 > )
 		}
 		else
 			break
@@ -321,8 +317,7 @@ void function PortalEnd( entity player, entity weapon, vector startPos, vector s
 		maxPortalLength = PORTAL_MAX_DISTANCE_GRUNT
 	if( portalLeft / maxPortalLength >= PORTAL_CANCEL_PERCENTAGE && !isInfiniteDistance )
 	{
-		player.s.GUIActive <- false
-		thread SendKsGUI_Threaded( player, "距离过近，已取消放置", < 255, 100, 100 >, 2, 1, null, -0.4 )
+		SendHudMessageWithPriority( player, 92, "距离过近，已取消放置", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 > )
 		thread DelayedRechargeWeapon( weapon )
 		return
 	}

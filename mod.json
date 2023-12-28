@@ -85,6 +85,13 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "tcputil/shared/sh_hudmsg_priority.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "HudMessagePriority_Init"
+			}
+		},
+		{
 			"Path": "tcputil/shared/sh_votecommand.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {

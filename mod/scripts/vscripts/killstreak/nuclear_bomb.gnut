@@ -267,7 +267,7 @@ void function RandomStringAnim( entity owner )
 			bar += "-"
 		msg += "INITIALIZING TARGETING MATRIX ["+ bar +"]"
 		if( IsValid( owner ) )
-			SendHudMessage( owner, msg, 0, 0.3, 235, 235, 235, 255, 0, 2, 0 )
+			SendHudMessageWithPriority( owner, 90.01, msg, 0, 0.3, < 235, 235, 235 >, < 0, 2, 0 > )
 		WaitFrame()
 	}
 	if( IsValid( owner ) )
@@ -277,8 +277,6 @@ void function RandomStringAnim( entity owner )
 void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 {
 	if( !IsValid( owner ) )
-		return
-	if( !owner.s.GUIClose || owner.s.DisableGUI )
 		return
 
 	string msg = ""
@@ -292,10 +290,10 @@ void function HudMsgSend( array<string> a, entity owner, bool isRed = false )
 	}
 	if( isRed )
 	{
-		SendHudMessage( owner, msg, 0, 0.3, 235, 0, 0, 255, 0, 1, 0 )
+		SendHudMessageWithPriority( owner, 90.01, msg, 0, 0.3, < 255, 0, 0 >, < 0, 1, 0 > )
 		return
 	}
-	SendHudMessage( owner, msg, 0, 0.3, 235, 235, 235, 255, 0, 2, 0 )
+	SendHudMessageWithPriority( owner, 90.01, msg, 0, 0.3, < 235, 235, 235 >, < 0, 2, 0 > )
 }
 
 string function GetWarnSysbols( int val, int endVal )
@@ -314,9 +312,7 @@ void function SendNuclearWarn( string msg )
 	{
 		if( !IsValid( player ) )
 			continue
-		if( !player.s.GUIClose || player.s.DisableGUI )
-			continue
-		SendHudMessage( player, msg, -1, 0.3, 235, 0, 0, 255, 0, 2, 0 )
+		SendHudMessageWithPriority( player, 90.01, msg, -1, 0.3, < 255, 0, 0 >, < 0, 2, 0 > )
 	}
 }
 
