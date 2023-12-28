@@ -170,7 +170,7 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 {
 	player.Signal( "StartZiplinePlacement" )
 	player.EndSignal( "StartZiplinePlacement" )
-	player.EndSignal( "EndZiplinePlacement" ) // cancelling
+	//player.EndSignal( "EndZiplinePlacement" ) // cancelling
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "UsingCruiseMissile" )
@@ -191,8 +191,8 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 	entity proxyRope // this should be update on time
 
 	// control
-	AddButtonPressedPlayerInputCallback( player, IN_ZOOM, PlayerCancelZiplinePlacement )
-	AddButtonPressedPlayerInputCallback( player, IN_ZOOM_TOGGLE, PlayerCancelZiplinePlacement )
+	//AddButtonPressedPlayerInputCallback( player, IN_ZOOM, PlayerCancelZiplinePlacement )
+	//AddButtonPressedPlayerInputCallback( player, IN_ZOOM_TOGGLE, PlayerCancelZiplinePlacement )
 
 	float powerRequired = weapon.GetWeaponSettingFloat( eWeaponVar.grapple_power_required )
 
@@ -208,8 +208,8 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 			// player
 			if ( IsValid( player ) )
 			{
-				RemoveButtonPressedPlayerInputCallback( player, IN_ZOOM, PlayerCancelZiplinePlacement )
-				RemoveButtonPressedPlayerInputCallback( player, IN_ZOOM_TOGGLE, PlayerCancelZiplinePlacement )
+				//RemoveButtonPressedPlayerInputCallback( player, IN_ZOOM, PlayerCancelZiplinePlacement )
+				//RemoveButtonPressedPlayerInputCallback( player, IN_ZOOM_TOGGLE, PlayerCancelZiplinePlacement )
 
 				if ( results.success )
 				{
@@ -294,6 +294,8 @@ void function StartZiplinePlacement( entity player, entity weapon ) // main cont
 				EmitSoundOnEntityOnlyToPlayer( player, player, "coop_sentrygun_deploymentdeniedbeep" )
 		}
 
+		if( player.IsInputCommandHeld( IN_ZOOM_TOGGLE ) || player.IsInputCommandHeld( IN_ZOOM ) )
+			return
 		WaitFrame()
 	}
 }

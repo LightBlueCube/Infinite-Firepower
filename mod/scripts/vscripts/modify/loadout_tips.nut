@@ -28,7 +28,7 @@ void function OnTitanfall( entity titan )
 		player = GetPetTitanOwner( titan )
 	if( !IsValid( player ) )
 		return
-	string tips = ""
+	string tips = "\n"
 	if( player.s.lastTitanLoadout == GetTitanName( titan ) )
 		return
 	player.s.lastTitanLoadout = GetTitanName( titan )
@@ -146,7 +146,7 @@ void function OnPlayerRespawned( entity player )
 	if( player.IsTitan() )
 		return
 	asset modelName = player.GetModelName()
-	string tips = ""
+	string tips = "\n"
 	if( player.s.lastPilotLoadout == GetCustomPilotSkillName( modelName ) )
 		return
 	player.s.lastPilotLoadout = GetCustomPilotSkillName( modelName )
