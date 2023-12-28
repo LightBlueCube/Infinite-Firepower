@@ -35,6 +35,14 @@ void function OnProjectileCollision_ability_cloak_field( entity projectile, vect
 {
 	#if SERVER
 		entity owner = projectile.GetOwner()
+		if( !IsValid( owner ) )
+		{
+			if( IsValid( projectile ) ) // don't let a useless shuriken stay on ground
+			{
+				projectile.Destroy()
+				return
+			}
+		}
 		if ( !IsAlive( owner ) ) // only deploy cloak field if owner still alive
 		{
 			if ( IsValid( projectile ) )

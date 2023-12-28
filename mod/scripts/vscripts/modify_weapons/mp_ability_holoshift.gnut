@@ -16,8 +16,8 @@ void function MpAbilityHoloShift_Init()
 {
 	#if SERVER
 		RegisterSignal( "HoloShiftRewind" )
-		AddCallback_PlayerDecoyDie( HoloShiftCleanUp )
-		AddCallback_PlayerDecoyDissolve( HoloShiftCleanUp )
+	//	AddCallback_PlayerDecoyDie( HoloShiftCleanUp )
+	//	AddCallback_PlayerDecoyDissolve( HoloShiftCleanUp )
 	#endif
 }
 
@@ -43,7 +43,8 @@ var function OnWeaponPrimaryAttack_ability_holoshift( entity weapon, WeaponPrima
 		entity decoy = CreateHoloPilotDecoys( weaponOwner, 1 )
 		decoy.SetTimeout( HOLOSHIFT_DURATION )
 		file.playerDecoyList[ weaponOwner ] <- decoy
-		thread HoloShiftTips( weaponOwner, weapon )
+		thread HoloShiftDecoyThink( weaponOwner, decoy, weapon )
+		thread HoloShiftTips( weaponOwner )
 		return 0.1
 	}
 #endif
@@ -51,14 +52,37 @@ var function OnWeaponPrimaryAttack_ability_holoshift( entity weapon, WeaponPrima
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_min_to_fire )
 }
 
-void function HoloShiftTips( entity player, entity weapon )
+void function HoloShiftDecoyThink( entity player, entity decoy, entity weapon )
 {
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "HoloShiftRewind" )
 	weapon.EndSignal( "OnDestroy" )
+	decoy.EndSignal( "OnDestroy" )
+	decoy.EndSignal( "OnDeath" )
 
-	float endTime = Time() + DECOY_DURATION
+	OnThreadEnd(
+		function() : ( decoy, player )
+		{
+			HoloShiftCleanUp( decoy, player )
+		}
+	)
+
+	for( ;; )
+	{
+		if( IsPlayerEmbarking( player ) )
+			return
+		WaitFrame()
+	}
+}
+
+void function HoloShiftTips( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	player.EndSignal( "HoloShiftRewind" )
+
+	float endTime = Time() + HOLOSHIFT_DURATION
 	for( ;; )
 	{
 		if( IsPlayerEmbarking( player ) )
@@ -72,9 +96,9 @@ void function HoloShiftTips( entity player, entity weapon )
 		if( player.s.GUIClose )
 		{
 			vector rgb = < 0, 0, 0 >
-			float hasTime = DECOY_DURATION - ( endTime - Time() )
-			rgb.x = GraphCapped( hasTime, 0, DECOY_DURATION / 2, 0, 255 )
-			rgb.y = GraphCapped( hasTime, DECOY_DURATION / 2, DECOY_DURATION, 255, 0 )
+			float hasTime = HOLOSHIFT_DURATION - ( endTime - Time() )
+			rgb.x = GraphCapped( hasTime, 0, HOLOSHIFT_DURATION / 2, 0, 255 )
+			rgb.y = GraphCapped( hasTime, HOLOSHIFT_DURATION / 2, HOLOSHIFT_DURATION, 255, 0 )
 			thread SendKsGUI_Threaded( player, "再次使用技能以进行相位传送\n幻影相位锚在线中", rgb, 0.2, 0.0, null, -0.4 )
 		}
 		WaitFrame()
@@ -108,20 +132,19 @@ bool function PlayerCanUseHoloShift( entity weapon )
 }
 
 #if SERVER
-void function HoloShiftCleanUp( entity decoy, int currentState )
+void function HoloShiftCleanUp( entity decoy, entity player )
 {
-	entity bossPlayer = decoy.GetBossPlayer()
-	if ( IsValid( bossPlayer ) )
+	if ( IsValid( player ) )
 	{
 		// holoshift clean up
-		if( bossPlayer in file.playerDecoyList )
+		if( player in file.playerDecoyList )
 		{
-			if( decoy == file.playerDecoyList[bossPlayer] )
-				delete file.playerDecoyList[bossPlayer]
+			if( decoy == file.playerDecoyList[player] )
+				delete file.playerDecoyList[player]
 
 			for ( int i = 0; i <= OFFHAND_MELEE; i++ ) // OFFHAND_MELEE is the largest
 			{
-				entity weapon = bossPlayer.GetOffhandWeapon( i )
+				entity weapon = player.GetOffhandWeapon( i )
 				if( IsValid( weapon ) )
 					if( weapon.GetWeaponClassName() == "mp_ability_shifter" )
 						weapon.SetWeaponPrimaryClipCountAbsolute( 0 )

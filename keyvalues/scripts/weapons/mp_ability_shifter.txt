@@ -46,7 +46,7 @@ WeaponData
 		}
 
 		// from Super.Mixed.Game
-		wraith_portal //use together with amped_tacticals
+		wraith_portal
 		{
 			"regen_ammo_refill_rate"						"7.4074"
 		}
@@ -55,7 +55,7 @@ WeaponData
 		// holoshift
 		holoshift
 		{
-			"regen_ammo_refill_rate"						"10"
+			"regen_ammo_refill_rate"						"7.4074"
 		}
 	}
 }
