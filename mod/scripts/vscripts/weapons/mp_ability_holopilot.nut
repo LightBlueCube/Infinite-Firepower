@@ -187,7 +187,7 @@ var function OnWeaponPrimaryAttack_holopilot( entity weapon, WeaponPrimaryAttack
 	entity weaponOwner = weapon.GetWeaponOwner()
 	Assert( weaponOwner.IsPlayer() )
 
-	if ( !PlayerCanUseDecoy( weapon ) )
+	if ( !PlayerCanUseDecoy( weaponOwner ) )
 		return 0
 
 #if SERVER
@@ -422,9 +422,8 @@ int function GetDecoyActiveCountForPlayer( entity player )
 	#endif // MP
 #endif // SERVER
 
-bool function PlayerCanUseDecoy( entity weapon ) //For holopilot and HoloPilot Nova. No better place to put this for now
+bool function PlayerCanUseDecoy( entity ownerPlayer ) //For holopilot and HoloPilot Nova. No better place to put this for now
 {
-	entity ownerPlayer = weapon.GetWeaponOwner()
 	if ( !ownerPlayer.IsZiplining() )
 	{
 		if ( ownerPlayer.IsTraversing() )
