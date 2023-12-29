@@ -380,6 +380,8 @@ void function OnSpeedPadPlanted( entity projectile )
     vector origin = projectile.GetOrigin()
     vector angles = projectile.proj.savedAngles
     entity player = projectile.GetOwner()
+	if( !IsValid( player ) )
+		return
     if( !player.IsPlayer() )
         return
 

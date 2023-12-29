@@ -61,12 +61,15 @@ entity function TryFindBestRespawnPointWithSettings( int team, array<entity> poi
 			if( distance > range )
 				continue
 			if( distance <= range * 0.5 )
+			{
 				weight += -4
+				haveEnemy = true
+			}
 			else if( distance <= range )
 			{
 				if( haveEnemy )
 				{
-					weight += -1
+					weight += -1.2
 					continue
 				}
 

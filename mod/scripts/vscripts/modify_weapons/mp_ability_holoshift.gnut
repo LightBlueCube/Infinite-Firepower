@@ -103,7 +103,7 @@ void function HoloShiftTips( entity player )
 
 bool function PlayerCanUseHoloShift( entity weapon )
 {
-	if ( !PlayerCanUseDecoy( weapon ) ) // basic check
+	if ( !PlayerCanUseDecoy( weapon.GetWeaponOwner() ) ) // basic check
 		return false
 
 	// holoshift specifics

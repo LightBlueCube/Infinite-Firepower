@@ -165,12 +165,12 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	if( attacker.s.TotalKills % file.nukeTitan == 0 )
 	{
 		attacker.s.NukeTitan += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "", < 255, 0, 0 >, 255, 5 )
+		NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.TotalKills % file.cruiseMissile == 0 )
 	{
 		attacker.s.CruiseMissile += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "", < 255, 0, 0 >, 255, 5 )
+		NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.KillStreak == file.vtol )
 	{
@@ -179,7 +179,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	if( attacker.s.KillStreakNoNPC == file.nuclearBomb )
 	{
 		attacker.s.HaveNuclearBomb <- true
-		NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "", < 255, 0, 0 >, 255, 6 )
+		NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 6 )
 	}
 }
 
