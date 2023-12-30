@@ -22,6 +22,21 @@ void function MpTitanWeaponSonarPulse_Init()
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_gravity_node, GravityNodeOnDamage )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_gravity_node_explode, GravityNodeExplodeOnDamage )
 	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_gravity_node )
+
+	Vortex_AddImpactDataOverride_WeaponMod(
+		"mp_titanability_sonar_pulse", // weapon name
+		"tcp_gravity", // mod name
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_titanability_laser_trip", "vortex_absorb_effect" ), // absorb effect
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_titanability_laser_trip", "vortex_absorb_effect_third_person" ), // absorb effect 3p
+		"grenade_long_fuse" // refire behavior
+	)
+	Vortex_AddImpactDataOverride_WeaponMod(
+		"mp_titanability_sonar_pulse", // weapon name
+		"tcp_smoke", // mod name
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_electric_smoke", "vortex_absorb_effect" ), // absorb effect
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_electric_smoke", "vortex_absorb_effect_third_person" ), // absorb effect 3p
+		"grenade_long_fuse" // refire behavior
+	)
 }
 
 bool function OnWeaponAttemptOffhandSwitch_titanability_sonar_pulse( entity weapon )
@@ -72,12 +87,12 @@ int function FireSonarPulse( entity weapon, WeaponPrimaryAttackParams attackPara
 
 void function OnProjectileCollision_titanability_sonar_pulse( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	if( projectile.ProjectileGetMods().contains( "tcp_gravity" ) )
-		return OnProjectileCollision_weapon_deployable( projectile, pos, normal, hitEnt, hitbox, isCritical )
+	if( Vortex_GetRefiredProjectileMods( projectile ).contains( "tcp_gravity" ) )
+		return OnProjectileCollision_GravityNode( projectile, pos, normal, hitEnt, hitbox, isCritical )
 
 	#if SERVER
 		entity owner = projectile.GetOwner()
-		array<string> mods = projectile.ProjectileGetMods()
+		array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 		if( mods.contains( "tcp_smoke" ) )
 		{
 			thread SonarSmoke( projectile, owner )
@@ -242,9 +257,30 @@ int function OnWeaponPrimaryAttack_GravityNode( entity weapon, WeaponPrimaryAtta
 	return weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot )
 }
 
+void function OnProjectileCollision_GravityNode( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
+{
+	#if SERVER
+	if ( projectile.proj.projectileBounceCount > 5 )
+		projectile.Destroy()
+	projectile.proj.projectileBounceCount++
+	#endif
+	table collisionParams =
+	{
+		pos = pos,
+		normal = normal,
+		hitEnt = hitEnt,
+		hitbox = hitbox
+	}
+
+	local result = PlantStickyEntityOnWorldThatBouncesOffWalls( projectile, collisionParams, 0.7 )
+
+	if( projectile.proj.isPlanted )
+		thread GravityNodeThink( projectile )
+}
+
 void function GravityNodePlanted( entity projectile )
 {
-	thread GravityNodeThink( projectile )
+//	thread GravityNodeThink( projectile )
 }
 
 const GRAVITYNODE_LIFETIME = 1.6

@@ -110,7 +110,7 @@ void function OnProjectileCollision_ability_zipline_gun( entity projectile, vect
 	PlacedZipline playerZipline = ZiplineGun_AddZipline( owner, projectile )
 	EmitSoundOnEntity( projectile, "Wpn_LaserTripMine_Land" )
 
-	array<string> mods = projectile.ProjectileGetMods()
+	array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 
 	if ( CanTetherEntities( playerZipline.start, playerZipline.end ) )
 	{

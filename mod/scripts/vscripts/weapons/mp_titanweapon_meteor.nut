@@ -442,7 +442,7 @@ entity function CreateThermiteTrailOnMovingGeo( entity movingGeo, vector origin,
 void function OnProjectileCollision_Meteor( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
 	#if SERVER
-	if( projectile.ProjectileGetMods().contains( "tcp_shotgun" ) )
+	if( Vortex_GetRefiredProjectileMods( projectile ).contains( "tcp_shotgun" ) )
 		return OnProjectileCollision_FireWallShotGun( projectile )
 
 	if ( projectile.proj.projectileBounceCount > 0 )
@@ -674,7 +674,7 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 void function Meteor_DamagedTarget( entity target, var damageInfo )
 {
 	entity inflictor = DamageInfo_GetInflictor( damageInfo )
-	if( inflictor.ProjectileGetMods().contains( "tcp_shotgun" ) )
+	if( Vortex_GetRefiredProjectileMods( inflictor ).contains( "tcp_shotgun" ) )
 	{
 		DamageInfo_SetDamageSourceIdentifier( damageInfo, eDamageSourceId.mp_titanweapon_firewall_shotgun )
 		DamageInfo_SetCustomDamageType( damageInfo, METEOR_DAMAGE_FLAGS | DF_STOPS_TITAN_REGEN )

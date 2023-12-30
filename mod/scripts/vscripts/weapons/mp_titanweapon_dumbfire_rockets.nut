@@ -20,6 +20,14 @@ void function MpTitanWeaponDumbfireRocket_Init()
 	RegisterWeaponDamageSource( "mp_titanweapon_charge_ball", "球狀閃電" )
     AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_charge_ball, ChargeBall_OnDamagedTarget )
 	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_charge_ball ) // doing check in stun laser damagesourceID
+
+	Vortex_AddImpactDataOverride_WeaponMod(
+		"mp_titanweapon_dumbfire_rockets", // weapon name
+		"archon_stun_impact", // mod name
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_emp", "vortex_absorb_effect" ), // absorb effect
+		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_emp", "vortex_absorb_effect_third_person" ), // absorb effect 3p
+		"grenade" // refire behavior
+	)
 }
 
 var function OnWeaponPrimaryAttack_titanweapon_multi_cluster( entity weapon, WeaponPrimaryAttackParams attackParams )

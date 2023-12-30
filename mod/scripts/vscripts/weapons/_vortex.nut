@@ -5,6 +5,10 @@ global function Vortex_Init
 global function CreateVortexSphere
 global function DestroyVortexSphereFromVortexWeapon
 global function EnableVortexSphere
+// northstar modified utility
+global function RegisterNewVortexIgnoreClassname
+global function RegisterNewVortexIgnoreClassnames
+//
 #if SERVER
 global function ValidateVortexImpact
 global function TryVortexAbsorb
@@ -20,6 +24,9 @@ global function IsVortexing
 global function Vortex_HandleElectricDamage
 global function VortexSphereDrainHealthForDamage
 global function Vortex_CreateImpactEventData
+// modified to globalize
+global function Vortex_SpawnShieldPingFX
+//
 global function Vortex_SpawnHeatShieldPingFX
 #endif
 
@@ -78,11 +85,481 @@ global const VORTEX_REFIRE_ROCKET				= "rocket"
 global const VORTEX_REFIRE_GRENADE				= "grenade"
 global const VORTEX_REFIRE_GRENADE_LONG_FUSE	= "grenade_long_fuse"
 
-const VortexIgnoreClassnames = {
+// northstar modified utility
+table<string, bool> VortexIgnoreClassnames = {
 	["mp_titancore_flame_wave"] = true,
 	["mp_ability_grapple"] = true,
 	["mp_ability_shifter"] = true,
 }
+//
+
+// nessie modified utility
+global function Vortex_GetRefiredProjectileMods
+
+// basic behavior override
+global function Vortex_AddBehaviorOverride_WeaponName
+global function Vortex_AddBehaviorOverride_WeaponMod
+
+// these functions are not globalized because there's no need we share the struct to other files
+/*
+global function Vortex_HasBehaviorOverride_WeaponName
+global function Vortex_GetBehaviorOverride_WeaponName
+global function Vortex_HasBehaviorOverride_WeaponMod
+global function Vortex_GetBehaviorOverride_WeaponMod
+
+global function Vortex_WeaponOrProjectileHasBehaviorOverride
+global function Vortex_GetBehaviorOverrideFromWeaponOrProjectile
+*/
+
+// impact data override
+global function Vortex_AddImpactDataOverride_WeaponName
+global function Vortex_AddImpactDataOverride_WeaponMod
+
+global function Vortex_HasImpactDataOverride_WeaponName
+global function Vortex_GetImpactDataOverride_WeaponName
+global function Vortex_HasImpactDataOverride_WeaponMod
+global function Vortex_GetImpactDataOverride_WeaponMod
+global function Vortex_WeaponOrProjectileHasImpactDataOverride
+global function Vortex_GetImpactDataOverrideFromWeaponOrProjectile
+
+
+// vortex nerf: drain on impact no matter what it catches
+// THESE are hardcoded, should be in callbacks like AddCallback_VortexDrainedByImpact()
+const float VORTEX_DRAIN_ON_PROJECTILE_HIT_ALWAYS = 0.045 // use this amount of drain if the projectile has no "vortex_drain"
+// projectile shotgun being refired will deal it's original damage
+// mostly the damage is pretty low so we scale down cost
+const float VORTEX_DRAIN_PROJECTILE_SHOTGUN_FRAC = 0.3
+
+const float VORTEX_DRAIN_ON_BULLET_HIT_ALWAYS = 0.03 // use this amount of drain if the weapon has no "vortex_drain"
+// bullet shotgun being refired by vortex shield can still deal full damage
+// no need to check for it
+
+
+// respawn messy functions rework
+#if SERVER
+global function Vortex_CalculateBulletHitDamage
+global function Vortex_CalculateProjectileHitDamage
+#endif
+
+// respawn hardcode turns to settings
+global function Vortex_SetWeaponVortexColorUpdateFunc
+global function Vortex_ClearWeaponVortexColorUpdateFunc
+
+
+// modified callbacks
+/* // wip
+global function AddCallback_OnVortexHitBullet
+global function AddCallback_OnVortexHitProjectile
+
+// callbacks per vortexSphere entity
+global function AddEntityCallback_OnVortexHitBullet
+global function AddEntityCallback_OnVortexHitProjectile
+
+// this will run all callbacks from vortexHitBulletCallbacks, and entityVortexHitBulletCallbacks specified for current entity
+global function RunEntityCallbacks_OnVortexHitBullet
+// this will run all callbacks from vortexHitProjectileCallbacks, and entityVortexHitProjectileCallbacks specified for current entity
+global function RunEntityCallbacks_OnVortexHitProjectile
+
+global function AddCallback_VortexDrainedByImpact
+
+// modified function callbacks
+global function AddCallback_CalculateBulletHitDamage
+global function AddCallback_CalculateProjectileHitDamage
+*/
+
+
+// WIP: basic behavior override
+struct VortexBehaviorOverride
+{
+	string impact_sound_1p				// leave empty "" to use weapon's default value
+	string impact_sound_3p				// leave empty "" to use weapon's default value
+	// "vortex_impact_effect" is a weapon settings that can be modified by mods, why not.
+	// but to keep everything modifiable through script, I'd like to add it here
+	asset vortex_impact_effect			// leave empty $"" to use weapon(or mod)'s default value
+	string projectile_ignores_vortex	// projectile only. leave empty "" to use weapon's default value
+}
+
+// absorb impactdata override
+struct ImpactDataOverride
+{
+	asset absorb_effect					// leave empty $"" to use weapon's default value
+	asset absorb_effect_third_person	// leave empty $"" to use weapon's default value
+	string refire_behavior				// leave empty "" to use weapon's default value
+}
+
+struct
+{
+	// utility
+	table< entity, array<string> > vortexRefiredProjectileMods
+	// basic behavior override
+	table< string, VortexBehaviorOverride > vortexBehaviorOverride_WeaponName
+	table< string, table< string, VortexBehaviorOverride > > vortexBehaviorOverride_WeaponMod
+	// absorb impactdata override
+	table< string, ImpactDataOverride > vortexImpactDataOverride_WeaponName
+	table< string, table< string, ImpactDataOverride > > vortexImpactDataOverride_WeaponMod
+
+	// respawn messy functions rework
+	table< entity, bool functionref( entity vortexSphere, entity attacker, bool takesDamage ) > vortexCustomProjectileHitRules // don't want to change entityStruct, use fileStruct instead
+	// respawn hardcode turns to settings
+	table<entity, void functionref( entity weapon, var sphereClientFXHandle = null )> vortexWeaponColorUpdateFunc
+
+	// wip
+	array< bool functionref( entity weapon, entity vortexSphere, var damageInfo ) > vortexHitBulletCallbacks
+	array< bool functionref( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos ) > vortexHitProjectileCallbacks
+	table< entity, array< bool functionref( entity weapon, entity vortexSphere, var damageInfo ) > > entityVortexHitBulletCallbacks
+	table< entity, array< bool functionref( entity weapon, entity vortexSphere, entity attacker, entity projectile, vector contactPos ) > > entityVortexHitProjectileCallbacks
+} file
+//
+
+// northstar modified utility
+void function RegisterNewVortexIgnoreClassnames(table<string, bool> classTable)
+{
+	foreach(string classname, bool shouldignore in classTable)
+	{
+		RegisterNewVortexIgnoreClassname(classname, shouldignore)
+	}
+}
+void function RegisterNewVortexIgnoreClassname(string classname, bool shouldignore)
+{
+	VortexIgnoreClassnames[classname] <- shouldignore
+}
+//
+
+// nessie modified utility
+array<string> function Vortex_GetRefiredProjectileMods( entity projectile )
+{
+	if ( !( projectile in file.vortexRefiredProjectileMods ) )
+		return projectile.ProjectileGetMods()
+
+	return file.vortexRefiredProjectileMods[ projectile ]
+}
+
+// BASIC BEHAVIOR OVERRIDE
+void function Vortex_AddBehaviorOverride_WeaponName( string weaponName, string impactSound1p, string impactSound3p, asset vortexImpactEffect, string ignoresVortex )
+{
+	// construct
+	VortexBehaviorOverride dataStruct
+	dataStruct.impact_sound_1p = impactSound1p
+	dataStruct.impact_sound_3p = impactSound3p
+	dataStruct.vortex_impact_effect = vortexImpactEffect
+	dataStruct.projectile_ignores_vortex = ignoresVortex
+
+	if ( !( weaponName in file.vortexBehaviorOverride_WeaponName ) )
+		file.vortexBehaviorOverride_WeaponName[ weaponName ] <- dataStruct
+	else
+		file.vortexBehaviorOverride_WeaponName[ weaponName ] = dataStruct
+}
+
+void function Vortex_AddBehaviorOverride_WeaponMod( string weaponName, string weaponMod, string impactSound1p, string impactSound3p, asset vortexImpactEffect, string ignoresVortex )
+{
+	VortexBehaviorOverride dataStruct
+	dataStruct.impact_sound_1p = impactSound1p
+	dataStruct.impact_sound_3p = impactSound3p
+	dataStruct.vortex_impact_effect = vortexImpactEffect
+	dataStruct.projectile_ignores_vortex = ignoresVortex
+
+	// init done here
+	if ( !( weaponName in file.vortexBehaviorOverride_WeaponMod ) )
+		file.vortexBehaviorOverride_WeaponMod[ weaponName ] <- {}
+	if ( !( weaponMod in file.vortexBehaviorOverride_WeaponMod[ weaponName ] ) )
+		file.vortexBehaviorOverride_WeaponMod[ weaponName ][ weaponMod ] <- dataStruct
+	else
+		file.vortexBehaviorOverride_WeaponMod[ weaponName ][ weaponMod ] = dataStruct
+}
+
+bool function Vortex_HasBehaviorOverride_WeaponName( string weaponName )
+{
+	return weaponName in file.vortexBehaviorOverride_WeaponName
+}
+
+VortexBehaviorOverride function Vortex_GetBehaviorOverride_WeaponName( string weaponName )
+{
+	VortexBehaviorOverride overrideStruct
+	if ( Vortex_HasBehaviorOverride_WeaponName( weaponName ) )
+	{
+		// never directly return a struct, use clone
+		overrideStruct = clone file.vortexBehaviorOverride_WeaponName[ weaponName ]
+	}
+
+	return overrideStruct
+}
+
+bool function Vortex_HasBehaviorOverride_WeaponMod( string weaponName, string weaponMod )
+{
+	if ( weaponName in file.vortexBehaviorOverride_WeaponMod
+		 && weaponMod in file.vortexBehaviorOverride_WeaponMod[ weaponName ] )
+		return true
+
+	return false
+}
+
+VortexBehaviorOverride function Vortex_GetBehaviorOverride_WeaponMod( string weaponName, string weaponMod )
+{
+	VortexBehaviorOverride overrideStruct
+	if ( Vortex_HasBehaviorOverride_WeaponMod( weaponName, weaponMod ) )
+	{
+		// never directly return a struct, use clone
+		overrideStruct = clone file.vortexBehaviorOverride_WeaponMod[ weaponName ][ weaponMod ]
+	}
+
+	return overrideStruct
+}
+
+bool function Vortex_WeaponOrProjectileHasBehaviorOverride( entity weaponOrProjectile )
+{
+	string weaponName
+	array<string> weaponMods
+
+	if ( weaponOrProjectile.IsProjectile() )
+	{
+		weaponName = weaponOrProjectile.ProjectileGetWeaponClassName()
+		weaponMods = Vortex_GetRefiredProjectileMods( weaponOrProjectile )
+	}
+	else
+	{
+		weaponName = weaponOrProjectile.GetWeaponClassName()
+		weaponMods = weaponOrProjectile.GetMods()
+	}
+
+	foreach ( string mod in weaponMods )
+	{
+		//print( "weapon has mod " + mod + " registered: " + string( Vortex_HasBehaviorOverride_WeaponMod( weaponName, mod ) ) )
+		if ( Vortex_HasBehaviorOverride_WeaponMod( weaponName, mod ) )
+			return true
+	}
+
+	return false
+}
+
+VortexBehaviorOverride function Vortex_GetBehaviorOverrideFromWeaponOrProjectile( entity weaponOrProjectile )
+{
+	string weaponName
+	array<string> weaponMods
+
+	if ( weaponOrProjectile.IsProjectile() )
+	{
+		weaponName = weaponOrProjectile.ProjectileGetWeaponClassName()
+		weaponMods = Vortex_GetRefiredProjectileMods( weaponOrProjectile )
+	}
+	else
+	{
+		weaponName = weaponOrProjectile.GetWeaponClassName()
+		weaponMods = weaponOrProjectile.GetMods()
+	}
+
+	VortexBehaviorOverride overrideStruct
+	bool hasWeaponOverride = weaponName in file.vortexBehaviorOverride_WeaponName
+	bool foundModOverride = false
+	// get from mod override
+	foreach ( string mod in weaponMods )
+	{
+		if ( Vortex_HasBehaviorOverride_WeaponMod( weaponName, mod ) )
+		{
+			overrideStruct = Vortex_GetBehaviorOverride_WeaponMod( weaponName, mod )
+			foundModOverride = true
+			break
+		}
+	}
+	// no mod override! try to find from weapon
+	if ( !foundModOverride && hasWeaponOverride )
+		overrideStruct = Vortex_GetBehaviorOverride_WeaponName( weaponName )
+
+	return overrideStruct
+}
+
+// IMPACT DATA OVERRIDE
+void function Vortex_AddImpactDataOverride_WeaponName( string weaponName, asset absorbFX, asset absorbFX_3p, string refireBehavior )
+{
+	// construct
+	ImpactDataOverride dataStruct
+	dataStruct.absorb_effect = absorbFX
+	dataStruct.absorb_effect_third_person = absorbFX_3p
+	dataStruct.refire_behavior = refireBehavior
+
+	if ( !( weaponName in file.vortexImpactDataOverride_WeaponName ) )
+		file.vortexImpactDataOverride_WeaponName[ weaponName ] <- dataStruct
+	else
+		file.vortexImpactDataOverride_WeaponName[ weaponName ] = dataStruct
+}
+
+void function Vortex_AddImpactDataOverride_WeaponMod( string weaponName, string weaponMod, asset absorbFX, asset absorbFX_3p, string refireBehavior )
+{
+	ImpactDataOverride dataStruct
+	dataStruct.absorb_effect = absorbFX
+	dataStruct.absorb_effect_third_person = absorbFX_3p
+	dataStruct.refire_behavior = refireBehavior
+
+	// init done here
+	if ( !( weaponName in file.vortexImpactDataOverride_WeaponMod ) )
+		file.vortexImpactDataOverride_WeaponMod[ weaponName ] <- {}
+	if ( !( weaponMod in file.vortexImpactDataOverride_WeaponMod[ weaponName ] ) )
+		file.vortexImpactDataOverride_WeaponMod[ weaponName ][ weaponMod ] <- dataStruct
+	else
+		file.vortexImpactDataOverride_WeaponMod[ weaponName ][ weaponMod ] = dataStruct
+}
+
+table function BuildImpactDataFromOverride( ImpactDataOverride overrideStruct )
+{
+	table impactData = {
+		absorbFX = overrideStruct.absorb_effect,
+		absorbFX_3p = overrideStruct.absorb_effect_third_person,
+		refireBehavior = overrideStruct.refire_behavior,
+	}
+
+	return impactData
+}
+
+bool function Vortex_HasImpactDataOverride_WeaponName( string weaponName )
+{
+	return weaponName in file.vortexImpactDataOverride_WeaponName
+}
+
+table function Vortex_GetImpactDataOverride_WeaponName( string weaponName )
+{
+	if ( !Vortex_HasImpactDataOverride_WeaponName( weaponName ) )
+		return {}
+
+	return BuildImpactDataFromOverride( file.vortexImpactDataOverride_WeaponName[ weaponName ] )
+}
+
+bool function Vortex_HasImpactDataOverride_WeaponMod( string weaponName, string weaponMod )
+{
+	if ( weaponName in file.vortexImpactDataOverride_WeaponMod
+		 && weaponMod in file.vortexImpactDataOverride_WeaponMod[ weaponName ] )
+		return true
+
+	return false
+}
+
+table function Vortex_GetImpactDataOverride_WeaponMod( string weaponName, string weaponMod )
+{
+	if ( !Vortex_HasImpactDataOverride_WeaponMod( weaponName, weaponMod ) )
+		return {}
+
+	return BuildImpactDataFromOverride( file.vortexImpactDataOverride_WeaponMod[ weaponName ][ weaponMod ] )
+}
+
+bool function Vortex_WeaponOrProjectileHasImpactDataOverride( entity weaponOrProjectile )
+{
+	string weaponName
+	array<string> weaponMods
+
+	if ( weaponOrProjectile.IsProjectile() )
+	{
+		weaponName = weaponOrProjectile.ProjectileGetWeaponClassName()
+		weaponMods = Vortex_GetRefiredProjectileMods( weaponOrProjectile )
+	}
+	else
+	{
+		weaponName = weaponOrProjectile.GetWeaponClassName()
+		weaponMods = weaponOrProjectile.GetMods()
+	}
+
+	foreach ( string mod in weaponMods )
+	{
+		//print( "weapon has mod " + mod + " registered: " + string( Vortex_HasImpactDataOverride_WeaponMod( weaponName, mod ) ) )
+		if ( Vortex_HasImpactDataOverride_WeaponMod( weaponName, mod ) )
+			return true
+	}
+
+	return false
+}
+
+table function Vortex_GetImpactDataOverrideFromWeaponOrProjectile( entity weaponOrProjectile )
+{
+	string weaponName
+	array<string> weaponMods
+
+	if ( weaponOrProjectile.IsProjectile() )
+	{
+		weaponName = weaponOrProjectile.ProjectileGetWeaponClassName()
+		weaponMods = Vortex_GetRefiredProjectileMods( weaponOrProjectile )
+	}
+	else
+	{
+		weaponName = weaponOrProjectile.GetWeaponClassName()
+		weaponMods = weaponOrProjectile.GetMods()
+	}
+
+	bool hasWeaponOverride = weaponName in file.vortexImpactDataOverride_WeaponName
+	// get from mod override
+	foreach ( string mod in weaponMods )
+	{
+		if ( Vortex_HasImpactDataOverride_WeaponMod( weaponName, mod ) )
+			return Vortex_GetImpactDataOverride_WeaponMod( weaponName, mod )
+	}
+	// no mod override! try to find from weapon
+	if ( hasWeaponOverride )
+		return Vortex_GetImpactDataOverride_WeaponName( weaponName )
+
+	// default value
+	return {}
+}
+
+// respawn messy functions rework
+#if SERVER
+float function Vortex_CalculateBulletHitDamage( entity vortexSphere, var damageInfo )
+{
+	entity weapon = DamageInfo_GetWeapon( damageInfo )
+	float damage = ceil( DamageInfo_GetDamage( damageInfo ) )
+
+	Assert( damage >= 0, "Bug 159851 - Damage should be greater than or equal to 0.")
+	damage = max( 0.0, damage )
+
+	if ( IsValid( weapon ) )
+		damage = HandleWeakToPilotWeapons( vortexSphere, weapon.GetWeaponClassName(), damage )
+
+	//JFS - Arc Round bug fix for Monarch. Projectiles vortex callback doesn't even have damageInfo, so the shield modifier here doesn't exist in VortexSphereDrainHealthForDamage like it should.
+	// GetShieldDamageModifier() has been modified, now passing victim into it
+	ShieldDamageModifier damageModifier = GetShieldDamageModifier( damageInfo )
+	//ShieldDamageModifier damageModifier = GetShieldDamageModifier( vortexSphere, damageInfo )
+	damage *= damageModifier.damageScale
+
+	return damage
+}
+
+float function Vortex_CalculateProjectileHitDamage( entity vortexSphere, entity attacker, entity projectile )
+{
+	float damage = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
+	//	once damageInfo is passed correctly we'll use that instead of looking up the values from the weapon .txt file.
+	//	local damage = ceil( DamageInfo_GetDamage( damageInfo ) )
+
+	if ( IsValid( projectile ) )
+	{
+		damage = HandleWeakToPilotWeapons( vortexSphere, projectile.ProjectileGetWeaponClassName(), damage )
+		damage = damage + CalculateTitanSniperExtraDamage( projectile, vortexSphere )
+	}
+
+	return damage
+}
+#endif
+
+// respawn hardcode turns to settings
+void function Vortex_SetWeaponVortexColorUpdateFunc( entity weapon, void functionref( entity weapon, var sphereClientFXHandle = null ) func )
+{
+	if ( !( weapon in file.vortexWeaponColorUpdateFunc ) )
+		file.vortexWeaponColorUpdateFunc[ weapon ] <- null
+	file.vortexWeaponColorUpdateFunc[ weapon ] = func
+}
+
+bool function Vortex_ClearWeaponVortexColorUpdateFunc( entity weapon )
+{
+	if ( !( weapon in file.vortexWeaponColorUpdateFunc ) )
+		return false
+	delete file.vortexWeaponColorUpdateFunc[ weapon ]
+	return true
+}
+
+void functionref( entity weapon, var sphereClientFXHandle = null ) function GetWeaponVortexColorUpdateFunc( entity weapon )
+{
+	// default return value: use color update func in this file
+	if ( !( weapon in file.vortexWeaponColorUpdateFunc ) || file.vortexWeaponColorUpdateFunc[ weapon ] == null )
+		return VortexSphereColorUpdate
+
+	return file.vortexWeaponColorUpdateFunc[ weapon ]
+}
+
+// WIP: modified callbacks
 
 table vortexImpactWeaponInfo
 
@@ -123,7 +600,10 @@ void function SetVortexSphereBulletHitRules( entity vortexSphere, var functionre
 
 void function SetVortexSphereProjectileHitRules( entity vortexSphere, bool functionref( entity, entity, bool ) customRules  )
 {
-	vortexSphere.e.ProjectileHitRules = customRules
+	//vortexSphere.e.ProjectileHitRules = customRules // don't want to change entityStruct, use fileStruct instead
+	if ( !( vortexSphere in file.vortexCustomProjectileHitRules ) )
+		file.vortexCustomProjectileHitRules[ vortexSphere ] <- null // default value
+	file.vortexCustomProjectileHitRules[ vortexSphere ] = customRules
 }
 #endif
 function CreateVortexSphere( entity vortexWeapon, bool useCylinderCheck, bool blockOwnerWeapon, int sphereRadius = 40, int bulletFOV = 180 )
@@ -248,7 +728,9 @@ function EnableVortexSphere( entity vortexWeapon )
 		if ( fxAlias )
 		{
 			int sphereClientFXHandle = vortexWeapon.PlayWeaponEffectReturnViewEffectHandle( fxAlias, $"", tagname )
-			thread VortexSphereColorUpdate( vortexWeapon, sphereClientFXHandle )
+			// modified: use a setting for handling function
+			//thread VortexSphereColorUpdate( vortexWeapon, sphereClientFXHandle )
+			thread GetWeaponVortexColorUpdateFunc( vortexWeapon )( vortexWeapon, sphereClientFXHandle )
 		}
 	}
 	#elseif  SERVER
@@ -268,7 +750,9 @@ function EnableVortexSphere( entity vortexWeapon )
 		if ( fxAlias != $"" )
 			vortexWeapon.PlayWeaponEffect( fxAlias, $"", tagname )
 
-		thread VortexSphereColorUpdate( vortexWeapon )
+		// modified: use a setting for handling function
+		//thread VortexSphereColorUpdate( vortexWeapon )
+		thread GetWeaponVortexColorUpdateFunc( vortexWeapon )( vortexWeapon )
 	#endif
 }
 
@@ -475,9 +959,11 @@ function Vortex_HandleElectricDamage( entity ent, entity attacker, damage, entit
 }
 
 // this function handles all incoming vortex impact events
+// nessie: should add a function AddCallback_ModdedVortexAbsorb() to handle modded projectiles
+// AddCallback_ModdedVortexAbsorb( string weaponName, string modName, string absorbBehavior )
 bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector origin, int damageSourceID, entity weapon, string weaponName, string impactType, entity projectile = null, damageType = null, reflect = false )
 {
-	if ( weaponName in VortexIgnoreClassnames )
+	if ( weaponName in VortexIgnoreClassnames && VortexIgnoreClassnames[weaponName] )
 		return false
 
 	entity vortexWeapon = vortexSphere.GetOwnerWeapon()
@@ -568,7 +1054,10 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 			EmitSoundAtPosition( TEAM_UNASSIGNED, origin, impact_sound_3p )
 	}
 
-	local impactData = Vortex_CreateImpactEventData( vortexWeapon, attacker, origin, damageSourceID, weaponName, impactType )
+	// modified to add callbacks
+	//local impactData = Vortex_CreateImpactEventData( vortexWeapon, attacker, origin, damageSourceID, weaponName, impactType )
+	entity weaponOrProjectile = impactType == "hitscan" ? weapon : projectile
+	local impactData = Vortex_CreateImpactEventData( vortexWeapon, attacker, origin, damageSourceID, weaponName, impactType, weaponOrProjectile )
 
 	VortexDrainedByImpact( vortexWeapon, weapon, projectile, damageType )
 	Vortex_NotifyAttackerDidDamage( expect entity( impactData.attacker ), owner, impactData.origin )
@@ -576,6 +1065,7 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 	if ( impactData.refireBehavior == VORTEX_REFIRE_ABSORB )
 		return true
 
+	// this is hardcoded for no reason
 	if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_heat_shield" )
 		return true
 
@@ -591,42 +1081,41 @@ bool function TryVortexAbsorb( entity vortexSphere, entity attacker, vector orig
 	else
 		vortexSphere.AddProjectileToSphere();
 
+	// nessie note: I don't think this works best for shotgun bullets...
+	// legion's power shot won't be handled, amped vortex refire also ignore this
+	// looks pretty silly. though it breaks vanilla behavior, I'd like to remove it
+	/*
 	local maxShotgunPelletsToIgnore = VORTEX_BULLET_ABSORB_COUNT_MAX * ( 1 - VORTEX_SHOTGUN_DAMAGE_RATIO )
 	if ( IsPilotShotgunWeapon( weaponName ) && ( vortexWeapon.s.shotgunPelletsToIgnore + 1 ) <  maxShotgunPelletsToIgnore )
-			vortexWeapon.s.shotgunPelletsToIgnore += ( 1 - VORTEX_SHOTGUN_DAMAGE_RATIO )
+		vortexWeapon.s.shotgunPelletsToIgnore += ( 1 - VORTEX_SHOTGUN_DAMAGE_RATIO )
+	*/
 
 	if ( reflect )
 	{
-		thread ReflectAfterFrame( vortexWeapon, vortexSphere, owner )
+		// this seem to work bad in TTF2
+		// we do need to wait for next frame before firing them back... to prevent some infinite reflecting happens
+		// the error indicates by SCRIPT ERROR Failed to Create Entity "info_particle_system", the failure is because we've created so much entities due to infinite refire
+		// maybe also need to rework AmpedVortexRefireThink()? it fire back with script fps limit( triggers after WaitSignal() )
+
+		local attackParams = {}
+		attackParams.pos <- owner.EyePosition()
+		attackParams.dir <- owner.GetPlayerOrNPCViewVector()
+
+		int bulletsFired = VortexReflectAttack( vortexWeapon, attackParams, expect vector( impactData.origin ) )
+
+		Vortex_CleanupImpactAbsorbFX( vortexWeapon )
+		Vortex_ClearImpactEventData( vortexWeapon )
+
+		while ( vortexSphere.GetBulletAbsorbedCount() > 0 )
+			vortexSphere.RemoveBulletFromSphere();
+
+		while ( vortexSphere.GetProjectileAbsorbedCount() > 0 )
+			vortexSphere.RemoveProjectileFromSphere();
 	}
 
 	return true
 }
 #endif // SERVER
-
-void function ReflectAfterFrame( entity vortexWeapon, entity vortexSphere, entity owner )
-{
-	vortexWeapon.EndSignal( "OnDestroy" )
-	local attackParams = {}
-	attackParams.pos <- owner.EyePosition()
-	attackParams.dir <- owner.GetPlayerOrNPCViewVector()
-
-	WaitFrame()
-
-	int bulletsFired = VortexReflectAttack( vortexWeapon, attackParams )
-
-	if( !IsValid( vortexSphere ) )
-		return
-
-	Vortex_CleanupImpactAbsorbFX( vortexWeapon )
-	Vortex_ClearImpactEventData( vortexWeapon )
-
-	while ( vortexSphere.GetBulletAbsorbedCount() > 0 )
-		vortexSphere.RemoveBulletFromSphere();
-
-	while ( vortexSphere.GetProjectileAbsorbedCount() > 0 )
-		vortexSphere.RemoveProjectileFromSphere();
-}
 
 function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity projectile, damageType )
 {
@@ -637,54 +1126,90 @@ function VortexDrainedByImpact( entity vortexWeapon, entity weapon, entity proje
 
 	float amount
 	if ( projectile )
-		amount = projectile.GetProjectileWeaponSettingFloat( eWeaponVar.vortex_drain )
-	else
-		amount = weapon.GetWeaponSettingFloat( eWeaponVar.vortex_drain )
-
-	bool hasVortexRegen = vortexWeapon.HasMod( "tcp_vortex" )
-
-	if ( amount <= 0.0 && !hasVortexRegen )
-		return
-
-	if( hasVortexRegen )
 	{
-		if ( projectile )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
-		else
-			amount = float( weapon.GetWeaponSettingInt( eWeaponVar.damage_near_value ) )
-
-		if( amount <= 0 )
+		amount = projectile.GetProjectileWeaponSettingFloat( eWeaponVar.vortex_drain )
+		// vortex nerf: drain on impact no matter what it catches
+		if( vortexWeapon.HasMod( "impact_drain_vortex" ) )
 		{
-			if ( projectile )
-				amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage ) )
-			else
-				amount = float( weapon.GetWeaponSettingInt( eWeaponVar.explosion_damage ) )
-		}
+			if ( amount == 0 ) // only do default drain if we have no drain from projectile
+			{
+				// debug
+				//print( "Attacker weapon has no vortex_drain, using default value" )
 
-		entity owner = vortexWeapon.GetWeaponOwner()
-		int currentEnergy = owner.GetSharedEnergyCount()
-		int val = int( amount / 3 )
-		if( currentEnergy - val <= 0 )
-			val = currentEnergy
-		if( val >= 0 )
-			owner.TakeSharedEnergy( val )
+				amount = VORTEX_DRAIN_ON_PROJECTILE_HIT_ALWAYS
+				// projectile shotgun check
+				#if SERVER
+					if ( IsProjectileShotgunPellets( projectile ) )
+						amount *= VORTEX_DRAIN_PROJECTILE_SHOTGUN_FRAC
+				#endif // SERVE
+			}
+		}
 	}
 	else
 	{
-		if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
+		amount = weapon.GetWeaponSettingFloat( eWeaponVar.vortex_drain )
+		// vortex nerf: drain on impact no matter what it catches
+		if( vortexWeapon.HasMod( "impact_drain_vortex" ) )
 		{
-			entity owner = vortexWeapon.GetWeaponOwner()
-			int totalEnergy = owner.GetSharedEnergyTotal()
-			owner.TakeSharedEnergy( int( float( totalEnergy ) * amount ) )
+			if ( amount == 0 ) // only do default drain if we have no drain from weapon
+			{
+				// debug
+				//print( "Attacker weapon has no vortex_drain, using default value" )
+
+				amount = VORTEX_DRAIN_ON_BULLET_HIT_ALWAYS
+			}
 		}
-		else
-		{
-			float frac = min ( vortexWeapon.GetWeaponChargeFraction() + amount, 1.0 )
-			vortexWeapon.SetWeaponChargeFraction( frac )
-		}
+	}
+
+	if ( amount <= 0.0 )
+		return
+
+	if ( vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield_ion" )
+	{
+		entity owner = vortexWeapon.GetWeaponOwner()
+		int totalEnergy = owner.GetSharedEnergyTotal()
+		owner.TakeSharedEnergy( int( float( totalEnergy ) * amount ) )
+	}
+	else
+	{
+		float frac = min ( vortexWeapon.GetWeaponChargeFraction() + amount, 1.0 )
+		vortexWeapon.SetWeaponChargeFraction( frac )
 	}
 }
 
+// modified
+#if SERVER
+// projectile shotgun check
+bool function IsProjectileShotgunPellets( entity projectile )
+{
+	entity owner = projectile.GetOwner()
+	if ( !IsValid( owner ) ) // projectile don't have a valid owner?
+		return false
+	if ( projectile.GetClassName() != "crossbow_bolt" ) // not a bolt projectile?
+		return false
+
+	// if there're any other projectile with the same owner created at the same time
+	// we consider them as a shotgun blast projectile
+	float creationTime = projectile.GetProjectileCreationTime()
+	foreach ( entity otherProj in GetProjectileArray() )
+	{
+		if ( otherProj == projectile )
+			continue
+		if ( otherProj.GetClassName() != "crossbow_bolt" )
+			continue
+
+		if ( projectile.GetOwner() == owner && projectile.GetProjectileCreationTime() == creationTime )
+		{
+			// debug
+			//print( "This is a projectile shotgun pellet!" )
+
+			return true
+		}
+	}
+
+	return false
+}
+#endif // SERVER
 
 function VortexSlowOwnerFromAttacker( entity player, entity attacker, vector velocity, float multiplier )
 {
@@ -748,7 +1273,9 @@ function Vortex_RemoveOldestAbsorbedProjectile( entity vortexWeapon )
 	vortexSphere.RemoveProjectileFromSphere()
 }
 
-function Vortex_CreateImpactEventData( entity vortexWeapon, entity attacker, vector origin, int damageSourceID, string weaponName, string impactType )
+// nessie: should add some mod callbacks to change certain mod weapon's vortex behavior...
+//function Vortex_CreateImpactEventData( entity vortexWeapon, entity attacker, vector origin, int damageSourceID, string weaponName, string impactType )
+function Vortex_CreateImpactEventData( entity vortexWeapon, entity attacker, vector origin, int damageSourceID, string weaponName, string impactType, entity weaponOrProjectile = null )
 {
 	entity player = vortexWeapon.GetWeaponOwner()
 	local impactData = {}
@@ -823,7 +1350,76 @@ function Vortex_CreateImpactEventData( entity vortexWeapon, entity attacker, vec
 		impactData.explosion_damage		= vortexImpactWeaponInfo[ impactData.weaponName ].explosion_damage
 	impactData.impact_effect_table	= vortexImpactWeaponInfo[ impactData.weaponName ].impact_effect_table
 
+	// modified
+	if ( IsValid( weaponOrProjectile ) )
+	{
+		// behavior override
+		//print( "Vortex_WeaponOrProjectileHasImpactDataOverride(): " + string( Vortex_WeaponOrProjectileHasImpactDataOverride( weaponOrProjectile ) ) )
+		if ( Vortex_WeaponOrProjectileHasImpactDataOverride( weaponOrProjectile ) )
+		{
+			table overrideImpactData = Vortex_GetImpactDataOverrideFromWeaponOrProjectile( weaponOrProjectile )
+			if ( overrideImpactData != {} )
+			{
+				if ( overrideImpactData.absorbFX != $"" )
+					impactData.absorbFX = overrideImpactData.absorbFX
+				if ( overrideImpactData.absorbFX_3p != $"" )
+					impactData.absorbFX_3p = overrideImpactData.absorbFX_3p
+				if ( overrideImpactData.refireBehavior!= "" )
+					impactData.refireBehavior = overrideImpactData.refireBehavior
+			}
+		}
+
+		// saving model, particle, and reset impact effect
+		if ( weaponOrProjectile.IsProjectile() ) // projectile specific stuff!
+		{
+			impactData.projectileModel <- weaponOrProjectile.GetModelName()
+			// get default trail effect, compare to current trail: if modified, do a extra trail effect
+			asset defaultTrail = GetWeaponInfoFileKeyFieldAsset_Global( weaponName, "projectile_trail_effect_0" )
+			asset modTrail = weaponOrProjectile.GetProjectileWeaponSettingAsset( eWeaponVar.projectile_trail_effect_0 )
+			// debug
+			//print( "defaultTrail: " + string( defaultTrail ) )
+			//print( "modTrail: " + string( modTrail ) )
+			if ( defaultTrail != modTrail )
+			{
+				// debug
+				//print( "refired projectile trail has been modified!" )
+				impactData.projectileTrail <- modTrail
+			}
+			// this may require tons of resources to display?
+			//impactData.projectileTrail <- weaponOrProjectile.GetProjectileWeaponSettingAsset( eWeaponVar.projectile_trail_effect_0 )
+			// convert asset to string
+			string impactFXName = GetImpactTableNameFromWeaponOrProjectile( weaponOrProjectile ) // shared from _unpredicted_impact_fix.gnut
+			impactData.impact_effect_table = impactFXName
+		}
+
+		// saving mods
+		array<string> mods = weaponOrProjectile.IsProjectile() ? Vortex_GetRefiredProjectileMods( weaponOrProjectile ) : weaponOrProjectile.GetMods()
+		// build an var array
+		array untypedArray
+		foreach ( string mod in mods )
+			untypedArray.append( mod )
+		impactData.refiredProjectileMods <- untypedArray
+	}
+
 	return impactData
+}
+
+string function GetImpactTableNameFromWeaponOrProjectile( entity weaponOrProjectile )
+{
+    asset impactEffect
+    // cast asset into string by removing first $ character
+    if ( weaponOrProjectile.IsProjectile() )
+        impactEffect = weaponOrProjectile.GetProjectileWeaponSettingAsset( eWeaponVar.impact_effect_table )
+    else
+        impactEffect = weaponOrProjectile.GetWeaponSettingAsset( eWeaponVar.impact_effect_table )
+
+    if ( impactEffect == $"" )
+        return ""
+
+    string tempString = string( impactEffect )
+    string impactFXName = tempString.slice( 2, tempString.len() - 1 )
+
+    return impactFXName
 }
 
 function Vortex_ScriptCanHandleImpactEvent( impactData )
@@ -1091,9 +1687,15 @@ int function VortexPrimaryAttack( entity vortexWeapon, WeaponPrimaryAttackParams
 int function Vortex_FireBackBullets( entity vortexWeapon, WeaponPrimaryAttackParams attackParams )
 {
 	int bulletCount = GetBulletsAbsorbedCount( vortexWeapon )
+
+	// nessie note: I don't think this works best for shotgun bullets...
+	// legion's power shot won't be handled, amped vortex refire also ignore this
+	// looks pretty silly. though it breaks vanilla behavior, I'd like to remove it
 	//Defensive Check - Couldn't repro error.
+	/*
 	if ( "shotgunPelletsToIgnore" in vortexWeapon.s )
 		bulletCount = int( ceil( bulletCount - vortexWeapon.s.shotgunPelletsToIgnore ) )
+	*/
 
 	if ( bulletCount )
 	{
@@ -1105,7 +1707,7 @@ int function Vortex_FireBackBullets( entity vortexWeapon, WeaponPrimaryAttackPar
 		float radius = LOUD_WEAPON_AI_SOUND_RADIUS_MP;
 		vortexWeapon.EmitWeaponNpcSound( radius, 0.2 )
 		int damageType = damageTypes.shotgun | DF_VORTEX_REFIRE
-		if ( bulletCount == 1 )
+		if ( bulletCount == 1 ) // wait respawn you serious? 1 bullet can be refired to any distance?
 			vortexWeapon.FireWeaponBullet( attackParams.pos, attackParams.dir, bulletCount, damageType )
 		else
 			ShotgunBlast( vortexWeapon, attackParams.pos, attackParams.dir, bulletCount, damageType )
@@ -1289,11 +1891,47 @@ function Vortex_ProjectileCommonSetup( entity projectile, impactData )
 	Vortex_SetImpactEffectTable_OnProjectile( projectile, impactData )  // set the correct impact effect table
 
 	projectile.SetVortexRefired( true ) // This tells code the projectile was refired from the vortex so that it uses "projectile_vortex_vscript"
-	projectile.SetModel( GetWeaponInfoFileKeyFieldAsset_Global( impactData.weaponName, "projectilemodel" ) )
+
+	// modified: model from modified impactData
+	if ( "projectileModel" in impactData )
+		projectile.SetModel( expect asset( impactData.projectileModel ) )
+	else // default
+		projectile.SetModel( GetWeaponInfoFileKeyFieldAsset_Global( impactData.weaponName, "projectilemodel" ) )
+
 	projectile.SetWeaponClassName( impactData.weaponName )  // causes the projectile to use its normal trail FX
 
+	// modified: fix for trails
+	if ( "projectileTrail" in impactData )
+	{
+		asset trailEffect = expect asset( impactData.projectileTrail )
+		if ( trailEffect != $"" )
+			thread DelayedStartParticleEffectOnProjectile( projectile, trailEffect ) // delay one frame, so client can predict it
+	}
+
 	projectile.ProjectileSetDamageSourceID( impactData.damageSourceID ) // obit will show the owner weapon
+
+	// modified: get refired mods from here
+	if ( "refiredProjectileMods" in impactData )
+	{
+		array<string> typedArray
+		foreach ( mod in impactData.refiredProjectileMods )
+			typedArray.append( expect string( mod ) )
+		file.vortexRefiredProjectileMods[ projectile ] <- typedArray
+	}
 }
+
+// delay one frame, so client themselves can see it
+void function DelayedStartParticleEffectOnProjectile( entity projectile, asset trailEffect )
+{
+	WaitFrame()
+	if ( IsValid( projectile ) )
+	{
+		// debug
+		//print( "starting trail on refired projectile!" )
+		StartParticleEffectOnEntity( projectile, GetParticleSystemIndex( trailEffect ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	}
+}
+//
 
 // gives a refired projectile the correct impact effect table
 function Vortex_SetImpactEffectTable_OnProjectile( projectile, impactData )
@@ -1403,7 +2041,9 @@ function SetVortexAmmo( entity vortexWeapon, count )
 
 
 // sets the RGB color value for the vortex sphere FX based on current charge fraction
-function VortexSphereColorUpdate( entity weapon, sphereClientFXHandle = null )
+// modified: make it typed, so we can handle it with callbacks
+//function VortexSphereColorUpdate( entity weapon, sphereClientFXHandle = null )
+void function VortexSphereColorUpdate( entity weapon, var sphereClientFXHandle = null )
 {
 	weapon.EndSignal( "VortexStopping" )
 
@@ -1571,6 +2211,8 @@ vector function GetBulletCollectionOffset( entity weapon )
 
 
 #if SERVER
+// nessie: really should leave a AddEntityCallback_OnVortexSphereDrainHealthForDamage()
+// AddEntityCallback_OnVortexSphereDrainHealthForDamage( entity vortexSphere, var damageInfo )
 function VortexSphereDrainHealthForDamage( entity vortexSphere, damage )
 {
 	// don't drain the health of vortex_spheres that are set to be invulnerable. This is the case for the Particle Wall
@@ -1657,6 +2299,9 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 			PlayEffectOnVortexSphere( fxId, DamageInfo_GetDamagePosition( damageInfo ), damageAngles, vortexSphere )
 		}
 
+		// I... genericly don't understand why respawn have to code things like this...
+		// reworked
+		/*
 		entity weapon = DamageInfo_GetWeapon( damageInfo )
 		float damage = ceil( DamageInfo_GetDamage( damageInfo ) )
 
@@ -1673,6 +2318,11 @@ bool function CodeCallback_OnVortexHitBullet( entity weapon, entity vortexSphere
 			damage *= damageModifier.damageScale
 			VortexSphereDrainHealthForDamage( vortexSphere, damage )
 		}
+		*/
+		float damage = Vortex_CalculateBulletHitDamage( vortexSphere, damageInfo )
+		if ( takesDamage )
+			VortexSphereDrainHealthForDamage( vortexSphere, damage )
+		// rework end
 
 		if ( DamageInfo_GetAttacker( damageInfo ) && DamageInfo_GetAttacker( damageInfo ).IsTitan() )
 			EmitSoundAtPosition( teamNum, DamageInfo_GetDamagePosition( damageInfo ), "TitanShieldWall.Heavy.BulletImpact_3P_vs_3P" )
@@ -1735,7 +2385,14 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 	if ( !IsValid( vortexSphere ) )
 		return false
 
+	// modified: vortex behavior override
+	VortexBehaviorOverride overrideStruct = Vortex_GetBehaviorOverrideFromWeaponOrProjectile( projectile )
+
 	var ignoreVortex = projectile.ProjectileGetWeaponInfoFileKeyField( "projectile_ignores_vortex" )
+	// modified: vortex behavior override
+	if ( overrideStruct.projectile_ignores_vortex != "" )
+		ignoreVortex = overrideStruct.projectile_ignores_vortex
+
 	if ( ignoreVortex != null )
 	{
 		#if SERVER
@@ -1781,14 +2438,22 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		damageAngles = AnglesCompose( damageAngles, Vector( 90, 0, 0 ) )
 
 	asset projectileSettingFX = projectile.GetProjectileWeaponSettingAsset( eWeaponVar.vortex_impact_effect )
+	// modified: vortex behavior override
+	if ( overrideStruct.vortex_impact_effect != $"" )
+		projectileSettingFX = overrideStruct.vortex_impact_effect
+
 	asset impactFX = (projectileSettingFX != $"") ? projectileSettingFX : SHIELD_WALL_EXPMED_FX
 
 	bool isAmpedWall = vortexSphere.GetTargetName() == PROTO_AMPED_WALL
 	bool takesDamage = !isAmpedWall
 
 	#if SERVER
-		if ( vortexSphere.e.ProjectileHitRules != null )
-			takesDamage = vortexSphere.e.ProjectileHitRules( vortexSphere, attacker, takesDamage )
+		// WTF RESPAWN? why not pass the projectile entity on vortex hit? modified
+		//if ( vortexSphere.e.ProjectileHitRules != null )
+		//	takesDamage = vortexSphere.e.ProjectileHitRules( vortexSphere, attacker, takesDamage )
+		// don't want to change entityStruct, use fileStruct instead
+		if ( vortexSphere in file.vortexCustomProjectileHitRules )
+			takesDamage = file.vortexCustomProjectileHitRules[ vortexSphere ]( vortexSphere, attacker, takesDamage )
 	#endif
 	// hack to let client know about amped wall, and to amp the shot
 	if ( isAmpedWall )
@@ -1806,6 +2471,11 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		}
 
 		var impact_sound_1p = projectile.ProjectileGetWeaponInfoFileKeyField( "vortex_impact_sound_1p" )
+		// modified: vortex behavior override
+		// though I think there won't be 1p vortex hit conditions. no vortex is bind with client-side
+		if ( overrideStruct.impact_sound_1p != "" )
+			impact_sound_1p = overrideStruct.impact_sound_1p
+
 		if ( impact_sound_1p == null )
 			impact_sound_1p = "TitanShieldWall.Explosive.BulletImpact_1P_vs_3P"
 
@@ -1817,12 +2487,18 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 			PlayEffectOnVortexSphere( fxId, contactPos, damageAngles, vortexSphere )
 		}
 
+		// I... genericly don't understand why respawn have to code things like this...
+		// reworked
+		/*
 		float damage = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
 		//	once damageInfo is passed correctly we'll use that instead of looking up the values from the weapon .txt file.
 		//	local damage = ceil( DamageInfo_GetDamage( damageInfo ) )
 
 		damage = HandleWeakToPilotWeapons( vortexSphere, projectile.ProjectileGetWeaponClassName(), damage )
 		damage = damage + CalculateTitanSniperExtraDamage( projectile, vortexSphere )
+		*/
+		float damage = Vortex_CalculateProjectileHitDamage( vortexSphere, attacker, projectile )
+		// rework end
 
 		if ( takesDamage )
 		{
@@ -1832,12 +2508,17 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		}
 
 		var impact_sound_3p = projectile.ProjectileGetWeaponInfoFileKeyField( "vortex_impact_sound_3p" )
+		// modified: vortex behavior override
+		// though I think there won't be 1p vortex hit conditions. no vortex is bind with client-side
+		if ( overrideStruct.impact_sound_3p != "" )
+			impact_sound_3p = overrideStruct.impact_sound_3p
 
 		if ( impact_sound_3p == null )
 			impact_sound_3p = "TitanShieldWall.Explosive.BulletImpact_3P_vs_3P"
 
 		EmitSoundAtPosition( teamNum, contactPos, impact_sound_3p )
 
+		// respawn you sure these things should hardcode?
 		int damageSourceID = projectile.ProjectileGetDamageSourceID()
 		switch ( damageSourceID )
 		{
@@ -1863,7 +2544,8 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 				{
 					int team = attacker.GetTeam()
 					PulseLocation( attacker, team, contactPos, false, false )
-					array<string> mods = projectile.ProjectileGetMods()
+					//array<string> mods = projectile.ProjectileGetMods() // vanilla behavior, no need to use Vortex_GetRefiredProjectileMods()
+					array<string> mods = Vortex_GetRefiredProjectileMods( projectile ) // I don't care, let's break vanilla behavior
 					if ( mods.contains( "pas_tone_sonar" ) )
 						thread DelayedPulseLocation( attacker, team, contactPos, false, false )
 				}
@@ -1945,9 +2627,15 @@ float function HandleWeakToPilotWeapons( entity vortexSphere, string weaponName,
 #endif
 
 // ???: reflectOrigin not used
-int function VortexReflectAttack( entity vortexWeapon, attackParams )//, vector reflectOrigin )
+int function VortexReflectAttack( entity vortexWeapon, attackParams, vector reflectOrigin )
 {
 	entity vortexSphere = vortexWeapon.GetWeaponUtilityEntity()
+	if ( !vortexSphere )
+		return 0
+
+	#if SERVER
+		Assert( vortexSphere )
+	#endif
 
 	int totalfired = 0
 	int totalAttempts = 0
@@ -1963,6 +2651,8 @@ int function VortexReflectAttack( entity vortexWeapon, attackParams )//, vector 
 
 	// PREDICTED REFIRES
 	// bullet impact events don't individually fire back per event because we aggregate and then shotgun blast them
+	// nessie note: the signal is for triggering AmpedVortexRefireThink() in mp_titanweapon_vortex_shield.nut
+	// but with modified script FPS, the reflecting maybe still fast enough to fire back per event( catching shotgunblast will still work )
 
 	//Remove the below script after FireWeaponBulletBroadcast
 	//local bulletsFired = Vortex_FireBackBullets( vortexWeapon, attackParams )
@@ -2002,8 +2692,7 @@ int function VortexReflectAttack( entity vortexWeapon, attackParams )//, vector 
 	vortexWeapon.Signal( "VortexFired" )
 
 #if SERVER
-	if( IsValid( vortexSphere ) )
-		vortexSphere.ClearAllBulletsFromSphere()
+	vortexSphere.ClearAllBulletsFromSphere()
 #endif
 
 	/*

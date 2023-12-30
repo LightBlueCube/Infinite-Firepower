@@ -71,7 +71,7 @@ var function OnWeaponTossReleaseAnimEvent_ability_heal( entity weapon, WeaponPri
 
 void function OnProjectileCollision_ability_heal( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	array<string> mods = projectile.ProjectileGetMods()
+	array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 	if ( mods.contains( "wrecking_ball" ) )
 		return OnProjectileCollision_weapon_wrecking_ball( projectile, pos, normal, hitEnt, hitbox, isCritical )
 }
