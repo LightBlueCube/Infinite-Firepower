@@ -224,8 +224,8 @@ float function HandleBlockingAndCalcDamageScaleForHit( entity blockingEnt, var d
 		if( blockingEnt.GetOffhandWeapon( OFFHAND_SPECIAL ).HasMod( "tcp_balance" ) )
 		{
 			if ( blockingEnt.IsPlayer() && PlayerHasPassive( blockingEnt, ePassives.PAS_SHIFT_CORE ) )
-				return 0.5
-			return 0.3
+				return 0.3
+			return 0.5
 		}
 
 		if ( blockingEnt.IsPlayer() && PlayerHasPassive( blockingEnt, ePassives.PAS_SHIFT_CORE ) )

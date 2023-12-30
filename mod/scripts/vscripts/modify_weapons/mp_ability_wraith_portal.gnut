@@ -97,7 +97,7 @@ var function OnWeaponPrimaryAttack_ability_wraith_portal( entity weapon, WeaponP
 	}
 	else if( !(player in file.playerPlacingPortal) )
 	{
-		SendHudMessageWithPriority( player, 92, "未能正常启动，已回复充能", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 > )
+		SendHudMessageWithPriority( player, 101, "未能正常启动，已回复充能", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 >, 92 )
 		weapon.SetWeaponPrimaryClipCount( ammoMax )
 	}
 	#endif
@@ -317,7 +317,7 @@ void function PortalEnd( entity player, entity weapon, vector startPos, vector s
 		maxPortalLength = PORTAL_MAX_DISTANCE_GRUNT
 	if( portalLeft / maxPortalLength >= PORTAL_CANCEL_PERCENTAGE && !isInfiniteDistance )
 	{
-		SendHudMessageWithPriority( player, 92, "距离过近，已取消放置", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 > )
+		SendHudMessageWithPriority( player, 101, "距离过近，已取消放置", -1, -0.4, < 255, 100, 100 >, < 0, 2.0, 1.0 >, 92 )
 		thread DelayedRechargeWeapon( weapon )
 		return
 	}

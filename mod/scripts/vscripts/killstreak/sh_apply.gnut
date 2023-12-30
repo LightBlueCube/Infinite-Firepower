@@ -16,10 +16,10 @@ void function ApplyDropBattery( entity player )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		return ApplyFalied( player, "\n你没有电池" )
 
-	DropBattery( player )
+	DropBattery( player, true )
 }
 
-void function DropBattery( entity player )
+void function DropBattery( entity player, bool showTips = false )
 {
 	if( !player.IsHuman() || !IsAlive( player ) || !PlayerHasMaxBatteryCount( player ) )
 		return
@@ -31,12 +31,15 @@ void function DropBattery( entity player )
 	battery.SetVelocity( batteryVel )
 	battery.s.touchEnabledTime <- Time() + 1
 
+	string text = "\n已丢出电池！"
+	if( showTips )
+		text += "\n你也可以在未打开GUI菜单时直接长按\n泰坦辅助技能键（默认为G）来快速丢弃电池"
 	if( battery.GetSkin() == 0 )
-		thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 100, 255, 100 >, 2, 1 )
+		thread SendKsGUI_Threaded( player, text, < 100, 255, 100 >, 2, 1 )
 	if( battery.GetSkin() == 1 )
-		thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 255, 100, 100 >, 2, 1 )
+		thread SendKsGUI_Threaded( player, text, < 255, 100, 100 >, 2, 1 )
 	if( battery.GetSkin() == 2 )
-		thread SendKsGUI_Threaded( player, "\n已丢出电池!", < 255, 255, 100 >, 2, 1 )
+		thread SendKsGUI_Threaded( player, text, < 255, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 }
 

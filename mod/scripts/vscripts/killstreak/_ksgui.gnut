@@ -257,11 +257,11 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	text += timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
 
 	table<int> ksData = GetKillStreakData()
-	text += "\n铁驭生命值:"+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	护甲生命值:"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	text += "\n铁驭生命值: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	 护甲生命值: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
 	text += "\n====== 连杀奖励获取进度 ======\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
-	text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
+	//text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
 
 	return text
 }

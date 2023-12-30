@@ -64,7 +64,7 @@ void function PlayerUsingVTOL( entity owner )
 	WaitFrame()
 	thread VTOLIntro( owner )
 
-	entity evacSpaceNode = GetEvacSpaceNode()
+	entity evacSpaceNode// = GetEvacSpaceNode()
 	if( !IsValid( evacSpaceNode ) )
 		evacSpaceNode = GetEnt( "spaceNode" )
 	vector validOrigin = evacSpaceNode.GetOrigin()
