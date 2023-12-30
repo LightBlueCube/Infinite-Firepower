@@ -89,7 +89,7 @@ void function HoloShiftTips( entity player )
 			return
 		if( !( player in file.playerDecoyList ) )
 		{
-			SendHudMessageWithPriority( player, 92, "幻影相位锚被摧毁", -1, -0.4, < 255, 0, 0 >, < 0, 2.0, 1.0 > )
+			SendHudMessageWithPriority( player, 101, "幻影相位锚被摧毁", -1, -0.4, < 255, 0, 0 >, < 0, 2.0, 1.0 >, 92 )
 			return
 		}
 		vector rgb = < 0, 0, 0 >
