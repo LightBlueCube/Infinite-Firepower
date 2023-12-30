@@ -175,7 +175,7 @@ void function OnGravityLiftDeployed( entity projectile )
 void function GravityLiftThink( entity projectile )
 {
 	projectile.Hide() // don't show the shuriken to player
-	EmitSoundOnEntity( projectile, "default_gravitystar_impact_3p" )
+	EmitSoundAtPosition( TEAM_UNASSIGNED, projectile.GetOrigin(), "default_gravitystar_impact_3p" )
 
 	array<entity> liftEffects
 	if ( USE_HARVESTER_BEAM )
@@ -221,22 +221,22 @@ void function GravityLiftThink( entity projectile )
 
 	ScriptTriggerSetEnabled( trigger, true )
 
-	thread GravityLiftLifeTime( projectile, trigger, liftEffects )
+	thread GravityLiftLifeTime( trigger, liftEffects )
+	projectile.Destroy()
 }
 
-void function GravityLiftLifeTime( entity projectile, entity trigger, array<entity> liftEffects )
+void function GravityLiftLifeTime( entity trigger, array<entity> liftEffects )
 {
-	projectile.EndSignal( "OnDestroy" )
 	trigger.EndSignal( "OnDestroy" )
 	//gravLiftBeam.EndSignal( "OnDestroy" )
 
 	OnThreadEnd(
-		function(): ( projectile, trigger, liftEffects )
+		function(): ( trigger, liftEffects )
 		{
 			// this handles IsValid() checks
 			// older version needs thread
 			//thread DestroyGravityLift( projectile, trigger, liftEffects )
-			DestroyGravityLift( projectile, trigger, liftEffects )
+			DestroyGravityLift( trigger, liftEffects )
 		}
 	)
 
@@ -265,7 +265,7 @@ void function GravityLiftLifeTime( entity projectile, entity trigger, array<enti
 	}
 }
 
-void function DestroyGravityLift( entity projectile, entity trigger, array<entity> liftEffects )
+void function DestroyGravityLift( entity trigger, array<entity> liftEffects )
 {
 	/* // older version. now resolved by using gravLiftBeam.SetStopType( "DestroyImmediately" )
 	if( IsValid( gravLiftBeam ) )
@@ -281,8 +281,6 @@ void function DestroyGravityLift( entity projectile, entity trigger, array<entit
 		if( IsValid( fx ) )
 			EffectStop( fx )
 	}
-	if( IsValid( projectile ) )
-		projectile.Destroy()
 	if( IsValid( trigger ) )
 		trigger.Destroy()
 }
