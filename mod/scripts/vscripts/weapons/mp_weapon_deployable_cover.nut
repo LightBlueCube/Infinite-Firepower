@@ -118,7 +118,7 @@ void function OnDeployableCoverPlanted( entity projectile )
 
 		projectile.SetAngles( surfaceAngles )
 
-		if( projectile.ProjectileGetMods().contains( "smoke_trap" ) )
+		if( Vortex_GetRefiredProjectileMods( projectile ).contains( "smoke_trap" ) )
 			return SmokeTrapThink( projectile )
 
 		bool isAmpedWall = !( projectile.ProjectileGetMods().contains( "burn_card_weapon_mod" ) ) //Unusual, but deliberate: the boost version of the weapon does not have amped functionality

@@ -3,7 +3,7 @@ global function OnProjectileCollision_ClusterRocket
 
 void function OnProjectileCollision_ClusterRocket( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	array<string> mods = projectile.ProjectileGetMods()
+	array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 	if( mods.contains( "charge_ball" ) )
 	{
 		EmitSoundAtPosition( TEAM_UNASSIGNED, projectile.GetOrigin(), "Explo_ProximityEMP_Impact_3P" )

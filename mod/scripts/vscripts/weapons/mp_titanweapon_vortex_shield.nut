@@ -240,9 +240,30 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 		string attackerWeaponName	= attackerWeapon.GetWeaponClassName()
 		int damageType				= DamageInfo_GetCustomDamageType( damageInfo )
 
+		// tempfix ttf2 vanilla behavior: burn mod vortex shield
+		// never try to catch a burn mod vortex's refiring bullets if we're using burn mod vortex shield
+		// otherwise it may cause infinite refire and crash the server( indicates by SCRIPT ERROR Failed to Create Entity "info_particle_system", the failure is because we've created so much entities due to infinite refire )
+		if ( weapon.HasMod( "burn_mod_titan_vortex_shield" ) && attackerWeapon.HasMod( "burn_mod_titan_vortex_shield" ) )
+		{
+			// build impact data
+			local impactData = Vortex_CreateImpactEventData( weapon, attacker, origin, damageSourceID, attackerWeaponName, "hitscan" )
+			// do vortex drain
+			VortexDrainedByImpact( weapon, attackerWeapon, null, null )
+			// like heat shield and TryVortexAbsorb() behavior: if it's absorb behavior, we don't do FX
+			if ( impactData.refireBehavior == VORTEX_REFIRE_ABSORB )
+				return true
+			// generic shield ping FX, modified to globalize this function in _vortex.nut
+			Vortex_SpawnShieldPingFX( weapon, impactData )
+			return true
+		}
+		//
+
 		TakeAmountIfIsRodeoAttack( attacker, weapon )
 		if( weapon.HasMod( "tcp_vortex" ) )
+		{
+			TakeAmountOnVotexDamaged( weapon, attackerWeapon )
 			weapon.s.trackEnergyCooldown <- 40
+		}
 
 		return TryVortexAbsorb( vortexSphere, attacker, origin, damageSourceID, attackerWeapon, attackerWeaponName, "hitscan", null, damageType, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
 	#endif
@@ -284,12 +305,18 @@ bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weap
 		return true
 	#else
 
-		if( projectile.ProjectileGetMods().contains( "tcp_shotgun" ) )
+		if( weapon.HasMod( "tcp_vortex" ) )
+		{
+			TakeAmountOnVotexDamaged( weapon, projectile )
+			weapon.s.trackEnergyCooldown <- 40
+		}
+
+		if( Vortex_GetRefiredProjectileMods( projectile ).contains( "tcp_shotgun" ) )
 		{
 			OnProjectileCollision_FireWallShotGun( projectile )
 			return false
 		}
-		if( projectile.ProjectileGetMods().contains( "charge_ball" ) )
+		if( Vortex_GetRefiredProjectileMods( projectile ).contains( "charge_ball" ) )
 		{
 			projectile.Destroy()
 			return false
@@ -302,8 +329,6 @@ bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weap
 		string weaponName = projectile.ProjectileGetWeaponClassName()
 
 		TakeAmountIfIsRodeoAttack( projectile.GetOwner(), weapon )
-		if( weapon.HasMod( "tcp_vortex" ) )
-			weapon.s.trackEnergyCooldown <- 40
 
 		return TryVortexAbsorb( vortexSphere, attacker, contactPos, damageSourceID, projectile, weaponName, "projectile", projectile, null, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
 	#endif
@@ -413,6 +438,31 @@ bool function OnWeaponChargeBegin_titanweapon_vortex_shield( entity weapon )
 			thread TrackSharedEnergyOnVortexOn( weaponOwner, weapon )
 	}
 	return true
+}
+
+void function TakeAmountOnVotexDamaged( entity weapon, entity projectile )
+{
+	float amount
+	if ( projectile.IsProjectile() )
+		amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
+	else
+		amount = float( projectile.GetWeaponSettingInt( eWeaponVar.damage_near_value ) )
+
+	if( amount <= 0 )
+	{
+		if ( projectile.IsProjectile() )
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage ) )
+		else
+			amount = float( projectile.GetWeaponSettingInt( eWeaponVar.explosion_damage ) )
+	}
+
+	entity owner = weapon.GetWeaponOwner()
+	int currentEnergy = owner.GetSharedEnergyCount()
+	int val = int( amount / 3 )
+	if( currentEnergy - val <= 0 )
+		val = currentEnergy
+	if( val >= 0 )
+		owner.TakeSharedEnergy( val )
 }
 
 void function TrackSharedEnergyOnVortexOn( entity owner, entity weapon )

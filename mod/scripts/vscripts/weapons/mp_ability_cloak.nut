@@ -41,7 +41,7 @@ var function OnWeaponPrimaryAttack_cloak( entity weapon, WeaponPrimaryAttackPara
 void function OnProjectileCollision_cloak( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
 	// modded weapons!
-	array<string> mods = projectile.ProjectileGetMods()
+	array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 	if ( mods.contains( "cloak_field" ) )
 		return OnProjectileCollision_ability_cloak_field( projectile, pos, normal, hitEnt, hitbox, isCritical )
 }

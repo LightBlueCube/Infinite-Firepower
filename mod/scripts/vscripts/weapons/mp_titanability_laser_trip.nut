@@ -173,10 +173,8 @@ function DeployLaserPylon( entity projectile )
 	entity attachparent = projectile.GetParent()
 
 	bool arcTrip = false
-	if( IsValid( owner ) )
-		if( IsValid( owner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ) ) )
-			if( owner.GetOffhandWeapon( OFFHAND_TITAN_CENTER ).HasMod( "tcp_arc_trip" ) )
-				arcTrip = true
+	if( Vortex_GetRefiredProjectileMods( projectile ).contains( "tcp_arc_trip" ) )
+		arcTrip = true
 
 	projectile.SetModel( $"models/dev/empty_model.mdl" )
 	projectile.Hide()

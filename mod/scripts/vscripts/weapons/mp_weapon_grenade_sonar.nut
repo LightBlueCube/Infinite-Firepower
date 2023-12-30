@@ -34,7 +34,7 @@ var function OnWeaponTossReleaseAnimEvent_weapon_grenade_sonar( entity weapon, W
 
 void function OnProjectileCollision_weapon_grenade_sonar( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCritical )
 {
-	if ( projectile.ProjectileGetMods().contains( "gravity_lift" ) )
+	if ( Vortex_GetRefiredProjectileMods( projectile ).contains( "gravity_lift" ) )
 		return OnProjectileCollision_ability_gravity_lift( projectile, pos, normal, hitEnt, hitbox, isCritical )
 
 	#if SERVER

@@ -200,10 +200,28 @@ void function OnWeaponOwnerChanged_titanweapon_40mm( entity weapon, WeaponOwnerC
 void function OnProjectileCollision_titanweapon_sticky_40mm( entity projectile, vector pos, vector normal, entity hitEnt, int hitbox, bool isCrit )
 {
 	#if SERVER
-	array<string> mods = projectile.ProjectileGetMods()
+	array<string> mods = Vortex_GetRefiredProjectileMods( projectile )
 	entity owner = projectile.GetOwner()
 	if( ( mods.contains( "mortar_shots" ) || mods.contains( "tcp_no_gravity" ) ) && IsValid( owner ) )
-		PlayImpactFXTable( projectile.GetOrigin(), owner, "exp_satchel" )
+	{
+		if( ( mods.contains( "mortar_shots" ) && !projectile.ProjectileGetMods().contains( "mortar_shots" ) ) || ( mods.contains( "tcp_no_gravity" ) && !projectile.ProjectileGetMods().contains( "tcp_no_gravity" ) ) )
+		{
+			RadiusDamage(
+				projectile.GetOrigin(),							// center
+				owner,											// attacker
+				projectile,										// inflictor
+				100,											// damage
+				600,											// damageHeavyArmor
+				10,												// innerRadius
+				225,											// outerRadius
+				0,												// flags
+				0,												// distanceFromAttacker
+				20000,											// explosionForce
+				DF_EXPLOSION | DF_STOPS_TITAN_REGEN,			// scriptDamageFlags
+				eDamageSourceId.mp_titanweapon_sticky_40mm )	// scriptDamageSourceIdentifier
+		}
+		return PlayImpactFXTable( projectile.GetOrigin(), owner, "exp_satchel" )
+	}
 	if ( !IsAlive( owner ) )
 		return
 
