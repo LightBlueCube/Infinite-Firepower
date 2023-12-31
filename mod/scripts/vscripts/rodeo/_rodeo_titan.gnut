@@ -744,7 +744,8 @@ function PlayerBeginsTitanRodeo( entity player, RodeoPackageStruct rodeoPackage,
 					{
 						entToTeleport = newRodeoTitan
 						int attachIndex = newRodeoTitan.LookupAttachment( rodeoPackage.attachPoint )
-						startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
+						if( attachIndex != 0 )	// defensive fix for some time soul can be invalid, at this time the newRodeoTitan is a human, will return a invalid attachIndex
+							startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
 					}
 
 					if ( !PlayerCanTeleportHere( player, startPos, entToTeleport ) )
