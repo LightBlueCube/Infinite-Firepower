@@ -238,14 +238,6 @@ void function RespawnAsPilotInAfterFrame( entity poorGuy )
 			RespawnAsPilot( poorGuy )
 }
 
-void function WaitForPlayerRespawnThenNotify( entity player )
-{
-	player.EndSignal( "OnDestroy" )
-
-	player.WaitSignal( "OnRespawned" )
-	SendHudMessage( player, "由于队伍人数不平衡，你已被重新分队", -1, 0.4, 200, 200, 225, 0, 0.15, 3.5, 0.5 )
-}
-
 void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 {
 	if( file.unBalanceTime + 90 > Time() )
@@ -262,7 +254,6 @@ void function CheckTeamBalance( entity victim, entity attacker, var damageInfo )
 	// We passed all checks, balance the teams
 	PlayerTrySwitchTeam( victim )
 	Chat_ServerPrivateMessage( victim, ANSI_COLOR_TEAM + "由于队伍人数不平衡，你已被重新分队", false )
-	thread WaitForPlayerRespawnThenNotify( victim )
 }
 
 bool function CanChangeTeam()
@@ -326,71 +317,3 @@ bool function PlayerTrySwitchTeam( entity player, bool fixRespawn = false )
 
 	return true
 }
-
-/* // pandora version
-bool function ClientCommand_SwitchTeam( entity player, array<string> args )
-{
-	if( !IsValid( player ) )
-		return false
-
-	int PlayerTeam = player.GetTeam()
-	int EnemyTeam = GetEnemyTeam( PlayerTeam )
-	entity PetTitan = player.GetPetTitan()
-	string PlayerFaction = GetFactionChoice( player )
-	string EnemyFaction = GetEnemyFaction( player )
-	int PlayerTeamCount = GetPlayerArrayOfTeam( PlayerTeam ).len()
-		int EnemyTeamCount = GetPlayerArrayOfTeam( EnemyTeam ).len()
-	int MaxPlayers = GetGamemodeVarOrUseValue( GetConVarString( "ns_private_match_last_mode" ), "max_players", "12" ).tointeger()
-
-	if( PlayerTeam != TEAM_MILITIA && PlayerTeam != TEAM_IMC )
-	{
-		SendHudMessage( player, "#PATCH_BLANK", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-		return false
-	}
-
-	if( PlayerTeamCount + EnemyTeamCount >= MaxPlayers )
-	{
-		SendHudMessage( player, "#PRIVATE_MATCH_NOT_READY_TEAMS", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-		return false
-	}
-
-	if( EnemyTeamCount - PlayerTeamCount > 1 )
-	{
-		SendHudMessage( player, "#PRIVATE_MATCH_NOT_READY_TEAMS", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-		return false
-	}
-
-	if( IsAlive( player ) )
-	{
-		SendHudMessage( player, "#CONVO_S2S_WELLIMNOTDEAD", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-		return false
-		/ayer.Die( svGlobal.worldspawn, svGlobal.worldspawn, { damageSourceId = eDamageSourceId.team_switch } )
-	}
-
-	if( IsValid( PetTitan ) && player.IsTitan() )
-	{
-		SendHudMessage( player, "#CONVO_S2S_WELLIMNOTDEAD", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-		return false
-	}
-	else if( IsValid( PetTitan ) && !player.IsTitan() )
-	{
-		//Kill that auto titan
-		PetTitan.Die( svGlobal.worldspawn, svGlobal.worldspawn, { damageSourceId = eDamageSourceId.team_switch } )
-	}
-
-	if( PlayerTeam == TEAM_IMC )
-	{
-		SetTeam( player, TEAM_MILITIA )
-	}
-	else if( PlayerTeam == TEAM_MILITIA )
-	{
-		SetTeam( player, TEAM_IMC )
-	}
-
-	player.SetPersistentVar( "factionChoice", EnemyFaction )
-	player.SetPersistentVar( "enemyFaction", PlayerFaction )
-
-	SendHudMessage( player, "#SWITCH_TEAMS", -1, 0.33, 192, 255, 0, 255, 0.0, 3.0, 0.0 )
-	return true
-}
-*/

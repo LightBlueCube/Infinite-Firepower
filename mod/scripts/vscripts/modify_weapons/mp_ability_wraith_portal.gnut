@@ -26,7 +26,7 @@ const float PORTAL_COOLDOWN_TIME = 1.5
 const float PORTAL_FX_TICKRATE = 1.0
 
 // these can be modified
-const float PORTAL_DURATION = 25 // should be a multipiler of PORTAL_FX_TICKRATE, could be PORTAL_DURATION + PORTAL_FX_TICKRATE * 2 in actrual
+const float PORTAL_DURATION = 30 // should be a multipiler of PORTAL_FX_TICKRATE, could be PORTAL_DURATION + PORTAL_FX_TICKRATE * 2 in actrual
 const float PORTAL_MAX_DISTANCE = 4200 // was 3500, may should set higher since lastPos wasn't very accurate
 // speed boost
 const float PORTAL_SPEED_BOOST_SEVERITY = 0.15
@@ -243,7 +243,6 @@ void function PortalStart( entity player, entity weapon )
 				return
 			if( isInfiniteDistance )
 			{
-				SendHudMessage( player,"传送门距离剩余：无限制", -1, 0.65, 255, 255, 100, 1, 0, 0.2, 0 )
 				continue
 			}
 			float portalPercentage = float( int ( portalLeft / maxPortalLength * 10000 ) ) / 100 // leave 2 sorts
@@ -294,7 +293,7 @@ void function PortalEnd( entity player, entity weapon, vector startPos, vector s
 		// gruntmode
 		isGruntModeVer = weapon.HasMod( "gm_phasewalker" )
 
-		duration = float( weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) ) / weapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate )
+		//duration = float( weapon.GetWeaponSettingInt( eWeaponVar.ammo_per_shot ) ) / weapon.GetWeaponSettingFloat( eWeaponVar.regen_ammo_refill_rate )
 	}
 	vector endPos = player.GetOrigin()
 	vector endAng = player.EyeAngles()
@@ -335,7 +334,7 @@ void function PortalEnd( entity player, entity weapon, vector startPos, vector s
 
 	entity startTrig = CreateEntity( "trigger_cylinder" )
 	startTrig.SetRadius( 16 )
-	startTrig.SetAboveHeight( 48 )
+	startTrig.SetAboveHeight( 64 )
 	startTrig.SetBelowHeight( 0 )
 	startTrig.SetOrigin( startPos )
 	startTrig.kv.triggerFilterNpc = "none" // never teleports npcs
@@ -346,7 +345,7 @@ void function PortalEnd( entity player, entity weapon, vector startPos, vector s
 
 	entity endTrig = CreateEntity( "trigger_cylinder" )
 	endTrig.SetRadius( 16 )
-	endTrig.SetAboveHeight( 48 )
+	endTrig.SetAboveHeight( 64 )
 	endTrig.SetBelowHeight( 0 )
 	endTrig.SetOrigin( endPos )
 	endTrig.kv.triggerFilterNpc = "none" // never teleports npcs

@@ -109,20 +109,10 @@ bool function PlayerCanUseHoloShift( entity weapon )
 
 	// holoshift specifics
 	if ( weapon.GetWeaponPrimaryClipCount()<100 )
-	{
-		//#if SERVER
-		//SendHudMessage(ownerPlayer, "需要完全充满以使用幻影转移", -1, -0.35, 255, 255, 100, 255, 0, 3, 0)
-		//#endif
 		return false
-	}
 
 	if ( weapon.GetWeaponPrimaryClipCount() < 200 && !( IsValid( file.playerDecoyList ) ) )
-	{
-		//#if SERVER
-		//SendHudMessage(ownerPlayer, "场内无自身幻影!\n需要完全充满以使用幻影转移", -1, -0.35, 255, 255, 100, 255, 0, 3, 0)
-		//#endif
 		return false
-	}
 
 	// all checks passed
 	return true

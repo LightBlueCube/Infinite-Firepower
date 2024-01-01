@@ -30,11 +30,11 @@ void function InfiniteFirepower_Init()
 	// 连杀系统
 	KillStreak_Init()
 
+	// Apex like 铁驭护盾
+	PilotShield_Init()
+
 	// 打乱队伍
 	TeamShuffle_Init()
-
-	// 使用此函数来关闭更好的重生点选点
-	//SetBetterRespawnPointEnable( false )
 
 	// 反挂机
 	AntiAFK_Init()
@@ -47,14 +47,17 @@ void function InfiniteFirepower_Init()
 	// 踢出阈值
 	AntiAFK_SetKickTime( 120 )
 
+	// 使用此函数来关闭更好的重生点选点
+	//SetBetterRespawnPointEnable( false )
+
 	// 反蹲起
 	AntiInsult_Init()
 
+	// 禁止手柄辅助瞄准
+	DisableAimAssist_Init()
+
 	// 炫彩聊天文字，已fuck up
 	// ColorfulChat_Init()
-
-	// Apex like 铁驭护盾
-	PilotShield_Init()
 
 	// 如果服务器无人则自动重启服务器
 	AutoShutdown_Init()

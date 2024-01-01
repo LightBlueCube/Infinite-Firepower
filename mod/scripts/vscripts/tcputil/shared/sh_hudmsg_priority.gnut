@@ -2,6 +2,20 @@ untyped
 global function HudMessagePriority_Init
 global function SendHudMessageWithPriority
 
+/*
+
+KsGUI: 100 / OnFadeOut: 90
+NuclearBomb: 90.01
+PilotShieldDamaged: 93 / OnFadeOut: 91
+SkillUsingMessage: 92 / OnFaild: 101 / OnFadeOut: 92
+LoadoutTips: 91
+AntiAFK: 95
+RandMap: 102
+AntiInsult: 102
+
+*/
+
+
 void function HudMessagePriority_Init()
 {
 	RegisterSignal( "SendingNewHudMessage" )
@@ -13,13 +27,11 @@ void function OnClientConnected( entity player )
 	player.s.nowMsgPriority <- -1.0
 }
 
-bool function SendHudMessageWithPriority( entity player, float priority, var text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout = 114514 )
+bool function SendHudMessageWithPriority( entity player, float priority, var text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout = 90 )
 {
 	if( priority < player.s.nowMsgPriority )
 		return false
 	player.s.nowMsgPriority = priority
-	if( priorityOnFadeout == 114514 )
-		priorityOnFadeout = priority
 	string str = string( text )
 	thread StartSendHudMessage( player, str, yaw, pos, rgb, time, priorityOnFadeout )
 	return true
