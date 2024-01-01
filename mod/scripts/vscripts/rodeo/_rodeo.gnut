@@ -46,6 +46,10 @@ function Rodeo_Init()
 	RodeoTitan_Init()
 	RegisterSignal( "RodeoPointOfNoReturn" )
 	AddCallback_OnTitanDoomed( OnTitanDoomed_Rodeo )
+
+	// vanilla missing
+	RegisterSignal( "WatchForPlayerJumpingOffRodeo" )
+
 }
 
 
@@ -351,6 +355,10 @@ void function PlayerClimbsIntoRodeoPosition( entity player, entity rodeoTarget, 
 
 void function WatchForPlayerJumpingOffRodeo( entity player )
 {
+	// vanilla missing
+	player.Signal( "WatchForPlayerJumpingOffRodeo" )
+	player.EndSignal( "WatchForPlayerJumpingOffRodeo" )
+
 	player.EndSignal( "OnDeath" )
 	player.EndSignal( "RodeoOver" )
 	player.EndSignal( "RodeoPointOfNoReturn" )
@@ -412,7 +420,7 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	float yAxis = player.GetInputAxisForward()
 
 	vector velocity
-	float speed = 400
+	float speed = 450
 	if ( fabs( xAxis ) < 0.2 && fabs( yAxis ) < 0.2 )
 	{
 	    // no press = back press
@@ -435,9 +443,8 @@ void function PlayerJumpsOffRodeoTarget( entity player, entity rodeoTarget, vect
 	if( ang > 180 )
 		ang = 360 - ang
 
-	float frac = GraphCapped( ang, 0, 180, 0, 1 )
-	if( frac < 0.5 )
-		frac = 0.5
+	float frac = GraphCapped( ang, 0, 180, 0.5, 1 )
+	frac = min( 0.7, frac )
 
 	velocity = velocity * frac
 	velocity.z += 400

@@ -60,7 +60,7 @@ void function InitTitanTitle( entity titan )
 	if( !( "titanTitle" in soul.s ) )
 		return
 
-	if( soul.s.classicRodeoBatteryCount == 0 )
+	if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
 	{
 		titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
 		return

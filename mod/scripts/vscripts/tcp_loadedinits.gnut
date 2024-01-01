@@ -36,6 +36,11 @@ void function InfiniteFirepower_Init()
 	// 打乱队伍
 	TeamShuffle_Init()
 
+	// 使用此函数关闭一代训牛术
+	//ClassicRodeo_SetEnabled( false )
+	// 使用此函数来关闭更好的重生点选点
+	//SetBetterRespawnPointEnable( false )
+
 	// 反挂机
 	AntiAFK_Init()
 	// 达到多少人才开始踢出挂机玩家
@@ -46,9 +51,6 @@ void function InfiniteFirepower_Init()
 	AntiAFK_SetKickWarningTime( 90 )
 	// 踢出阈值
 	AntiAFK_SetKickTime( 120 )
-
-	// 使用此函数来关闭更好的重生点选点
-	//SetBetterRespawnPointEnable( false )
 
 	// 反蹲起
 	AntiInsult_Init()
