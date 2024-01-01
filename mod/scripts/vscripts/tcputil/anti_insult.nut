@@ -134,7 +134,6 @@ void function FuckUpPlayer( entity player )
 	player.Signal( "FuckUpPlayer" )
 	player.EndSignal( "FuckUpPlayer" )
 	player.EndSignal( "OnDestroy" )
-	SendHudMessage( player, "喜欢蹲起？", -1, 0.4, 255, 0, 0, 255, 0, 5, 1 )
 	wait 0.5
 	if( player.IsTitan() )
 	{
@@ -149,7 +148,7 @@ void function FuckUpPlayer( entity player )
 	for( int i = 25; i > 0; i-- )
 	{
 		WaitFrame()
-		SendHudMessage( player, "喜欢蹲起？", -1, 0.4, 255, 0, 0, 255, 0, 5, 1 )
+		SendHudMessageWithPriority( player, 102, "喜欢蹲起？", -1, 0.4, < 255, 0, 0 >, < 0, 5, 1 > )
 		if( !IsAlive( player ) )
 			player.RespawnPlayer( null )
 		if( IsAlive( player ) )

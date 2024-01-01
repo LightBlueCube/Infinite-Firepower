@@ -137,6 +137,10 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "tcputil/disable_aimassist.nut",
+			"RunOn": "SERVER && MP"
+		},
+		{
 			"Path": "tcputil/dev_tarck_usage.nut",
 			"RunOn": "SERVER && MP"
 		},
