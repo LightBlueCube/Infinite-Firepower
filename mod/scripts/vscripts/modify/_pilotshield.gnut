@@ -202,7 +202,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 	player.Server_TurnOffhandWeaponsDisabledOn()
 	for( int i = 6; i > 0; i-- )
 	{
-		while( player.Anim_IsActive() && !player.s.grabbingTitan )
+		while( player.Anim_IsActive() && !ClassicRodeo_IsPlayerGrabbingTitan( player ) )
 		{
 			thread SendKsGUI_Threaded( player, "正在等待动画结束\n" + text + tips, < r, 255, 100 >, 0.2, 0.0, null, -0.4 )
 			i = 6
@@ -220,7 +220,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 	bool reEmitSound = false
 	while( startTime + useTime > Time() )
 	{
-		while( player.Anim_IsActive() && !player.s.grabbingTitan )
+		while( player.Anim_IsActive() && !ClassicRodeo_IsPlayerGrabbingTitan( player ) )
 		{
 			thread SendKsGUI_Threaded( player, "正在等待动画结束\n" + text + tips, < r, 255, 100 >, 0.2, 0.0, null, -0.4 )
 			startTime = Time()
