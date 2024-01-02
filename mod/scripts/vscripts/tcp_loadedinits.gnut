@@ -6,7 +6,6 @@ void function InfiniteFirepower_Init()
 	RandomMap_Init()
 	// 设置对局结束时显示在换图提示下方的文字
 	ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式\nQQ群:150381961 @LightBlueCube" )
-
 	// 如果注释了RandomMap_Init()，请务必将此处一并注释
 	// 如果获取到的随机地图播放列表为空，终止操作，等待RandomMap_Init()初始化播放列表并换图
 	if( GetConVarString( "random_map_playlist" ) == "" )
@@ -23,9 +22,13 @@ void function InfiniteFirepower_Init()
 
 	// 客制化泰坦
 	TitanChange_Init()
+	// 泰坦配装提示
+	TitanLoadoutTips_Init()
 
-	// 客制化铁驭技能
-	SkillChange_Init()
+	// 客制化铁驭
+	PilotChange_Init()
+	// 铁驭配装提示
+	PilotLoadoutTips_Init()
 
 	// 连杀系统
 	KillStreak_Init()

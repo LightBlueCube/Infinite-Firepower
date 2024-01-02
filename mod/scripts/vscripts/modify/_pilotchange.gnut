@@ -1,6 +1,6 @@
-global function SkillChange_Init
+global function PilotChange_Init
 
-void function SkillChange_Init()
+void function PilotChange_Init()
 {
 	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 	AddCallback_OnPlayerGetsNewPilotLoadout( OnPlayerGetsNewPilotLoadout )
