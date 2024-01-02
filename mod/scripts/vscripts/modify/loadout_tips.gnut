@@ -1,13 +1,15 @@
 untyped
-global function LoadoutTips_Init
+global function TitanLoadoutTips_Init
+global function PilotLoadoutTips_Init
 
-void function LoadoutTips_Init()
+void function TitanLoadoutTips_Init()
 {
-	// custom titans //
 	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_OnClientConnected( OnClientConnected )
+}
 
-	// pilot skills //
+void function PilotLoadoutTips_Init()
+{
 	AddCallback_OnPlayerRespawned( OnPlayerRespawned )
 	AddCallback_OnPlayerGetsNewPilotLoadout( OnPlayerGetsNewPilotLoadout )
 }

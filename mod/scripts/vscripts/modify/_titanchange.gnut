@@ -3,7 +3,6 @@ global function TitanChange_Init
 
 void function TitanChange_Init()
 {
-	LoadoutTips_Init()
 	AddSpawnCallback( "npc_titan", OnTitanfall )
 	AddCallback_OnPilotBecomesTitan( OnPilotBecomesTitan )
 	AddCallback_OnTitanBecomesPilot( OnTitanBecomesPilot )

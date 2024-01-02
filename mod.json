@@ -18,15 +18,15 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "modify/_skillchange.gnut",
-			"RunOn": "SERVER && MP"
-		},
-		{
-			"Path": "modify/loadout_tips.nut",
+			"Path": "modify/_pilotchange.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
 			"Path": "modify/_pilotshield.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
+			"Path": "modify/loadout_tips.gnut",
 			"RunOn": "SERVER && MP"
 		},
 
