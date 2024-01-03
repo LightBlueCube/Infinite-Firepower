@@ -141,7 +141,7 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 	turret.Hide()
 	turret.SetInvulnerable()
 	turret.SetParent( dropship ) // if missile gets destroyed,
-	turret.SetAngles( < 45, -90, 0 > )
+	turret.SetAngles( camAngles )
 	turret.SetOrigin( < -800, 0, 1200 > )
 	turret.GiveWeapon( "mp_weapon_rocket_launcher" )
 	DisableWeapons( turret, [] )
