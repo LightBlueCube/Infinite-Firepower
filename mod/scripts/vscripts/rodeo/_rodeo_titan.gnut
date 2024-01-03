@@ -2612,8 +2612,14 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool owne
 		float healthSegmentFrac = GetCurrentPlaylistVarFloat( "battery_health_frac", 0.5 )
 
 		float coreFrac = IsAmpedBattery( battery ) ? 0.4 : 0.8
-		if( battery.GetSkin() == 1 )
+		if( IsValid( battery ) )
+		{
+			if( battery.GetSkin() == 1 )
+				coreFrac = 0.2
+		}
+		else
 			coreFrac = 0.2
+
 		AddCreditToTitanCoreBuilder( titan, coreFrac ) //Always give core
 
 		// moved down for reworked regen system
@@ -2629,6 +2635,14 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool owne
 		// modified settings!
 		frac = batteryIsAmped ? frac * file.ampedBatteryRegenScale : frac * file.batteryRegenScale
 		//
+
+		if( IsValid( battery ) )
+		{
+			if( battery.GetSkin() == 1 )
+				frac = 0.5
+		}
+		else
+			frac = 0.5
 
 		// calculate health given
 		int addHealth = int( healingAmount * frac )
@@ -2653,8 +2667,6 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool owne
 		int shieldMaxHealth = soul.GetShieldHealthMax()
 		// modified settings
 		float shieldRegenFrac = batteryIsAmped ? file.ampedBatteryShieldRegenScale : file.batteryShieldRegenScale
-		if( battery.GetSkin() == 1 )
-			shieldRegenFrac = 0.5
 		int shieldRegen = int( shieldMaxHealth * shieldRegenFrac )
 		soul.SetShieldHealth( min( soul.GetShieldHealthMax(), soul.GetShieldHealth() + shieldRegen ) )
 

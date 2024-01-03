@@ -319,6 +319,7 @@ void function SmokeTrapThink( entity projectile )
 
 	float spacing = 100.0
 	float randomSize = 50
+	smokescreen.fxOffsets = []
 	for( float z = spacing; z >= 0; z -= spacing )
 		for( float x = spacing; x >= -spacing; x -= spacing )
 			for( float y = spacing; y >= -spacing; y -= spacing )
@@ -335,7 +336,7 @@ void function SmokeTrapThink( entity projectile )
 	trigger.SetBelowHeight( 0 )
 	trigger.SetOrigin( pos )
 	SetTeam( trigger, team )
-	trigger.kv.triggerFilterNpc = "all" // never teleports npcs
+	trigger.kv.triggerFilterNpc = "all"
 	trigger.kv.triggerFilterPlayer = "all"
 	trigger.kv.triggerFilterNonCharacter = "0"
 	trigger.SetEnterCallback( OnSonarTriggerEnter )

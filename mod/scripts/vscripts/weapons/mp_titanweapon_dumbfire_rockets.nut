@@ -18,6 +18,7 @@ void function MpTitanWeaponDumbfireRocket_Init()
     AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_stun_impact, ImpactStun_OnDamagedTarget )
 	// charge ball
 	RegisterWeaponDamageSource( "mp_titanweapon_charge_ball", "球狀閃電" )
+	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_dumbfire_rockets, DumbfireRocket_OnDamagedTarget )
     AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_charge_ball, ChargeBall_OnDamagedTarget )
 	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_charge_ball ) // doing check in stun laser damagesourceID
 
@@ -415,4 +416,15 @@ void function ChargeBall_OnDamagedTarget( entity target, var damageInfo )
 	if( !attacker.IsPlayer() )
 		return
 	MessageToPlayer( attacker, eEventNotifications.VANGUARD_ShieldGain, attacker )
+}
+
+void function DumbfireRocket_OnDamagedTarget( entity target, var damageInfo )
+{
+	entity inflictor = DamageInfo_GetInflictor( damageInfo )
+	if( Vortex_GetRefiredProjectileMods( inflictor ).contains( "charge_ball" ) )
+	{
+		DamageInfo_SetDamageSourceIdentifier( damageInfo, eDamageSourceId.mp_titanweapon_charge_ball )
+		DamageInfo_SetCustomDamageType( damageInfo, DF_DISSOLVE | DF_GIB | DF_ELECTRICAL | DF_STOPS_TITAN_REGEN )
+		ChargeBall_OnDamagedTarget( target, damageInfo )
+	}
 }
