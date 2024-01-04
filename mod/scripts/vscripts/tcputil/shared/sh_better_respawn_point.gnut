@@ -45,8 +45,8 @@ entity function TryFindBestRespawnPoint( int team, array<entity> points, float r
 
 entity function TryFindBestRespawnPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos )
 {
-	array<entity> bestPoints = points
-	float weightSave = 0
+	array<entity> bestPoints = []
+	float weightSave = -114514
 	foreach( point in points )
 	{
 		vector pointPos = point.GetOrigin()
@@ -93,5 +93,7 @@ entity function TryFindBestRespawnPointWithSettings( int team, array<entity> poi
 		else if( weight == weightSave )
 			bestPoints.append( point )
 	}
+	if( bestPoints.len() == 0 )	// defensive fix
+		return points[ RandomInt( points.len() ) ]
 	return bestPoints[ RandomInt( bestPoints.len() ) ]
 }
