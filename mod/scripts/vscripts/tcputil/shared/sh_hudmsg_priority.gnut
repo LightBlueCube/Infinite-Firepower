@@ -25,53 +25,84 @@ void function HudMessagePriority_Init()
 void function OnClientConnected( entity player )
 {
 	player.s.nowMsgPriority <- -1.0
+	player.s.nowMsg <- ""
 }
 
 bool function SendHudMessageWithPriority( entity player, float priority, var text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout = 90 )
 {
-	if( priority < player.s.nowMsgPriority )
-		return false
 	player.s.nowMsgPriority = priority
 	string str = string( text )
-	thread StartSendHudMessage( player, str, yaw, pos, rgb, time, priorityOnFadeout )
+	thread StartSendHudMessage( player, str, yaw, pos, rgb, time, priority, priorityOnFadeout )
+	if( priority < player.s.nowMsgPriority )
+		return false
 	return true
 }
 
-void function StartSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout )
+void function StartSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector time, float priority, float priorityOnFadeout )
 {
 	player.EndSignal( "OnDestroy" )
-	player.Signal( "SendingNewHudMessage" )
-	player.EndSignal( "SendingNewHudMessage" )
+	player.s.nowMsg = text	// if now priority is same, latecomer preferred
 
-	//fade in
+	// fade in
 	int tick = int( time.x * 10 )
 	vector rgbFadeStart = < 0, 0, 0 >
 	vector fadePerTick = < rgb.x / tick, rgb.y / tick, rgb.z / tick >
-	WhileSendHudMessage( player, text, yaw, pos, rgbFadeStart, fadePerTick, tick )
+	WhileSendHudMessage( player, text, yaw, pos, rgbFadeStart, fadePerTick, tick, priority )
 
 	// show msg
 	tick = int( time.y * 10 )
 	fadePerTick = < 0, 0, 0 >	// dont do any fade
-	WhileSendHudMessage( player, text, yaw, pos, rgb, fadePerTick, tick )
+	WhileSendHudMessage( player, text, yaw, pos, rgb, fadePerTick, tick, priority )
 
-	player.s.nowMsgPriority = priorityOnFadeout
+	PlayerPriorityCleanUp( player, priority, priorityOnFadeout )
+	priority = priorityOnFadeout
 
 	// fade out
 	tick = int( time.z * 10 )
 	rgbFadeStart = rgb
 	fadePerTick = < rgb.x / tick, rgb.y / tick, rgb.z / tick >
-	fadePerTick *= -1	// cuz we r doing fade out
-	WhileSendHudMessage( player, text, yaw, pos, rgb, fadePerTick, tick )
+	fadePerTick *= -1	// do fade out
+	WhileSendHudMessage( player, text, yaw, pos, rgbFadeStart, fadePerTick, tick, priority )
 
-	player.s.nowMsgPriority = -1.0
+	PlayerPriorityCleanUp( player, priority )
+	if( player.s.nowMsg == text )
+		player.s.nowMsg = ""
 }
 
-void function WhileSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector fadePerTick, int tick )
+void function WhileSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector fadePerTick, int tick, float priority )
 {
 	for( int i = tick; i > 0; i-- )
 	{
 		rgb += fadePerTick
-		SendHudMessage( player, text, yaw, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0.2, 0.0 )
+		thread SendHudMessageWithPriorityOverride( player, text, yaw, pos, rgb, priority )
 		WaitFrame()
 	}
+}
+
+void function SendHudMessageWithPriorityOverride( entity player, string text, float yaw, float pos, vector rgb, float priority )
+{
+	player.EndSignal( "OnDestroy" )
+	if( priority < player.s.nowMsgPriority )
+		return
+	if( priority == player.s.nowMsgPriority && text != player.s.nowMsg && player.s.nowMsg != "" )
+		return
+
+	player.Signal( "SendingNewHudMessage" )
+	player.EndSignal( "SendingNewHudMessage" )
+
+	player.s.nowMsgPriority = priority
+	player.s.nowMsg = text
+	SendHudMessage( player, text, yaw, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0.2, 0.0 )
+	wait 0.2
+	player.s.nowMsgPriority = -1
+}
+
+
+void function PlayerPriorityCleanUp( entity player, float priority, float overrideVal = -1 )
+{
+	if( priority < player.s.nowMsgPriority )
+		return
+
+	player.Signal( "SendingNewHudMessage" )
+	player.s.nowMsgPriority = overrideVal
 }

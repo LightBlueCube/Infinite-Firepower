@@ -198,6 +198,7 @@ void function OnSlowTrapDamaged( entity damageArea, var damageInfo )
 		case eDamageSourceId.mp_titanweapon_flame_wall:
 		case eDamageSourceId.mp_titanweapon_heat_shield:
 		case eDamageSourceId.mp_titanability_slow_trap:
+		case eDamageSourceId.mp_titanweapon_firewall_shotgun:
 			shouldExplode = true
 			break
 	}
@@ -207,7 +208,7 @@ void function OnSlowTrapDamaged( entity damageArea, var damageInfo )
 			if( damageArea.s.hasExplode )
 				return DamageInfo_SetDamage( damageInfo, 1001 )
 		damageArea.s.hasExplode <- true
-		
+
 		bool isExplosiveBarrel = damageArea.GetScriptName() == "explosive_barrel"
 		if ( isExplosiveBarrel )
 			CreateExplosiveBarrelExplosion( damageArea )
