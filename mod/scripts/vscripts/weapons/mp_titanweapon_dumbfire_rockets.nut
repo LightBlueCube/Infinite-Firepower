@@ -421,6 +421,9 @@ void function ChargeBall_OnDamagedTarget( entity target, var damageInfo )
 void function DumbfireRocket_OnDamagedTarget( entity target, var damageInfo )
 {
 	entity inflictor = DamageInfo_GetInflictor( damageInfo )
+	if( !inflictor.IsProjectile() )
+		return
+
 	if( Vortex_GetRefiredProjectileMods( inflictor ).contains( "charge_ball" ) )
 	{
 		DamageInfo_SetDamageSourceIdentifier( damageInfo, eDamageSourceId.mp_titanweapon_charge_ball )

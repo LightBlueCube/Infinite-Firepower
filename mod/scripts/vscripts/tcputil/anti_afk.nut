@@ -58,6 +58,6 @@ void function CheckPlayerMove( entity player )
 		if( afkTime >= file.warnTime )
 			SendHudMessageWithPriority( player, 95, "!!!!请不要挂机!!!!", -1, 0.3, < 255, 0, 0 >, < 0.0, 0.7, 1 > )
 		if( afkTime >= file.kickTime && GetPlayerArray().len() > file.kickNeededPlayer && !file.ignorePlayers.contains( player.GetUID() ) )
-			ServerCommand( "kickid "+ player.GetUID() )
+			NSDisconnectPlayer( player, "请不要挂机" )
 	}
 }

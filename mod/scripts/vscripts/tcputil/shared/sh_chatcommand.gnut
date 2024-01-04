@@ -17,11 +17,7 @@ void function ChatCommand_Init()
 
 void function AddChatCommandCallback( string cmd, bool functionref( entity, array<string> ) callbackFunc )
 {
-	if( cmd in file.chatCommandCallbacks )
-	{
-		printt( "[ERROR] ChatCommand: command:"+ cmd +" already exists")
-		unreachable
-	}
+	Assert( cmd in file.chatCommandCallbacks )
 
 	file.chatCommandCallbacks[ cmd ] <- callbackFunc
 }
@@ -33,11 +29,7 @@ void function RemoveChatCommandCallback( string cmd )
 
 void function AddCallback_OnReceivedSayTextMessage_AfterChatCommand( ClServer_MessageStruct functionref( ClServer_MessageStruct ) callbackFunc )
 {
-	if( file.afterChatCommandCallbacks.contains( callbackFunc ) )
-	{
-		printt( "[ERROR] ChatCommand: function already exists" )
-		unreachable
-	}
+	Assert( file.afterChatCommandCallbacks.contains( callbackFunc ) )
 
 	file.afterChatCommandCallbacks.append( callbackFunc )
 }
