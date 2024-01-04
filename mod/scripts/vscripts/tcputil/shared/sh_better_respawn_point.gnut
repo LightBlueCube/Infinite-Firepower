@@ -60,43 +60,30 @@ entity function TryFindBestRespawnPointWithSettings( int team, array<entity> poi
 			float distance = Distance( pos, pointPos )
 			if( distance > range )
 				continue
-			if( distance <= range * 0.5 )
-			{
-				weight += -4
-				haveEnemy = true
-			}
-			else if( distance <= range )
-			{
-				if( haveEnemy )
-				{
-					weight += -1.2
-					continue
-				}
 
-				haveEnemy = true
-				weight += 1.9
+			if( distance <= range * 0.5 )
+				weight += -4
+			else if( haveEnemy )
+				weight += weight > 0 ? -weight : -1.2
+			else
+			{
+				weight += 1.4
 				weight += GraphCapped( distance, range * 0.5, range, 0, 0.1 )
 			}
+			haveEnemy = true
 		}
 		foreach( pos in friendlyPos )
 		{
 			float distance = Distance( pos, pointPos )
 			if( distance > range )
 				continue
+
+			weight += 0.5
+			weight += GraphCapped( distance, range, 0, 0, 0.5 )
 			haveFriendly = true
-			weight += 1
-			weight += GraphCapped( distance, range, 0, 0, 0.1 )
 		}
 		if( svmPredictSameTeam )
-			weight += 2.5
-		if( svmPredictSameTeam && haveEnemy )
-			weight += -1.5
-		if( !haveEnemy && !haveFriendly )
-		{
-			if( svmPredictSameTeam )
-				weight += -1
-			weight += -1
-		}
+			weight += 1.4
 
 		if( weight > weightSave )
 		{
