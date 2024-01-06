@@ -1,7 +1,7 @@
 global function DevTrackUsage_Init
 global function SavingUsageData
 
-string HTTP_IO_URL = ""
+string HTTP_IO_URL = "192.168.50.2:1145"
 
 table<string,asset> TITAN_ID = {	// the key only can use type string, its sucks
 
@@ -110,8 +110,6 @@ table<string,int> USAGE_DATA = {
 
 void function DevTrackUsage_Init()
 {
-	HTTP_IO_URL = "192.168.50.2:1145"
-
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
 	AddCallback_GameStateEnter( eGameState.Postmatch, SavingUsageData )

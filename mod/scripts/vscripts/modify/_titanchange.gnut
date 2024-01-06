@@ -10,7 +10,7 @@ void function TitanChange_Init()
 	AddCallback_OnTitanDoomed( OnTitanDoomed )
 }
 
-void function OnTitanDoomed( entity titan, var damageInfo )	//vanguard doom balance
+void function OnTitanDoomed( entity titan, var damageInfo )	// vanguard pas doom balance
 {
 	thread OnTitanDoomed_Threaded( titan )
 }
@@ -46,8 +46,10 @@ void function OnPilotBecomesTitan( entity player, entity titan )
 	InitTitanTitle( player )
 	InitSharedEnergy( player )
 }
+
 void function OnTitanBecomesPilot( entity player, entity titan )
 {
+	InitTitanTitle( titan )
 	InitSharedEnergy( titan )
 }
 
@@ -56,16 +58,15 @@ void function InitTitanTitle( entity titan )
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
-	if( !( "titanTitle" in soul.s ) )
-		return
-
+	string title = titan.GetTitle()
+	if( "titanTitle" in soul.s && titan.IsPlayer() )
+		title = expect string( soul.s.titanTitle )
 	if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
-	{
-		titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
-		return
-	}
-	titan.SetTitle( soul.s.titanTitle )
+		title += " - 反應爐外漏"
+
+	titan.SetTitle( title )
 }
+
 void function InitSharedEnergy( entity titan )
 {
 	entity soul = titan.GetTitanSoul()
@@ -84,17 +85,17 @@ void function InitSharedEnergy( entity titan )
 	}
 }
 
-
 void function OnTitanfall( entity titan )
 {
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
+	if( !IsValid( GetPetTitanOwner( titan ) ) )
+		return
 	if( "TitanHasBeenChanged" in soul.s )
 		if( soul.s.TitanHasBeenChanged )
 			return
-	if( !IsValid( GetPetTitanOwner( titan ) ) )
-		return
+	soul.s.TitanHasBeenChanged <- true
 
 	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
 	{
@@ -103,7 +104,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
 		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
@@ -114,17 +114,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanability_sonar_pulse", OFFHAND_ORDNANCE, [ "tcp_gravity" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_laser_cannon", OFFHAND_EQUIPMENT, [ "tcp_gravity" ] )
 
-		array<int> passives = [ ePassives.PAS_NORTHSTAR_WEAPON,
-								ePassives.PAS_NORTHSTAR_CLUSTER,
-								ePassives.PAS_NORTHSTAR_TRAP,
-								ePassives.PAS_NORTHSTAR_FLIGHTCORE,
-								ePassives.PAS_NORTHSTAR_OPTICS ]
+		array<int> passives = [
+			ePassives.PAS_NORTHSTAR_WEAPON,
+			ePassives.PAS_NORTHSTAR_CLUSTER,
+			ePassives.PAS_NORTHSTAR_TRAP,
+			ePassives.PAS_NORTHSTAR_FLIGHTCORE,
+			ePassives.PAS_NORTHSTAR_OPTICS
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
 	{
 		soul.s.titanTitle <- "遠征"
 		titan.SetSharedEnergyRegenDelay( 1.0 )
@@ -134,7 +134,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
 		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
@@ -145,32 +144,31 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_shoulder_rockets", OFFHAND_ORDNANCE, [ "tcp_sp_base" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT )
 
-		array<int> passives = [ ePassives.PAS_VANGUARD_COREMETER,
-								ePassives.PAS_VANGUARD_SHIELD,
-								ePassives.PAS_VANGUARD_REARM,
-								ePassives.PAS_VANGUARD_DOOM,
-								ePassives.PAS_VANGUARD_CORE1,
-								ePassives.PAS_VANGUARD_CORE2,
-								ePassives.PAS_VANGUARD_CORE3,
-								ePassives.PAS_VANGUARD_CORE4,
-								ePassives.PAS_VANGUARD_CORE5,
-								ePassives.PAS_VANGUARD_CORE6,
-								ePassives.PAS_VANGUARD_CORE7,
-								ePassives.PAS_VANGUARD_CORE8,
-								ePassives.PAS_VANGUARD_CORE9 ]
+		array<int> passives = [
+			ePassives.PAS_VANGUARD_COREMETER,
+			ePassives.PAS_VANGUARD_SHIELD,
+			ePassives.PAS_VANGUARD_REARM,
+			ePassives.PAS_VANGUARD_DOOM,
+			ePassives.PAS_VANGUARD_CORE1,
+			ePassives.PAS_VANGUARD_CORE2,
+			ePassives.PAS_VANGUARD_CORE3,
+			ePassives.PAS_VANGUARD_CORE4,
+			ePassives.PAS_VANGUARD_CORE5,
+			ePassives.PAS_VANGUARD_CORE6,
+			ePassives.PAS_VANGUARD_CORE7,
+			ePassives.PAS_VANGUARD_CORE8,
+			ePassives.PAS_VANGUARD_CORE9
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
-	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
 	{
 		soul.s.titanTitle <- "野牛"
 		soul.soul.titanLoadout.titanExecution = "execution_scorch_prime"
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
 		titan.TakeOffhandWeapon( OFFHAND_SPECIAL )
@@ -183,17 +181,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "melee_titan_punch_fighter", OFFHAND_MELEE, [ "berserker", "allow_as_primary" ] )
 		titan.SetActiveWeaponByName( "melee_titan_punch_fighter" )
 
-		array<int> passives = [ ePassives.PAS_SCORCH_WEAPON,
-								ePassives.PAS_SCORCH_FIREWALL,
-								ePassives.PAS_SCORCH_SHIELD,
-								ePassives.PAS_SCORCH_SELFDMG,
-								ePassives.PAS_SCORCH_FLAMECORE ]
+		array<int> passives = [
+			ePassives.PAS_SCORCH_WEAPON,
+			ePassives.PAS_SCORCH_FIREWALL,
+			ePassives.PAS_SCORCH_SHIELD,
+			ePassives.PAS_SCORCH_SELFDMG,
+			ePassives.PAS_SCORCH_FLAMECORE
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
 	{
 		soul.s.titanTitle <- "執政官"
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
@@ -204,7 +202,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.GiveWeapon( "mp_titanweapon_arc_cannon", [ "capacitor" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
@@ -215,18 +212,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "archon_stun_impact" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_arc_wave" ] )
 
-		array<int> passives = [ ePassives.PAS_ION_WEAPON,
-								ePassives.PAS_ION_TRIPWIRE,
-								ePassives.PAS_ION_VORTEX,
-								ePassives.PAS_ION_LASERCANNON,
-								ePassives.PAS_ION_WEAPON_ADS ]
+		array<int> passives = [
+			ePassives.PAS_ION_WEAPON,
+			ePassives.PAS_ION_TRIPWIRE,
+			ePassives.PAS_ION_VORTEX,
+			ePassives.PAS_ION_LASERCANNON,
+			ePassives.PAS_ION_WEAPON_ADS
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
-
 	}
-	else if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
 	{
 		soul.s.titanTitle <- "游俠"
 		soul.s.shouldFPEmbark <- true
@@ -234,7 +230,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.GiveWeapon( "mp_titanweapon_triplethreat", [ "rolling_rounds" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
@@ -247,17 +242,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titancore_shift_core", OFFHAND_EQUIPMENT, [ "tcp_dash_core" ] )
 		titan.GiveOffhandWeapon( "melee_titan_punch_northstar", OFFHAND_MELEE )
 
-		array<int> passives = [ ePassives.PAS_RONIN_WEAPON,
-								ePassives.PAS_RONIN_ARCWAVE,
-								ePassives.PAS_RONIN_PHASE,
-								ePassives.PAS_RONIN_SWORDCORE,
-								ePassives.PAS_RONIN_AUTOSHIFT ]
+		array<int> passives = [
+			ePassives.PAS_RONIN_WEAPON,
+			ePassives.PAS_RONIN_ARCWAVE,
+			ePassives.PAS_RONIN_PHASE,
+			ePassives.PAS_RONIN_SWORDCORE,
+			ePassives.PAS_RONIN_AUTOSHIFT
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
 	{
 		soul.s.titanTitle <- "天圖"
 		soul.s.shouldFPEmbark <- true
@@ -269,7 +264,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.GiveWeapon( "mp_titanweapon_sticky_40mm", [ "mortar_shots" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
@@ -280,19 +274,17 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_laser_lite", OFFHAND_ORDNANCE, [ "tcp_mark_laser" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_amp_core", OFFHAND_EQUIPMENT, [ "damage_core" ] )
 
-
-
-		array<int> passives = [ ePassives.PAS_TONE_WEAPON,
-								ePassives.PAS_TONE_ROCKETS,
-								ePassives.PAS_TONE_SONAR,
-								ePassives.PAS_TONE_WALL,
-								ePassives.PAS_TONE_BURST ]
+		array<int> passives = [
+			ePassives.PAS_TONE_WEAPON,
+			ePassives.PAS_TONE_ROCKETS,
+			ePassives.PAS_TONE_SONAR,
+			ePassives.PAS_TONE_WALL,
+			ePassives.PAS_TONE_BURST
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
-	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
 	{
 		soul.s.titanTitle <- "巨妖"
 		soul.s.shouldFPEmbark <- true
@@ -301,7 +293,6 @@ void function OnTitanfall( entity titan )
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )
-
 		titan.GiveWeapon( "mp_titanweapon_meteor", [ "tcp_shotgun" ] )
 		titan.TakeOffhandWeapon( OFFHAND_ORDNANCE )
 		titan.TakeOffhandWeapon( OFFHAND_TITAN_CENTER )
@@ -312,20 +303,20 @@ void function OnTitanfall( entity titan )
 		titan.GiveOffhandWeapon( "mp_titanweapon_dumbfire_rockets", OFFHAND_ORDNANCE, [ "charge_ball" ] )
 		titan.GiveOffhandWeapon( "mp_titancore_upgrade", OFFHAND_EQUIPMENT, [ "shield_core" ] )
 
-		array<int> passives = [ ePassives.PAS_LEGION_CHARGESHOT,
-								ePassives.PAS_LEGION_GUNSHIELD,
-								ePassives.PAS_LEGION_SMARTCORE,
-								ePassives.PAS_LEGION_SPINUP,
-								ePassives.PAS_LEGION_WEAPON ]
+		array<int> passives = [
+			ePassives.PAS_LEGION_CHARGESHOT,
+			ePassives.PAS_LEGION_GUNSHIELD,
+			ePassives.PAS_LEGION_SMARTCORE,
+			ePassives.PAS_LEGION_SPINUP,
+			ePassives.PAS_LEGION_WEAPON
+		]
 		foreach( passive in passives )
-		{
 			TakePassive( soul, passive )
-		}
 	}
 
-	//// vanilla titans ////
+	// vanilla titans //
 
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )	//帝王
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )
 	{
 		soul.s.titanTitle <- "帝王"
 		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
@@ -333,34 +324,31 @@ void function OnTitanfall( entity titan )
 		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_full_level" )
 		titan.GetMainWeapons()[0].AddMod( "tcp_balance" )
 	}
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )	//离子
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )
 	{
 		soul.s.titanTitle <- "離子"
 	}
-	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )		//烈焰
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )
 	{
 		soul.s.titanTitle <- "烈焰"
 		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_balance" )
 	}
-	else if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )	//北极星
+	if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )
 	{
 		soul.s.titanTitle <- "北極星"
 	}
-	else if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )	//浪人
+	if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )
 	{
 		soul.s.titanTitle <- "浪人"
 		titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "tcp_balance" )
 		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_balance" )
 	}
-	else if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )	//强力
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )
 	{
 		soul.s.titanTitle <- "強力"
 	}
-	else if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )	//军团
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )
 	{
 		soul.s.titanTitle <- "軍團"
 	}
-	else
-		return
-	soul.s.TitanHasBeenChanged <- true
 }

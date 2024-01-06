@@ -51,10 +51,10 @@ var function OnWeaponPrimaryAttack_UpgradeCore( entity weapon, WeaponPrimaryAtta
 		int currentUpgradeCount
 		currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
 
-		if( currentUpgradeCount <= 2 )
+		if( weapon.HasMod( "tcp_full_level" ) && currentUpgradeCount > 2 )
+			FullUpgradeThink( weapon, owner, soul )
+		else
 			DefaultUpgrade( weapon, owner, soul )
-		else if( weapon.HasMod( "tcp_full_level" ) )
-			UpgradeThink( weapon, owner, soul )
 
 		soul.SetTitanSoulNetInt( "upgradeCount", currentUpgradeCount + 1 )
 		int statesIndex = owner.FindBodyGroup( "states" )
@@ -174,36 +174,41 @@ void function ServerCallback_VanguardUpgradeMessage( int upgradeID )
 void function DefaultUpgrade( entity weapon, entity owner, entity soul )
 {
 	int currentUpgradeCount = soul.GetTitanSoulNetInt( "upgradeCount" )
-	if ( currentUpgradeCount == 0 )
+	if( currentUpgradeCount == 0 )
 	{
 		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE1 ) )
-			ArcRounds( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE2 ) )
-			MissileRacks( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE3 ) )
-			EnergyTransfer( weapon, owner, soul )
+			return ArcRounds( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE2 ) )
+			return MissileRacks( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE3 ) )
+			return EnergyTransfer( weapon, owner, soul )
 	}
-	else if ( currentUpgradeCount == 1 )
+	if( currentUpgradeCount == 1 )
 	{
 		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE4 ) )
-			RapidRearm( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE5 ) )
-			Maelstrom( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE6 ) )
-			EnergyField( weapon, owner, soul )
+			return RapidRearm( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE5 ) )
+			return Maelstrom( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE6 ) )
+			return EnergyField( weapon, owner, soul )
 	}
-	else if ( currentUpgradeCount == 2 )
+	if( currentUpgradeCount == 2 )
 	{
 		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE7 ) )
-			Multi_TargetMissiles( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE8 ) )
-			SuperiorChassis( weapon, owner, soul )
-		else if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE9 ) )
-			XO_16BattleRifle( weapon, owner, soul )
+			return Multi_TargetMissiles( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE8 ) )
+			return SuperiorChassis( weapon, owner, soul )
+		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE9 ) )
+			return XO_16BattleRifle( weapon, owner, soul )
+	}
+	if( owner.IsPlayer() )
+	{
+		int conversationID = GetConversationIndex( "upgradeShieldReplenish" )
+		Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
 	}
 }
 
-void function UpgradeThink( entity weapon, entity owner, entity soul )
+void function FullUpgradeThink( entity weapon, entity owner, entity soul )
 {
 	if( !SoulHasPassive( soul, ePassives.PAS_VANGUARD_CORE3 ) )
 	{
@@ -250,8 +255,7 @@ void function UpgradeThink( entity weapon, entity owner, entity soul )
 		GivePassive( soul, ePassives.PAS_VANGUARD_CORE9 )
 		return XO_16BattleRifle( weapon, owner, soul )
 	}
-
-	if ( owner.IsPlayer() )
+	if( owner.IsPlayer() )
 	{
 		int conversationID = GetConversationIndex( "upgradeShieldReplenish" )
 		Remote_CallFunction_Replay( owner, "ServerCallback_PlayTitanConversation", conversationID )
@@ -601,6 +605,7 @@ void function ShieldCoreThink( entity weapon, float coreDuration )
 
 	const int SHILED_CORE_REGEN_RATE = 200
 	const float SHIELD_CORE_REGEN_TICKRATE = 0.1 // 2000 shields per second
+	soul.nextRegenTime = Time() + coreDuration
 	float startTime = Time()
 	while( Time() < startTime + coreDuration )
 	{
