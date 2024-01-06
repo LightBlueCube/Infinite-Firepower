@@ -1,6 +1,6 @@
-global function InfiniteFirepower_Init
+global function LoadedInits_Init
 
-void function InfiniteFirepower_Init()
+void function LoadedInits_Init()
 {
 	// 随机换图
 	RandomMap_Init()

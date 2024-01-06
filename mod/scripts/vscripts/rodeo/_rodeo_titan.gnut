@@ -1305,28 +1305,10 @@ struct RodeoRiderSequenceStruct
 
 void function DisableCloakBeforeRodeoSequence( entity rodeoPilot, RodeoRiderSequenceStruct dataStruct )
 {
-	if ( !IsCloaked( rodeoPilot ) )
-		return
-
-	dataStruct.wasCloaked = true
-	dataStruct.cloakEndTime = rodeoPilot.GetCloakEndTime()
-	DisableCloak( rodeoPilot, 0.0 )
-
 }
 
 void function RestoreCloakAfterRodeoSequence( entity rodeoPilot, RodeoRiderSequenceStruct dataStruct )
 {
-	if ( !IsAlive( rodeoPilot ) )
-		return
-
-	if ( !dataStruct.wasCloaked  )
-		return
-
-	Assert( dataStruct.cloakEndTime > 0.0 )
-
-	float remainingCloakDuration = max( 0.0, dataStruct.cloakEndTime - Time() )
-	if ( remainingCloakDuration > CLOAK_FADE_IN  ) //Has to be greater than 1.0 fade in duration, otherwise will cloak forever
-		EnableCloak( rodeoPilot, remainingCloakDuration, CLOAK_FADE_IN )
 }
 
 void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, entity titanSoul, RodeoPackageStruct rodeoPackage )
@@ -4378,14 +4360,13 @@ void function ClassicRodeo_ChangeTitanTitleWhenBatteryMoved( entity titan, bool 
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
-	if( !( "titanTitle" in soul.s ) )
-		return
-	if( battery )
-	{
-		titan.SetTitle( soul.s.titanTitle )
-		return
-	}
-	titan.SetTitle( soul.s.titanTitle + " - 反應爐外漏" )
+	string title = titan.GetTitle()
+	if( "titanTitle" in soul.s && titan.IsPlayer() )
+		title = expect string( soul.s.titanTitle )
+	if( !battery )
+		title += " - 反應爐外漏"
+
+	titan.SetTitle( title )
 }
 
 void function Rodeo_SetTitanRodeoSequenceEnabled( entity titan, bool enabled )

@@ -82,6 +82,7 @@ function MpTitanweaponMeteor_Init()
 
 	RegisterWeaponDamageSource( "mp_titanweapon_firewall_shotgun", "龍息彈" )
 	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_meteor, Meteor_DamagedTarget )
+	AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_firewall_shotgun, FireWallShotGun_DamagedTarget )
 }
 
 void function OnWeaponActivate_Meteor( entity weapon )
@@ -661,7 +662,7 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 			SF_ENVEXPLOSION_NO_NPC_SOUND_EVENT,					// explosion flags
 			0, 													// distanceFromAttacker
 			0, 													// explosionForce
-			DF_EXPLOSION,								// damage flags
+			DF_EXPLOSION | DF_STOPS_TITAN_REGEN,				// damage flags
 			damageSourceId										// damage source id
 		)
 
@@ -669,6 +670,14 @@ void function FireWallShotGun_PROTO_PhysicsThermiteCausesDamage( entity trail, e
 
 		wait 0.1
 	}
+}
+
+void function FireWallShotGun_DamagedTarget( entity target, var damageInfo )
+{
+	if ( !IsValid( target ) )
+		return
+
+	Thermite_DamagePlayerOrNPCSounds( target )
 }
 
 void function Meteor_DamagedTarget( entity target, var damageInfo )

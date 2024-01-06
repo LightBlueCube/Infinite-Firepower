@@ -161,11 +161,11 @@ var function OnAbilityStart_Damage_Core( entity weapon, WeaponPrimaryAttackParam
 	return 1
 }
 
-void function DamageCoreThink( entity weapon, float coreDuration )
+void function DamageCoreThink( entity coreWeapon, float coreDuration )
 {
 	#if SERVER
-	weapon.EndSignal( "OnDestroy" )
-	entity owner = weapon.GetWeaponOwner()
+	coreWeapon.EndSignal( "OnDestroy" )
+	entity owner = coreWeapon.GetWeaponOwner()
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "DisembarkingTitan" )
@@ -191,17 +191,13 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 		GivePassive( owner, ePassives.PAS_FUSION_CORE )
 	}
 
-	if( owner.GetMainWeapons().len() != 0 )
-	{
-		entity weapon = owner.GetMainWeapons()[0]
-		foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
-		{
-			weapon.AddMod( mod )
-		}
-	}
+	foreach( weapons in [ owner.GetMainWeapons(), owner.GetOffhandWeapons() ] )
+		foreach( weapon in weapons )
+			foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
+				weapon.AddMod( mod )
 
 	OnThreadEnd(
-	function() : ( weapon, soul, owner, statusEffect )
+	function() : ( coreWeapon, soul, owner, statusEffect )
 		{
 			if ( IsValid( owner ) )
 			{
@@ -214,20 +210,19 @@ void function DamageCoreThink( entity weapon, float coreDuration )
 					StatusEffect_Stop( owner, statusEffect )
 					TakePassive( owner, ePassives.PAS_FUSION_CORE )
 				}
-				if( owner.GetMainWeapons().len() != 0 )
-				{
-					entity weapon = owner.GetMainWeapons()[0]
-					if( !weapon.HasMod( "tcp_no_gravity" ) )
+
+				foreach( weapons in [ owner.GetMainWeapons(), owner.GetOffhandWeapons() ] )
+					foreach( weapon in weapons )
 						foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
-							weapon.RemoveMod( mod )
-				}
+							if( weapon.HasMod( mod ) && !weapon.HasMod( "tcp_no_gravity" ) )
+								weapon.RemoveMod( mod )
 			}
 
-			if ( IsValid( weapon ) )
+			if ( IsValid( coreWeapon ) )
 			{
 				if ( IsValid( owner ) )
-					CoreDeactivate( owner, weapon )
-				OnAbilityEnd_TitanCore( weapon )
+					CoreDeactivate( owner, coreWeapon )
+				OnAbilityEnd_TitanCore( coreWeapon )
 			}
 
 			if ( IsValid( soul ) )

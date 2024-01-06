@@ -1,5 +1,5 @@
 {
-	"Name": "Infinite-Firepower",
+	"Name": "ifp-base-package",
 	"LoadPriority": 100,
 	"Scripts": [
 
@@ -8,7 +8,7 @@
 			"Path": "tcp_loadedinits.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
-				"After": "InfiniteFirepower_Init"
+				"After": "LoadedInits_Init"
 			}
 		},
 
