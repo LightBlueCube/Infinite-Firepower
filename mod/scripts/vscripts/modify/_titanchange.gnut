@@ -1,5 +1,6 @@
 untyped
 global function TitanChange_Init
+global function InitTitanTitle
 
 void function TitanChange_Init()
 {
@@ -58,10 +59,21 @@ void function InitTitanTitle( entity titan )
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
-	string title = titan.GetTitle()
-	if( "titanTitle" in soul.s && titan.IsPlayer() )
-		title = expect string( soul.s.titanTitle )
-	if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
+	if( !( "titanTitle" in soul.s ) )
+		return
+	string title = expect string( soul.s.titanTitle )
+	if( titan.IsNPC() && IsValid( GetPetTitanOwner( titan ) ) )
+	{
+		if( SoulHasPassive( soul, ePassives.PAS_ENHANCED_TITAN_AI ) )
+			title = "強化泰坦"
+		else
+			title = "自動泰坦"
+		if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
+			title += " - 反應爐外漏"
+		else
+			title += " - " + expect string( soul.s.titanTitle )
+	}
+	else if( ClassicRodeo_GetSoulBatteryCount( soul ) == 0 )
 		title += " - 反應爐外漏"
 
 	titan.SetTitle( title )
@@ -351,4 +363,6 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "軍團"
 	}
+
+	InitTitanTitle( titan )
 }
