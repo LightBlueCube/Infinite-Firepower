@@ -134,15 +134,11 @@ void function FuckUpPlayer( entity player )
 	player.Signal( "FuckUpPlayer" )
 	player.EndSignal( "FuckUpPlayer" )
 	player.EndSignal( "OnDestroy" )
+
 	wait 0.5
-	if( player.IsTitan() )
-	{
-		entity titan = CreateAutoTitanForPlayer_ForTitanBecomesPilot( player )
-		DispatchSpawn( titan )
-		TitanBecomesPilot( player, titan )
-		if( IsValid( titan ) )
-			titan.Destroy()
-	}
+	SendHudMessageWithPriority( player, 102, "喜欢蹲起？", -1, 0.4, < 255, 0, 0 >, < 0, 5, 1 > )
+	player.Die()
+	wait 0.5
 
 	player.s.dontShowTips <- true
 	for( int i = 25; i > 0; i-- )
