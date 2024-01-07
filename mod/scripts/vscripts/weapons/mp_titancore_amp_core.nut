@@ -194,7 +194,8 @@ void function DamageCoreThink( entity coreWeapon, float coreDuration )
 	foreach( weapons in [ owner.GetMainWeapons(), owner.GetOffhandWeapons() ] )
 		foreach( weapon in weapons )
 			foreach( mod in GetWeaponBurnMods( weapon.GetWeaponClassName() ) )
-				weapon.AddMod( mod )
+				if( weapon.GetWeaponClassName() != "mp_titanability_particle_wall" )
+					weapon.AddMod( mod )
 
 	OnThreadEnd(
 	function() : ( coreWeapon, soul, owner, statusEffect )

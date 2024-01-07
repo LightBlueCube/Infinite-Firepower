@@ -1428,7 +1428,7 @@ void function PlayerRemovesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 
 	EmitDifferentSoundsOnEntityForPlayerAndWorld( dataStruct.interiorSound, dataStruct.exteriorSound, rodeoPilot, rodeoTitan ) //Play sound on rodeoPilot instead of panel
 	FirstPersonSequence( sequence, rodeoPilot, rodeoTitan )
-	ClassicRodeo_ChangeTitanTitleWhenBatteryMoved( rodeoTitan, false )
+	InitTitanTitle( rodeoTitan )
 }
 
 void function MonitorRodeoPastPointOfNoReturn( entity rodeoPilot, entity titanSoul )
@@ -1723,7 +1723,7 @@ void function PlayerAppliesBatteryPack( entity rodeoPilot, entity rodeoTitan, en
 		Rodeo_PilotAddsBatteryToFriendlyTitan( rodeoPilot, rodeoTitan )
 	#endif
 
-	ClassicRodeo_ChangeTitanTitleWhenBatteryMoved( rodeoTitan, true )
+	InitTitanTitle( rodeoTitan )
 }
 
 void function ClearRodeoAnimTempProps( entity player )
@@ -4351,22 +4351,6 @@ void function PilotRegrabTitan_Threaded( entity soul, entity titan, entity oldTi
 	rodeoPilot.ClearParent()
 	//rodeoPilot.SetParent( titan, "hijack", false, 1 ) // this is hacky! only titans always use hijack as their rodeo attachment
 	rodeoPilot.SetParent( titan, titanAttachment ) // try to use this one to re-bind rodeo player
-}
-
-void function ClassicRodeo_ChangeTitanTitleWhenBatteryMoved( entity titan, bool battery )
-{
-	if( !IsValid( titan ) )
-		return
-	entity soul = titan.GetTitanSoul()
-	if( !IsValid( soul ) )
-		return
-	string title = titan.GetTitle()
-	if( "titanTitle" in soul.s && titan.IsPlayer() )
-		title = expect string( soul.s.titanTitle )
-	if( !battery )
-		title += " - 反應爐外漏"
-
-	titan.SetTitle( title )
 }
 
 void function Rodeo_SetTitanRodeoSequenceEnabled( entity titan, bool enabled )
