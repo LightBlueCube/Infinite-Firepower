@@ -1208,8 +1208,6 @@ void function TryBatteryStyleRodeo( entity rodeoPilot, entity rodeoTitan, entity
 		bool sameTeam = rodeoPilot.GetTeam() == rodeoTitan.GetTeam()
 		bool shouldDoFriendlyGrab = sameTeam // base setting
 		bool classicRodeo = ClassicRodeo_IsEnabled()
-		bool meleePressing = rodeoPilot.IsInputCommandHeld( IN_MELEE )
-		bool usePressing = rodeoPilot.IsInputCommandHeld( IN_USE )
 
 		if( classicRodeo ) // classic rodeo condition: never do friendlyGrab, cause we need to do ClassicRodeoThink() below
 			shouldDoFriendlyGrab = false
@@ -3542,7 +3540,7 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 		if( result.signal == "RodeoDefensiveSequence" )
 		{
 			//if( ClassicRodeo_GetBatteryCountPlayerAllowedToApply( rodeoPilot ) >= 1 && pilotHasBattery && ( friendlyFireOn || sameTeam ) )
-			if( ClassicRodeo_GetBatteryCountPlayerAllowedToApply( rodeoPilot ) >= 1 && pilotHasBattery && sameTeam )
+			if( pilotHasBattery && sameTeam )
 				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
 		}
 		else if( result.signal == "RodeoOffensiveSequence" )
