@@ -1,32 +1,36 @@
 global function AutoShutdown_Init
+global function ShutdownServer
 
 void function AutoShutdown_Init()
 {
-	RegisterSignal( "AutoShutdownCountdown" )
+	RegisterSignal( "AutoShutdownNewCountdown" )
 	AddCallback_OnClientConnecting( StopCountdown )
 	AddCallback_OnClientDisconnected( OnClientDisconnected )
 	if( GetConVarString( "is_server_frist_start" ) == "1" )
 	{
 		SetConVarString( "is_server_frist_start", "0" )
-		thread WaitBeforeStartCountdown( 60 * 60 )	// 60 minutes
+		thread ShutdownCountdown( 60 * 60 )	// 60 minutes
 		return
 	}
 
-	thread StartCountdown( null )
+	thread ShutdownCountdown( 60 )	// 1 minutes, wait for player connect
 }
 
-void function WaitBeforeStartCountdown( int time )
+void function ShutdownCountdown( int time )
 {
+	svGlobal.levelEnt.Signal( "AutoShutdownNewCountdown" )
+	svGlobal.levelEnt.EndSignal( "AutoShutdownNewCountdown" )
+
 	wait time
-	thread StartCountdown( null )
+	thread ShutdownServerWhenEmpty()
 }
 
 void function OnClientDisconnected( entity client )
 {
-	thread StartCountdown( client )
+	thread ShutdownServerWhenEmpty( client )
 }
 
-void function StartCountdown( entity client )
+void function ShutdownServerWhenEmpty( entity client = null )
 {
 	foreach( player in GetPlayerArray() )
 	{
@@ -34,24 +38,18 @@ void function StartCountdown( entity client )
 			continue
 		return
 	}
-
-	svGlobal.levelEnt.Signal( "AutoShutdownCountdown" )
-	svGlobal.levelEnt.EndSignal( "AutoShutdownCountdown" )
-	wait 60
-	SavingUsageData()
-	wait 1
-	foreach( player in GetPlayerArray() )
-	{
-		if( player == client || !IsValid( player ) )
-			continue
-		return
-	}
-
 	printt( "[AutoShutdown] server is empty! shutdowning!" )
-	ServerCommand( "quit" )	// say goodbye lol
+	ShutdownServer()
+}
+
+void function ShutdownServer()
+{
+	printt( "[ShutdownServer()] ShutdownServer() has been called, starting shutdown sequence" )
+	SavingUsageData()
+	ServerCommand( "quit" )
 }
 
 void function StopCountdown( entity client )
 {
-	svGlobal.levelEnt.Signal( "AutoShutdownCountdown" )
+	svGlobal.levelEnt.Signal( "AutoShutdownNewCountdown" )
 }
