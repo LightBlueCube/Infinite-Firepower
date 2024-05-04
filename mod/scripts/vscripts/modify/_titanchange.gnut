@@ -56,6 +56,8 @@ void function OnTitanBecomesPilot( entity player, entity titan )
 
 void function InitTitanTitle( entity titan )
 {
+	if( !IsValid( titan ) )
+		return
 	entity soul = titan.GetTitanSoul()
 	if( !IsValid( soul ) )
 		return
