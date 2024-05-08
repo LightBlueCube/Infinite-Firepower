@@ -20,4 +20,6 @@ modify铁驭武器在/modify_weapons
 
 常用插件在/tcputil，有些插件有前置，大部分前置在/tcputil/shared
 
+> <strong><font color="#dc3545">注意！</font></strong>在某些文件中定义了一些global struct或者global var，请保证定义这些东西的文件在json中的顺序要比使用这些东西的文件要靠前，否则编译器会报错undefined
+
 在tcp_loadedinits.gnut内配置要开启的功能，默认全开
