@@ -9,7 +9,7 @@ void function AutoShutdown_Init()
 	if( GetConVarString( "is_server_frist_start" ) == "1" )
 	{
 		SetConVarString( "is_server_frist_start", "0" )
-		thread ShutdownCountdown( 60 * 60 )	// 60 minutes
+		thread ShutdownCountdown( 6 * 60 * 60 )	// 6 hours
 		return
 	}
 
