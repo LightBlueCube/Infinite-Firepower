@@ -49,6 +49,10 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "killstreak/orbital_strike.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
 			"Path": "killstreak/cruise_missile.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {

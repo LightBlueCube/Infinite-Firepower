@@ -23,6 +23,7 @@ global function GiveFriendlyRodeoPlayerProtection
 global function TakeAwayFriendlyRodeoPlayerProtection
 global function Rodeo_GiveBatteryToPlayer
 global function Rodeo_PilotThrowsBattery
+global function Rodeo_OnTouchBatteryPack_Internal
 
 global function Rodeo_TakeBatteryAwayFromPilot
 
@@ -83,6 +84,7 @@ global function ClassicRodeo_IsPlayerRemovingBatteryPack
 global function ClassicRodeo_IsPlayerThrowingGrenadeInHatch
 global function ClassicRodeo_IsPlayerGrabbingTitan
 global function ClassicRodeo_GetSoulBatteryCount
+global function ClassicRodeo_SetSoulBatteryCount
 #endif // MP
 
 #if MP // nessie modify
@@ -3539,6 +3541,12 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 
 		if( result.signal == "RodeoDefensiveSequence" )
 		{
+			// KillStreak modify
+			if( GetBatteryOnBack( rodeoPilot ).GetSkin() == 1 )
+			{
+				SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 4.0, 1.0 > )
+				return
+			}
 			//if( ClassicRodeo_GetBatteryCountPlayerAllowedToApply( rodeoPilot ) >= 1 && pilotHasBattery && ( friendlyFireOn || sameTeam ) )
 			if( pilotHasBattery && sameTeam )
 				waitthread ClassicRodeo_PlayerAppliesBatteryPackWhileOnBoard( rodeoPilot, titanSoul, rodeoPackage )
@@ -3782,6 +3790,8 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 	for ( float i = 1.0; i <= batteryCount; i += 1.0 )
 	{
 		entity newBattery = Rodeo_CreateBatteryPack()
+		newBattery.SetSkin( RandomInt( 10 ) == 0 ? 0 : 2 )	// 90% Yellow, 10% Green
+		Battery_StartFX( newBattery )
 		newBattery.s.touchEnabledTime = Time() + 0.3
 		vector direction = AnglesToForward( <0, i/batteryCount * 360.0, 0> )
 		newBattery.SetOrigin( ent.GetWorldSpaceCenter() + direction * 30 )
