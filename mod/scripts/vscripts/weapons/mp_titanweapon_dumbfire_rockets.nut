@@ -353,7 +353,37 @@ entity function ChargeBall_CreateBallLightning( entity owner, vector origin, vec
 	SetTeam( ballLightning, owner.GetTeam() )
 
 	thread ChargeBall_BallLightningThink( ballLightning )
+	thread ChargeBall_ZapFxToOwner( ballLightning, owner )
 	return ballLightning
+}
+
+void function ChargeBall_ZapFxToOwner( entity ballLightning, entity owner )
+{
+	ballLightning.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDestroy" )
+	owner.EndSignal( "OnDeath" )
+	owner.EndSignal( "TitanEjectionStarted" )
+	owner.EndSignal( "DisembarkingTitan" )
+
+	string tag = "center"
+
+	if ( IsHumanSized( owner ) )
+		tag = "CHESTFOCUS"
+	else if ( owner.IsTitan() )
+		tag = "HIJACK"
+	else if ( IsSuperSpectre( owner ) || IsAirDrone( owner ) )
+		tag = "CHESTFOCUS"
+	else if ( IsDropship( owner ) )
+		tag = "ORIGIN"
+	else if ( owner.GetClassName() == "npc_turret_mega" )
+		tag = "ATTACH"
+
+	for( ;; )
+	{
+		WaitFrame()
+		thread BallLightningZapConnectionFX( ballLightning, owner, tag, ballLightning.e.ballLightningData )
+		thread BallLightningZapFX( ballLightning, owner, tag, ballLightning.e.ballLightningData )
+	}
 }
 
 void function ChargeBall_BallLightningThink( entity ballLightning )
