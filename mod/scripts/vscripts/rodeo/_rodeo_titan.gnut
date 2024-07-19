@@ -3542,10 +3542,13 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 		if( result.signal == "RodeoDefensiveSequence" )
 		{
 			// KillStreak modify
-			if( GetBatteryOnBack( rodeoPilot ).GetSkin() == 1 )
+			if( IsValid( GetBatteryOnBack( rodeoPilot ) ) )
 			{
-				SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 4.0, 1.0 > )
-				return
+				if( GetBatteryOnBack( rodeoPilot ).GetSkin() == 1 )
+				{
+					SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 4.0, 1.0 > )
+					return
+				}
 			}
 			//if( ClassicRodeo_GetBatteryCountPlayerAllowedToApply( rodeoPilot ) >= 1 && pilotHasBattery && ( friendlyFireOn || sameTeam ) )
 			if( pilotHasBattery && sameTeam )
