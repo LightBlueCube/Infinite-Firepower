@@ -28,10 +28,37 @@ var function OnWeaponPrimaryAttack_ability_heal( entity weapon, WeaponPrimaryAtt
 		EmitSoundOnEntityOnlyToPlayer( ownerPlayer, ownerPlayer, "titan_flight_liftoff_1p" )
 		float movestunEffect = 1.0 - StatusEffect_Get( ownerPlayer, eStatusEffect.dodge_speed_slow )
 		float moveSpeed = 600 * movestunEffect
-		if( ownerPlayer.IsOnGround() )
-			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed, ownerPlayer.GetVelocity() + < 0, 0, 400 > )
+		float height = 400
+		if( !ownerPlayer.IsOnGround() )
+		{
+			moveSpeed *= 0.5
+			height *= 2
+		}
+
+		float xAxis = ownerPlayer.GetInputAxisRight()
+		float yAxis = ownerPlayer.GetInputAxisForward()
+		if( xAxis == 0 && yAxis == 0 )
+		{
+			yAxis = 1
+
+			vector playerAngles = ownerPlayer.EyeAngles()
+			playerAngles.x = 0
+			playerAngles.z = 0
+			vector forward = AnglesToForward( playerAngles )
+			vector right = AnglesToRight( playerAngles )
+
+			vector directionVec = Vector(0,0,0)
+			directionVec += right * xAxis
+			directionVec += forward * yAxis
+
+			vector directionAngles = VectorToAngles( directionVec )
+			vector directionForward = AnglesToForward( directionAngles )
+
+			ownerPlayer.SetVelocity( directionForward * moveSpeed + ownerPlayer.GetVelocity() + < 0, 0, height > )
+		}
 		else
-			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed * 0.5 , ownerPlayer.GetVelocity() + < 0, 0, 800 > )
+			SetPlayerVelocityFromInput( ownerPlayer, moveSpeed, ownerPlayer.GetVelocity() + < 0, 0, height > )
+
 		entity soul = ownerPlayer.GetTitanSoul()
 		if ( soul == null )
 			soul = ownerPlayer
