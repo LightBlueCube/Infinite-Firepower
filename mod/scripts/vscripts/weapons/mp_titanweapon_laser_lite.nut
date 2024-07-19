@@ -108,7 +108,8 @@ void function HighLightingTarget( entity target )
 	Highlight_ClearEnemyHighlight( target )
 	Highlight_SetSonarHighlightWithParam0( target, "enemy_sonar", <1, 0, 0> )
 
-	thread MarkLaserHudMsgThink( target )
+	if( target.IsPlayer() )
+		thread MarkLaserHudMsgThink( target )
 	wait 6
 }
 

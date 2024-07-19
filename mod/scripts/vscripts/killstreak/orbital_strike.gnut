@@ -1,0 +1,129 @@
+untyped
+global function ApplyOrbitalStrike
+
+void function ApplyOrbitalStrike( entity player )
+{
+	if( !player.IsHuman() || !IsAlive( player ) )
+		return
+	if( PlayerHasMaxBatteryCount( player ) )
+	{
+		entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
+		vector viewVector = player.GetViewVector()
+		vector playerVel = player.GetVelocity()
+		vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
+		battery.SetVelocity( batteryVel )
+		battery.s.touchEnabledTime <- Time() + 1
+	}
+
+	entity battery = Rodeo_CreateBatteryPack()
+	battery.SetSkin( 1 )
+	Rodeo_OnTouchBatteryPack_Internal( player, battery )
+
+	thread ForceDropBatteryWhenSpecialSituations( battery, player )
+	thread MarkBatteryWaitForActive( battery, player )
+}
+
+void function ForceDropBatteryWhenSpecialSituations( entity battery, entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+	battery.EndSignal( "OnDestroy" )
+
+	for( ;; )
+	{
+		player.WaitSignal( "player_embarks_titan" )
+		Rodeo_TakeBatteryAwayFromPilot( player )
+		battery.ClearParent()
+		battery.SetAngles( < 0, 0, 0 > )
+		battery.SetVelocity( < 0, 0, 200 > )
+		battery.s.touchEnabledTime <- Time() + 100
+	}
+}
+
+void function MarkBatteryWaitForActive( entity battery, entity player )
+{
+	battery.EndSignal( "OnDestroy" )
+
+	for( ;; )
+	{
+		WaitFrame()
+		if( IsValid( battery.GetParent() ) )
+			continue
+		if( !battery.IsOnGround() )
+			continue
+		if( !IsValid( player ) )
+		{
+			battery.Destroy()
+			return
+		}
+
+		thread MarkBatteryActive( battery, player.GetTeam(), player )
+		battery.s.touchEnabledTime <- Time() + 100
+		return
+	}
+}
+
+void function MarkBatteryActive( entity battery, int team, entity player )
+{
+	EmitSoundOnEntity( battery, "Pilot_PulseBlade_Activated_3P" )
+	PlayImpactFXTable( battery.GetOrigin(), player, "exp_sonar_pulse" )
+
+	array<vector> strikePos = []
+	for( int i = 8; i > 0; i-- )
+		strikePos.append( < battery.GetOrigin().x + RandomFloatRange( -400, 400 ), battery.GetOrigin().y + RandomFloatRange( -400, 400 ), 4000 > )
+
+	foreach( pos in strikePos )
+	{
+		TraceResults trace = TraceLine( pos, pos - < 0, 0, 5000 >, [], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		if( trace.fraction == 1.0 )
+			continue
+		pos = trace.endPos
+		wait 0.1
+		thread OrbitalStrikeThink( pos, team, player )
+		EmitSoundAtPosition( TEAM_UNASSIGNED, pos, "Pilot_PulseBlade_Activated_3P" )
+	}
+
+	wait 1
+	if( !IsValid( battery ) )
+		return
+
+	PlayImpactFXTable( battery.GetOrigin(), player, "exp_deployable_cover" )
+	EmitSoundOnEntity( battery, "weapon_sentryfragdrone_warmup" )
+	battery.Destroy()
+}
+
+void function OrbitalStrikeThink( vector pos, int team, entity player )
+{
+	if( !IsValid( player ) )
+		return
+	thread PlayerUsesNuke( pos, player )
+	PlayImpactFXTable( pos, player, "exp_sonar_pulse" )
+}
+
+void function PlayerUsesNuke( vector pos, entity player )
+{
+	entity titan = CreateOgre( TEAM_UNASSIGNED, pos, < 0, RandomInt( 360 ), 0 > )
+	titan.EndSignal( "OnDestroy" )
+
+	SetTeam( titan, player.GetTeam() )
+	DispatchSpawn( titan )
+
+	titan.kv.script_hotdrop = "4"
+	thread PlayersTitanHotdrops( titan, pos, < 0, RandomInt( 360 ), 0 >, player, "at_hotdrop_drop_2knee_turbo" )
+	ClassicRodeo_SetSoulBatteryCount( titan.GetTitanSoul(), false )
+
+	Remote_CallFunction_Replay( player, "ServerCallback_ReplacementTitanSpawnpoint", pos.x, pos.y, pos.z, Time() + GetHotDropImpactTime( titan, "at_hotdrop_drop_2knee_turbo" ) + 1.6 )
+
+	DoomTitan( titan )
+	titan.SetBossPlayer(player) // Do this so that if we crush something we get awarded the kill.
+
+	entity soul = titan.GetTitanSoul()
+	soul.soul.nukeAttacker = player // Use this to get credit for the explosion kills.
+
+	NPC_SetNuclearPayload( titan )
+
+	titan.WaitSignal( "ClearDisableTitanfall" )
+	titan.ClearBossPlayer() // Stop being the boss so we don't get an award for this titan blowing up.
+
+	thread TitanEjectPlayer( titan, true )
+}
