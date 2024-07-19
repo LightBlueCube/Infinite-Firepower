@@ -14,6 +14,7 @@ void function MpTitanWeaponLaserLite_Init()
 	#endif
 
 	RegisterSignal( "MarkLaserTagetThink" )
+	RegisterSignal( "MarkLaserHudMsgStop" )
 }
 
 bool function OnWeaponAttemptOffhandSwitch_titanweapon_laser_lite( entity weapon )
@@ -79,25 +80,25 @@ void function LaserLite_DamagedTarget( entity target, var damageInfo )
 		return
 	if( !target.IsNPC() && !target.IsTitan() )
 		return
-	thread HighLightingTarget( target, attacker )
+	thread HighLightingTarget( target )
 }
 
-void function HighLightingTarget( entity target, entity owner )
+void function HighLightingTarget( entity target )
 {
 	target.EndSignal( "OnDeath" )
 	target.EndSignal( "OnDestroy" )
 	target.Signal( "MarkLaserTagetThink" )
 	target.EndSignal( "MarkLaserTagetThink" )
 
-	int sonarTeam = owner.GetTeam()
 	int statusEffect = StatusEffect_AddEndless( target, eStatusEffect.damage_received_multiplier, 0.5 )
 	int statusEffectHandle = StatusEffect_AddEndless( target, eStatusEffect.sonar_detected, 1.0 )
 
 	OnThreadEnd(
-		function() : ( target, statusEffect, sonarTeam, statusEffectHandle )
+		function() : ( target, statusEffect, statusEffectHandle )
 		{
 			if ( IsValid( target ) )
 			{
+				target.Signal( "MarkLaserHudMsgStop" )
 				Highlight_ClearEnemyHighlight( target )
 				StatusEffect_Stop( target, statusEffect )
 				StatusEffect_Stop( target, statusEffectHandle )
@@ -107,7 +108,24 @@ void function HighLightingTarget( entity target, entity owner )
 	Highlight_ClearEnemyHighlight( target )
 	Highlight_SetSonarHighlightWithParam0( target, "enemy_sonar", <1, 0, 0> )
 
+	thread MarkLaserHudMsgThink( target )
 	wait 6
+}
+
+void function MarkLaserHudMsgThink( entity target )
+{
+	target.EndSignal( "OnDeath" )
+	target.EndSignal( "OnDestroy" )
+	target.EndSignal( "MarkLaserHudMsgStop" )
+	target.EndSignal( "MarkLaserTagetThink" )
+
+	for( ;; )
+	{
+		SendHudMessageWithPriority( target, 91, "你已被天图标记", -1, -0.4, < 255, 0, 0 >, < 0, 0.2, 0 > )
+		WaitFrame()
+		SendHudMessageWithPriority( target, 91, "你已被天图标记", -1, -0.4, < 255, 255, 0 >, < 0, 0.2, 0 > )
+		WaitFrame()
+	}
 }
 
 #endif
