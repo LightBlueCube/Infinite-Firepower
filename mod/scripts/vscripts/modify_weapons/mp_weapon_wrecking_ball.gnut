@@ -617,7 +617,8 @@ void function WreckingBall_DamagedTarget( entity victim, var damageInfo )
 
 	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 1 )
 	StatusEffect_AddTimed( victim, eStatusEffect.emp, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 1 )
-	Remote_CallFunction_Replay( victim, "ServerCallback_TitanEMP", 0.25, 2.0, WRECKING_BALL_SHELLSHOCK_DURATION )
+	if( victim.IsPlayer() )
+		Remote_CallFunction_Replay( victim, "ServerCallback_TitanEMP", 0.25, 2.0, WRECKING_BALL_SHELLSHOCK_DURATION )
 }
 void function SpeedPadLimitThink()
 {
