@@ -2045,6 +2045,8 @@ entity function Rodeo_CreateBatteryPack( entity batteryOwner = null, bool isTita
 			{
 				if( batteryArray[i].GetParent() ) // assuming this is a battery carried by players
 					continue
+				if( batteryArray[i].GetSkin() == 1 )	// skin 1 battery is OrbitalStrike kill streak, never destroy it
+					continue
 				batteryArray[i].Destroy()
 				break
 			}
@@ -3546,8 +3548,8 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 			{
 				if( GetBatteryOnBack( rodeoPilot ).GetSkin() == 1 )
 				{
-					SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 4.0, 1.0 > )
-					return
+					SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 1.0, 1.0 > )
+					continue
 				}
 			}
 			//if( ClassicRodeo_GetBatteryCountPlayerAllowedToApply( rodeoPilot ) >= 1 && pilotHasBattery && ( friendlyFireOn || sameTeam ) )

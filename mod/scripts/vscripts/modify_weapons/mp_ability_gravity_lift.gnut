@@ -8,13 +8,13 @@ global function OnProjectileCollision_ability_gravity_lift
 const float LIFT_THROW_POWER_SCALE = 0.3
 const float LIFT_HEIGHT = 1200
 const float LIFT_RADIUS = 100
-const float LIFT_RISE_SPEED = 325
+const float LIFT_RISE_SPEED = 500
 const float LIFT_HORIZONTAL_MOVE_SPEED = 225
 const float LIFT_AIR_ACCELERATION = 3000 // higher for better control
 const float LIFT_PULL_SPEED_HORIZON = 350
 const float LIFT_PULL_SPEED_VERTICAl = 340
 const float LIFT_TOP_TIME_LIMIT = 999
-const float LIFT_LIFETIME = 10
+const float LIFT_LIFETIME = 12
 const float LIFT_COOLDOWN = 0.0 // 0.5 // time between second lift, I guess it's no need for titanfall?
 const float LIFT_MAX_LIFETIME_EXTEND = 1.0 // cap to 1.5x lifetime
 
@@ -327,7 +327,7 @@ void function OnGravityLiftTriggerEnter( entity trigger, entity ent )
 
 void function OnGravityLiftTriggerLeave( entity trigger, entity ent )
 {
-	if ( !EntityAllowedToTriggerGravLift( ent ) ) // generic check
+	if ( !EntityAllowedToTriggerGravLift( ent ) && file.playerInGravLiftCount[ ent ] == 0 ) // generic check
 		return
 
 	if ( ent.IsPlayer() && file.playerInGravLiftCount[ ent ] == 0 ) // no lift valid!
@@ -388,6 +388,7 @@ void function EntityInGravityLift( entity ent, entity trigger )
 	ent.EndSignal( "OnDestroy" )
 	if ( ent.IsPlayer() || ent.IsNPC() ) // these entities may die
 		ent.EndSignal( "OnDeath" )
+	ent.EndSignal( "player_embarks_titan" )
 	ent.EndSignal( "EnterGravityLift" )
 	ent.EndSignal( "LeaveGravityLift" )
 

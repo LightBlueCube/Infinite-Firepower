@@ -87,7 +87,7 @@ WeaponData
 		// modded
 		cloak_field
 		{
-
+			"regen_ammo_refill_rate"						"12.5"
 		}
 	}
 }

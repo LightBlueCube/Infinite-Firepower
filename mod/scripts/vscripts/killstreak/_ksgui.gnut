@@ -92,7 +92,7 @@ void function KsGUI( entity player )
 	KsGUI_Select( player )
 }
 
-const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "折叠时空武器", "丢出电池", "使用电池" ]
+const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "轨道打击", "折叠时空武器", "丢出电池", "使用电池" ]
 
 void function KsGUI_Switch( entity player )
 {
@@ -116,12 +116,14 @@ void function KsGUI_Switch( entity player )
 		skippedElem.append( 1 )
 	if( !player.s.HaveVTOL )
 		skippedElem.append( 2 )
-	if( !player.s.HaveNuclearBomb )
+	if( player.s.orbitalStrike == 0 )
 		skippedElem.append( 3 )
-	if( !PlayerHasMaxBatteryCount( player ) )
+	if( !player.s.HaveNuclearBomb )
 		skippedElem.append( 4 )
-	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 5 )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+		skippedElem.append( 6 )
 
 	if( skippedElem.len() == KSGUI_ELEM.len() )
 	{
@@ -149,12 +151,14 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		skippedElem.append( 1 )
 	if( !player.s.HaveVTOL )
 		skippedElem.append( 2 )
-	if( !player.s.HaveNuclearBomb )
+	if( player.s.orbitalStrike == 0 )
 		skippedElem.append( 3 )
-	if( !PlayerHasMaxBatteryCount( player ) )
+	if( !player.s.HaveNuclearBomb )
 		skippedElem.append( 4 )
-	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 5 )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+		skippedElem.append( 6 )
 
 	if( skippedElem.len() == KSGUI_ELEM.len() )
 	{
@@ -165,7 +169,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		player.s.GUIIndex = 0
 
 	bool onlyShowBatteryElem = false
-	if( skippedElem.contains( 0 ) && skippedElem.contains( 1 ) && skippedElem.contains( 2 ) && skippedElem.contains( 3 ) )
+	if( skippedElem.contains( 0 ) && skippedElem.contains( 1 ) && skippedElem.contains( 2 ) && skippedElem.contains( 3 ) && skippedElem.contains( 4 ) )
 		onlyShowBatteryElem = true
 
 	if( player.s.GUIIndex != -1 )
@@ -203,7 +207,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		if( skippedElem.contains( i ) )
 			continue
 
-		if( i == 4 )
+		if( i == 5 )
 		{
 			isFristElem = true
 			if( !onlyShowBatteryElem )
@@ -242,7 +246,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		// ◆text1(03)◆" "- ◇text2◇" "
 		text += " "
 	}
-	if( onlyShowBatteryElem || ( skippedElem.contains( 4 ) && skippedElem.contains( 5 ) ) )
+	if( onlyShowBatteryElem || ( skippedElem.contains( 5 ) && skippedElem.contains( 6 ) ) )
 		text += "\n"
 	text += "\n\n\n\n\n\n\n"
 
@@ -261,6 +265,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	text += "\n====== 连杀奖励获取进度 ======\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
+	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]轨道打击\n"
 	//text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
 
 	return text
@@ -278,10 +283,12 @@ void function KsGUI_Select( entity player )
 	if( index == 2 )
 		return ApplyVTOL( player )
 	if( index == 3 )
-		return ApplyNuclearBomb( player )
+		return ApplyOrbitalStrike( player )
 	if( index == 4 )
-		return ApplyDropBattery( player )
+		return ApplyNuclearBomb( player )
 	if( index == 5 )
+		return ApplyDropBattery( player )
+	if( index == 6 )
 		return ApplyShieldBattery( player )
 }
 

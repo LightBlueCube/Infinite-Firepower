@@ -114,6 +114,7 @@ WeaponData
 			"bounce_effect_table"							"bounce_frag_drone"
 			// regen ammo
 			"grenade_fuse_time"								"0.0" // script handle this
+			"regen_ammo_refill_rate"						"20"
 
 			// toss
 			"toss_pullout_time"								"++0.25" // 0.35
@@ -124,7 +125,7 @@ WeaponData
 			"impact_effect_table" 							"exp_emp"
 
 			"explosion_damage"								"40"
-			"explosion_damage_heavy_armor"					"330"
+			"explosion_damage_heavy_armor"					"900"
 
 			"explosion_inner_radius"  						"250"
 			"explosionradius" 								"320"

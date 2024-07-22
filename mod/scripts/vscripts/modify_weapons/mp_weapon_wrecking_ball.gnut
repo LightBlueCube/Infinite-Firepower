@@ -24,7 +24,7 @@ const float WRECKING_BALL_BOUNCE_SPEED_VERTICAL = 800
 const float WRECKING_BALL_SEARCH_BOUNCE_RADIUS = 640 // better be explosionradius * 2
 const float WRECKING_BALL_SEARCH_BOUNCE_RADIUS_PILOT = 300 // pilot one is nerfed
 const float WRECKING_BALL_BOUNCE_DOT = 0.7 // if bounceDot like this consider as it hit a wall
-const float WRECKING_BALL_SHELLSHOCK_DURATION = 2.0
+const float WRECKING_BALL_SHELLSHOCK_DURATION = 4.0
 const float SPEED_PAD_LAUNCH_POWER = 200
 const float SPEED_PAD_LAUNCH_POWER_TITAN = 300
 const float SPEED_PAD_LAUNCH_POWER_EXPLOSION = 350
@@ -615,8 +615,9 @@ void function WreckingBall_DamagedTarget( entity victim, var damageInfo )
 			DamageInfo_ScaleDamage( damageInfo, 0 )
 	}
 
-	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 0.25 )
-	StatusEffect_AddTimed( victim, eStatusEffect.emp, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 0.25 )
+	StatusEffect_AddTimed( victim, eStatusEffect.move_slow, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 1 )
+	StatusEffect_AddTimed( victim, eStatusEffect.emp, 0.25, WRECKING_BALL_SHELLSHOCK_DURATION, 1 )
+	Remote_CallFunction_Replay( victim, "ServerCallback_TitanEMP", 0.25, 2.0, WRECKING_BALL_SHELLSHOCK_DURATION )
 }
 void function SpeedPadLimitThink()
 {
