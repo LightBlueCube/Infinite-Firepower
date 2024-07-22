@@ -327,8 +327,15 @@ void function OnGravityLiftTriggerEnter( entity trigger, entity ent )
 
 void function OnGravityLiftTriggerLeave( entity trigger, entity ent )
 {
-	if ( !EntityAllowedToTriggerGravLift( ent ) && file.playerInGravLiftCount[ ent ] == 0 ) // generic check
-		return
+	if ( !EntityAllowedToTriggerGravLift( ent ) ) // generic check
+	{
+		if( ent in file.playerInGravLiftCount )
+		{
+			if( file.playerInGravLiftCount[ ent ] == 0 )
+				return
+		}
+		else return
+	}
 
 	if ( ent.IsPlayer() && file.playerInGravLiftCount[ ent ] == 0 ) // no lift valid!
 		return
