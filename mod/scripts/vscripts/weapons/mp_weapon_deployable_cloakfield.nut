@@ -311,7 +311,7 @@ function CloakFlieldThink( entity cloaker, float radius, array<string> ents = [ 
 
 void function CloakFlieldCloakerCloaksGuy( guy )
 {
-	guy.SetCloakDuration( 2.0, -1, 0 )
+	guy.SetCloakDuration( 0.1, -1, 0 )
 	EmitSoundOnEntity( guy, CLOAKED_DRONE_CLOAK_START_SFX )
 	guy.Minimap_Hide( TEAM_IMC, null )
 	guy.Minimap_Hide( TEAM_MILITIA, null )

@@ -11,6 +11,7 @@ table<int> file = {
 	nukeTitan = 4
 	cruiseMissile = 15
 	vtol = 20
+	orbitalStrike = 10
 	nuclearBomb = 30
 }
 
@@ -81,6 +82,7 @@ void function OnClientConnected( entity player )
 
 	player.s.HaveNuclearBomb <- false
 	player.s.HaveVTOL <- false
+	player.s.orbitalStrike <- 0
 	player.s.NukeTitan <- 0
 	player.s.CruiseMissile <- 0
 
@@ -171,6 +173,11 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	{
 		attacker.s.CruiseMissile += 1
 		NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
+	}
+	if( attacker.s.KillStreak % file.orbitalStrike == 0 && attacker.s.orbitalStrike == 0 )	// so player only can get one time orbitalStrike in one respawn
+	{
+		attacker.s.orbitalStrike += 1
+		NSSendAnnouncementMessageToPlayer( attacker, "獲得軌道打擊！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.KillStreak == file.vtol )
 	{

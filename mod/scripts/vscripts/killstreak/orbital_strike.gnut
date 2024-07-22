@@ -1,10 +1,8 @@
 untyped
-global function ApplyOrbitalStrike
+global function OrbitalStrikeThink
 
-void function ApplyOrbitalStrike( entity player )
+void function OrbitalStrikeThink( entity player )
 {
-	if( !player.IsHuman() || !IsAlive( player ) )
-		return
 	if( PlayerHasMaxBatteryCount( player ) )
 	{
 		entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
@@ -19,11 +17,11 @@ void function ApplyOrbitalStrike( entity player )
 	battery.SetSkin( 1 )
 	Rodeo_OnTouchBatteryPack_Internal( player, battery )
 
-	thread ForceDropBatteryWhenSpecialSituations( battery, player )
+	thread ForceDropBatteryWhenEmbarks( battery, player )
 	thread MarkBatteryWaitForActive( battery, player )
 }
 
-void function ForceDropBatteryWhenSpecialSituations( entity battery, entity player )
+void function ForceDropBatteryWhenEmbarks( entity battery, entity player )
 {
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "OnDeath" )
@@ -49,6 +47,7 @@ void function MarkBatteryWaitForActive( entity battery, entity player )
 		WaitFrame()
 		if( IsValid( battery.GetParent() ) )
 			continue
+		battery.s.touchEnabledTime <- Time() + 100
 		if( !battery.IsOnGround() )
 			continue
 		if( !IsValid( player ) )
@@ -57,30 +56,38 @@ void function MarkBatteryWaitForActive( entity battery, entity player )
 			return
 		}
 
-		thread MarkBatteryActive( battery, player.GetTeam(), player )
+		thread MarkBatteryActive( battery, player )
 		battery.s.touchEnabledTime <- Time() + 100
 		return
 	}
 }
 
-void function MarkBatteryActive( entity battery, int team, entity player )
+void function MarkBatteryActive( entity battery, entity player )
 {
+	int team = player.GetTeam()
+
 	EmitSoundOnEntity( battery, "Pilot_PulseBlade_Activated_3P" )
-	PlayImpactFXTable( battery.GetOrigin(), player, "exp_sonar_pulse" )
 
-	array<vector> strikePos = []
+	array<vector> strikePos = [ < battery.GetOrigin().x, battery.GetOrigin().y, 4000 > ]
 	for( int i = 8; i > 0; i-- )
-		strikePos.append( < battery.GetOrigin().x + RandomFloatRange( -400, 400 ), battery.GetOrigin().y + RandomFloatRange( -400, 400 ), 4000 > )
-
+		strikePos.append( < battery.GetOrigin().x + RandomFloatRange( -500, 500 ), battery.GetOrigin().y + RandomFloatRange( -500, 500 ), 4000 > )
+	foreach( pos in strikePos )
+	{
+		TraceResults trace = TraceLine( pos, pos - < 0, 0, 5000 >, [], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
+		if( trace.fraction == 1.0 )
+			continue
+		thread HotDrop_Spawnpoint( trace.endPos, team, 0.1, false, true )
+	}
 	foreach( pos in strikePos )
 	{
 		TraceResults trace = TraceLine( pos, pos - < 0, 0, 5000 >, [], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
 		if( trace.fraction == 1.0 )
 			continue
 		pos = trace.endPos
-		wait 0.1
-		thread OrbitalStrikeThink( pos, team, player )
+		thread DropNukeTitan( pos, player )
+		thread HotDrop_Spawnpoint( pos, team, 6, true, false )
 		EmitSoundAtPosition( TEAM_UNASSIGNED, pos, "Pilot_PulseBlade_Activated_3P" )
+		wait RandomFloat( 0.5 )
 	}
 
 	wait 1
@@ -92,16 +99,12 @@ void function MarkBatteryActive( entity battery, int team, entity player )
 	battery.Destroy()
 }
 
-void function OrbitalStrikeThink( vector pos, int team, entity player )
+void function DropNukeTitan( vector pos, entity player )
 {
 	if( !IsValid( player ) )
 		return
-	thread PlayerUsesNuke( pos, player )
 	PlayImpactFXTable( pos, player, "exp_sonar_pulse" )
-}
 
-void function PlayerUsesNuke( vector pos, entity player )
-{
 	entity titan = CreateOgre( TEAM_UNASSIGNED, pos, < 0, RandomInt( 360 ), 0 > )
 	titan.EndSignal( "OnDestroy" )
 
@@ -126,4 +129,40 @@ void function PlayerUsesNuke( vector pos, entity player )
 	titan.ClearBossPlayer() // Stop being the boss so we don't get an award for this titan blowing up.
 
 	thread TitanEjectPlayer( titan, true )
+}
+
+void function HotDrop_Spawnpoint( vector origin, int team, float impactTime, bool friendly = false, bool enemy = false )
+{
+	array<entity> targetEffects = []
+	vector surfaceNormal = < 0, 0, 1 >
+
+	int index = GetParticleSystemIndex( $"P_ar_titan_droppoint" )
+
+	if( friendly )
+	{
+		entity effectFriendly = StartParticleEffectInWorld_ReturnEntity( index, origin, surfaceNormal )
+		SetTeam( effectFriendly, team )
+		EffectSetControlPointVector( effectFriendly, 1, FRIENDLY_COLOR_FX )
+		effectFriendly.kv.VisibilityFlags = ENTITY_VISIBLE_TO_FRIENDLY
+		effectFriendly.DisableHibernation() // prevent it from fading out
+		targetEffects.append( effectFriendly )
+	}
+	if( enemy )
+	{
+		entity effectEnemy = StartParticleEffectInWorld_ReturnEntity( index, origin, surfaceNormal )
+		SetTeam( effectEnemy, team )
+		EffectSetControlPointVector( effectEnemy, 1, ENEMY_COLOR_FX )
+		effectEnemy.kv.VisibilityFlags = ENTITY_VISIBLE_TO_ENEMY
+		effectEnemy.DisableHibernation() // prevent it from fading out
+		targetEffects.append( effectEnemy )
+	}
+
+	wait impactTime
+
+	// clean up
+	foreach( entity targetEffect in targetEffects )
+	{
+		if ( IsValid( targetEffect ) )
+			EffectStop( targetEffect )
+	}
 }

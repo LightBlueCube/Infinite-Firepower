@@ -49,6 +49,7 @@ void function OnPlayerRespawned( entity player )
 	if( modelName == $"models/humans/pilots/pilot_heavy_roog_f.mdl" )
 	{
 		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "smoke_trap" )
+		player.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "amped_tacticals" )
 	}
 }
 

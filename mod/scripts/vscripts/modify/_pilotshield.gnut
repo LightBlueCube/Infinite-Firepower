@@ -73,13 +73,13 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 1.0, 1.0 )
 		//EmitSoundOnEntity( victim, "titan_energyshield_down" )	// early have play this in health_regen.gnut
 		if( damage - curr < victim.GetHealth() )
-			SendHudMessageWithPriority( victim, 93, "护盾损坏\n0/"+ total, -1, -0.4, < 255, 0, 0 >, < 0, 1.0, 1.0 >, 91 )
+			SendHudMessageWithPriority( victim, 93, "护盾损坏\n0/"+ total, -1, -0.4, < 255, 0, 0 >, < 0, 1.0, 1.0 > )
 		return
 	}
 	int afterHealth = int( curr - damage )
 	StatusEffect_AddTimed( victim, eStatusEffect.emp, GraphCapped( damage, 0, total / 2, 0.2, 0.6 ), GraphCapped( afterHealth, total, 0, 0.5, 1.0 ), 0.5 )
 	EmitSoundOnEntityOnlyToPlayer( victim, victim, "titanshieldwall_light_bulletimpact_1p_vs_3p" )
-	SendHudMessageWithPriority( victim, 93, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, < 0, 1.0, 1.0 >, 91 )
+	SendHudMessageWithPriority( victim, 93, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, < 0, 1.0, 1.0 > )
 }
 
 void function OnTitanBecomesPilot( entity player, entity titan )
@@ -110,7 +110,11 @@ void function TryUseShieldBattery( entity player )
 	player.EndSignal( "OnDeath" )
 	entity activeWeapon = player.GetActiveWeapon()
 	wait 0.5
-	if( player.GetShieldHealth() == player.GetShieldHealthMax() || !IsValid( GetBatteryOnBack( player ) ) )
+	bool isKillstreak = false
+	if( IsValid( GetBatteryOnBack( player ) ) )
+		if( GetBatteryOnBack( player ).GetSkin() == 1 )
+			isKillstreak = true
+	if( player.GetShieldHealth() == player.GetShieldHealthMax() || !IsValid( GetBatteryOnBack( player ) ) || isKillstreak )
 	{
 		entity inventory = player.GetOffhandWeapon( OFFHAND_INVENTORY )
 		if( IsValid( inventory ) )
@@ -120,8 +124,12 @@ void function TryUseShieldBattery( entity player )
 			if( inventory.GetWeaponInfoFileKeyField( "fire_mode" ) == "offhand_hybrid" && IsValid( activeWeapon ) )
 				player.SetActiveWeaponByName( activeWeapon.GetWeaponClassName() )
 		}
+
+		if( isKillstreak )
+			SendHudMessageWithPriority( player, 93, "不能使用标记电池回充护盾", -1, -0.4, < 255, 0, 0 >, < 0, 1.0, 1.0 > )
 		return
 	}
+
 	OnThreadEnd(
 		function() : ( activeWeapon, player )
 		{
@@ -144,6 +152,7 @@ void function UseShieldBattery( entity player, bool attackButtonCancel = true )
 {
 	player.Signal( "StopUseShieldBattery" )
 	player.EndSignal( "StopUseShieldBattery" )
+
 	entity battery = GetBatteryOnBack( player )
 	battery.EndSignal( "OnDestroy" )
 

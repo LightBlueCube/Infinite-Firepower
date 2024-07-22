@@ -3,7 +3,7 @@ ifp stable
 -allowlocalhttp
 +mp_gamemode aitdm
 +setplaylist aitdm
-+setplaylistvaroverrides "max_players 16 titan_shield_regen 1 earn_meter_pilot_multiplier 1.5 timelimit 24 scorelimit 2147483647"
++setplaylistvaroverrides "max_players 16 titan_shield_regen 1 timelimit 24 scorelimit 2147483647"
 +sv_usercmd_max_queued 100
 +ns_should_return_to_lobby 0
 +sv_max_props_multiplayer 500000

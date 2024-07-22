@@ -30,7 +30,7 @@
 
 			zipline_gun_fast_regen
 			{
-				grapple_power_regen_rate	*1.5
+				grapple_power_regen_rate	*2
 			}
 		}
 	}

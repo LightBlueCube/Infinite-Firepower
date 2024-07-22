@@ -6,6 +6,7 @@ global function ApplyCruiseMissile
 global function ApplyVTOL
 global function ApplyNuclearBomb
 global function ApplyShieldBattery
+global function ApplyOrbitalStrike
 
 void function ApplyDropBattery( entity player )
 {
@@ -137,9 +138,32 @@ void function ApplyShieldBattery( entity player )
 		return ApplyFalied( player, "\n你没有电池" )
 	if( player.GetShieldHealth() == player.GetShieldHealthMax() )
 		return ApplyFalied( player, "\n护盾已满" )
+	if( IsValid( GetBatteryOnBack( player ) ) )
+		if( GetBatteryOnBack( player ).GetSkin() == 1 )
+			return ApplyFalied( player, "不能使用标记电池回充护盾" )
 
 	thread UseShieldBattery( player )
 	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+}
+
+
+void function ApplyOrbitalStrike( entity player )
+{
+	if( player.s.orbitalStrike == 0 )
+		return ApplyFalied( player, "\n你没有轨道打击" )
+	if( !IsAlive( player ) )
+		return ApplyFalied( player, "\n在死亡时不可交付轨道打击" )
+	if( !player.IsHuman() )
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付轨道打击" )
+	if( player.Anim_IsActive() )
+		return ApplyFalied( player, "\n在播放动画时不可交付轨道打击" )
+	if( PlayerHasMaxBatteryCount( player ) )
+		return ApplyFalied( player, "\n扔出身上的电池再交付轨道打击" )
+
+	player.s.orbitalStrike -= 1
+	thread OrbitalStrikeThink( player )
+	thread SendKsGUI_Threaded( player, "已交付轨道打击\n扔出标记电池在想要打击的位置以开始", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 

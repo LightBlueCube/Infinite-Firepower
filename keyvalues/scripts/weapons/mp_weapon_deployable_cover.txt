@@ -16,7 +16,8 @@ WeaponData
 
 		smoke_trap
 		{
-
+			"fire_duration"									"0.1"
+			"regen_ammo_refill_rate"						"2"
 		}
 	}
 }
