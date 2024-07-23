@@ -22,7 +22,7 @@ void function VoteToSkipMatch()
 	voteEvent.voteEndFunc = Vote_OnEndFunc
 	voteEvent.callbackFunc = SkipMatch
 	voteEvent.voteName = "\x1b[94m要跳过此对局吗？"
-	voteEvent.endTime = Time() + 60.0
+	voteEvent.endTime = Time() + 120.0
 	StartNewVoteEvent( voteEvent )
 }
 

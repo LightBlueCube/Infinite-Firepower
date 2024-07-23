@@ -17,8 +17,6 @@ void function ChatCommand_Init()
 
 void function AddChatCommandCallback( string cmd, bool functionref( entity, array<string> ) callbackFunc )
 {
-	Assert( cmd in file.chatCommandCallbacks )
-
 	file.chatCommandCallbacks[ cmd ] <- callbackFunc
 }
 
@@ -29,8 +27,6 @@ void function RemoveChatCommandCallback( string cmd )
 
 void function AddCallback_OnReceivedSayTextMessage_AfterChatCommand( ClServer_MessageStruct functionref( ClServer_MessageStruct ) callbackFunc )
 {
-	Assert( file.afterChatCommandCallbacks.contains( callbackFunc ) )
-
 	file.afterChatCommandCallbacks.append( callbackFunc )
 }
 
@@ -48,7 +44,7 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 		return msgStruct
 	}
 
-	foreach ( callbackFunc in file.afterChatCommandCallbacks )
+	foreach( callbackFunc in file.afterChatCommandCallbacks )
 	{
 		ClServer_MessageStruct returnStruct = callbackFunc( msgStruct )
 		msgStruct.message = returnStruct.message

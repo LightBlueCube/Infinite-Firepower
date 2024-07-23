@@ -283,7 +283,7 @@ void function GravityNodePlanted( entity projectile )
 //	thread GravityNodeThink( projectile )
 }
 
-const GRAVITYNODE_LIFETIME = 1.6
+const GRAVITYNODE_LIFETIME = 2.0
 const GRAVITYNODE_BUILDUP_TIME = 1.0
 
 void function GravityNodeThink( entity projectile )
@@ -313,18 +313,11 @@ void function GravityNodeThink( entity projectile )
 	{
 		owner.EndSignal( "OnDestroy" )
 	}
-	entity soul = owner.GetTitanSoul()
-	if( IsValid( soul ) )
-	{
-		if( soul.IsEjecting() )
-		{
-			projectile.Destroy()
-			return
-		}
-	}
 	int team = owner.GetTeam()
 
 	entity tower = CreatePropScript( $"models/weapons/titan_trip_wire/titan_trip_wire.mdl", origin, angles, SOLID_VPHYSICS )
+	tower.EndSignal( "OnDestroy" )
+
 	tower.kv.collisionGroup = TRACE_COLLISION_GROUP_BLOCK_WEAPONS
 	tower.EnableAttackableByAI( 20, 0, AI_AP_FLAG_NONE )
 	SetTargetName( tower, "Laser Tripwire Base" )
@@ -403,8 +396,6 @@ void function GravityNodeThink( entity projectile )
 				mover.Destroy()
 		}
 	)
-	owner.EndSignal( "TitanEjectionStarted" )
-	tower.EndSignal( "OnDestroy" )
 
 
 	mover.NonPhysicsMoveTo( mover.GetOrigin() + < 0, 0, 100 >, 1.0, 0.0, 0.0 )
