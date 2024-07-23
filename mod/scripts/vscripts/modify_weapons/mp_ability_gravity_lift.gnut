@@ -7,12 +7,12 @@ global function OnProjectileCollision_ability_gravity_lift
 // Gravity Lift
 const float LIFT_THROW_POWER_SCALE = 0.3
 const float LIFT_HEIGHT = 1200
-const float LIFT_RADIUS = 100
-const float LIFT_RISE_SPEED = 500
-const float LIFT_HORIZONTAL_MOVE_SPEED = 225
-const float LIFT_AIR_ACCELERATION = 3000 // higher for better control
-const float LIFT_PULL_SPEED_HORIZON = 350
-const float LIFT_PULL_SPEED_VERTICAl = 340
+const float LIFT_RADIUS = 120
+const float LIFT_RISE_SPEED = 800
+const float LIFT_HORIZONTAL_MOVE_SPEED = 400
+const float LIFT_AIR_ACCELERATION = 10000 // higher for better control
+const float LIFT_PULL_SPEED_HORIZON = 100
+const float LIFT_PULL_SPEED_VERTICAl = 400
 const float LIFT_TOP_TIME_LIMIT = 999
 const float LIFT_LIFETIME = 12
 const float LIFT_COOLDOWN = 0.0 // 0.5 // time between second lift, I guess it's no need for titanfall?
@@ -513,7 +513,7 @@ void function EntityInGravityLift( entity ent, entity trigger )
 		if ( ent.IsPlayer() && PlayerNotDoingInput( ent ) ) // not doing any input, we take 2 ticks to fully stop player, so they can feel better controlling
 			airSpeed = GainVelocityHorizontal( airSpeed, -( LIFT_HORIZONTAL_MOVE_SPEED * 0.5 ), 0.0 ) //RemoveVelocityHorizonal( airSpeed )
 		else
-			airSpeed = LimitVelocityHorizontal( airSpeed, LIFT_HORIZONTAL_MOVE_SPEED )
+			airSpeed = LimitVelocityHorizontal( ent, airSpeed, LIFT_HORIZONTAL_MOVE_SPEED )
 		ent.SetVelocity( airSpeed )
 
 		if ( reachedHighest ) // reached highest!
@@ -554,8 +554,14 @@ void function EntityInGravityLift( entity ent, entity trigger )
 	}
 }
 
-vector function LimitVelocityHorizontal( vector vel, float speed )
+vector function LimitVelocityHorizontal( entity ent, vector vel, float speed )
 {
+	if( ent.IsPlayer() )
+	{
+		vector inputVel = GetPlayerVelocityFromInput( ent, speed )
+		return < inputVel.x, inputVel.y, vel.z >
+	}
+
 	vector horzVel = <vel.x, vel.y, 0>
 	if ( Length( horzVel ) <= speed )
 		return vel
@@ -604,7 +610,10 @@ bool function PlayerNotDoingInput( entity player )
 void function BouncePlayerFromLift( entity player, vector lastTickVel ) // last tick's velocity can mostly get player's move direction
 {
 	vector airSpeed = GetPlayerHorizontalSpeedForced( lastTickVel, LIFT_PULL_SPEED_HORIZON )
-	airSpeed.z = LIFT_PULL_SPEED_VERTICAl
+	airSpeed += player.GetVelocity()
+	airSpeed.z = player.GetVelocity().z
+	if( airSpeed.z <= 100 )
+		airSpeed.z = LIFT_PULL_SPEED_VERTICAl
 	player.SetVelocity( airSpeed )
 }
 
@@ -628,13 +637,15 @@ void function BounceEntityForward( entity ent )
 		vector playerAngles = ent.EyeAngles()
 		vector forward = AnglesToForward( < 0, playerAngles.y, 0 > ) // yaw only
 		airSpeed = forward * LIFT_PULL_SPEED_HORIZON
-		airSpeed.z = LIFT_PULL_SPEED_VERTICAl
 	}
 	else
 	{
 		airSpeed = ent.GetForwardVector() * LIFT_PULL_SPEED_HORIZON
-		airSpeed.z = LIFT_PULL_SPEED_VERTICAl
 	}
+	airSpeed += ent.GetVelocity()
+	airSpeed.z = ent.GetVelocity().z
+	if( airSpeed.z <= 100 )
+		airSpeed.z = LIFT_PULL_SPEED_VERTICAl
 
 	ent.SetVelocity( airSpeed )
 }
