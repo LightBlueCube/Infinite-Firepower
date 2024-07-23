@@ -15,6 +15,7 @@ void function OrbitalStrikeThink( entity player )
 
 	entity battery = Rodeo_CreateBatteryPack()
 	battery.SetSkin( 1 )
+	Battery_StartFX( battery )
 	Rodeo_OnTouchBatteryPack_Internal( player, battery )
 
 	thread ForceDropBatteryWhenEmbarks( battery, player )
@@ -44,11 +45,12 @@ void function MarkBatteryWaitForActive( entity battery, entity player )
 
 	for( ;; )
 	{
+		vector lastPos = battery.GetOrigin()
 		WaitFrame()
 		if( IsValid( battery.GetParent() ) )
 			continue
 		battery.s.touchEnabledTime <- Time() + 100
-		if( !battery.IsOnGround() )
+		if( battery.GetOrigin() != lastPos )
 			continue
 		if( !IsValid( player ) )
 		{
