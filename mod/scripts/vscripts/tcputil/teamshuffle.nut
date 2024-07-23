@@ -27,6 +27,7 @@ void function TeamShuffle_Init()
 {
 	AddCallback_GameStateEnter( eGameState.Prematch, ShuffleTeams )
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
+	AddCallback_GameStateEnter( eGameState.Playing, OnPlayering )
 	AddCallback_OnClientDisconnected( CheckPlayerDisconnect )
 	if ( BALANCE_ON_DEATH )
 		AddCallback_OnPlayerKilled( CheckTeamBalance )
@@ -38,6 +39,20 @@ void function TeamShuffle_Init()
 		AddChatCommandCallback( "!"+ command, CC_TrySwitchTeam )
 		AddChatCommandCallback( "！"+ command, CC_TrySwitchTeam )
 	}
+}
+
+void function OnPlayering()
+{
+	// Check if difference is smaller than 2 ( dont balance when it is 0 or 1 )
+	int imcTeamSize = GetPlayerArrayOfTeam( TEAM_IMC ).len()
+	int mltTeamSize = GetPlayerArrayOfTeam( TEAM_MILITIA ).len()
+	if( abs ( imcTeamSize - mltTeamSize ) <= BALANCE_ALLOWED_TEAM_DIFFERENCE )
+		return
+
+	int weakTeam = imcTeamSize > mltTeamSize ? TEAM_MILITIA : TEAM_IMC
+	foreach ( entity player in GetPlayerArrayOfTeam( GetOtherTeam( weakTeam ) ) )
+		Chat_ServerPrivateMessage( player, ANSI_COLOR_ENEMY + "队伍人数不平衡，可通过输入 !switch 切换队伍。", false )
+
 }
 
 bool function CC_TrySwitchTeam( entity player, array<string> args )
@@ -163,7 +178,6 @@ void function ShuffleTeams()
 	if ( mapDisable )
 		return
 
-	file.hasShuffled = false
 	TeamShuffleThink()
 }
 
