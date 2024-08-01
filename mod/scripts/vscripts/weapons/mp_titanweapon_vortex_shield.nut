@@ -262,7 +262,7 @@ bool function OnWeaponVortexHitBullet_titanweapon_vortex_shield( entity weapon, 
 		if( weapon.HasMod( "tcp_vortex" ) )
 		{
 			TakeAmountOnVotexDamaged( weapon, attackerWeapon )
-			weapon.s.trackEnergyCooldown <- 40
+			weapon.s.trackEnergyCooldown <- 50
 		}
 
 		return TryVortexAbsorb( vortexSphere, attacker, origin, damageSourceID, attackerWeapon, attackerWeaponName, "hitscan", null, damageType, weapon.HasMod( "burn_mod_titan_vortex_shield" ) )
@@ -308,7 +308,7 @@ bool function OnWeaponVortexHitProjectile_titanweapon_vortex_shield( entity weap
 		if( weapon.HasMod( "tcp_vortex" ) )
 		{
 			TakeAmountOnVotexDamaged( weapon, projectile )
-			weapon.s.trackEnergyCooldown <- 40
+			weapon.s.trackEnergyCooldown <- 50
 		}
 
 		if( Vortex_GetRefiredProjectileMods( projectile ).contains( "tcp_shotgun" ) )
@@ -444,21 +444,21 @@ void function TakeAmountOnVotexDamaged( entity weapon, entity projectile )
 {
 	float amount
 	if ( projectile.IsProjectile() )
-		amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value ) )
+		amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
 	else
-		amount = float( projectile.GetWeaponSettingInt( eWeaponVar.damage_near_value ) )
+		amount = float( projectile.GetWeaponSettingInt( eWeaponVar.damage_near_value_titanarmor ) )
 
 	if( amount <= 0 )
 	{
 		if ( projectile.IsProjectile() )
-			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage ) )
+			amount = float( projectile.GetProjectileWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
 		else
-			amount = float( projectile.GetWeaponSettingInt( eWeaponVar.explosion_damage ) )
+			amount = float( projectile.GetWeaponSettingInt( eWeaponVar.explosion_damage_heavy_armor ) )
 	}
 
 	entity owner = weapon.GetWeaponOwner()
 	int currentEnergy = owner.GetSharedEnergyCount()
-	int val = int( amount / 3 )
+	int val = int( amount * 0.2 )
 	if( currentEnergy - val <= 0 )
 		val = currentEnergy
 	if( val >= 0 )
@@ -490,7 +490,8 @@ void function TrackSharedEnergyOnVortexOn( entity owner, entity weapon )
 	)
 
 	int delay = int( soul.s.SharedEnergyRegenDelay ) * 10
-	float amount = float( soul.s.SharedEnergyRegenRate ) / 10 + 3
+	float baseRefill = expect float( soul.s.SharedEnergyRegenRate ) / 60
+	float amount = expect float( soul.s.SharedEnergyRegenRate ) / 10 + baseRefill
 	for( ;; )
 	{
 		WaitFrame()
@@ -499,10 +500,10 @@ void function TrackSharedEnergyOnVortexOn( entity owner, entity weapon )
 			if( weapon.s.trackEnergyCooldown )
 			{
 				weapon.s.trackEnergyCooldown -= 1
-				if( owner.GetSharedEnergyCount() + 3 > owner.GetSharedEnergyTotal() - 50 )
+				if( owner.GetSharedEnergyCount() + baseRefill > owner.GetSharedEnergyTotal() - 50 )
 					owner.AddSharedEnergy( max( 0, ( owner.GetSharedEnergyTotal() - 50 ) - owner.GetSharedEnergyCount() ) )
 				else
-					owner.AddSharedEnergy( 3 )
+					owner.AddSharedEnergy( baseRefill )
 				continue
 			}
 		}
@@ -588,4 +589,3 @@ bool function OnWeaponAttemptOffhandSwitch_titanweapon_vortex_shield( entity wea
 	// Only allow it if we have enough charge to do anything
 	return allowSwitch
 }
-

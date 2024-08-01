@@ -365,22 +365,26 @@ void function ChargeBall_ZapFxToOwner( entity ballLightning, entity owner )
 	owner.EndSignal( "TitanEjectionStarted" )
 	owner.EndSignal( "DisembarkingTitan" )
 
-	string tag = "center"
-
-	if ( IsHumanSized( owner ) )
-		tag = "CHESTFOCUS"
-	else if ( owner.IsTitan() )
-		tag = "HIJACK"
-	else if ( IsSuperSpectre( owner ) || IsAirDrone( owner ) )
-		tag = "CHESTFOCUS"
-	else if ( IsDropship( owner ) )
-		tag = "ORIGIN"
-	else if ( owner.GetClassName() == "npc_turret_mega" )
-		tag = "ATTACH"
 
 	for( ;; )
 	{
 		WaitFrame()
+
+		string tag = "center"
+		if ( IsHumanSized( owner ) )
+			tag = "CHESTFOCUS"
+		else if ( owner.IsTitan() )
+			tag = "HIJACK"
+		else if ( IsSuperSpectre( owner ) || IsAirDrone( owner ) )
+			tag = "CHESTFOCUS"
+		else if ( IsDropship( owner ) )
+			tag = "ORIGIN"
+		else if ( owner.GetClassName() == "npc_turret_mega" )
+			tag = "ATTACH"
+
+		if( !owner.IsTitan() )
+			return
+
 		thread BallLightningZapConnectionFX( ballLightning, owner, tag, ballLightning.e.ballLightningData )
 		thread BallLightningZapFX( ballLightning, owner, tag, ballLightning.e.ballLightningData )
 	}

@@ -106,6 +106,9 @@ void function OnPlayerRespawned( entity player )
 
 void function TryUseShieldBattery( entity player )
 {
+	if( !IsAlive( player ) || !player.IsHuman() )
+		return
+
 	player.EndSignal( "OnDestroy" )
 	player.EndSignal( "OnDeath" )
 	entity activeWeapon = player.GetActiveWeapon()

@@ -48,14 +48,14 @@ WeaponData
 		// from Super.Mixed.Game
 		wraith_portal
 		{
-			"regen_ammo_refill_rate"						"7.4074"
+			"regen_ammo_refill_rate"						"10"
 		}
 
 		// from Super.Mixed.Game, modify by me
 		// holoshift
 		holoshift
 		{
-			"regen_ammo_refill_rate"						"7.4074"
+			"regen_ammo_refill_rate"						"10"
 		}
 	}
 }
