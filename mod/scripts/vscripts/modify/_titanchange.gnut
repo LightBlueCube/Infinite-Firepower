@@ -209,10 +209,10 @@ void function OnTitanfall( entity titan )
 	{
 		soul.s.titanTitle <- "執政官"
 		soul.soul.titanLoadout.titanExecution = "execution_ion"
-		titan.SetSharedEnergyRegenRate( 200 )
-		soul.s.SharedEnergyRegenRate <- 200
-		titan.SetSharedEnergyRegenDelay( 4.0 )
-		soul.s.SharedEnergyRegenDelay <- 4.0
+		titan.SetSharedEnergyRegenRate( 333.33 )
+		soul.s.SharedEnergyRegenRate <- 333.33
+		titan.SetSharedEnergyRegenDelay( 5.0 )
+		soul.s.SharedEnergyRegenDelay <- 5.0
 
 		foreach( weapon in titan.GetMainWeapons() )
 			titan.TakeWeaponNow( weapon.GetWeaponClassName() )

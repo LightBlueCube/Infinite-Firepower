@@ -7,7 +7,7 @@ struct{
 
 void function Vote_SkipMatch_Init()
 {
-	AddCallback_GameStateEnter( eGameState.Prematch, VoteToSkipMatch )
+	AddCallback_GameStateEnter( eGameState.Playing, VoteToSkipMatch )
 }
 
 void function VoteToSkipMatch()
