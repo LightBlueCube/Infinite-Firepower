@@ -5,7 +5,7 @@ const float FAR_CHECK_RANGE = 75
 const float NEAR_CHECK_RANGE = 1
 const float TITAN_CHECK_RANGE_MULTIPLIER = 2.0	// only multiple FAR_CHECK_RANGE and NEAR_CHECK_RANGE, not work for MAX_CHECK_RANGE
 const float MAX_CHECK_RANGE = 1000
-const float THRESHLOD = 1.6
+const float THRESHLOD = 2.4
 
 void function AntiInsult_Init()
 {
@@ -93,7 +93,7 @@ void function OnPlayerDuckToggle( entity player )
 
 void function OnPlayerDuck( entity player, float num )
 {
-	float distance2d = Distance2D( player.s.duckOriginSave, player.GetOrigin() )
+	float distance = Distance( player.s.duckOriginSave, player.GetOrigin() )
 	player.s.duckOriginSave = player.GetOrigin()
 	float far = FAR_CHECK_RANGE
 	float near = NEAR_CHECK_RANGE
@@ -103,9 +103,9 @@ void function OnPlayerDuck( entity player, float num )
 		near *= TITAN_CHECK_RANGE_MULTIPLIER
 	}
 
-	bool shouldReset = !IsAlive( player ) || distance2d > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging()
+	bool shouldReset = !IsAlive( player ) || distance > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging()
 	bool invalidDuck = shouldReset || !player.IsOnGround()
-	if( distance2d > near || shouldReset )
+	if( distance > near || shouldReset )
 		player.s.nearDuckNum = 0.0
 	if( invalidDuck )
 	{
@@ -115,7 +115,7 @@ void function OnPlayerDuck( entity player, float num )
 	}
 
 	player.s.validDuckNum += num
-	if( distance2d <= near )
+	if( distance <= near )
 	{
 		player.s.nearDuckNum += num
 		if( player.s.nearDuckNum > 0.5 )
