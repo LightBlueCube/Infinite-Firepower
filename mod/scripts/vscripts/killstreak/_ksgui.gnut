@@ -116,7 +116,7 @@ void function KsGUI_Switch( entity player )
 		skippedElem.append( 1 )
 	if( !player.s.HaveVTOL )
 		skippedElem.append( 2 )
-	if( player.s.orbitalStrike == 0 )
+	if( player.s.OrbitalStrike == 0 )
 		skippedElem.append( 3 )
 	if( !player.s.HaveNuclearBomb )
 		skippedElem.append( 4 )
@@ -151,7 +151,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		skippedElem.append( 1 )
 	if( !player.s.HaveVTOL )
 		skippedElem.append( 2 )
-	if( player.s.orbitalStrike == 0 )
+	if( player.s.OrbitalStrike == 0 )
 		skippedElem.append( 3 )
 	if( !player.s.HaveNuclearBomb )
 		skippedElem.append( 4 )
@@ -236,6 +236,8 @@ string function KsGUITextChange( entity player, string baseText, string text )
 			text += "("+ player.s.NukeTitan +")"
 		if( i == 1 )
 			text += "("+ player.s.CruiseMissile +")"
+		if( i == 3 )
+			text += "("+ player.s.OrbitalStrike +")"
 
 		// ◆text1(03)"◆" - ◇text2"◇"
 		if( i == index )
@@ -258,7 +260,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		if( v < 10 )
 			timeTable[ string( k ) ] = "0"+ string( v )
 	}
-	text += timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
+	text += "(UTC+8)"+ timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
 
 	table<int> ksData = GetKillStreakData()
 	text += "\n铁驭生命值: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	 护甲生命值: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
