@@ -302,7 +302,7 @@ bool function PlayerTrySwitchTeam( entity player, bool fixRespawn = false )
 
 	int oldTeam = player.GetTeam()
 	SetTeam( player, GetOtherTeam( player.GetTeam() ) )
-	NotifyClientsOfTeamChange( player, oldTeam, player.GetTeam() )
+	//NotifyClientsOfTeamChange( player, oldTeam, player.GetTeam() )
 
 	if( IsAlive( player ) ) // poor guy
 	{

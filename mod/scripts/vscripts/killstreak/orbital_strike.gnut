@@ -73,13 +73,13 @@ void function MarkBatteryActive( entity battery, entity player )
 	array<vector> strikePos = [ < battery.GetOrigin().x, battery.GetOrigin().y, 4000 > ]
 	for( int i = 16; i > 0; i-- )
 		strikePos.append( < battery.GetOrigin().x + RandomFloatRange( -500, 500 ), battery.GetOrigin().y + RandomFloatRange( -500, 500 ), 4000 > )
-	foreach( pos in strikePos )
+
+	foreach( player in GetPlayerArray() )
 	{
-		TraceResults trace = TraceLine( pos, pos - < 0, 0, 5000 >, [], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
-		if( trace.fraction == 1.0 )
-			continue
-		thread HotDrop_Spawnpoint( trace.endPos, team, 0.1, false, true )
+		EmitSoundOnEntityOnlyToPlayer( player, player, "coop_generator_underattack_alarm" )
+		NSSendLargeMessageToPlayer( player,"廣域轟炸接近中！", "小心天上......", 7, "rui/callsigns/callsign_94_col" )
 	}
+
 	foreach( pos in strikePos )
 	{
 		TraceResults trace = TraceLine( pos, pos - < 0, 0, 5000 >, [], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
