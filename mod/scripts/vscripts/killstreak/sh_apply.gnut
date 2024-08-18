@@ -7,6 +7,7 @@ global function ApplyVTOL
 global function ApplyNuclearBomb
 global function ApplyShieldBattery
 global function ApplyOrbitalStrike
+global function ApplySCP018
 
 void function ApplyDropBattery( entity player )
 {
@@ -165,6 +166,24 @@ void function ApplyOrbitalStrike( entity player )
 	thread OrbitalStrikeThink( player )
 	thread SendKsGUI_Threaded( player, "已交付轨道打击\n扔出标记电池在想要打击的位置以开始", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+}
+
+void function ApplySCP018( entity player )
+{
+	if( player.s.SCP018 == 0 )
+		return ApplyFalied( player, "\n你没有弹力球" )
+	if( !IsAlive( player ) )
+		return ApplyFalied( player, "\n在死亡时不可交付弹力球" )
+	if( !player.IsHuman() )
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付弹力球" )
+	entity weapon = player.GetOffhandWeapon( OFFHAND_ORDNANCE )
+	if( weapon.HasMod( "scp018_kill_streak" ) )
+		return ApplyFalied( player, "你已经交付了弹力球 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
+
+	thread ApplySCP018_Think( player )
+	thread SendKsGUI_Threaded( player, "已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", < 100, 255, 100 >, 2, 1 )
+	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+
 }
 
 void function ApplyFalied( entity player, string text )

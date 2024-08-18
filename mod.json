@@ -73,6 +73,13 @@
 				"After": "NuclearBomb_Init"
 			}
 		},
+		{
+			"Path": "killstreak/scp018.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "SCP018_Init"
+			}
+		},
 
 		// util shared //
 

@@ -1,0 +1,41 @@
+global function SCP018_Init
+global function ApplySCP018_Think
+
+// for more information see:
+// _grenade.nut
+// mp_weapon_grenade_emp.nut
+// mp_weapon_grenade_emp.txt
+
+void function SCP018_Init()
+{
+	RegisterSignal( "PlayerUseSCP018" )
+
+	Vortex_AddBehaviorOverride_WeaponMod(
+		"mp_weapon_grenade_emp", // weapon name
+		"scp018", // mod name
+		"", // vortex impact sound 1p( seems no where used )
+		"", // vortex impact sound 3p
+		$"", // vortex impact effect
+		"mirror" // ignores vortex behavior
+	)
+}
+
+void function ApplySCP018_Think( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+	player.EndSignal( "OnDeath" )
+
+	entity wpn = player.GetOffhandWeapon( OFFHAND_ORDNANCE )
+	string wpnName = wpn.GetWeaponClassName()
+	array<string> wpnMods = wpn.GetMods()
+
+	player.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+	player.GiveOffhandWeapon( "mp_weapon_grenade_emp", OFFHAND_ORDNANCE, [ "scp018", "scp018_kill_streak" ] )
+
+	player.WaitSignal( "PlayerUseSCP018" )
+
+	while( !player.IsHuman() )
+		WaitFrame()
+	player.TakeOffhandWeapon( OFFHAND_ORDNANCE )
+	player.GiveOffhandWeapon( wpnName, OFFHAND_ORDNANCE, wpnMods )
+}

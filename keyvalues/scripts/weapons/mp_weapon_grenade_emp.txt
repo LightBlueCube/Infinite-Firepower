@@ -1,0 +1,46 @@
+WeaponData
+{
+	Mods
+	{
+		pas_ordnance_pack
+		{
+		}
+
+		bc_arc_refill
+		{
+		}
+		burn_mod_emp_grenade
+		{
+		}
+		spree_lvl2_grenade_emp
+		{
+		}
+		spree_lvl2_grenade_emp
+		{
+		}
+		spree_lvl3_grenade_emp
+		{
+		}
+		sp_disable_arc_indicator
+		{
+		}
+
+		scp018
+		{
+			"grenade_bounce_vel_frac_shallow"				"0.9"
+			"grenade_bounce_vel_frac_sharp"					"0.9"
+			"grenade_bounce_vel_frac_along_normal"			"0.9"
+			"grenade_bounce_randomness"						"0.4"
+			"grenade_bounce_extra_vertical_randomness"		"0"
+			"explosion_damage"								"0"
+			"explosion_damage_heavy_armor"					"0"
+    	    "explosion_inner_radius"  						"0"
+    	    "explosionradius" 								"0"
+		}
+
+		scp018_kill_streak
+		{
+			"regen_ammo_refill_rate"						"0"
+		}
+	}
+}
