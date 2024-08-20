@@ -22,6 +22,7 @@ void function OnClientConnected( entity player )
 	player.s.validDuckNum <- 0.0
 	player.s.nearDuckNum <- 0.0
 	player.s.duckOriginSave <- < 0, 0, 0 >
+	player.s.killPos <- < 0, 0, 0 >
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -38,6 +39,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	if( DamageInfo_GetDamageSourceIdentifier( damageInfo ) == eDamageSourceId.anti_insult )
 		return
 
+	attacker.s.killPos = victim.EyePosition()
 	thread PlayerDuckCheck( attacker )
 }
 
@@ -103,7 +105,7 @@ void function OnPlayerDuck( entity player, float num )
 		near *= TITAN_CHECK_RANGE_MULTIPLIER
 	}
 
-	bool shouldReset = !IsAlive( player ) || distance > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging()
+	bool shouldReset = !IsAlive( player ) || distance > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging() || TraceLine( player.GetOrigin(), player.s.killPos, [ player ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE ).fraction < 0.99
 	bool invalidDuck = shouldReset || !player.IsOnGround()
 	if( distance > near || shouldReset )
 		player.s.nearDuckNum = 0.0
@@ -136,15 +138,14 @@ void function FuckUpPlayer( entity player )
 	player.EndSignal( "OnDestroy" )
 
 	wait 0.5
-	SendHudMessageWithPriority( player, 102, "喜欢蹲起？", -1, 0.4, < 255, 0, 0 >, < 0, 5, 1 > )
-	player.Die()
+	if( IsAlive( player ) )
+		player.Die()
 	wait 0.5
 
 	player.s.dontShowTips <- true
 	for( int i = 25; i > 0; i-- )
 	{
 		WaitFrame()
-		SendHudMessageWithPriority( player, 102, "喜欢蹲起？", -1, 0.4, < 255, 0, 0 >, < 0, 5, 1 > )
 		if( !IsAlive( player ) )
 			player.RespawnPlayer( null )
 		if( IsAlive( player ) )

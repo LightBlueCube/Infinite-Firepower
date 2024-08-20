@@ -266,7 +266,7 @@ void function SCP018_DamagedPlayerOrNPC( entity ent, var damageInfo )
 	if( !IsValid( proj ) )
 		return
 
-	if( TraceLine( ent.EyePosition(), proj.GetWorldSpaceCenter(), [ proj ], TRACE_MASK_BLOCKLOS, TRACE_COLLISION_GROUP_NONE ).fraction <= 0.90 )
+	if( TraceLine( proj.GetWorldSpaceCenter(), ent.EyePosition(), [ proj ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE ).fraction <= 0.90 )
 	{
 		DamageInfo_SetDamage( damageInfo, 0 )
 		return

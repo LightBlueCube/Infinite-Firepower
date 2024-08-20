@@ -11,7 +11,7 @@ void function KsGUI_Init()
 // KSGUI消息优先级： 发布时：100， 淡出时：90
 // 不建议将其他hud消息设置为比100更高的值，否则玩家可能看不到ksgui，但是他们依旧可以正常切换元素和使用元素
 // KSGUI message priority: on release: 100, on fadeout: 90
-// do not set other hudmsg`s priority higher then 100, else player will can not see ksgui, but they still can switch and use it
+// do not set other hudmsg`s priority higher then 100, either player will cant see ksgui, but they still can switch and use it
 
 void function SendKsGUI_Threaded( entity player, string text, vector rgb, float time, float fadeoutTime, string functionref( entity, string, string ) textChangeFunc = null, float pos = 0.3 )
 {
@@ -251,7 +251,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	}
 	if( onlyShowBatteryElem || ( skippedElem.contains( 6 ) && skippedElem.contains( 7 ) ) )
 		text += "\n"
-	text += "\n\n\n\n\n\n\n"
+	text += "\n\n\n\n\n"
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )
 	table<string,string> timeTable
@@ -269,6 +269,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
 	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]轨道打击\n"
+	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]弹力球　\n"
 	//text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
 
 	return text

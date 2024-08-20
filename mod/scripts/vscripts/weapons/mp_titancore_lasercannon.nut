@@ -351,7 +351,7 @@ bool function OnCoreCharge_GravityCore( entity weapon )
 	if( owner.IsPlayer() )
 	{
 		EmitSoundOnEntityOnlyToPlayer( owner, owner, "flamewave_start_1p" )
-		EmitSoundOnEntityExceptToPlayer( owner, owner, "flamewave_start_1p" )
+		EmitSoundOnEntityExceptToPlayer( owner, owner, "flamewave_start_3p" )
 	}
 	weapon.EmitWeaponSound_1p3p( "flamewave_start_1p", "flamewave_start_3p" )
 	EmitSoundOnEntity( owner, "weapon_gravitystar_preexplo" )

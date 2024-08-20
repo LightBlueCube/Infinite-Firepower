@@ -2,6 +2,7 @@ global function VoteCommand_Init
 global function StartNewVoteEvent
 global function EndVoteEvent
 global function GetVoteEvent
+global function Vote_ShouldEarlyEnd
 global function Vote_EasyReleaseFunc
 global function Vote_EasyVoteFunc
 global function Vote_EasyEndFunc
@@ -141,8 +142,10 @@ VoteEventStruct function GetVoteEvent( int id )
 
 void function Vote_EasyReleaseFunc( VoteEventStruct voteEvent )
 {
-	Chat_ServerBroadcast( "\n\x1b[32m一个新的投票：\x1b[36m"+ voteEvent.voteName +"\x1b[32m 已被发布", false )
-	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false )
+	foreach( ent in GetPlayerArray() )
+		Chat_ServerPrivateMessage( ent, "\n\x1b[32m一个新的投票：\x1b[36m"+ voteEvent.voteName +"\x1b[32m 已被发布", false, false )
+	foreach( ent in GetPlayerArray() )
+		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false, false )
 }
 
 bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, bool vote )
@@ -158,21 +161,24 @@ bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, bool 
 	else
 		voteEvent.voteNoCount += 1
 
-	Chat_ServerBroadcast( "\n\x1b[32m名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false )
+	foreach( ent in GetPlayerArray() )
+		Chat_ServerPrivateMessage( ent, "\n\x1b[32m名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false, false )
 	if( Vote_ShouldEarlyEnd( voteEvent ) )
 	{
 		EndVoteEvent( voteEvent, eVoteEndCode.complete )
 		return true
 	}
 
-	Chat_ServerBroadcast( "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false )
+	foreach( ent in GetPlayerArray() )
+		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false, false )
 	return true
 }
 
 void function Vote_EasyEndFunc( VoteEventStruct voteEvent )
 {
 	if( voteEvent.endCode == eVoteEndCode.timeout )
-		Chat_ServerBroadcast( "\n\x1b[32m名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false )
+		foreach( ent in GetPlayerArray() )
+			Chat_ServerPrivateMessage( ent, "\n\x1b[32m名为 \x1b[36m"+ voteEvent.voteName +"\x1b[32m 的投票目前票数为\n\x1b[36m同意票 "+ voteEvent.voteYesCount +" / "+ voteEvent.voteNoCount +" 反对票", false, false )
 	string voteEndText = "\x1b[33m此投票已结束！投票结果为："
 	int yes = voteEvent.voteYesCount
 	int no = voteEvent.voteNoCount
@@ -182,7 +188,8 @@ void function Vote_EasyEndFunc( VoteEventStruct voteEvent )
 		voteEndText += "\x1b[36m同意票居多"
 	else
 		voteEndText += "\x1b[36m反对票居多"
-	Chat_ServerBroadcast( voteEndText, false )
+	foreach( ent in GetPlayerArray() )
+		Chat_ServerPrivateMessage( ent, voteEndText, false, false )
 
 	voteEvent.callbackFunc( yes > no )
 }

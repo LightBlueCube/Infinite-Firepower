@@ -1,7 +1,3 @@
-untyped
-global function HudMessagePriority_Init
-global function SendHudMessageWithPriority
-
 /*
 
 KsGUI: 100 / OnFadeOut: 90
@@ -15,63 +11,136 @@ AntiInsult: 102
 
 */
 
+global function HudMessagePriority_Init
+global function SendHudMessageWithPriority
+
+table<string, table<string, float> > msgid = {}
+table<array<string> > prioritySeq = {}
 
 void function HudMessagePriority_Init()
 {
-	RegisterSignal( "SendingNewHudMessage" )
 	AddCallback_OnClientConnected( OnClientConnected )
 }
 
 void function OnClientConnected( entity player )
 {
-	player.s.nowMsgPriority <- -1.0
+	msgid[ player.GetUID() ] <- {}
+	prioritySeq[ player.GetUID() ] <- []
 }
 
-bool function SendHudMessageWithPriority( entity player, float priority, var text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout = 90 )
+void function SendHudMessageWithPriority( entity player, float priority, var text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout = 90 )
 {
-	if( priority < player.s.nowMsgPriority )
-		return false
-	player.s.nowMsgPriority = priority
-	string str = string( text )
-	thread StartSendHudMessage( player, str, yaw, pos, rgb, time, priorityOnFadeout )
-	return true
+	thread SendHudMessageWithPriority_Threaded( player, GetNewMessageId( player, priority ), string( text ), yaw, pos, rgb, time, priorityOnFadeout )
 }
 
-void function StartSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout )
+string function GetNewMessageId( entity player, float priority )
+{
+	int i = 0
+	string uid = player.GetUID()
+	for( ;; )
+	{
+		i++
+		if( !( string( i ) in msgid[uid] ) )
+			break
+	}
+	string id = string( i )
+	msgid[uid][id] <- priority
+	return id
+}
+
+void function FreeMessageId( entity player, string id )
+{
+	string uid = player.GetUID()
+
+	array<string> tmp = []
+	foreach( seq in prioritySeq[uid] )
+	{
+		if( seq == id )
+			continue
+		tmp.append( seq )
+	}
+	prioritySeq[uid] = tmp
+
+	delete msgid[uid][id]
+}
+
+bool function CanSendMessage( entity player, string id )
+{
+	string uid = player.GetUID()
+	if( prioritySeq[uid].len() == 0 )
+		return false
+	return prioritySeq[uid][0] == id
+}
+
+void function AddMsgToPrioritySeq( entity player, string id )
+{
+	array<string> tmp = []
+	string uid = player.GetUID()
+	float priority = msgid[uid][id]
+
+	if( prioritySeq[uid].len() == 0 )
+	{
+		prioritySeq[uid] = [ id ]
+		return
+	}
+	foreach( i in prioritySeq[uid] )
+	{
+		if( priority >= msgid[uid][i] && !tmp.contains( id ) )
+			tmp.append( id )
+		tmp.append( i )
+	}
+	if( !tmp.contains( id ) )
+		tmp.append( id )
+	prioritySeq[uid] = tmp
+}
+
+void function SendHudMessageWithPriority_Threaded( entity player, string id, string text, float yaw, float pos, vector rgb, vector time, float priorityOnFadeout )
 {
 	player.EndSignal( "OnDestroy" )
-	player.Signal( "SendingNewHudMessage" )
-	player.EndSignal( "SendingNewHudMessage" )
 
-	// fade in
 	int tick = int( time.x * 10 )
 	vector rgbFadeStart = < 0, 0, 0 >
 	vector fadePerTick = < rgb.x / tick, rgb.y / tick, rgb.z / tick >
-	WhileSendHudMessage( player, text, yaw, pos, rgbFadeStart, fadePerTick, tick )
+	AddMsgToPrioritySeq( player, id )
 
-	// show msg
-	tick = int( time.y * 10 )
-	fadePerTick = < 0, 0, 0 >	// dont do any fade
-	WhileSendHudMessage( player, text, yaw, pos, rgb, fadePerTick, tick )
+	if( time.x != 0 )
+	{
+		// fade in
+		WhileSendHudMessage( player, id, text, yaw, pos, rgbFadeStart, fadePerTick, tick )
+	}
 
-	player.s.nowMsgPriority = priorityOnFadeout
+	if( time.y != 0 )
+	{
+		// show msg
+		tick = int( time.y * 10 )
+		fadePerTick = < 0, 0, 0 >	// dont do any fade
+		WhileSendHudMessage( player, id, text, yaw, pos, rgb, fadePerTick, tick )
+	}
+
+	FreeMessageId( player, id )
+	if( time.z == 0 )
+		return
+
+	id = GetNewMessageId( player, priorityOnFadeout )
+	AddMsgToPrioritySeq( player, id )
 
 	// fade out
 	tick = int( time.z * 10 )
 	rgbFadeStart = rgb
 	fadePerTick = < rgb.x / tick, rgb.y / tick, rgb.z / tick >
 	fadePerTick *= -1	// do fade out
-	WhileSendHudMessage( player, text, yaw, pos, rgbFadeStart, fadePerTick, tick )
+	WhileSendHudMessage( player, id, text, yaw, pos, rgbFadeStart, fadePerTick, tick )
 
-	player.s.nowMsgPriority = -1.0
+	FreeMessageId( player, id )
 }
 
-void function WhileSendHudMessage( entity player, string text, float yaw, float pos, vector rgb, vector fadePerTick, int tick )
+void function WhileSendHudMessage( entity player, string id, string text, float yaw, float pos, vector rgb, vector fadePerTick, int tick )
 {
 	for( int i = tick; i > 0; i-- )
 	{
 		rgb += fadePerTick
-		SendHudMessage( player, text, yaw, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0.2, 0.0 )
+		if( CanSendMessage( player, id ) )
+			SendHudMessage( player, text, yaw, pos, int( rgb.x ), int( rgb.y ), int( rgb.z ), 255, 0, 0.2, 0.0 )
 		WaitFrame()
 	}
 }
