@@ -1,6 +1,12 @@
 untyped
 global function TitanLoadoutTips_Init
 global function PilotLoadoutTips_Init
+global function GetTitanName
+global function GetSwitchedTitanName
+global function IsCustomTitan
+global function GetCustomPilotSkillName
+global function GetSwitchedCustomPilotSkillName
+global function IsCustomPilotSkill
 
 void function TitanLoadoutTips_Init()
 {
@@ -53,7 +59,7 @@ void function OnTitanfall( entity titan )
 		tips += "原版泰坦"
 	else
 		tips += "客制化泰坦"
-	tips += ": "+ GetSwitchedTitan( titan )
+	tips += ": "+ GetSwitchedTitanName( titan )
 
 	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 5.0, 1.0 > )
 }
@@ -110,7 +116,7 @@ bool function IsCustomTitan( entity titan )
 	return false
 }
 
-string function GetSwitchedTitan( entity titan )
+string function GetSwitchedTitanName( entity titan )
 {
 	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
 		return "離子"

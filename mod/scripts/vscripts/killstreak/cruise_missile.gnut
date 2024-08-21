@@ -544,14 +544,14 @@ void function CruiseMissileExplode( vector origin, entity owner )
 		}
 	)
 
-	for ( int i = 0; i < 20; i++ )
+	for ( int i = 0; i < 15; i++ )
 	{
 		RadiusDamage(
 			origin,										// center
 			owner,										// attacker
 			inflictor,									// inflictor
 			75,											// damage
-			1500,										// damageHeavyArmor
+			1750,										// damageHeavyArmor
 			350,										// innerRadius
 			750,										// outerRadius
 			0,											// flags
@@ -560,6 +560,6 @@ void function CruiseMissileExplode( vector origin, entity owner )
 			DF_EXPLOSION | DF_STOPS_TITAN_REGEN,		// scriptDamageFlags
 			eDamageSourceId.mp_weapon_cruise_missile )	// scriptDamageSourceIdentifier
 
-		wait 0.1
+		WaitFrame()
 	}
 }

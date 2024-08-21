@@ -87,6 +87,9 @@ void function HighLightingTarget( entity target )
 {
 	target.EndSignal( "OnDeath" )
 	target.EndSignal( "OnDestroy" )
+	target.EndSignal( "TitanEjectionStarted" )
+	target.EndSignal( "DisembarkingTitan" )
+	target.EndSignal( "player_embarks_titan" )
 	target.Signal( "MarkLaserTagetThink" )
 	target.EndSignal( "MarkLaserTagetThink" )
 
@@ -115,16 +118,14 @@ void function HighLightingTarget( entity target )
 
 void function MarkLaserHudMsgThink( entity target )
 {
-	target.EndSignal( "OnDeath" )
 	target.EndSignal( "OnDestroy" )
 	target.EndSignal( "MarkLaserHudMsgStop" )
-	target.EndSignal( "MarkLaserTagetThink" )
 
 	for( ;; )
 	{
-		SendHudMessageWithPriority( target, 91, "你已被天图标记", -1, -0.4, < 255, 0, 0 >, < 0, 0.2, 0 > )
+		SendHudMessageWithPriority( target, 91, "被天图标记", -1, -0.4, < 255, 0, 0 >, < 0, 0.2, 0 > )
 		WaitFrame()
-		SendHudMessageWithPriority( target, 91, "你已被天图标记", -1, -0.4, < 255, 255, 0 >, < 0, 0.2, 0 > )
+		SendHudMessageWithPriority( target, 91, "被天图标记", -1, -0.4, < 255, 255, 0 >, < 0, 0.2, 0 > )
 		WaitFrame()
 	}
 }

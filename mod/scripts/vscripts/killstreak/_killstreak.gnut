@@ -8,11 +8,11 @@ global function SetKillStreakEnable
 global function GiveRandomKillStreakInNextMatch
 
 table<int> file = {
-	nukeTitan = 4
-	cruiseMissile = 15
-	vtol = 20
-	orbitalStrike = 10
-	scp018 = 14
+	nukeTitan = 5
+	cruiseMissile = 12
+	vtol = 12
+	orbitalStrike = 8
+	scp018 = 10
 	nuclearBomb = 20
 }
 
@@ -48,9 +48,13 @@ void function SetRandomKillStreakFunction( void functionref( entity ) func )
 
 void function RandomKillStreak( entity player )
 {
-	player.s.NukeTitan += RandomInt( 8 ) + 1
-	if( player.s.NukeTitan <= 8 )
+	player.s.NukeTitan += RandomInt( 4 ) + 1
+	if( player.s.NukeTitan > 2 )
+		return
+	if( player.s.NukeTitan > 0 )
 		player.s.CruiseMissile += 1
+	else
+		player.s.OrbitalStrike += 1
 }
 
 void function SetKillStreakData( table<int> input )

@@ -57,7 +57,7 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 			damage = curr
 		}
 	}
-	if( [ eDamageSourceId.mp_weapon_grenade_sonar ].contains( damageSourceId ) )
+	if( [ eDamageSourceId.mp_weapon_grenade_sonar, eDamageSourceId.mp_titanweapon_laser_lite, eDamageSourceId.phase_shift ].contains( damageSourceId ) )
 	{
 		victim.SetShieldHealth( 0 )
 	}
