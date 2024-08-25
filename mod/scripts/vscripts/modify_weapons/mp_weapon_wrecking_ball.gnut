@@ -513,7 +513,7 @@ void function SpeedPadStimThink( entity player, float severity, float leaveDurat
     player.EndSignal( "OnDestroy" )
     player.EndSignal( "EnterSpeedPad" )
     int speedBoostHandle = StatusEffect_AddEndless( player, eStatusEffect.speed_boost, severity )
-	GivePassive( player, ePassives.PAS_FUSION_CORE )
+    int stimVisualHandle = StatusEffect_AddEndless( player, eStatusEffect.stim_visual_effect, severity )
 
     int attachmentIndex = player.LookupAttachment( "CHESTFOCUS" )
 	entity stimFX = StartParticleEffectOnEntity_ReturnEntity( player, PILOT_STIM_HLD_FX, FX_PATTACH_POINT_FOLLOW, attachmentIndex )
@@ -521,12 +521,12 @@ void function SpeedPadStimThink( entity player, float severity, float leaveDurat
 	stimFX.kv.VisibilityFlags = (ENTITY_VISIBLE_TO_FRIENDLY | ENTITY_VISIBLE_TO_ENEMY) // not owner only
 
     OnThreadEnd(
-        function(): ( player, stimFX, triggerLeft, speedBoostHandle )
+        function(): ( player, stimFX, triggerLeft, speedBoostHandle, stimVisualHandle )
         {
             if( IsValid( player ) )
             {
                 StatusEffect_Stop( player, speedBoostHandle )
-				TakePassive( player, ePassives.PAS_FUSION_CORE )
+                StatusEffect_Stop( player, stimVisualHandle )
                 StopSoundOnEntity( player, "pilot_stimpack_loop_1P" )
                 StopSoundOnEntity( player, "pilot_stimpack_loop_3P" )
             }

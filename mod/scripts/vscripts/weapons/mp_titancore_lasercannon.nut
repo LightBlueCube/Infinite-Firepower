@@ -392,8 +392,8 @@ void function GravityCoreThink( entity weapon, entity owner )
 				owner.GetOrigin(),											// origin
 				owner,														// owner
 				owner,		 												// inflictor
-				50,															// normal damage
-				1600,														// heavy armor damage
+				120,														// normal damage
+				800,														// heavy armor damage
 				400,														// inner radius
 				400,														// outer radius
 				SF_ENVEXPLOSION_NO_DAMAGEOWNER,								// explosion flags

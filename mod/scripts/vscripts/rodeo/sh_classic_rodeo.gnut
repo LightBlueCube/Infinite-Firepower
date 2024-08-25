@@ -194,9 +194,6 @@ void function OnRodeoWeakpointPostDamaged( entity weakpoint, var damageInfo )
 	if( [ "mp_weapon_frag_drone", "mp_weapon_frag_grenade", "mp_weapon_deployable_cover", "mp_weapon_grenade_electric_smoke", "mp_weapon_grenade_emp", "mp_weapon_grenade_gravity", "mp_weapon_thermite_grenade", "mp_weapon_grenade_sonar", "mp_weapon_hard_cover", "mp_weapon_satchel" ].contains( weaponName ) )
 		rodeoDamage = targetHealth / ( 4 * targetTime )
 
-	if( titanSoul.IsDoomed() )
-		rodeoDamage *= 0.5
-
 	//if( damageSourceID == eDamageSourceId.mp_weapon_frag_grenade || damageSourceID == eDamageSourceId.mp_weapon_grenade_gravity || damageSourceID == eDamageSourceId.mp_weapon_grenade_sonar || damageSourceID == eDamageSourceId.mp_weapon_thermite_grenade )
 	//	rodeoDamage /= 2
 

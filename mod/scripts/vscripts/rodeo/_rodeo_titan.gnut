@@ -152,7 +152,7 @@ global float ANTI_RODEO_DEFAULT_WINDOW_START = 0.55
 
 //nessie modify
 const int PILOT_BATTERY_BUGGED_LIMIT = 1
-const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 64
+const int WORLD_BATTERY_MAX_COUNT_DEFAULT = 32
 
 struct AntiRodeoPlayerData
 {
@@ -2595,7 +2595,7 @@ void function Rodeo_ApplyBatteryToTitan( entity battery, entity titan, bool owne
 		float ampedHealthSegmentFrac = GetCurrentPlaylistVarFloat( "amped_battery_health_frac", 2.0 )
 		float healthSegmentFrac = GetCurrentPlaylistVarFloat( "battery_health_frac", 0.5 )
 
-		float coreFrac = IsAmpedBattery( battery ) ? 0.4 : 0.8
+		float coreFrac = IsAmpedBattery( battery ) ? 0.2 : 0.4
 		if( IsValid( battery ) )
 		{
 			if( battery.GetSkin() == 1 )
@@ -3795,7 +3795,7 @@ void function ClassicRodeo_DropAllStoredBatteries( entity ent, var damageInfo )
 	for ( float i = 1.0; i <= batteryCount; i += 1.0 )
 	{
 		entity newBattery = Rodeo_CreateBatteryPack()
-		newBattery.SetSkin( RandomInt( 10 ) == 0 ? 0 : 2 )	// 90% Yellow, 10% Green
+		newBattery.SetSkin( RandomInt( 2 ) == 0 ? 0 : 2 )	// 50% Yellow, 50% Green
 		Battery_StartFX( newBattery )
 		newBattery.s.touchEnabledTime = Time() + 0.3
 		vector direction = AnglesToForward( <0, i/batteryCount * 360.0, 0> )

@@ -114,7 +114,7 @@ WeaponData
 			"bounce_effect_table"							"bounce_frag_drone"
 			// regen ammo
 			"grenade_fuse_time"								"0.0" // script handle this
-			"regen_ammo_refill_rate"						"20"
+			"regen_ammo_refill_rate"						"13.333"
 
 			// toss
 			"toss_pullout_time"								"++0.25" // 0.35

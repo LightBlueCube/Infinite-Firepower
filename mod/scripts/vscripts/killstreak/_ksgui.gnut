@@ -121,7 +121,7 @@ void function KsGUI_Switch( entity player )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 7 )
 
 	while( player.s.GUIActive && skippedElem.contains( player.s.GUIIndex ) )
@@ -156,7 +156,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 7 )
 
 	if( skippedElem.len() == KSGUI_ELEM.len() )
@@ -199,7 +199,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	{
 		if( index == -1 )
 		{
-			text += "啥都木有 ┐(‘～`;)┌"
+			text += "啥也没有(^･ｪ･^)\n去捡个电池或打个连杀奖励"
 			break
 		}
 
@@ -250,7 +250,8 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		text += " "
 	}
 	if( onlyShowBatteryElem || ( skippedElem.contains( 6 ) && skippedElem.contains( 7 ) ) )
-		text += "\n"
+		if( index != -1 )
+			text += "\n"
 	text += "\n\n\n\n\n"
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )

@@ -62,11 +62,11 @@ void function LoadedInits_Init()
 	DisableAimAssist_Init()
 
 	// 炫彩聊天文字，已fuck up
-	// ColorfulChat_Init()
+	//ColorfulChat_Init()
 
 	// 如果服务器无人则自动重启服务器
 	AutoShutdown_Init()
 
 	// DEV: 跟踪泰坦使用频次和记录各泰坦的kd
-	DevTrackUsage_Init()
+	//DevTrackUsage_Init()
 }

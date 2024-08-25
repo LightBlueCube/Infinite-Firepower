@@ -1,6 +1,8 @@
 ifp stable
 
 -allowlocalhttp
+-allowdupeaccounts
++sv_maxvelocity 100000
 +setplaylistvaroverrides "max_players 14"
 +sv_usercmd_max_queued 100
 +ns_should_return_to_lobby 0
@@ -13,6 +15,8 @@ ifp stable
 ifp rotation
 
 -allowlocalhttp
+-allowdupeaccounts
++sv_maxvelocity 100000
 +setplaylistvaroverrides "max_players 10"
 +sv_usercmd_max_queued 100
 +ns_should_return_to_lobby 0
@@ -25,6 +29,8 @@ ifp rotation
 ifp ps
 
 -allowlocalhttp
+-allowdupeaccounts
++sv_maxvelocity 100000
 +mp_gamemode ps
 +setplaylist ps
 +setplaylistvaroverrides "max_players 16 timelimit 18 scorelimit 2147483647"
@@ -40,6 +46,7 @@ ifp test
 
 -allowlocalhttp
 -allowdupeaccounts
++sv_maxvelocity 100000
 +map mp_glitch
 +mp_gamemode tdm
 +setplaylist tdm

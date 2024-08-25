@@ -37,6 +37,22 @@ void function MpTitanWeaponSonarPulse_Init()
 		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_electric_smoke", "vortex_absorb_effect_third_person" ), // absorb effect 3p
 		"grenade_long_fuse" // refire behavior
 	)
+	Vortex_AddBehaviorOverride_WeaponMod(
+		"mp_titanability_sonar_pulse", // weapon name
+		"tcp_gravity", // mod name
+		"", // vortex impact sound 1p( seems no where used )
+		"", // vortex impact sound 3p
+		$"", // vortex impact effect
+		"drop" // ignores vortex behavior
+	)
+	Vortex_AddBehaviorOverride_WeaponMod(
+		"mp_titanability_sonar_pulse", // weapon name
+		"tcp_smoke", // mod name
+		"", // vortex impact sound 1p( seems no where used )
+		"", // vortex impact sound 3p
+		$"", // vortex impact effect
+		"drop" // ignores vortex behavior
+	)
 }
 
 bool function OnWeaponAttemptOffhandSwitch_titanability_sonar_pulse( entity weapon )

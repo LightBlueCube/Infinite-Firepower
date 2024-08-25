@@ -57,7 +57,7 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 			damage = curr
 		}
 	}
-	if( [ eDamageSourceId.mp_weapon_grenade_sonar, eDamageSourceId.mp_titanweapon_laser_lite, eDamageSourceId.phase_shift ].contains( damageSourceId ) )
+	if( [ eDamageSourceId.mp_weapon_grenade_sonar, eDamageSourceId.phase_shift ].contains( damageSourceId ) )
 	{
 		victim.SetShieldHealth( 0 )
 	}
@@ -65,11 +65,11 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 	if( damage >= curr )
 	{
 		// when damage == curr, do not reset the damage amount, cuz its will change to 0 and we will lost hit notice
-		/*if( floor( damage ) > curr )
+		if( floor( damage ) > curr )
 		{
 			DamageInfo_SetDamage( damageInfo, damage - curr )
 			victim.SetShieldHealth( 0 )
-		}*/
+		}
 		StatusEffect_AddTimed( victim, eStatusEffect.emp, 1.0, 1.0, 1.0 )
 		//EmitSoundOnEntity( victim, "titan_energyshield_down" )	// early play this in health_regen.gnut
 		if( damage - curr < victim.GetHealth() )
@@ -78,7 +78,7 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 			victim.Signal( "SendingNewGUI" )
 			victim.s.GUIActive = false
 			victim.s.GUIClose = true
-			SendHudMessageWithPriority( victim, 93, "护盾损坏\n0/"+ total, -1, -0.4, < 255, 0, 0 >, < 0, 1.0, 1.0 >, 91 )
+			SendHudMessageWithPriority( victim, 93, "护盾损坏\n0/"+ total, -1, -0.4, < 255, 0, 0 >, < 0, 1.0, 1.0 >, 90 )
 		}
 		return
 	}
@@ -89,7 +89,7 @@ void function OnPlayerFinalDamaged( entity victim, var damageInfo )
 	victim.Signal( "SendingNewGUI" )
 	victim.s.GUIActive = false
 	victim.s.GUIClose = true
-	SendHudMessageWithPriority( victim, 93, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, < 0, 1.0, 1.0 >, 91 )
+	SendHudMessageWithPriority( victim, 93, "护盾受击\n"+ afterHealth +"/"+ total, -1, -0.4, < 255, int( GraphCapped( afterHealth, total, 0, 255, 0 ) ), 0 >, < 0, 1.0, 1.0 >, 90 )
 }
 
 void function OnTitanBecomesPilot( entity player, entity titan )
