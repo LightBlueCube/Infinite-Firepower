@@ -114,7 +114,7 @@ bool function Vote_OnVoteFunc( VoteEventStruct voteEvent, entity player, bool vo
 	}
 
 	foreach( ent in GetPlayerArray() )
-		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false, false )
+		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票\n\x1b[35m注意！如果你不投票则会被视为弃权，如果你不想跳过对局请投反对票", false, false )
 	return false
 }
 
@@ -128,7 +128,7 @@ void function SkipMatch( bool vote )
 		return
 	}
 	foreach( ent in GetPlayerArray() )
-		Chat_ServerPrivateMessage( ent, "\x1b[32m结果：\x1b[36m即将跳过此对局！", false, false )
-	wait 5
+		Chat_ServerPrivateMessage( ent, "\x1b[32m结果：\x1b[31m即将跳过此对局！", false, false )
+	wait 3
 	SetGameState( eGameState.Postmatch )
 }

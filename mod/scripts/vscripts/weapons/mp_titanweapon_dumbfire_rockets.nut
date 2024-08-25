@@ -22,12 +22,29 @@ void function MpTitanWeaponDumbfireRocket_Init()
     AddDamageCallbackSourceID( eDamageSourceId.mp_titanweapon_charge_ball, ChargeBall_OnDamagedTarget )
 	RegisterBallLightningDamage( eDamageSourceId.mp_titanweapon_charge_ball ) // doing check in stun laser damagesourceID
 
+
+	Vortex_AddBehaviorOverride_WeaponMod(
+		"mp_titanweapon_dumbfire_rockets", // weapon name
+		"charge_ball", // mod name
+		"", // vortex impact sound 1p( seems no where used )
+		"Explo_ProximityEMP_Impact_3P", // vortex impact sound 3p
+		$"P_impact_exp_emp_med_default", // vortex impact effect
+		"" // ignores vortex behavior
+	)
 	Vortex_AddImpactDataOverride_WeaponMod(
 		"mp_titanweapon_dumbfire_rockets", // weapon name
 		"archon_stun_impact", // mod name
 		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_emp", "vortex_absorb_effect" ), // absorb effect
 		GetWeaponInfoFileKeyFieldAsset_Global( "mp_weapon_grenade_emp", "vortex_absorb_effect_third_person" ), // absorb effect 3p
 		"grenade" // refire behavior
+	)
+	Vortex_AddBehaviorOverride_WeaponMod(
+		"mp_titanweapon_dumbfire_rockets", // weapon name
+		"archon_stun_impact", // mod name
+		"", // vortex impact sound 1p( seems no where used )
+		"", // vortex impact sound 3p
+		$"P_impact_exp_emp_med_default", // vortex impact effect
+		"" // ignores vortex behavior
 	)
 }
 

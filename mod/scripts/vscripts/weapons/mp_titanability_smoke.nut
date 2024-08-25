@@ -97,10 +97,19 @@ void function TitanSmokescreen( entity ent, entity weapon )
 	{
 		smokescreen.dpsPilot = 90
 		smokescreen.dpsTitan = 1350
-		if( weapon.HasMod( "tcp_balance" ) )
+		if( HasSoul( ent ) )
 		{
-			smokescreen.dpsPilot = 45
-			smokescreen.dpsTitan = 950
+			if( IsValid( ent.GetTitanSoul() ) )
+			{
+				if( "useBalanceSmoke" in ent.GetTitanSoul().s )
+				{
+					if( ent.GetTitanSoul().s.useBalanceSmoke )
+					{
+						smokescreen.dpsPilot = 60
+						smokescreen.dpsTitan = 1000
+					}
+				}
+			}
 		}
 		smokescreen.deploySound1p = SFX_SMOKE_DEPLOY_BURN_1P
 		smokescreen.deploySound3p = SFX_SMOKE_DEPLOY_BURN_3P

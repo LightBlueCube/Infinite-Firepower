@@ -195,6 +195,15 @@ int function Grenade_OnWeaponToss_( entity weapon, WeaponPrimaryAttackParams att
 
 void function SCP018_Think( entity grenade, entity owner, bool isKillstreak = false )
 {
+	if( !IsValid( owner ) )
+	{
+		if( IsValid( grenade ) )
+			grenade.Destroy()
+		return
+	}
+	if( !IsValid( grenade ) )
+		return
+
 	grenade.EndSignal( "OnDestroy" )
 	owner.Signal( "PlayerUseSCP018" )
 

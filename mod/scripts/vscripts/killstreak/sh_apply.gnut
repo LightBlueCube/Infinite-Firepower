@@ -33,7 +33,7 @@ void function DropBattery( entity player, bool showTips = false )
 	battery.SetVelocity( batteryVel )
 	battery.s.touchEnabledTime <- Time() + 1
 
-	string text = "\n已丢出电池！"
+	string text = "\n\n已丢出电池！"
 	if( showTips )
 		text += "\n你也可以在未打开GUI菜单时直接长按\n泰坦辅助技能键（默认为G）来快速丢弃电池"
 	if( battery.GetSkin() == 0 )
@@ -54,7 +54,10 @@ void function ApplyNukeTitan( entity player )
 
 	player.s.NukeTitan -= 1
 	PlayerInventory_GiveNukeTitan( player )
-	thread SendKsGUI_Threaded( player, "按住以持续交付核武泰坦\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付", < 100, 255, 100 >, 2, 1 )
+	string tips = ""
+	if( GameRules_GetGameMode() == "fw" )
+		tips = "\n注意！在边境战争模式下核武泰坦只能用来守家"
+	thread SendKsGUI_Threaded( player, "\n按住以持续交付核武泰坦\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付"+ tips, < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -164,7 +167,7 @@ void function ApplyOrbitalStrike( entity player )
 
 	player.s.OrbitalStrike -= 1
 	thread OrbitalStrikeThink( player )
-	thread SendKsGUI_Threaded( player, "已交付轨道打击\n扔出标记电池在想要打击的位置以开始", < 100, 255, 100 >, 2, 1 )
+	thread SendKsGUI_Threaded( player, "\n已交付轨道打击\n扔出标记电池在想要打击的位置以开始", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -178,10 +181,10 @@ void function ApplySCP018( entity player )
 		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付弹力球" )
 	entity weapon = player.GetOffhandWeapon( OFFHAND_ORDNANCE )
 	if( weapon.HasMod( "scp018_kill_streak" ) )
-		return ApplyFalied( player, "你已经交付了弹力球 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
+		return ApplyFalied( player, "\n你已经交付了弹力球 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
 
 	thread ApplySCP018_Think( player )
-	thread SendKsGUI_Threaded( player, "已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", < 100, 255, 100 >, 2, 1 )
+	thread SendKsGUI_Threaded( player, "\n已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", < 100, 255, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 
 }

@@ -333,6 +333,7 @@ void function OnTitanfall( entity titan )
 	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )
 	{
 		soul.s.titanTitle <- "帝王"
+		soul.s.useBalanceSmoke <- true	// delete this to use vanilla smoke damage
 		if( SoulHasPassive( soul, ePassives.PAS_VANGUARD_SHIELD ) )
 			titan.GetOffhandWeapon( OFFHAND_SPECIAL ).AddMod( "tcp_balance" )
 		titan.GetOffhandWeapon( OFFHAND_EQUIPMENT ).AddMod( "tcp_full_level" )

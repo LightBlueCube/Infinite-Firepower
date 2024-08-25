@@ -2523,6 +2523,8 @@ bool function CodeCallback_OnVortexHitProjectile( entity weapon, entity vortexSp
 		switch ( damageSourceID )
 		{
 			case eDamageSourceId.mp_titanweapon_dumbfire_rockets:
+				if( projectile.ProjectileGetMods().contains( "charge_ball" ) )
+					break
 				vector normal = projectile.GetVelocity() * -1
 				normal = Normalize( normal )
 				ClusterRocket_Detonate( projectile, normal )

@@ -587,7 +587,7 @@ void function WeaponAttackWave_tcp_arc_wave( entity ent, int projectileCount, en
 			if ( vortexWeapon && vortexWeapon.GetWeaponClassName() == "mp_titanweapon_vortex_shield" )
 				VortexDrainedByImpact( vortexWeapon, weapon, projectile, null ) // drain the vortex shield
 			else if ( IsVortexSphere( vortexHit.vortex ) )
-				VortexSphereDrainHealthForDamage( vortexHit.vortex, damageNearValueTitanArmor )
+				VortexSphereDrainHealthForDamage( vortexHit.vortex, 10000 )
 
 			WaitFrame()
 			continue

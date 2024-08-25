@@ -2,7 +2,7 @@
 
 KsGUI: 100 / OnFadeOut: 90
 NuclearBomb: 90.01
-PilotShieldDamaged: 93 / OnFadeOut: 91
+PilotShieldDamaged: 93 / OnFadeOut: 90
 SkillUsingMessage: 92 / OnFaild: 101 / OnFadeOut: 92
 LoadoutTips: 91
 AntiAFK: 95
@@ -52,15 +52,7 @@ void function FreeMessageId( entity player, string id )
 {
 	string uid = player.GetUID()
 
-	array<string> tmp = []
-	foreach( seq in prioritySeq[uid] )
-	{
-		if( seq == id )
-			continue
-		tmp.append( seq )
-	}
-	prioritySeq[uid] = tmp
-
+	prioritySeq[uid].removebyvalue( id )
 	delete msgid[uid][id]
 }
 

@@ -34,7 +34,12 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 {
 	string message = msgStruct.message
 	array<string> splitedMsg = split( message, " " ) // split with white space
-	string cmd = splitedMsg[0]
+	string cmd
+	// player can send no message chat
+	if( splitedMsg.len() == 0 )
+		cmd = ""
+	else
+		cmd = splitedMsg[0]
 	array<string> args = splitedMsg
 	args.removebyvalue( cmd )
 
