@@ -106,7 +106,7 @@ WeaponData
 
 	"crosshair"										"crosshair_t"
 	"explosion_damage"								"350"		// 150
-	"explosion_damage_heavy_armor"					"800"		// 150
+	"explosion_damage_heavy_armor"					"850"		// 150
 
 	"explosion_inner_radius"  						"140"
 	"explosionradius" 								"320"
@@ -423,7 +423,7 @@ WeaponData
 	// NPC
 	// modified: hopefully these fixes npc dealing damage
 	"npc_explosion_damage"							"350" // was 350, which is too high
-	"npc_explosion_damage_heavy_armor"				"800"
+	"npc_explosion_damage_heavy_armor"				"850"
 
 
 	// modified: hopefully these fixes npc targeting enemies

@@ -38,7 +38,7 @@ void function CruiseMissileAnim_ThinkBefore( entity owner )
 	owner.s.DisableGUI = true
 	owner.s.disableOutOfBounds <- true
 	owner.kv.VisibilityFlags = 0
-	PhaseShift( owner, 0, 1.2 )
+	PhaseShift( owner, 0, 2.0 )
 	HolsterAndDisableWeapons( owner )
 	owner.SetOrigin( owner.GetOrigin() )
 	FindNearestSafeSpotAndPutEntity( owner )
@@ -363,7 +363,8 @@ void function FireCruiseMissile( entity weaponOwner, vector cmFireOrigin, vector
 
 	if ( missile )
 	{
-		missile.kv.modelscale = 4.0
+		missile.kv.modelscale = 0.1
+		missile.SetTakeDamageType( DAMAGE_NO )
 		EmitSoundOnEntityOnlyToPlayer( weaponOwner, weaponOwner, "Weapon_Archer_Fire_1P" )
 		thread CruiseMissileThink( weapon, weaponOwner, missile )
 	}
@@ -557,7 +558,7 @@ void function CruiseMissileExplode( vector origin, entity owner )
 			0,											// flags
 			0,											// distanceFromAttacker
 			75,											// explosionForce
-			DF_EXPLOSION | DF_STOPS_TITAN_REGEN,		// scriptDamageFlags
+			DF_RAGDOLL | DF_EXPLOSION,					// scriptDamageFlags
 			eDamageSourceId.mp_weapon_cruise_missile )	// scriptDamageSourceIdentifier
 
 		WaitFrame()

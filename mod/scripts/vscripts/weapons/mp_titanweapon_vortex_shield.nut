@@ -458,7 +458,7 @@ void function TakeAmountOnVotexDamaged( entity weapon, entity projectile )
 
 	entity owner = weapon.GetWeaponOwner()
 	int currentEnergy = owner.GetSharedEnergyCount()
-	int val = int( amount * 0.2 )
+	int val = int( amount * 0.4 )	// 2500 hp for shield
 	if( currentEnergy - val <= 0 )
 		val = currentEnergy
 	if( val >= 0 )

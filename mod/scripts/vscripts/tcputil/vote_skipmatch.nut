@@ -4,6 +4,7 @@ global function VoteToSkipMatch
 struct{
 	bool hasVoted = false
 	bool onVote = false
+	int voteId = -1
 }file
 
 void function Vote_SkipMatch_Init()
@@ -11,6 +12,28 @@ void function Vote_SkipMatch_Init()
 	AddCallback_GameStateEnter( eGameState.Playing, VoteToSkipMatch )
 	AddChatCommandCallback( "!skip", StartNewSkipMatchVoteEvemt )
 	AddChatCommandCallback( "！skip", StartNewSkipMatchVoteEvemt )
+	AddChatCommandCallback( "!sy", SkipMatchOnVoteYes )
+	AddChatCommandCallback( "！sy", SkipMatchOnVoteYes )
+	AddChatCommandCallback( "!sn", SkipMatchOnVoteNo )
+	AddChatCommandCallback( "！sn", SkipMatchOnVoteNo )
+}
+
+bool function SkipMatchOnVoteYes( entity player, array<string> args )
+{
+	return SkipMatchOnVote( player, "y" )
+}
+
+bool function SkipMatchOnVoteNo( entity player, array<string> args )
+{
+	return SkipMatchOnVote( player, "n" )
+}
+
+bool function SkipMatchOnVote( entity player, string vote )
+{
+	if( !HasVoteEvent( file.voteId ) )
+		return false
+
+	return GetVoteEvent( file.voteId ).onVoteFunc( GetVoteEvent( file.voteId ), player, vote )
 }
 
 bool function StartNewSkipMatchVoteEvemt( entity player, array<string> args )
@@ -31,7 +54,7 @@ bool function StartNewSkipMatchVoteEvemt( entity player, array<string> args )
 	voteEvent.voteName = "\x1b[94m要跳过此对局吗？"
 	voteEvent.endTime = Time() + 60.0
 	voteEvent.s.ownerName <- player.GetPlayerName()
-	StartNewVoteEvent( voteEvent )
+	file.voteId = StartNewVoteEvent( voteEvent )
 	Chat_ServerPrivateMessage( player, "\x1b[33m提示：你只是发起了投票，但并没有投，你可以使用指令投票一次", false, false )
 	return false
 }
@@ -50,7 +73,7 @@ void function VoteToSkipMatch()
 	voteEvent.callbackFunc = SkipMatch
 	voteEvent.voteName = "\x1b[94m要跳过此对局吗？"
 	voteEvent.endTime = Time() + 60.0
-	StartNewVoteEvent( voteEvent )
+	file.voteId = StartNewVoteEvent( voteEvent )
 }
 
 void function Vote_OnRelease( VoteEventStruct voteEvent )
@@ -61,7 +84,7 @@ void function Vote_OnRelease( VoteEventStruct voteEvent )
 	foreach( ent in GetPlayerArray() )
 		Chat_ServerPrivateMessage( ent, "\n\x1b[36m"+ name +" \x1b[32m发起了一个投票！投票名为 \x1b[36m"+ voteEvent.voteName, false, false )
 	foreach( ent in GetPlayerArray() )
-		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false, false )
+		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!sy \x1b[32m投同意票\n输入 \x1b[36m!sn \x1b[32m投反对票", false, false )
 }
 
 void function Vote_OnEndFunc( VoteEventStruct voteEvent )
@@ -89,18 +112,28 @@ void function Vote_OnEndFunc( VoteEventStruct voteEvent )
 	foreach( ent in GetPlayerArray() )
 		Chat_ServerPrivateMessage( ent, voteEndText, false, false )
 
+	file.voteId = -1
+
 	voteEvent.callbackFunc( vote )
 }
 
-bool function Vote_OnVoteFunc( VoteEventStruct voteEvent, entity player, bool vote )
+bool function Vote_OnVoteFunc( VoteEventStruct voteEvent, entity player, string vote )
 {
+	if( ![ "y", "n" ].contains( vote ) )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m无效投票选项，请注意大小写！", false, false )
+		Vote_ShowList( player )
+		return true
+	}
+
 	if( voteEvent.hasVotedPlayers.contains( player.GetUID() ) )
 	{
 		Chat_ServerPrivateMessage( player, "\x1b[31m你已经投过票了！", false, false )
 		return true
 	}
+
 	voteEvent.hasVotedPlayers.append( player.GetUID() )
-	if( vote )
+	if( vote == "y" )
 		voteEvent.voteYesCount += 1
 	else
 		voteEvent.voteNoCount += 1
@@ -114,7 +147,7 @@ bool function Vote_OnVoteFunc( VoteEventStruct voteEvent, entity player, bool vo
 	}
 
 	foreach( ent in GetPlayerArray() )
-		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票\n\x1b[35m注意！如果你不投票则会被视为弃权，如果你不想跳过对局请投反对票", false, false )
+		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!sy \x1b[32m投同意票\n输入 \x1b[36m!sn \x1b[32m投反对票\n\x1b[35m注意！如果你不投票则会被视为弃权，如果你不想跳过对局请投反对票", false, false )
 	return false
 }
 

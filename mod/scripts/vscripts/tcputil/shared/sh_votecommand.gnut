@@ -1,33 +1,69 @@
 global function VoteCommand_Init
+global function AddCustomVoteEndCode
 global function StartNewVoteEvent
 global function EndVoteEvent
+global function HasVoteEvent
 global function GetVoteEvent
+global function Vote_ShowList
 global function Vote_ShouldEarlyEnd
 global function Vote_EasyReleaseFunc
 global function Vote_EasyVoteFunc
 global function Vote_EasyEndFunc
 
-global enum eVoteEndCode
+global table<string, int> eVoteEndCode =
 {
-	invalid,
-	timeout,
-	complete
+	invalid = 0,
+	timeout = 1,
+	complete = 2
 }
+
+// get started
+// new a VoteEventStruct and setup it
+// use function StartNewVoteEvent to start ur own vote event
 
 global struct VoteEventStruct
 {
-	void functionref( VoteEventStruct ) voteReleaseFunc	// = Vote_EasyReleaseFunc
-	bool functionref( VoteEventStruct, entity, bool ) onVoteFunc	// = Vote_EasyVoteFunc
-	void functionref( VoteEventStruct ) voteEndFunc	// = Vote_EasyEndFunc
+	// on vote release, can use this function to show some stupid text
+	// we have a simple implementation by use this function: Vote_EasyReleaseFunc
+	void functionref( VoteEventStruct ) voteReleaseFunc
+
+	// on player voted by use command (can custom ur own vote command, we have a simple example at tcputil/vote_skipmatch.nut SkipMatchOnVote)
+	// we have a simple implementation by use this function: Vote_EasyVoteFunc
+
+	// here is some information u need if u want to made a own function
+	// bool onVoteFunc( voteStruct, votePlayer, voteArgs )
+	// return true will hided the message which send by player, return false will send it by normal
+	bool functionref( VoteEventStruct, entity, string ) onVoteFunc
+
+	// on end vote (time out or got enough number of vote)
+	// we have a simple implementation by use this function: Vote_EasyEndFunc
+
+	// VoteEventStruct.callbackFunc is called by this function
+	void functionref( VoteEventStruct ) voteEndFunc
+
+	// do something on vote passed or not passed
+	// called by VoteEventStruct.voteEndFunc
 	void functionref( bool ) callbackFunc
+
+	//================================================================//
+
 	string voteName = "新投票"
+
+	// function Time() will return current time, add the time u want on current time to setup vote end time
 	float endTime = 0.0
 
 	array<string> hasVotedPlayers = []
-	int endCode = eVoteEndCode.invalid
+
+	// to tell the reason for end this vote event, use function AddCustomVoteEndCode to made ur own endcode
+	int endCode = 0	// eVoteEndCode.invalid
 	int voteYesCount = 0
 	int voteNoCount = 0
+
+	// vote id, will be override at StartNewVoteEvent
+	// StartNewVoteEvent will return the id, u can get the event struct by using id on function GetVoteEvent
 	int id = 0
+
+	// if u wanna share or just save other shitting stuff, use this, require untyped
 	table s
 }
 
@@ -71,17 +107,13 @@ bool function VoteCommand( entity player, array<string> args )
 		Vote_ShowList( player )
 		return true
 	}
-	bool vote = args[1] == "y" ? true : false
-
-	foreach( k, v in file.events )
+	if( !HasVoteEvent( id ) )
 	{
-		if( k != id )
-			continue
-		return v.onVoteFunc( v, player, vote )
+		Chat_ServerPrivateMessage( player, "\x1b[31m无效投票ID", false, false )
+		Vote_ShowList( player )
+		return true
 	}
-	Chat_ServerPrivateMessage( player, "\x1b[31m无效投票ID", false, false )
-	Vote_ShowList( player )
-	return true
+	return GetVoteEvent( id ).onVoteFunc( GetVoteEvent( id ), player, args[1] )
 }
 
 void function Vote_ShowList( entity player )
@@ -133,12 +165,37 @@ void function EndVoteEvent( VoteEventStruct event, int endCode )
 	event.endTime = Time()
 }
 
+bool function HasVoteEvent( int id )
+{
+	return id in file.events
+}
+
 VoteEventStruct function GetVoteEvent( int id )
 {
 	return file.events[ id ]
 }
 
-// shared util functions //
+void function AddCustomVoteEndCode( string codeName )
+{
+	int id = FindValidIdForEndCode( 0 )
+
+	printt( codeName +" id:"+ id )
+
+	eVoteEndCode[ codeName ] <- id
+}
+
+int function FindValidIdForEndCode( int id )
+{
+	foreach( k, v in eVoteEndCode )
+	{
+		if( v != id )
+			continue
+		return FindValidIdForEndCode( ++id )
+	}
+	return id
+}
+
+// vote easy implementation functions //
 
 void function Vote_EasyReleaseFunc( VoteEventStruct voteEvent )
 {
@@ -148,15 +205,21 @@ void function Vote_EasyReleaseFunc( VoteEventStruct voteEvent )
 		Chat_ServerPrivateMessage( ent, "\x1b[32m输入 \x1b[36m!vote "+ voteEvent.id +" y \x1b[32m投同意票\n输入 \x1b[36m!vote "+ voteEvent.id +" n \x1b[32m投反对票", false, false )
 }
 
-bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, bool vote )
+bool function Vote_EasyVoteFunc( VoteEventStruct voteEvent, entity player, string vote )
 {
 	if( voteEvent.hasVotedPlayers.contains( player.GetUID() ) )
 	{
 		Chat_ServerPrivateMessage( player, "\x1b[31m你已经投过票了！", false, false )
 		return true
 	}
+	if( ![ "y", "n" ].contains( vote ) )
+	{
+		Chat_ServerPrivateMessage( player, "\x1b[31m无效投票选项，请注意大小写！", false, false )
+		Vote_ShowList( player )
+		return true
+	}
 	voteEvent.hasVotedPlayers.append( player.GetUID() )
-	if( vote )
+	if( vote == "y" )
 		voteEvent.voteYesCount += 1
 	else
 		voteEvent.voteNoCount += 1

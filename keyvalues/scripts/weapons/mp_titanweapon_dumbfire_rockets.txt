@@ -70,7 +70,7 @@ WeaponData
 			"explosion_inner_radius"  						"150"
 			"explosionradius" 								"350"
 
-			"explosion_damage"								"200"
+			"explosion_damage"								"400"
 			"explosion_damage_heavy_armor"					"1000"
 		}
 

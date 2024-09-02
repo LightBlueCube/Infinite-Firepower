@@ -1,3 +1,4 @@
+untyped
 global function PlayerUsesNukeBurncardThreaded
 global function PlayerInventory_GiveNukeTitan
 
@@ -58,5 +59,6 @@ void function PlayerUsesNukeBurncardThreaded( entity player )
 	titan.WaitSignal( "ClearDisableTitanfall" )
 	titan.ClearBossPlayer() // Stop being the boss so we don't get an award for this titan blowing up.
 
+	titan.s.NukeTitanKillStreak <- true
 	thread TitanEjectPlayer( titan, true )
 }
