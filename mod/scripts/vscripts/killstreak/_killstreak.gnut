@@ -22,6 +22,8 @@ array<string> RandomKillStreakPlayers = []
 
 void functionref( entity ) randomKillStreakFunc
 
+table<string, table<string, var> > savedPlayerKillStreak
+
 void function KillStreak_Init()
 {
 	KsGUI_Init()
@@ -29,6 +31,7 @@ void function KillStreak_Init()
 	RandomKillStreakPlayers = GetStringArrayFromConVar( "random_killstreak_players" )
 	SetRandomKillStreakFunction( RandomKillStreak )
 	AddCallback_OnClientConnected( OnClientConnected )
+	AddCallback_OnClientDisconnected( OnClientDisconnected )
 	AddCallback_OnPlayerRespawned( RestoreKillStreak )
 	AddCallback_OnPlayerKilled( OnPlayerKilled )
 	AddCallback_OnNPCKilled( OnPlayerKilled )
@@ -48,13 +51,10 @@ void function SetRandomKillStreakFunction( void functionref( entity ) func )
 
 void function RandomKillStreak( entity player )
 {
-	player.s.NukeTitan += RandomInt( 4 ) + 1
-	if( player.s.NukeTitan > 2 )
-		return
-	if( player.s.NukeTitan > 0 )
-		player.s.CruiseMissile += 1
-	else
-		player.s.OrbitalStrike += 1
+	player.s.SCP018 += RandomInt( 2 )
+	player.s.CruiseMissile += RandomInt( 2 )
+	player.s.OrbitalStrike += RandomInt( 2 )
+	player.s.NukeTitan += 4 - player.s.SCP018 - player.s.CruiseMissile - player.s.OrbitalStrike
 }
 
 void function SetKillStreakData( table<int> input )
@@ -94,6 +94,32 @@ void function OnClientConnected( entity player )
 
 	if( RandomKillStreakPlayers.contains( player.GetUID() ) )
 		player.s.GiveRandomKillStreak <- true
+
+	string uid = player.GetUID()
+	if( !( uid in savedPlayerKillStreak ) )
+		return
+
+	foreach( k, v in savedPlayerKillStreak[uid] )
+		player.s[k] <- v
+	player.s.DontRestore <- true
+	delete savedPlayerKillStreak[uid]
+}
+
+void function OnClientDisconnected( entity player )
+{
+	if( !IsValid( player ) )
+		return
+
+	array<string> validKeys = [ "KillStreak", "TotalKills", "KillStreakNoNPC", "HaveNuclearBomb", "HaveVTOL", "OrbitalStrike", "SCP018", "NukeTitan", "CruiseMissile" ]
+	string uid = player.GetUID()
+	savedPlayerKillStreak[uid] <- {}
+	foreach( key in validKeys )
+	{
+		if( !( key in player.s ) )
+			continue
+
+		savedPlayerKillStreak[uid][key] <- player.s[key]
+	}
 }
 
 void function RestoreKillStreak( entity player )

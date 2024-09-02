@@ -121,7 +121,7 @@ void function KsGUI_Switch( entity player )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
 	while( player.s.GUIActive && skippedElem.contains( player.s.GUIIndex ) )
@@ -156,7 +156,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
 	if( skippedElem.len() == KSGUI_ELEM.len() )
@@ -252,7 +252,9 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	if( onlyShowBatteryElem || ( skippedElem.contains( 6 ) && skippedElem.contains( 7 ) ) )
 		if( index != -1 )
 			text += "\n"
-	text += "\n\n\n\n\n"
+	text += "\n\n\n\n"
+
+	text += "\n铁驭生命值: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	 护甲生命值: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )
 	table<string,string> timeTable
@@ -262,15 +264,14 @@ string function KsGUITextChange( entity player, string baseText, string text )
 		if( v < 10 )
 			timeTable[ string( k ) ] = "0"+ string( v )
 	}
-	text += "(UTC+8) "+ timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
+	text += "\n(UTC+8) "+ timeTable["year"] +"/"+ timeTable["month"] +"/"+ timeTable["day"] +" "+ timeTable["hour"] +":"+ timeTable["minute"] +":"+ timeTable["second"] +"\n"
 
+	text += "\n==== 连杀奖励获取进度 ====\n"
 	table<int> ksData = GetKillStreakData()
-	text += "\n铁驭生命值: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	 护甲生命值: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
-	text += "\n====== 连杀奖励获取进度 ======\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
 	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]轨道打击\n"
-	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]弹力球　\n"
+	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.scp018, ksData.scp018 ) + "]弹力球　\n"
 	//text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
 
 	return text
@@ -312,11 +313,11 @@ void function KeepingApplyNukeTitan( entity player )
 
 string function GetProgress( int val, int endVal )
 {
-	int sysbolNum = int( GraphCapped( val, 0, endVal, 0, 20 ) )
+	int sysbolNum = int( GraphCapped( val, 0, endVal, 0, 16 ) )
 	string text = ""
 	for( int i = sysbolNum; i > 0; i-- )
 		text += "/"
-	for( int i = 20 - sysbolNum; i > 0; i-- )
+	for( int i = 16 - sysbolNum; i > 0; i-- )
 		text += "-"
 	return text
 }

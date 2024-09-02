@@ -130,6 +130,7 @@ void function DropNukeTitan( vector pos, entity player )
 	titan.WaitSignal( "ClearDisableTitanfall" )
 	titan.ClearBossPlayer() // Stop being the boss so we don't get an award for this titan blowing up.
 
+	titan.s.OrbitalStrikeKillStreak <- true
 	thread TitanEjectPlayer( titan, true )
 }
 
