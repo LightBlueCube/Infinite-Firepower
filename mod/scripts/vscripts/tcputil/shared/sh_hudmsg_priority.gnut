@@ -53,7 +53,10 @@ void function FreeMessageId( entity player, string id )
 	string uid = player.GetUID()
 
 	prioritySeq[uid].removebyvalue( id )
-	delete msgid[uid][id]
+
+	// defensive fix
+	if( id in msgid[uid] )
+		delete msgid[uid][id]
 }
 
 bool function CanSendMessage( entity player, string id )

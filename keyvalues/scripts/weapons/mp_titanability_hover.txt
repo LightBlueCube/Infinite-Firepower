@@ -16,7 +16,7 @@ WeaponData
 
 		tcp_super_hover
 		{
-			"regen_ammo_refill_rate"						"12"
+			"regen_ammo_refill_rate"						"16.667"
 			"fire_duration"   								"1.0"
 		}
 	}

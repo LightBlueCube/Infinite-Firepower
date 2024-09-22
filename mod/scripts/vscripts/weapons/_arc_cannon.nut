@@ -85,28 +85,30 @@ global const ARC_CANNON_BEAM_EFFECT_MOD = $"wpn_arc_cannon_beam_mod"
 global const ARC_CANNON_FX_TABLE = "exp_arc_cannon"
 
 global const ArcCannonTargetClassnames = {
-	[ "npc_drone" ] 			= true,
-	[ "npc_dropship" ] 			= true,
-	[ "npc_marvin" ] 			= true,
-	[ "npc_prowler" ]			= true,
-	[ "npc_soldier" ] 			= true,
-	[ "npc_soldier_heavy" ] 	= true,
-	[ "npc_soldier_shield" ]	= true,
-	[ "npc_spectre" ] 			= true,
-	[ "npc_stalker" ] 			= true,
-	[ "npc_super_spectre" ]		= true,
-	[ "npc_titan" ] 			= true,
-	[ "npc_turret_floor" ] 		= true,
-	[ "npc_turret_mega" ]		= true,
-	[ "npc_turret_sentry" ] 	= true,
-	[ "npc_frag_drone" ] 		= true,
-	[ "player" ] 				= true,
-	[ "prop_dynamic" ] 			= true,
-	[ "prop_script" ] 			= true,
-	[ "grenade_frag" ] 			= true,
-	[ "rpg_missile" ] 			= true,
-	[ "script_mover" ] 			= true,
-	[ "turret" ] 				= true,
+	[ "npc_drone" ]          = true,
+	[ "npc_dropship" ]       = true,
+	[ "npc_gunship" ]        = true,
+	[ "npc_marvin" ]         = true,
+	[ "npc_prowler" ]        = true,
+	[ "npc_soldier" ]        = true,
+	[ "npc_soldier_heavy" ]  = true,
+	[ "npc_soldier_shield" ] = true,
+	[ "npc_pilot_elite" ]    = true,
+	[ "npc_spectre" ]        = true,
+	[ "npc_stalker" ]        = true,
+	[ "npc_super_spectre" ]  = true,
+	[ "npc_titan" ]          = true,
+	[ "npc_turret_floor" ]   = true,
+	[ "npc_turret_mega" ]    = true,
+	[ "npc_turret_sentry" ]  = true,
+	[ "npc_frag_drone" ]     = true,
+	[ "player" ]             = true,
+	[ "prop_dynamic" ]       = true,
+	[ "prop_script" ]        = true,
+	[ "grenade_frag" ]       = true,
+	[ "rpg_missile" ]        = true,
+	[ "script_mover" ]       = true,
+	[ "turret" ]             = true,
 }
 
 struct {
@@ -385,7 +387,7 @@ function FireArcNoTargets( entity weapon, WeaponPrimaryAttackParams attackParams
 		expect VortexBulletHit( vortexHit )
 		#if SERVER
 			entity vortexWeapon = vortexHit.vortex.GetOwnerWeapon()
-			string className = IsValid( vortexWeapon ) ? vortexWeapon.GetWeaponClassName() : ""  
+			string className = IsValid( vortexWeapon ) ? vortexWeapon.GetWeaponClassName() : ""
 			if ( vortexWeapon && ( className == "mp_titanweapon_vortex_shield" || className == "mp_titanweapon_vortex_shield_ion" ) )
 			{
 				float amount = expect float ( chargeFrac ) * weapon.GetWeaponSettingFloat( eWeaponVar.vortex_drain )

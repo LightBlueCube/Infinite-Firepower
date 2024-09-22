@@ -367,7 +367,7 @@ void function GravityCoreThink( entity weapon, entity owner )
 	owner.EndSignal( "OnDeath" )
 	owner.EndSignal( "OnDestroy" )
 	owner.EndSignal( "DisembarkingTitan" )
-	owner.EndSignal( "TitanEjectionStarted" )
+
 	entity soul = owner.GetTitanSoul()
 	if ( soul == null )
 		soul = owner
@@ -418,8 +418,8 @@ void function GravityCoreThink( entity weapon, entity owner )
 			owner.GetOrigin(),											// origin
 			owner,														// owner
 			mover,		 												// inflictor
-			1,															// normal damage
-			40,															// heavy armor damage
+			2,															// normal damage
+			50,															// heavy armor damage
 			1000,														// inner radius
 			1000,														// outer radius
 			SF_ENVEXPLOSION_NO_DAMAGEOWNER,								// explosion flags
@@ -495,9 +495,7 @@ void function GravityCoreOnDamage( entity target, var damageInfo )
 
 	vector origin = owner.GetOrigin()
 
-	target.SetVelocity( ( origin - target.GetOrigin() ) * 3 )
-	if( target.IsOnGround() )
-		target.SetVelocity( target.GetVelocity() + < 0, 0, 400 > )
+	target.SetVelocity( ( origin - target.GetOrigin() ) * 3 + < 0, 0, 400 > )
 	if( target.IsPlayer() )
 		Remote_CallFunction_Replay( target, "ServerCallback_TitanEMP", 0.3, 0.5, 1.0 )
 }

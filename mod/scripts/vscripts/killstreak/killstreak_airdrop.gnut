@@ -1,0 +1,163 @@
+untyped
+
+global function KillStreakAirDrop_Init
+
+// modified from MixedGame extra_ai_spawner.gnut: care package
+const float CARE_PACKAGE_LIFETIME = 90
+const float CARE_PACKAGE_WAITTIME = 20
+const asset CAREPACKAGE_MODEL = $"models/vehicle/escape_pod/escape_pod.mdl"
+
+void function KillStreakAirDrop_Init()
+{
+	RegisterSignal( "DropPodUsed" )
+	PrecacheModel( CAREPACKAGE_MODEL )
+	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
+}
+
+void function OnPlaying()
+{
+	if( KillStreakEnable() )
+		thread DropPodSpawnThreaded()
+}
+
+void function DropPodSpawnThreaded()
+{
+	if( !KillStreakEnable() )
+		return
+
+	while( GetGameState() == eGameState.Playing )
+	{
+		wait RandomFloatRange( 45, 75 )
+
+		foreach( entity player in GetPlayerArray() )
+		{
+			EmitSoundOnEntityOnlyToPlayer( player, player, "Boomtown_RobotArm_90Turn" )
+			NSSendLargeMessageToPlayer( player, "補給艙運送中! ", "使用補給艙來獲得隨機連殺獎勵！", 7, "rui/callsigns/callsign_69_col" )
+		}
+
+		array< entity > points = SpawnPoints_GetDropPod()
+		points.extend( GetEntArrayByClass_Expensive( "info_spawnpoint_droppod_start" ) ) // add startpoints for fun!
+		entity node = FindBestSpawnForNPCDrop( points )
+
+		ExtraSpawner_SpawnCarePackage( node.GetOrigin(), node.GetAngles(), CarePackage_OnUse, "打開", CARE_PACKAGE_LIFETIME, CARE_PACKAGE_WAITTIME )
+
+		svGlobal.levelEnt.WaitSignal( "DropPodUsed" )
+	}
+}
+
+entity function FindBestSpawnForNPCDrop( array<entity> spawnPoints )
+{
+	array<entity> validSpawnPoints
+
+	foreach( team in [ TEAM_MILITIA, TEAM_IMC ] )
+	{
+		entity zone = DecideSpawnZone_Generic( spawnPoints, team )
+
+		if ( IsValid( zone ) )
+		{
+			foreach ( entity spawn in spawnPoints )
+			{
+				// spawn from too far shouldn't count!
+				if ( Distance2D( spawn.GetOrigin(), zone.GetOrigin() ) > 4000 )
+					continue
+				validSpawnPoints.append( spawn )
+			}
+		}
+	}
+
+	// no spawn zone valid or we can't find any valid point in zone...
+	if ( validSpawnPoints.len() == 0 )
+		validSpawnPoints = spawnPoints
+
+	return validSpawnPoints[ RandomInt( validSpawnPoints.len() ) ]
+}
+
+void function ExtraSpawner_SpawnCarePackage( vector pos, vector rot, useFunction, string usePrompt, float lifeTime, float waitTime )
+{
+	thread CarePackage_SpawnPoint( pos, waitTime + 5 ) // care package takes 5s to drop
+	thread ExtraSpawner_SpawnCarePackage_Threaded( pos, rot, useFunction, usePrompt, lifeTime, waitTime )
+}
+
+void function CarePackage_SpawnPoint( vector origin, float impactTime )
+{
+	svGlobal.levelEnt.EndSignal( "DropPodUsed" )
+
+	vector surfaceNormal = < 0, 0, 1 >
+	int index = GetParticleSystemIndex( $"P_ar_titan_droppoint" )
+	entity targetEffect = StartParticleEffectInWorld_ReturnEntity( index, origin, surfaceNormal )
+	EffectSetControlPointVector( targetEffect, 1, < 50, 50, 255 > )
+	targetEffect.DisableHibernation()
+
+	OnThreadEnd(
+		function() : ( targetEffect )
+		{
+			if ( IsValid( targetEffect ) )
+				EffectStop( targetEffect )
+		}
+	)
+
+	wait impactTime
+	EffectSetControlPointVector( targetEffect, 1, < 0,190,0 > ) // green
+	WaitForever()
+}
+
+void function ExtraSpawner_SpawnCarePackage_Threaded( vector pos, vector rot, useFunction, string usePrompt, float lifeTime, float waitTime )
+{
+	wait waitTime
+
+	pos += < 0, 0, -30 >
+
+	entity pod = CreateDropPod( pos, <0,0,0> )
+	pod.EndSignal( "OnDestroy" )
+	svGlobal.levelEnt.EndSignal( "DropPodUsed" )
+
+	OnThreadEnd(
+		function() : ( pod )
+		{
+			svGlobal.levelEnt.Signal( "DropPodUsed" )
+			if( !IsValid( pod ) )
+				return
+			pod.UnsetUsable() // don't let dissolving pod able to be used
+			pod.NotSolid() // clear collision
+			Highlight_ClearOwnedHighlight( pod )
+			Highlight_ClearNeutralHighlight( pod )
+			pod.Dissolve( ENTITY_DISSOLVE_CORE, Vector( 0, 0, 0 ), 500 )
+			EmitSoundAtPosition( TEAM_UNASSIGNED, pod.GetOrigin() + < 0, 0, 60 >, "droppod_dissolve" )
+		}
+	)
+	Highlight_SetOwnedHighlight( pod, "friendly_ai" )
+	Highlight_SetNeutralHighlight( pod, "friendly_ai" )
+
+	// it takes 5s to drop
+	waitthread LaunchAnimDropPod( pod, "pod_testpath", pos, rot )
+
+	pod.SetUsable()
+	pod.SetUsableByGroup( "pilot" )
+	pod.SetUsePrompts( "按住 %use% 以" + usePrompt, "按下 %use% 以" + usePrompt )
+	AddCallback_OnUseEntity( pod, useFunction )
+
+	pod.SetModel( CAREPACKAGE_MODEL )
+
+    wait lifeTime
+}
+
+function CarePackage_OnUse( pod , player )
+{
+	expect entity( pod )
+	expect entity( player )
+	vector pos = player.GetOrigin()
+
+	int scp018 = RandomInt( 2 )
+	int cruiseMissile = RandomInt( 2 )
+	int orbitalStrike = RandomInt( 2 )
+	int nukeTitan = 4 - scp018 - cruiseMissile - orbitalStrike
+
+	player.s.SCP018 += scp018
+	player.s.CruiseMissile += cruiseMissile
+	player.s.OrbitalStrike += orbitalStrike
+	player.s.NukeTitan += nukeTitan
+
+	NSSendAnnouncementMessageToPlayer( player, "已從空投中獲得連殺獎勵", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+
+	svGlobal.levelEnt.Signal( "DropPodUsed" )
+}

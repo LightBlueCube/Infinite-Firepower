@@ -41,6 +41,10 @@
 			"RunOn": "SERVER && MP"
 		},
 		{
+			"Path": "killstreak/killstreak_airdrop.gnut",
+			"RunOn": "SERVER && MP"
+		},
+		{
 			"Path": "killstreak/sh_apply.gnut",
 			"RunOn": "SERVER && MP"
 		},

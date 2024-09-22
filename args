@@ -17,7 +17,7 @@ ifp rotation
 -allowlocalhttp
 -allowdupeaccounts
 +sv_maxvelocity 100000
-+setplaylistvaroverrides "max_players 10"
++setplaylistvaroverrides "max_players 12"
 +sv_usercmd_max_queued 100
 +ns_should_return_to_lobby 0
 +sv_max_props_multiplayer 500000

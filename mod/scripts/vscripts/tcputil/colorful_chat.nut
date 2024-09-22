@@ -1,3 +1,4 @@
+untyped
 global function ColorfulChat_Init
 
 struct{
@@ -25,21 +26,16 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 	return msgStruct
 }
 
-string function AddChatColors( string text, string targetcmd, int color, bool random = false )
+string function AddChatColors( string str, string targetcmd, int color, bool random = false )
 {
-	string str = ""
-	array<string> splitArray = split( text, targetcmd )
-	if( splitArray == [] )
-		return text
-	foreach( string val in splitArray )
-	{
-		if( val == splitArray[0] )
-		{
-			str += val
-			continue
-		}
+	if( !random )
+		return StringReplace( str, targetcmd, file.ansiColors[ color ], true, true )
 
-		str += file.ansiColors[ random ? RandomInt( file.ansiColors.len() ) : color ] + val
+	string tmp = ""
+	while( tmp != str )
+	{
+		tmp = str
+		str = StringReplace( str, targetcmd, file.ansiColors[ RandomInt( file.ansiColors.len() ) ], false, true )
 	}
 	return str
 }

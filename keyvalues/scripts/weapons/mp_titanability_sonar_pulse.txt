@@ -20,8 +20,8 @@ WeaponData
 		}
 		tcp_gravity
 		{
-			"regen_ammo_refill_rate"						"10"
-			"charge_cooldown_time"							"20.0"
+			"regen_ammo_refill_rate"						"16.667"
+			"charge_cooldown_time"							"12.0"
 		}
 	}
 }

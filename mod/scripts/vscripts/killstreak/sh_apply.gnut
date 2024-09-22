@@ -37,11 +37,11 @@ void function DropBattery( entity player, bool showTips = false )
 	if( showTips )
 		text += "\n你也可以在未打开GUI菜单时直接长按\n泰坦辅助技能键（默认为G）来快速丢弃电池"
 	if( battery.GetSkin() == 0 )
-		thread SendKsGUI_Threaded( player, text, < 100, 255, 100 >, 2, 1 )
+		thread SendHudMessageWithPriority( player, 100, text, -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	if( battery.GetSkin() == 1 )
-		thread SendKsGUI_Threaded( player, text, < 255, 100, 100 >, 2, 1 )
+		thread SendHudMessageWithPriority( player, 100, text, -1, 0.3, < 255, 100, 100 >, < 0, 2, 1 > )
 	if( battery.GetSkin() == 2 )
-		thread SendKsGUI_Threaded( player, text, < 255, 255, 100 >, 2, 1 )
+		thread SendHudMessageWithPriority( player, 100, text, -1, 0.3, < 255, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_Menu_Store_Purchase_Success" )
 }
 
@@ -57,7 +57,7 @@ void function ApplyNukeTitan( entity player )
 	string tips = ""
 	if( GameRules_GetGameMode() == "fw" )
 		tips = "\n注意！在边境战争模式下核武泰坦只能用来守家"
-	thread SendKsGUI_Threaded( player, "\n按住以持续交付核武泰坦\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付"+ tips, < 100, 255, 100 >, 2, 1 )
+	thread SendHudMessageWithPriority( player, 100, "\n按住不放以持续交付核武泰坦\n成功交付了 1 个核武泰坦\n剩余 "+ player.s.NukeTitan +" 个核武泰坦未交付"+ tips, -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -86,7 +86,6 @@ void function ApplyCruiseMissile( entity player )
 
 	player.s.CruiseMissile -= 1
 	thread CruiseMissileAnim_ThinkBefore( player )
-	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -116,7 +115,6 @@ void function ApplyVTOL( entity player )
 
 	player.s.HaveVTOL = false
 	thread VTOLIntro( player )
-	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -128,7 +126,6 @@ void function ApplyNuclearBomb( entity player )
 		return ApplyFalied( player, "\n已有在途的折叠时空武器打击" )
 
 	thread NuclearBombAnimThink( player )
-	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -147,7 +144,6 @@ void function ApplyShieldBattery( entity player )
 			return ApplyFalied( player, "不能使用标记电池回充护盾" )
 
 	thread UseShieldBattery( player )
-	thread SendKsGUI_Threaded( player, "\n", < 100, 255, 100 >, 0, 0 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -167,7 +163,7 @@ void function ApplyOrbitalStrike( entity player )
 
 	player.s.OrbitalStrike -= 1
 	thread OrbitalStrikeThink( player )
-	thread SendKsGUI_Threaded( player, "\n已交付轨道打击\n扔出标记电池在想要打击的位置以开始", < 100, 255, 100 >, 2, 1 )
+	thread SendHudMessageWithPriority( player, 100, "\n已交付轨道打击\n扔出标记电池在想要打击的位置以开始", -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 }
 
@@ -184,13 +180,15 @@ void function ApplySCP018( entity player )
 		return ApplyFalied( player, "\n你已经交付了弹力球 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
 
 	thread ApplySCP018_Think( player )
-	thread SendKsGUI_Threaded( player, "\n已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", < 100, 255, 100 >, 2, 1 )
+	thread SendHudMessageWithPriority( player, 100, "\n已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 
 }
 
 void function ApplyFalied( entity player, string text )
 {
+	// when apply faild, dont close the gui, cuz player will probably try again and we better not to change their currently chosen element
+	player.s.GUIClose = false
 	thread SendKsGUI_Threaded( player, text, < 255, 100, 100 >, 2, 1 )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_deny" )
 }

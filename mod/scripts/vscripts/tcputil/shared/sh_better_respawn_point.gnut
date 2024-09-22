@@ -17,11 +17,12 @@ void function SetBetterRespawnPointEnable( bool state )
 	file.betterRespawnPointEnable = state
 }
 
-entity function TryFindBestRespawnPoint( int team, array<entity> points, float range = 2000 )
+entity function TryFindBestRespawnPoint( int team, array<entity> points, float range = 2000, float seeRange = 2000 )
 {
 	array<table> svmTrainData
 	array<vector> friendlyPos
 	array<vector> enemyPos
+	array<vector> badPoints
 	bool hasAlivePlayer = false
 	foreach( player in GetPlayerArray() )
 	{
@@ -35,15 +36,31 @@ entity function TryFindBestRespawnPoint( int team, array<entity> points, float r
 		if( player.GetTeam() == team )
 			friendlyPos.append( player.GetOrigin() )
 		else
+		{
 			enemyPos.append( player.GetOrigin() )
+			foreach( point in points )
+			{
+				vector eyePos = player.EyePosition()
+				vector pointPos = point.GetOrigin()
+				if( PlayerCanSee( player, point, false, 60 ) && Distance( eyePos, pointPos ) < seeRange * 0.5 )
+					badPoints.append( pointPos )
+				else if( PlayerCanSee( player, point, true, 40 ) && Distance( eyePos, pointPos ) < seeRange )
+					badPoints.append( pointPos )
+				else if( PlayerCanSee( player, point, true, 20 ) && Distance( eyePos, pointPos ) < seeRange * 2 )
+					badPoints.append( pointPos )
+				else if( PlayerCanSee( player, point, true, 10 ) && Distance( eyePos, pointPos ) < seeRange * 4 )
+					badPoints.append( pointPos )
+			}
+		}
 	}
-	var svmUserdata = NSSvmTrain( svmTrainData )
 	if( !hasAlivePlayer || GetPlayerArray().len() <= 1 )
 		return points[ RandomInt( points.len() ) ]
-	return TryFindBestRespawnPointWithSettings( team, points, range, svmUserdata, friendlyPos, enemyPos )
+
+	var svmUserdata = NSSvmTrain( svmTrainData )
+	return TryFindBestRespawnPointWithSettings( team, points, range, svmUserdata, friendlyPos, enemyPos, badPoints )
 }
 
-entity function TryFindBestRespawnPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos )
+entity function TryFindBestRespawnPointWithSettings( int team, array<entity> points, float range, var svmUserdata, array<vector> friendlyPos, array<vector> enemyPos, array<vector> badPoints )
 {
 	array<entity> bestPoints = []
 	float weightSave = -114514
@@ -51,7 +68,6 @@ entity function TryFindBestRespawnPointWithSettings( int team, array<entity> poi
 	{
 		vector pointPos = point.GetOrigin()
 		bool svmPredictSameTeam = NSSvmPredict( svmUserdata, pointPos ) == team
-		bool haveFriendly = false
 		bool haveEnemy = false
 		float weight = 0
 
@@ -80,10 +96,11 @@ entity function TryFindBestRespawnPointWithSettings( int team, array<entity> poi
 
 			weight += 0.5
 			weight += GraphCapped( distance, range, 0, 0, 0.5 )
-			haveFriendly = true
 		}
 		if( svmPredictSameTeam )
 			weight += 1.3
+		if( badPoints.contains( point.GetOrigin() ) )
+			weight += -1.5
 
 		if( weight > weightSave )
 		{
