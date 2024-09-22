@@ -32,6 +32,8 @@ void function LoadedInits_Init()
 
 	// 连杀系统
 	KillStreak_Init()
+	// 连杀空投
+	KillStreakAirDrop_Init()
 
 	// Apex like 铁驭护盾
 	PilotShield_Init()
@@ -46,7 +48,7 @@ void function LoadedInits_Init()
 
 	// 反挂机
 	AntiAFK_Init()
-	// 达到多少人才开始踢出挂机玩家
+	// 服务器当前在线人数超过多少人才开始踢出挂机玩家
 	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )
 	// 反挂机忽略的玩家的uid
 	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )
@@ -56,16 +58,19 @@ void function LoadedInits_Init()
 	AntiAFK_SetKickTime( 120 )
 
 	// 反蹲起
-	AntiInsult_Init()
+	//AntiInsult_Init()
 
 	// 禁止手柄辅助瞄准
 	DisableAimAssist_Init()
 
-	// 炫彩聊天文字，已fuck up
-	//ColorfulChat_Init()
+	// 炫彩聊天文字
+	ColorfulChat_Init()
 
 	// 如果服务器无人则自动重启服务器
 	AutoShutdown_Init()
+
+	// 设置聊天栏指令不区分大小写
+	SetChatCommandShouldCaseInsensitive( false )
 
 	// DEV: 跟踪泰坦使用频次和记录各泰坦的kd
 	//DevTrackUsage_Init()

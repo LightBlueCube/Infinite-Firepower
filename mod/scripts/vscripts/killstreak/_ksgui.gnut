@@ -13,7 +13,7 @@ void function KsGUI_Init()
 // KSGUI message priority: on release: 100, on fadeout: 90
 // do not set other hudmsg`s priority higher then 100, either player will cant see ksgui, but they still can switch and use it
 
-void function SendKsGUI_Threaded( entity player, string text, vector rgb, float time, float fadeoutTime, string functionref( entity, string, string ) textChangeFunc = null, float pos = 0.3 )
+void function SendKsGUI_Threaded( entity player, string text, vector rgb, float time, float fadeoutTime, table functionref( entity ) textChangeFunc = null )
 {
 	player.EndSignal( "OnDestroy" )
 	player.Signal( "SendingNewGUI" )
@@ -23,10 +23,14 @@ void function SendKsGUI_Threaded( entity player, string text, vector rgb, float 
 	for( int i = int( time * 10 ); i > 0; i-- )
 	{
 		if( textChangeFunc != null )
-			output = textChangeFunc( player, text, output )
+		{
+			table result = textChangeFunc( player )
+			output = expect string( result.text )
+			rgb = < expect int( result.r ), expect int( result.g ), expect int( result.b ) >
+		}
 		else
 			output = text
-		SendHudMessageWithPriority( player, 100, output, -1, pos, rgb, < 0, 0.2, 0 > )
+		SendHudMessageWithPriority( player, 100, output, -1, 0.3, rgb, < 0, 0.1, 0 > )
 		WaitFrame()
 	}
 	player.s.GUIActive = false
@@ -37,11 +41,14 @@ void function SendKsGUI_Threaded( entity player, string text, vector rgb, float 
 		rgb = rgb - rgbFadeout
 
 		if( textChangeFunc != null )
-			output = textChangeFunc( player, text, output )
+		{
+			table result = textChangeFunc( player )
+			output = expect string( result.text )
+		}
 		else
 			output = text
 
-		SendHudMessageWithPriority( player, 90, output, -1, pos, rgb, < 0, 0.2, 0 > )
+		SendHudMessageWithPriority( player, 90, output, -1, 0.3, rgb, < 0, 0.1, 0 > )
 		WaitFrame()
 	}
 	player.s.GUIClose = true
@@ -96,7 +103,7 @@ const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "轨�
 
 void function KsGUI_Switch( entity player )
 {
-	if( player.s.GUIClose && player.s.GUIIndex >= 6 )
+	if( player.s.GUIClose )
 		player.s.GUIIndex = 0
 	if( player.s.GUIActive )
 	{
@@ -124,7 +131,15 @@ void function KsGUI_Switch( entity player )
 	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
-	while( player.s.GUIActive && skippedElem.contains( player.s.GUIIndex ) )
+	player.s.GUIActive = true
+	player.s.GUIClose = false
+
+	if( skippedElem.len() == KSGUI_ELEM.len() )
+	{
+		player.s.GUIIndex = -1
+		player.s.GUIActive = false
+	}
+	else while( skippedElem.contains( player.s.GUIIndex ) )
 	{
 		if( player.s.GUIIndex < KSGUI_ELEM.len() - 1 )
 			player.s.GUIIndex += 1
@@ -132,14 +147,11 @@ void function KsGUI_Switch( entity player )
 			player.s.GUIIndex = 0
 	}
 
-	player.s.GUIActive = true
-	player.s.GUIClose = false
-
 	EmitSoundOnEntityOnlyToPlayer( player, player, "menu_click" )
 	thread SendKsGUI_Threaded( player, "", < 200, 200, 255 >, 2, 1, KsGUITextChange )
 }
 
-string function KsGUITextChange( entity player, string baseText, string text )
+table function KsGUITextChange( entity player )
 {
 	array<var> skippedElem = []
 	if( player.s.NukeTitan == 0 )
@@ -159,7 +171,11 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
-	if( skippedElem.len() == KSGUI_ELEM.len() )
+	bool skipall = false
+	if( KSGUI_ELEM.len() == skippedElem.len() )
+		skipall = true
+
+	if( skipall )
 	{
 		player.s.GUIIndex = -1
 		player.s.GUIActive = false
@@ -171,7 +187,7 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	if( skippedElem.contains( 0 ) && skippedElem.contains( 1 ) && skippedElem.contains( 2 ) && skippedElem.contains( 3 ) && skippedElem.contains( 4 ) && skippedElem.contains( 5 ) )
 		onlyShowBatteryElem = true
 
-	if( player.s.GUIIndex != -1 )
+	if( player.s.GUIIndex != -1 && !skipall )
 	{
 		while( skippedElem.contains( player.s.GUIIndex ) )
 		{
@@ -254,7 +270,27 @@ string function KsGUITextChange( entity player, string baseText, string text )
 			text += "\n"
 	text += "\n\n\n\n"
 
-	text += "\n铁驭生命值: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +"	 护甲生命值: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	int r = 200
+	int g = 200
+	int b = 255
+
+	if( player.s.LastShieldDamagedTime + 1.0 >= Time() )
+	{
+		float curr = float( player.GetShieldHealth() )
+		float total = float( player.GetShieldHealthMax() )
+
+		vector color = < 255, int( GraphCapped( curr, total, 0, 255, 0 ) ), 0 >
+		r = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.x, r ) )
+		g = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.y, g ) )
+		b = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.z, b ) )
+
+		string dmgText = "护盾受击"
+		if( curr <= 0 )
+			dmgText = "护盾损坏"
+		text += dmgText +"\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	}
+	else
+		text += "\n生命: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +" 护盾: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )
 	table<string,string> timeTable
@@ -270,16 +306,23 @@ string function KsGUITextChange( entity player, string baseText, string text )
 	table<int> ksData = GetKillStreakData()
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.nukeTitan, ksData.nukeTitan ) + "]核武泰坦\n"
 	text += "总杀["+ GetProgress( expect int( player.s.TotalKills ) % ksData.cruiseMissile, ksData.cruiseMissile ) + "]巡弋飞弹\n"
-	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.orbitalStrike, ksData.orbitalStrike ) + "]轨道打击\n"
-	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ) % ksData.scp018, ksData.scp018 ) + "]弹力球　\n"
+	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ), ksData.orbitalStrike ) + "]轨道打击\n"
+	text += "连杀["+ GetProgress( expect int( player.s.KillStreak ), ksData.scp018 ) + "]弹力球　\n"
 	//text += "连续击杀["+ GetProgress( expect int( player.s.KillStreakNoNPC ) % ksData.nuclearBomb, ksData.nuclearBomb ) + "]折叠时空武器\n"
 
-	return text
+	return {
+		text = text,
+		r = r,
+		g = g,
+		b = b
+	}
 }
 
 void function KsGUI_Select( entity player )
 {
+	player.Signal( "SendingNewGUI" )
 	player.s.GUIActive = false
+	player.s.GUIClose = true
 
 	local index = player.s.GUIIndex
 	if( index == 0 )

@@ -1,26 +1,47 @@
 global function FindNearestSafeSpotAndPutEntity
+global function FindNearestSafeSpotFaceCenterPointAndPutEntity
 
-void function FindNearestSafeSpotAndPutEntity( entity ent, int severity = 5 )
+void function FindNearestSafeSpotAndPutEntity( entity ent, float severity = 10, int maxTried = 100 )
 {
-	vector baseOrigin = ent.GetOrigin()
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y + severity, baseOrigin.z >, baseOrigin ) )
+	if( maxTried <= 0 )
 		return
 
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y - severity, baseOrigin.z >, baseOrigin ) )
-		return
+	vector pos = ent.GetOrigin()
+	array<vector> edgeMids = [
+		pos,
+		< pos.x + severity, pos.y + severity, pos.z >,
+		< pos.x + severity, pos.y - severity, pos.z >,
+		< pos.x - severity, pos.y + severity, pos.z >,
+		< pos.x - severity, pos.y - severity, pos.z >,
+		< pos.x + severity, pos.y, pos.z + severity >,
+		< pos.x + severity, pos.y, pos.z - severity >,
+		< pos.x - severity, pos.y, pos.z + severity >,
+		< pos.x - severity, pos.y, pos.z - severity >,
+		< pos.x, pos.y + severity, pos.z + severity >,
+		< pos.x, pos.y + severity, pos.z - severity >,
+		< pos.x, pos.y - severity, pos.z + severity >,
+		< pos.x, pos.y - severity, pos.z - severity >
+	]
 
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x + severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
+	foreach( basePos in edgeMids )
+		if( FindNearestSafeSpotFaceCenterPointAndPutEntity( ent, basePos, severity ) )
+			return
+	return FindNearestSafeSpotAndPutEntity( ent, severity + 10, --maxTried )
+}
 
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x - severity, baseOrigin.y, baseOrigin.z >, baseOrigin ) )
-		return
+bool function FindNearestSafeSpotFaceCenterPointAndPutEntity( entity ent, vector pos, float severity )
+{
+	array<vector> faceCenters = [
+		< pos.x + severity, pos.y, pos.z >,
+		< pos.x - severity, pos.y, pos.z >,
+		< pos.x, pos.y + severity, pos.z >,
+		< pos.x, pos.y - severity, pos.z >,
+		< pos.x, pos.y, pos.z + severity >,
+		< pos.x, pos.y, pos.z - severity >
+	]
 
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z + severity >, baseOrigin ) )
-		return
-
-	if( PutEntityInSafeSpot( ent, ent, null, < baseOrigin.x, baseOrigin.y, baseOrigin.z - severity >, baseOrigin ) )
-		return
-
-	return FindNearestSafeSpotAndPutEntity( ent, severity + 5 )
+	foreach( origin in faceCenters )
+		if( PutEntityInSafeSpot( ent, ent, null, origin, pos ) )
+			return true
+	return false
 }

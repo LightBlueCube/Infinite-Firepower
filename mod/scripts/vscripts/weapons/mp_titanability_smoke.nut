@@ -105,8 +105,8 @@ void function TitanSmokescreen( entity ent, entity weapon )
 				{
 					if( ent.GetTitanSoul().s.useBalanceSmoke )
 					{
-						smokescreen.dpsPilot = 60
-						smokescreen.dpsTitan = 1000
+						smokescreen.dpsPilot = 45
+						smokescreen.dpsTitan = 800
 					}
 				}
 			}

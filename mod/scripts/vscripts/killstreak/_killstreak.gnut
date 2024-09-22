@@ -11,8 +11,8 @@ table<int> file = {
 	nukeTitan = 5
 	cruiseMissile = 12
 	vtol = 12
-	orbitalStrike = 7
-	scp018 = 8
+	orbitalStrike = 6
+	scp018 = 4
 	nuclearBomb = 20
 }
 

@@ -42,8 +42,6 @@ WeaponData
         brute4_bubble_shield
 		{
 			"fire_rate"   									"1.0"
-		//	"fire_duration"                                 "8.0"
-		//	"regen_ammo_refill_rate"						"*2"
 		}
 
 		tcp_parent_shield
@@ -56,7 +54,7 @@ WeaponData
 		}
 		tcp_dash_shield
 		{
-			"regen_ammo_refill_rate"						"*2"
+			"regen_ammo_refill_rate"						"17.5"
 		}
 	}
 }

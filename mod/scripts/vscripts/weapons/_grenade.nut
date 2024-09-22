@@ -255,7 +255,7 @@ void function SCP018_Think( entity grenade, entity owner, bool isKillstreak = fa
 			owner,										// attacker
 			grenade,									// inflictor
 			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 5, 200 ),	// damage
-			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 100, 1250 ),	// damageHeavyArmor
+			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 100, 2500 ),	// damageHeavyArmor
 			radius,										// innerRadius
 			radius,										// outerRadius
 			0,											// flags

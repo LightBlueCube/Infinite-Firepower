@@ -197,6 +197,11 @@ void function OnRodeoWeakpointPostDamaged( entity weakpoint, var damageInfo )
 	//if( damageSourceID == eDamageSourceId.mp_weapon_frag_grenade || damageSourceID == eDamageSourceId.mp_weapon_grenade_gravity || damageSourceID == eDamageSourceId.mp_weapon_grenade_sonar || damageSourceID == eDamageSourceId.mp_weapon_thermite_grenade )
 	//	rodeoDamage /= 2
 
+	if( inflictor.GetClassName() == "grenade" )
+		if( damageSourceID == eDamageSourceId.mp_weapon_thermite_grenade )
+			if( inflictor.GrenadeHasIgnited() )
+				rodeoDamage *= 0.2
+
 	rodeoDamage *= GetClassicRodeoAdditionalDamageScale()
 	int damageTypes = DamageInfo_GetCustomDamageType( damageInfo ) | DF_BYPASS_SHIELD | DF_CRITICAL // always passthrough shield
 	#if CLASSIC_RODEO_WEAKPOINT_DEBUG

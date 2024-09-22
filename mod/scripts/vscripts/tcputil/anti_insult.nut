@@ -105,7 +105,7 @@ void function OnPlayerDuck( entity player, float num )
 		near *= TITAN_CHECK_RANGE_MULTIPLIER
 	}
 
-	bool shouldReset = !IsAlive( player ) || distance > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging() || TraceLine( player.GetOrigin(), player.s.killPos, [ player ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_NONE ).fraction < 0.99
+	bool shouldReset = !IsAlive( player ) || distance > far || IsValid( player.GetParent() ) || player.Anim_IsActive() || player.IsPhaseShifted() || player.IsWallRunning() || player.IsWallHanging()
 	bool invalidDuck = shouldReset || !player.IsOnGround()
 	if( distance > near || shouldReset )
 		player.s.nearDuckNum = 0.0

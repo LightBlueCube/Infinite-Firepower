@@ -35,7 +35,7 @@ WeaponData
 			"damage_far_value_titanarmor" 					"250"
 			"explosionradius" 								"200"
 			"explosion_damage"								"60"
-			"explosion_damage_heavy_armor"					"200"
+			"explosion_damage_heavy_armor"					"150"
 			"reload_time_late1" 							"2.0"
 			"reloadempty_time_late1" 						"2.0"
 

@@ -40,7 +40,7 @@ WeaponData
 
 		scp018_kill_streak
 		{
-			"regen_ammo_refill_rate"						"0"
+			"regen_ammo_refill_rate"						"1000"
 		}
 	}
 }

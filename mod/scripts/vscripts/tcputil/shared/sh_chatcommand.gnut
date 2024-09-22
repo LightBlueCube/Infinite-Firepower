@@ -1,6 +1,7 @@
 global function ChatCommand_Init
 global function AddChatCommandCallback
 global function RemoveChatCommandCallback
+global function SetChatCommandShouldCaseInsensitive
 
 global function AddCallback_OnReceivedSayTextMessage_AfterChatCommand
 
@@ -8,11 +9,18 @@ struct
 {
 	table<string, bool functionref( entity, array<string> )> chatCommandCallbacks
 	array<ClServer_MessageStruct functionref( ClServer_MessageStruct )> afterChatCommandCallbacks
+
+	bool shouldCaseInsensitive = true
 }file
 
 void function ChatCommand_Init()
 {
 	AddCallback_OnReceivedSayTextMessage( OnReceiveChatMessage )
+}
+
+void function SetChatCommandShouldCaseInsensitive( bool input )
+{
+	file.shouldCaseInsensitive = input
 }
 
 void function AddChatCommandCallback( string cmd, bool functionref( entity, array<string> ) callbackFunc )
@@ -35,11 +43,15 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 	string message = msgStruct.message
 	array<string> splitedMsg = split( message, " " ) // split with white space
 	string cmd
-	// player can send no message chat
+	// player can send a chat message without any message (like send a SOH(0x01) or other special stuff)
 	if( splitedMsg.len() == 0 )
 		cmd = ""
 	else
 		cmd = splitedMsg[0]
+
+	if( !file.shouldCaseInsensitive )
+		cmd = cmd.tolower()
+
 	array<string> args = splitedMsg
 	args.removebyvalue( cmd )
 

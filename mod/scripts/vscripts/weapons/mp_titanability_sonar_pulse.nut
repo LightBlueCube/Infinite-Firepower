@@ -375,7 +375,7 @@ void function GravityNodeThink( entity projectile )
 						owner,											// attacker
 						inflictor,										// inflictor
 						20,												// damage
-						400,											// damageHeavyArmor
+						200,											// damageHeavyArmor
 						400,											// innerRadius
 						400,											// outerRadius
 						SF_ENVEXPLOSION_NO_DAMAGEOWNER,					// flags
@@ -414,7 +414,7 @@ void function GravityNodeThink( entity projectile )
 	)
 
 
-	mover.NonPhysicsMoveTo( mover.GetOrigin() + < 0, 0, 100 >, 1.0, 0.0, 0.0 )
+	mover.NonPhysicsMoveTo( mover.GetOrigin() + < 0, 0, 100 >, GRAVITYNODE_BUILDUP_TIME, 0.0, 0.0 )
 	wait GRAVITYNODE_BUILDUP_TIME
 
 	if ( !IsAlive( owner ) )
@@ -452,23 +452,19 @@ void function ChargeBall_BallLightningThink( entity ballLightning, int damageSou
 
 	EmitSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
 	EmitSoundOnEntity( ballLightning, "default_gravitystar_impact_3p" )
-	entity FX = StartParticleEffectOnEntity_ReturnEntity( ballLightning, GetParticleSystemIndex( $"P_wpn_grenade_gravity" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
-
-	OnThreadEnd(
-		function() : ( ballLightning, FX )
-		{
-			if ( IsValid( ballLightning ) )
-			{
-				StopSoundOnEntity( ballLightning, "Weapon_Arc_Ball_Loop" )
-			}
-			EntFireByHandle( FX, "kill", "", 1.5, null, null )
-		}
-	)
 
 	int inflictorTeam = ballLightning.GetTeam()
 	ballLightning.e.ballLightningTargetsIdx = CreateScriptManagedEntArray()
 
 	wait GRAVITYNODE_BUILDUP_TIME
+	entity FX = StartParticleEffectOnEntity_ReturnEntity( ballLightning, GetParticleSystemIndex( $"P_wpn_grenade_gravity" ), FX_PATTACH_ABSORIGIN_FOLLOW, -1 )
+	OnThreadEnd(
+		function() : ( FX )
+		{
+			EntFireByHandle( FX, "kill", "", 1.5, null, null )
+		}
+	)
+
 	EmitSoundOnEntity( ballLightning, "weapon_gravitystar_preexplo" )
 
 	while( 1 )
@@ -479,10 +475,10 @@ void function ChargeBall_BallLightningThink( entity ballLightning, int damageSou
 			origin,							// origin
 			ballLightning.GetOwner(),		// owner
 			ballLightning,		 			// inflictor
-			1,								// normal damage
-			20,								// heavy armor damage
-			500,							// inner radius
-			500,							// outer radius
+			2,								// normal damage
+			10,								// heavy armor damage
+			400,							// inner radius
+			400,							// outer radius
 			SF_ENVEXPLOSION_NO_DAMAGEOWNER,	// explosion flags
 			0, 								// distanceFromAttacker
 			0, 								// explosionForce
@@ -520,7 +516,10 @@ void function GravityNodeExplodeOnDamage( entity target, var damageInfo )
 
 	vector origin = DamageInfo_GetDamagePosition( damageInfo )
 
-	target.SetVelocity( ( Normalize( target.GetOrigin() - origin ) * 600 ) )
+	vector vel = target.GetOrigin() - origin
+	vel.z = 0
+	vel = Normalize( vel )
+	target.SetVelocity( vel * 800 + < 0, 0, 400 > )
 }
 
 void function TitanSonarSmokescreen( entity ent, entity owner )

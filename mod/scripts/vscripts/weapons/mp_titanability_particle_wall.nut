@@ -237,6 +237,7 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 
 		pos = newPos
 		newPos = pos + dir * 100
+		mover.SetAngles( VectorToAngles( dir ) )
 
 		TraceResults trace = TraceLine( pos, newPos, [ owner ], TRACE_MASK_SHOT, TRACE_COLLISION_GROUP_BLOCK_WEAPONS )
 		if ( trace.fraction < 1.0 )
@@ -260,17 +261,17 @@ void function TitanDashShield_Threaded( entity owner, entity weapon, WeaponPrima
 		}
 
 		RadiusDamage(
-			pos + dir * 100,								// center
+			pos,											// center
 			owner,											// attacker
 			mover,											// inflictor
-			5,												// damage
-			50,												// damageHeavyArmor
+			2,												// damage
+			20,												// damageHeavyArmor
 			400,											// innerRadius
 			400,											// outerRadius
 			SF_ENVEXPLOSION_NO_DAMAGEOWNER,					// flags
 			0,												// distanceFromAttacker
 			0,												// explosionForce
-			DF_ELECTRICAL,									// scriptDamageFlags
+			DF_ELECTRICAL | DF_STOPS_TITAN_REGEN,			// scriptDamageFlags
 			eDamageSourceId.mp_titanability_dash_shield )	// scriptDamageSourceIdentifier
 
 		mover.NonPhysicsMoveTo( newPos, 0.2, 0.0, 0.0 )
@@ -290,10 +291,10 @@ void function DashShieldDamaged( entity target, var damageInfo )
 	if( target.IsPlayer() )
 		EmitSoundOnEntityOnlyToPlayer( target, target, "flesh_electrical_damage_1p" )
 
-	StatusEffect_AddTimed( target, eStatusEffect.emp, 0.4, 1.0, 0.5 )
-	target.SetVelocity( Normalize( mover.GetAngles() ) * 400 )
-	if( target.IsOnGround() )
-		target.SetVelocity( target.GetVelocity() + < 0, 0, 300 > )
+	StatusEffect_AddTimed( target, eStatusEffect.emp, 0.1, 0.5, 0.5 )
+	vector vel = AnglesToForward( mover.GetAngles() )
+	vel = max( 0, 600 - Length( target.GetVelocity() ) ) * vel
+	target.SetVelocity( vel + target.GetVelocity() )
 }
 
 void function CreateColorBubbleShield( int team, vector origin, vector angles, float duration = 9999.0 )
@@ -564,14 +565,13 @@ void function UpdateShieldPosition( entity mover, entity owner )
 
 // bubble shield //
 
-const vector DOME_COLOR_PAS_MOLTING_SHELL = <92, 92, 200>
-const vector DOME_COLOR_CHARGE_FULL		 = <92, 92, 200>    //<92, 155, 200>	// blue
+const vector DOME_COLOR_CHARGE_FULL		 = <92, 255, 155>	// blue
 const vector DOME_COLOR_CHARGE_MED		 = <255, 128, 80>	// orange
 const vector DOME_COLOR_CHARGE_EMPTY		 = <255, 80, 80>	// red
 
 const float DOME_COLOR_CROSSOVERFRAC_FULL2MED	= 0.75  // from zero to this fraction, fade between full and medium charge colors
 const float DOME_COLOR_CROSSOVERFRAC_MED2EMPTY	= 0.95  // from "full2med" to this fraction, fade between medium and empty charge colors
-const BRUTE4_DOME_SHIELD_HEALTH = 2500
+const BRUTE4_DOME_SHIELD_HEALTH = 1500
 
 struct BubbleShieldDamageStruct
 {
