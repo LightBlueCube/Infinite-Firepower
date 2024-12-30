@@ -112,10 +112,10 @@ var function OnWeaponPrimaryAttack_AmpCore( entity weapon, WeaponPrimaryAttackPa
 		CleanupCoreEffect( soul )
 #endif
 
-weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageTypes.largeCaliber | DF_STOPS_TITAN_REGEN )
+	weapon.FireWeaponBullet( attackParams.pos, attackParams.dir, 1, damageTypes.largeCaliber | DF_STOPS_TITAN_REGEN )
 
-if ( attackParams.burstIndex == 99 )
-{
+	if ( attackParams.burstIndex == 99 )
+	{
 		weapon.StopWeaponEffect( FX_AMPED_XO16, FX_AMPED_XO16_3P )
 		#if SERVER
 			weapon.w.initialized = false

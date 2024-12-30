@@ -28,10 +28,8 @@ void function RandomMap_Init()
 {
 	file.mapPlaylist = GetStringArrayFromConVar( "random_map_playlist" )
 	if( file.mapPlaylist.len() == 0 )
-	{
-		thread RandomMap()
-		return
-	}
+		return RandomMap( 0 )
+
 	AddCallback_GameStateEnter( eGameState.Postmatch, GameStateEnter_Postmatch )
 }
 
@@ -42,10 +40,10 @@ void function ShowCustomTextOnPostmatch( string text )
 
 void function GameStateEnter_Postmatch()
 {
-	thread RandomMap()
+	thread RandomMap( GAME_POSTMATCH_LENGTH - 0.1 )
 }
 
-void function RandomMap()
+void function RandomMap( float waitTime )
 {
 	int i = 0
 	foreach( map in file.mapPlaylist )
@@ -67,7 +65,7 @@ void function RandomMap()
 	foreach( player in GetPlayerArray() )
 		SendHudMessageWithPriority( player, 102, "下一局地图为："+ GetMapTitleName( map ) +"\n\n\n"+ file.customText, -1, 0.3, < 200, 200, 255 >, < 0.5, 10, 0 > )
 
-	wait GAME_POSTMATCH_LENGTH - 0.1
+	wait waitTime
 
 	StoreStringArrayIntoConVar( file.mapPlaylist, "random_map_playlist" )
 	ServerCommand( "map "+ map )

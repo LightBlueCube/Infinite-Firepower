@@ -406,10 +406,6 @@ void function GravityCoreThink( entity weapon, entity owner )
 
 		}
 	)
-	soul = owner.GetTitanSoul()
-	if( IsValid( soul ) )
-		if( soul.IsEjecting() )
-			return
 
 	int i = 8
 	while( i > 0 )

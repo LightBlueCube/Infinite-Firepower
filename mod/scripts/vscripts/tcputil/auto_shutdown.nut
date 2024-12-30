@@ -65,7 +65,7 @@ void function ShutdownServer()
 
 void function ShutdownServer_Threaded()
 {
-	// give server a sec to let it finish all of the jobs (like printt logs)
+	// give server a sec to let it finish all of the jobs (no idea but still wait a second)
 	wait 1
 	ServerCommand( "quit" )
 }

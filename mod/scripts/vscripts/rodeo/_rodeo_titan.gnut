@@ -940,7 +940,8 @@ function PlayerBeginsTitanRodeo( entity player, RodeoPackageStruct rodeoPackage,
 					{
 						entToTeleport = newRodeoTitan
 						int attachIndex = newRodeoTitan.LookupAttachment( rodeoPackage.attachPoint )
-						startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
+						if( attachIndex != 0 )
+							startPos = newRodeoTitan.GetAttachmentOrigin( attachIndex )
 					}
 
 					if ( !PlayerCanTeleportHere( player, startPos, entToTeleport ) )

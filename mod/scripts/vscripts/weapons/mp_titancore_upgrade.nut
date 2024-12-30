@@ -500,6 +500,9 @@ void function XO_16BattleRifle( entity weapon, entity owner, entity soul )
 				mods.append( "battle_rifle_icon" )
 				primaryWeapon.SetMods( mods )
 			}
+
+			if( primaryWeapon.HasMod( "tcp_balance" ) )
+				primaryWeapon.AddMod( "fd_balance" )	// damage *0.8
 		}
 	}
 

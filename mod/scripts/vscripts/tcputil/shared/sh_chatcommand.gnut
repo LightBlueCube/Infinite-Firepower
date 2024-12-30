@@ -43,7 +43,7 @@ ClServer_MessageStruct function OnReceiveChatMessage( ClServer_MessageStruct msg
 	string message = msgStruct.message
 	array<string> splitedMsg = split( message, " " ) // split with white space
 	string cmd
-	// player can send a chat message without any message (like send a SOH(0x01) or other special stuff)
+	// player can send a chat message without any words (like send a SOH(0x01) or other special stuff)
 	if( splitedMsg.len() == 0 )
 		cmd = ""
 	else

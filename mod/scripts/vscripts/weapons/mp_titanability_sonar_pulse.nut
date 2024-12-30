@@ -519,7 +519,7 @@ void function GravityNodeExplodeOnDamage( entity target, var damageInfo )
 	vector vel = target.GetOrigin() - origin
 	vel.z = 0
 	vel = Normalize( vel )
-	target.SetVelocity( vel * 800 + < 0, 0, 400 > )
+	target.SetVelocity( vel * 600 + < 0, 0, 400 > )
 }
 
 void function TitanSonarSmokescreen( entity ent, entity owner )
