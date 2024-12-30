@@ -317,7 +317,6 @@ WeaponData
 			"npc_damage_near_value_titanarmor"				"*1.1"
 			"npc_damage_far_value_titanarmor" 				"*1.1"
 		}
-		}
 	}
 
 	active_crosshair_count				"2"

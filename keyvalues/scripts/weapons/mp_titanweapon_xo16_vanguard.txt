@@ -8,10 +8,6 @@ WeaponData
 
 		arc_rounds_with_battle_rifle
 		{
-			"damage_near_value"   							"*1"
-			"damage_far_value"								"*1"
-			"damage_near_value_titanarmor"					"*1"
-			"damage_far_value_titanarmor" 					"*1"
 		}
 		battle_rifle_icon
 		{
@@ -19,10 +15,6 @@ WeaponData
 
 		battle_rifle
 		{
-			"damage_near_value"   							"*1"
-			"damage_far_value"								"*1"
-			"damage_near_value_titanarmor"					"*1"
-			"damage_far_value_titanarmor" 					"*1"
 		}
 
 		rapid_reload

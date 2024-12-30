@@ -161,7 +161,7 @@ void function SkipMatch( bool vote )
 		return
 	}
 	foreach( ent in GetPlayerArray() )
-		Chat_ServerPrivateMessage( ent, "\x1b[32m结果：\x1b[31m即将跳过此对局！", false, false )
-	wait 3
+		Chat_ServerPrivateMessage( ent, "\x1b[38;5;196m================\n\x1b[32m结果：\x1b[31m即将跳过此对局！\n\x1b[38;5;196m================", false, false )
+	wait 5
 	SetGameState( eGameState.Postmatch )
 }

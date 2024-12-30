@@ -1,6 +1,12 @@
 untyped
 
 global function KillStreakAirDrop_Init
+global function KillStreakAirDrop_SetWaitTimeBeforeDrop
+
+struct{
+	float waitTimeMin = 50
+	float waitTimeMax = 70
+}file
 
 // modified from MixedGame extra_ai_spawner.gnut: care package
 const float CARE_PACKAGE_LIFETIME = 90
@@ -10,6 +16,7 @@ const asset CAREPACKAGE_MODEL = $"models/vehicle/escape_pod/escape_pod.mdl"
 void function KillStreakAirDrop_Init()
 {
 	RegisterSignal( "DropPodUsed" )
+	RegisterSignal( "DropPodSpawn" )
 	PrecacheModel( CAREPACKAGE_MODEL )
 	AddCallback_GameStateEnter( eGameState.Playing, OnPlaying )
 }
@@ -22,12 +29,17 @@ void function OnPlaying()
 
 void function DropPodSpawnThreaded()
 {
+	svGlobal.levelEnt.Signal( "DropPodSpawn" )
+	svGlobal.levelEnt.EndSignal( "DropPodSpawn" )
+
 	if( !KillStreakEnable() )
 		return
 
-	while( GetGameState() == eGameState.Playing )
+	while( true )
 	{
-		wait RandomFloatRange( 45, 75 )
+		wait RandomFloatRange( file.waitTimeMin, file.waitTimeMax )
+		if( GetGameState() != eGameState.Playing )
+			continue
 
 		foreach( entity player in GetPlayerArray() )
 		{
@@ -147,17 +159,31 @@ function CarePackage_OnUse( pod , player )
 	expect entity( player )
 	vector pos = player.GetOrigin()
 
-	int scp018 = RandomInt( 2 )
-	int cruiseMissile = RandomInt( 2 )
-	int orbitalStrike = RandomInt( 2 )
-	int nukeTitan = 4 - scp018 - cruiseMissile - orbitalStrike
+	int scp018 = 0
+	int cruiseMissile = 0
+	int orbitalStrike = 0
+	int nukeTitan = 1
+
+	int i = RandomInt( 3 )
+	if( i == 0 )
+		scp018 += 1
+	else if( i == 1 )
+		cruiseMissile += 1
+	else if( i == 2 )
+		orbitalStrike += 1
 
 	player.s.SCP018 += scp018
 	player.s.CruiseMissile += cruiseMissile
 	player.s.OrbitalStrike += orbitalStrike
 	player.s.NukeTitan += nukeTitan
 
-	NSSendAnnouncementMessageToPlayer( player, "已從空投中獲得連殺獎勵", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+	NSSendAnnouncementMessageToPlayer( player, "已從補給艙中獲得連殺獎勵", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 
 	svGlobal.levelEnt.Signal( "DropPodUsed" )
+}
+
+void function KillStreakAirDrop_SetWaitTimeBeforeDrop( float min, float max )
+{
+	file.waitTimeMin = min
+	file.waitTimeMax = max
 }

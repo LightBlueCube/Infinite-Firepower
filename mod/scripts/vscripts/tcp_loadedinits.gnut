@@ -6,19 +6,16 @@ void function LoadedInits_Init()
 	RandomMap_Init()
 	// 设置对局结束时显示在换图提示下方的文字
 	ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式: QQ群150381961" )
-	// 如果注释了RandomMap_Init()，请务必将此处一并注释
-	// 如果获取到的随机地图播放列表为空，终止操作，等待RandomMap_Init()初始化播放列表并换图
-	if( GetConVarString( "random_map_playlist" ) == "" )
-		return
 
 	// 开局时会有一个投票，投票成功会跳过此对局
 	Vote_SkipMatch_Init()
 
+	// 50%概率夜间模式
 	if( RandomInt( 2 ) == 0 )
-	{
-		// 夜间模式
 		NightSky_Init()
-	}
+
+	// 是否允许武器掉落（北极星自带函数）
+	SetWeaponDropsEnabled( false )
 
 	// 客制化泰坦
 	TitanChange_Init()
@@ -48,14 +45,16 @@ void function LoadedInits_Init()
 
 	// 反挂机
 	AntiAFK_Init()
-	// 服务器当前在线人数超过多少人才开始踢出挂机玩家
-	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 2 )
+	// 服务器当前在线人数达到多少人才开始踢出挂机玩家
+	AntiAFK_SetKickNeededPlayer( GetCurrentPlaylistVarInt( "max_players", 0 ) - 1 )
 	// 反挂机忽略的玩家的uid
 	AntiAFK_SetIgnorePlayers( [ "1012451615950" ] )
 	// 警告阈值
-	AntiAFK_SetKickWarningTime( 90 )
+	AntiAFK_SetKickWarningTime( 60 )
 	// 踢出阈值
 	AntiAFK_SetKickTime( 120 )
+	// 给已踢出玩家的为什么会被踢出的提示
+	AntiAFK_SetKickNotice( "因为在服务器接近人满时依旧长时间挂机而被踢出" )
 
 	// 反蹲起
 	//AntiInsult_Init()

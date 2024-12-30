@@ -274,23 +274,28 @@ table function KsGUITextChange( entity player )
 	int g = 200
 	int b = 255
 
-	if( player.s.LastShieldDamagedTime + 1.0 >= Time() )
-	{
-		float curr = float( player.GetShieldHealth() )
-		float total = float( player.GetShieldHealthMax() )
-
-		vector color = < 255, int( GraphCapped( curr, total, 0, 255, 0 ) ), 0 >
-		r = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.x, r ) )
-		g = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.y, g ) )
-		b = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.z, b ) )
-
-		string dmgText = "护盾受击"
-		if( curr <= 0 )
-			dmgText = "护盾损坏"
-		text += dmgText +"\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
-	}
+	if( player.GetShieldHealthMax() == 0 )
+		text += "\n生命: "+ player.GetHealth() +"/"+ player.GetMaxHealth()
 	else
-		text += "\n生命: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +" 护盾: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	{
+		if( player.s.LastShieldDamagedTime + 2.0 >= Time() )
+		{
+			float curr = float( player.GetShieldHealth() )
+			float total = float( player.GetShieldHealthMax() )
+
+			vector color = < 255, int( GraphCapped( curr, total, 0, 255, 0 ) ), 0 >
+			r = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.x, r ) )
+			g = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.y, g ) )
+			b = int( GraphCapped( player.s.LastShieldDamagedTime, Time(), Time() - 1.0, color.z, b ) )
+
+			string dmgText = "护盾受击"
+			if( curr <= 0 )
+				dmgText = "护盾损坏"
+			text += dmgText +"\n"+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+		}
+		else
+			text += "\n生命: "+ player.GetHealth() +"/"+ player.GetMaxHealth() +" 护盾: "+ player.GetShieldHealth() +"/"+ player.GetShieldHealthMax() +"\n"
+	}
 
 	table timeParts = GetUnixTimeParts( GetUnixTimestamp() + 8 * SECONDS_PER_HOUR )
 	table<string,string> timeTable
