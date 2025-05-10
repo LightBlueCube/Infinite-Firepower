@@ -21,6 +21,8 @@ modify铁驭武器在/modify_weapons
 
 https://github.com/LightBlueCube/ifp-tempfix
 
+用于让nessie-tempfix和ifp一起运行而不是爆炸螺旋起飞，请使用下方的nessie-tempfix
+
 需要前置：
 
 https://github.com/LightBlueCube/MixedGame/tree/nessie-tempfix
@@ -34,6 +36,8 @@ https://github.com/LightBlueCube/ifp-fdpack
 ----                              
 
 https://github.com/LightBlueCube/ifp-rotation
+
+主要用于给其他冤种玩的PVP 5v5游戏模式，虽然也没多少人玩，我觉得挺好玩的
 
 需要前置：
 
@@ -54,6 +58,8 @@ https://github.com/LightBlueCube/ifp-fdpack
 
 https://github.com/LightBlueCube/ifp-stable
 
+已经废弃掉的最初的PVP游戏模式，基本上只是一个能让ifp能用的超级简单玩法包，好处是服务器会很稳定
+
 需要前置：
 
 https://github.com/LightBlueCube/Infinite-Firepower
@@ -67,6 +73,8 @@ https://github.com/LightBlueCube/ifp-fdpack
 ----
 
 https://github.com/LightBlueCube/ifp-fdpack
+
+为边境防御增加了ifp的东西，以及包含一个ifp泰坦的神盾升级拓展，由于破坏性改动过多，不能和其他任何拓展一起使用
 
 需要前置：
 
