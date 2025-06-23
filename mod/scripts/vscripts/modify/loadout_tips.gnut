@@ -61,7 +61,45 @@ void function OnTitanfall( entity titan )
 		tips += "客制化泰坦"
 	tips += ": "+ GetSwitchedTitanName( titan )
 
-	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 5.0, 1.0 > )
+
+	tips += "\n\n\n\n\n\n\n"
+	tips += "如果你对此有什么疑问, 输入 !d 来查看更详细的文档\n\n"
+	tips += AdditionTitanTips( titan )
+
+	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 8.0, 1.0 > )
+}
+
+string function AdditionTitanTips( entity titan )
+{
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ajax.mdl" )
+		return "\n離子 的额外改动: \n1.修复了离子可以扔出拌线后在能量不足的情况下依旧使用镭射炮的bug\n2.修复了离子主武器伤害异常的问题"
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_ogre.mdl" )
+		return "\n烈焰 的额外改动: \n火焰核心伤害略微削弱"
+	if( titan.GetModelName() == $"models/titans/light/titan_light_raptor.mdl" )
+		return "\n北極星 没有额外改动"
+	if( titan.GetModelName() == $"models/titans/light/titan_light_locust.mdl" )
+		return "\n浪人 的额外改动: \n1.修复了浪人快速剑封的BUG\n2.浪人核心核心期间每挥剑一次减少3秒核心剩余时间\n3.浪人剑封可以格挡的伤害小幅降低\n4.装备\"高地战士\"核心期间每挥剑一次只减少2秒剩余时间"
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_wraith.mdl" )
+		return "\n強力 没有额外改动"
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_deadbolt.mdl" )
+		return "\n軍團 的额外改动：\n1.修复了可以保存强大火力的bug"
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && ( titan.GetCamo() != -1 || titan.GetSkin() != 3 ) )
+		return "\n帝王 的额外改动: \n1.装备\"逝者生存\": 毁减血量提升到两格血\n2.装备\"防护罩放大器\": 能量吸收防护罩增大两倍，包括给队友\n3.帝王可以升级到九级，顺序为先升级你选择的三个升级，随后补充缺失升级\n4.轻微削弱涡旋电烟和XO16"
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_ion_prime.mdl" )
+		return "\n執政官 - 远距阻击型泰坦: \n左栏位：被动式涡旋防护罩\n中栏位：电磁陷阱\n右栏位：电浆爆破弹\n主武器：电弧机炮\n核心： 磁暴核心"
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_scorch_prime.mdl" )
+		return "\n野牛 - 近战爆发型泰坦:\n左栏位：跟随护盾\n中栏位：野牛突刺\n右栏位：牵引力场\n主武器：野牛拳\n核心：撼地核心"
+	if( titan.GetModelName() == $"models/titans/light/titan_light_northstar_prime.mdl" )
+		return "\n野獸四號 - 机动控制型泰坦: \n左栏位：牵引护盾\n中栏位：毒蛇推进器\n右栏位：重力节点\n主武器：四段火箭\n核心：重力核心"
+	if( titan.GetModelName() == $"models/titans/light/titan_light_ronin_prime.mdl" )
+		return "\n游俠 - 机动爆发型泰坦: \n左栏位：疾速剑封\n中栏位：电弧场\n右栏位：同步弹头\n主武器：三连环榴弹\n核心：冲刺核心"
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_tone_prime.mdl" )
+		return "\n天圖 - 全距爆发型泰坦: \n左栏位：彩虹护罩\n中栏位：线圈重载\n右栏位：标记射线\n主武器：40cm机炮\n核心：破坏核心"
+	if( titan.GetModelName() == $"models/titans/heavy/titan_heavy_legion_prime.mdl" )
+		return "\n巨妖 - 近距肉盾型泰坦: \n左栏位：穹顶护盾\n中栏位：投掷型强化电子烟幕\n右栏位：球状闪电\n主武器：龙息霰弹枪\n核心：护盾核心"
+	if( titan.GetModelName() == $"models/titans/medium/titan_medium_vanguard.mdl" && titan.GetCamo() == -1 && titan.GetSkin() == 3 )
+		return "\n遠征 - 反轻单位型泰坦: \n左栏位：涡旋防护罩\n中栏位：电子烟幕\n右栏位：多目标飞弹\n主武器：XO16\n核心：爆发核心"
+	unreachable
 }
 
 string function GetTitanName( entity titan )
@@ -175,7 +213,7 @@ void function OnPlayerRespawned( entity player )
 		tips += "客制化技能"
 	tips += ": "+ GetSwitchedCustomPilotSkillName( modelName )
 
-	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 5.0, 1.0 > )
+	SendHudMessageWithPriority( player, 91, tips, -1, 0.3, < 200, 200, 225 >, < 0.2, 8.0, 1.0 > )
 }
 
 void function OnPlayerGetsNewPilotLoadout( entity player, PilotLoadoutDef loadout )

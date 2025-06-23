@@ -5,7 +5,7 @@ void function LoadedInits_Init()
 	// 随机换图
 	RandomMap_Init()
 	// 设置对局结束时显示在换图提示下方的文字
-	ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式: QQ群150381961" )
+	// ShowCustomTextOnPostmatch( "如果你发现了任何BUG（或者疑似）\n一定要积极的反馈给我！这真的很重要！\n联系方式: QQ群150381961" )
 
 	// 开局时会有一个投票，投票成功会跳过此对局
 	Vote_SkipMatch_Init()
