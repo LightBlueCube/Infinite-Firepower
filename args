@@ -34,7 +34,7 @@ ifp ps
 -allowdupeaccounts
 +mp_gamemode ps
 +setplaylist ps
-+setplaylistvaroverrides "max_players 16 timelimit 18 scorelimit 2147483647"
++setplaylistvaroverrides "max_players 16 run_epilogue 0 classic_mp 0 timelimit 18 scorelimit 2147483647"
 +sv_maxvelocity 100000
 +sv_usercmd_max_queued 100
 +ns_should_return_to_lobby 0

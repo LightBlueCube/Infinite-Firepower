@@ -36,6 +36,7 @@ WeaponData
 			"explosion_damage_heavy_armor"					"0"
     	    "explosion_inner_radius"  						"0"
     	    "explosionradius" 								"0"
+			"projectile_lifetime"							"20"
 		}
 
 		scp018_kill_streak

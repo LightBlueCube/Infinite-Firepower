@@ -99,7 +99,7 @@ void function KsGUI( entity player )
 	KsGUI_Select( player )
 }
 
-const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "轨道打击", "弹力球", "折叠时空武器", "丢出电池", "使用电池" ]
+const array<string> KSGUI_ELEM = [ "核武泰坦", "巡弋飞弹", "VTOL", "轨道打击", "SCP-018", "折叠时空武器", "丢出电池", "使用电池" ]
 
 void function KsGUI_Switch( entity player )
 {

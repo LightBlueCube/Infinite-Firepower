@@ -228,7 +228,7 @@ void function SCP018_Think( entity grenade, entity owner, bool isKillstreak = fa
 		}
 	)
 
-	float endTime = Time() + 10.0
+	float endTime = Time() + 20.0
 	float startTime = Time()
 	float dmgTime = Time() + 0.2
 	float elapsedTime
@@ -239,12 +239,12 @@ void function SCP018_Think( entity grenade, entity owner, bool isKillstreak = fa
 		if( Length( grenade.GetVelocity() ) > 15000 )
 			grenade.SetVelocity( Normalize( grenade.GetVelocity() ) * 15000 )
 
-		if( startTime + elapsedTime < Time() )
+		/*if( startTime + elapsedTime < Time() )
 		{
 			elapsedTime = GetGravityLandData( grenade.GetOrigin(), < 0, 0, 0 >, grenade.GetVelocity(), endTime - Time() ).elapsedTime
 			if( elapsedTime >= endTime - Time() )
 				return
-		}
+		}*/
 
 		if( Time() < dmgTime )
 			continue
@@ -254,8 +254,8 @@ void function SCP018_Think( entity grenade, entity owner, bool isKillstreak = fa
 			grenade.GetOrigin(),						// center
 			owner,										// attacker
 			grenade,									// inflictor
-			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 5, 200 ),	// damage
-			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 100, 2500 ),	// damageHeavyArmor
+			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 5, 50 ),		// damage
+			GraphCapped( Length( grenade.GetVelocity() ), 2000, 15000, 0, 250 ),	// damageHeavyArmor
 			radius,										// innerRadius
 			radius,										// outerRadius
 			0,											// flags

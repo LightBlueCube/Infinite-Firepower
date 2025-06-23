@@ -170,17 +170,17 @@ void function ApplyOrbitalStrike( entity player )
 void function ApplySCP018( entity player )
 {
 	if( player.s.SCP018 == 0 )
-		return ApplyFalied( player, "\n你没有弹力球" )
+		return ApplyFalied( player, "\n你没有SCP-018" )
 	if( !IsAlive( player ) )
-		return ApplyFalied( player, "\n在死亡时不可交付弹力球" )
+		return ApplyFalied( player, "\n在死亡时不可交付SCP-018" )
 	if( !player.IsHuman() )
-		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付弹力球" )
+		return ApplyFalied( player, "\n你需要处于铁驭状态才能交付SCP-018" )
 	entity weapon = player.GetOffhandWeapon( OFFHAND_ORDNANCE )
 	if( weapon.HasMod( "scp018_kill_streak" ) )
-		return ApplyFalied( player, "\n你已经交付了弹力球 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
+		return ApplyFalied( player, "\n你已经交付了SCP-018 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用" )
 
 	thread ApplySCP018_Think( player )
-	thread SendHudMessageWithPriority( player, 100, "\n已交付弹力球在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
+	thread SendHudMessageWithPriority( player, 100, "\n已交付SCP-018在重火力槽位 使用重火力以扔出\nTips: 这是一个越弹越快的球，建议在室内使用", -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
 
 }
