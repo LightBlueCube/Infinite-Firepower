@@ -128,7 +128,7 @@ void function KsGUI_Switch( entity player )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) ) //|| player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
 	player.s.GUIActive = true
@@ -168,7 +168,7 @@ table function KsGUITextChange( entity player )
 		skippedElem.append( 5 )
 	if( !PlayerHasMaxBatteryCount( player ) )
 		skippedElem.append( 6 )
-	if( !PlayerHasMaxBatteryCount( player ) ) //|| player.GetShieldHealth() == player.GetShieldHealthMax() )
+	if( !PlayerHasMaxBatteryCount( player ) || player.GetShieldHealth() == player.GetShieldHealthMax() )
 		skippedElem.append( 7 )
 
 	bool skipall = false

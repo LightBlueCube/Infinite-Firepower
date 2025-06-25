@@ -3446,7 +3446,10 @@ void function ClassicRodeoThink( entity rodeoPilot, entity titanSoul, RodeoPacka
 	bool isEnemyStyle = rodeoPilot.GetTeam() != rodeoTitan.GetTeam()
 
 	bool didRodeoSequence = false
-
+	
+	// adding notifications to player
+	thread ClassicRodeo_DoHintsBaseOnRodeoConditions( rodeoPilot, titanSoul )
+	
 	// starting sequences:
 	if( file.automaticallyDoRodeoSequence && isEnemyStyle )
 	{
@@ -3489,8 +3492,6 @@ void function ClassicRodeoThink( entity rodeoPilot, entity titanSoul, RodeoPacka
 			wait CLASSIC_RODEO_SEQUENCE_ADDITIONAL_INTERVAL_STRYDER // stryders wait 0.2s more, or ripping their batteries will be too fast
 	}
 
-	// adding notifications to player
-	thread ClassicRodeo_DoHintsBaseOnRodeoConditions( rodeoPilot, titanSoul )
 	//CreateClassicRodeoHintEntityForPlayer( rodeoPilot ) // not finished yet, setParented players won't show useHints on their client
 	thread ClassicRodeo_SequenceThink( rodeoPilot, titanSoul, rodeoPackage ) // for player doing sequences
 
@@ -3552,7 +3553,7 @@ void function ClassicRodeo_SequenceThink( entity rodeoPilot, entity titanSoul, R
 			{
 				if( GetBatteryOnBack( rodeoPilot ).GetSkin() == 1 )
 				{
-					SendHudMessageWithPriority( rodeoPilot, 91, "你不能将标记电池给予友军泰坦", -1, -0.4, < 255, 0, 0 >, < 0.2, 1.0, 1.0 > )
+					SendHudMessageWithPriority( rodeoPilot, 91.1, "你不能将标记电池给予友军泰坦", -1, -0.3, < 255, 0, 0 >, < 0.2, 1.0, 1.0 > )
 					continue
 				}
 			}
@@ -3745,13 +3746,41 @@ void function ClassicRodeo_DoHintsBaseOnRodeoConditions( entity player, entity t
 	player.EndSignal( "RodeoOver" )
 	titanSoul.EndSignal( "OnDestroy" )
 
-	bool sameTeam = titanSoul.GetTeam() == player.GetTeam()
+	string msg = ""
+	vector color = < 0, 0, 0 >
+	for( ;; )
+	{
+		WaitFrame()
+	
+		if( titanSoul.GetTeam() != player.GetTeam() )
+		{
+			msg = "射击电池仓以快速毁减敌方泰坦"
+			color = < 255, 0, 0 >
+		}
+		else if( PlayerHasBattery( player ) )
+		{
+			msg = "轻按 使用键（默认为\"E\"）给予电池"
+			int skin = GetBatteryOnBack( player ).GetSkin()
+			if( skin == 0 )
+				color = < 100, 255, 100 >
+			if( skin == 1 )
+				continue
+			if( skin == 2 )
+				color = < 255, 255, 100 >
+		}
+		else
+			continue
+		
+		SendHudMessageWithPriority( player, 91, msg, -1, -0.3, color, < 0, 0.1, 1.0 > )
+	}
+
+/*	bool sameTeam = titanSoul.GetTeam() == player.GetTeam()
 	string curHints = sameTeam ? "輕按 使用鍵 (默認為\"E\") 給予電池" : "射擊電池倉以快速毀減敵方泰坦"
 
 	while( sameTeam && !PlayerHasBattery( player ) )
 		WaitFrame()
 
-	NSSendInfoMessageToPlayer( player, curHints )
+	NSSendInfoMessageToPlayer( player, curHints )*/
 
 }
 

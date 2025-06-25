@@ -19,13 +19,16 @@ void function LoadedInits_Init()
 
 	// 客制化泰坦
 	TitanChange_Init()
-	// 泰坦配装提示
-	TitanLoadoutTips_Init()
-
+	
 	// 客制化铁驭
 	PilotChange_Init()
+	
+	// 泰坦配装提示
+	TitanLoadoutTips_Init()
 	// 铁驭配装提示
 	PilotLoadoutTips_Init()
+	// 常用功能提示
+	UtilTips_Init()
 
 	// 连杀系统
 	KillStreak_Init()

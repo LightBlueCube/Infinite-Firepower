@@ -71,7 +71,7 @@ void function MarkBatteryActive( entity battery, entity player )
 	EmitSoundOnEntity( battery, "Pilot_PulseBlade_Activated_3P" )
 
 	array<vector> strikePos = [ < battery.GetOrigin().x, battery.GetOrigin().y, 4000 > ]
-	for( int i = 16; i > 0; i-- )
+	for( int i = 8; i > 0; i-- )
 		strikePos.append( < battery.GetOrigin().x + RandomFloatRange( -500, 500 ), battery.GetOrigin().y + RandomFloatRange( -500, 500 ), 4000 > )
 
 	foreach( player in GetPlayerArray() )

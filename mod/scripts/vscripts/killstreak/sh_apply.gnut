@@ -123,7 +123,7 @@ void function ApplyNuclearBomb( entity player )
 	if( !player.s.HaveNuclearBomb )
 		return ApplyFalied( player, "\n折叠时空武器离线" )
 	if( IsNuclearBombDisable() )
-		return ApplyFalied( player, "\n已有在途的折叠时空武器打击" )
+		return ApplyFalied( player, "\n折叠时空武器离线" )
 
 	thread NuclearBombAnimThink( player )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
@@ -159,7 +159,14 @@ void function ApplyOrbitalStrike( entity player )
 	if( player.Anim_IsActive() )
 		return ApplyFalied( player, "\n在播放动画时不可交付轨道打击" )
 	if( PlayerHasMaxBatteryCount( player ) )
-		return ApplyFalied( player, "\n扔出身上的电池再交付轨道打击" )
+	{
+		entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
+		vector viewVector = player.GetViewVector()
+		vector playerVel = player.GetVelocity()
+		vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
+		battery.SetVelocity( batteryVel )
+		battery.s.touchEnabledTime <- Time() + 1
+	}
 
 	player.s.OrbitalStrike -= 1
 	thread OrbitalStrikeThink( player )

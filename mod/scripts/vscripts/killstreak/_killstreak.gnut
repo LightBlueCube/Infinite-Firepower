@@ -133,7 +133,7 @@ void function RestoreKillStreak( entity player )
 
 	if( player.s.HaveNuclearBomb )
 		thread DelayAnnouncement( player, 1 )
-	else if( player.s.NukeTitan != 0 || player.s.CruiseMissile != 0 || player.s.HaveVTOL || player.s.OrbitalStrike != 0 )
+	else if( player.s.NukeTitan != 0 || player.s.CruiseMissile != 0 || player.s.HaveVTOL || player.s.OrbitalStrike != 0 || player.s.SCP018 != 0 )
 		thread DelayAnnouncement( player, 0 )
 
 	if( "DontRestore" in player.s )
