@@ -167,9 +167,9 @@ void function DelayAnnouncement( entity player, int style )
 
 	wait 0.5
 	if( style == 0 )
-		NSSendAnnouncementMessageToPlayer( player, "有連殺獎勵未使用！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( player, "有連殺獎勵未使用！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 	if( style == 1 )
-		NSSendAnnouncementMessageToPlayer( player, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 225, 50, 60 >, 255, 6 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( player, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 225, 50, 60 >, 255, 6 )
 }
 
 void function RandomKillStreak_MsgShared( entity player )
@@ -179,7 +179,7 @@ void function RandomKillStreak_MsgShared( entity player )
 	WaitFrame()
 	while( player.GetParent() )
 		WaitFrame()
-	NSSendAnnouncementMessageToPlayer( player, "在上一對局成功撤離，給予隨機連殺獎勵！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+	RUIQueue_NSSendAnnouncementMessageToPlayer( player, "在上一對局成功撤離，給予隨機連殺獎勵！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 }
 
 void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
@@ -211,22 +211,22 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	if( attacker.s.TotalKills % file.nukeTitan == 0 )
 	{
 		attacker.s.NukeTitan += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( attacker, "獲得核武泰坦！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.TotalKills % file.cruiseMissile == 0 )
 	{
 		attacker.s.CruiseMissile += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( attacker, "獲得巡飛彈！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.KillStreak == file.scp018 )	// player only can get one time SCP-018 in once respawn
 	{
 		attacker.s.SCP018 += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得彈力球！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( attacker, "獲得彈力球！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.KillStreak == file.orbitalStrike )	// player only can get one time OrbitalStrike in once respawn
 	{
 		attacker.s.OrbitalStrike += 1
-		NSSendAnnouncementMessageToPlayer( attacker, "獲得軌道打擊！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( attacker, "獲得軌道打擊！", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 5 )
 	}
 	if( attacker.s.KillStreak == file.vtol )
 	{
@@ -235,7 +235,7 @@ void function OnPlayerKilled( entity victim, entity attacker, var damageInfo )
 	if( attacker.s.KillStreakNoNPC == file.nuclearBomb )
 	{
 		attacker.s.HaveNuclearBomb <- true
-		NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 6 )
+		RUIQueue_NSSendAnnouncementMessageToPlayer( attacker, "折疊時空武器已就緒", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 255, 0, 0 >, 255, 6 )
 	}
 }
 
@@ -247,5 +247,5 @@ void function GameStateEnter_Postmatch()
 void function GiveRandomKillStreakInNextMatch( entity player )
 {
 	RandomKillStreakPlayers.append( player.GetUID() )
-	NSSendAnnouncementMessageToPlayer( player, "成功撤離！將在下一對局給予隨機連殺獎勵", "", < 50, 50, 225 >, 255, 5 )
+	RUIQueue_NSSendAnnouncementMessageToPlayer( player, "成功撤離！將在下一對局給予隨機連殺獎勵", "", < 50, 50, 225 >, 255, 5 )
 }

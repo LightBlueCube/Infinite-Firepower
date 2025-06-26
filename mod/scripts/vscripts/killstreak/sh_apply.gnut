@@ -160,18 +160,29 @@ void function ApplyOrbitalStrike( entity player )
 		return ApplyFalied( player, "\n在播放动画时不可交付轨道打击" )
 	if( PlayerHasMaxBatteryCount( player ) )
 	{
-		entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
-		vector viewVector = player.GetViewVector()
-		vector playerVel = player.GetVelocity()
-		vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
-		battery.SetVelocity( batteryVel )
-		battery.s.touchEnabledTime <- Time() + 1
+		thread ApplyOrbitalStrike_DroppingBattery( player )
+		return
 	}
 
 	player.s.OrbitalStrike -= 1
 	thread OrbitalStrikeThink( player )
 	thread SendHudMessageWithPriority( player, 100, "\n已交付轨道打击\n扔出标记电池在想要打击的位置以开始", -1, 0.3, < 100, 255, 100 >, < 0, 2, 1 > )
 	EmitSoundOnEntityOnlyToPlayer( player, player, "UI_InGame_FD_ArmoryPurchase" )
+}
+
+void function ApplyOrbitalStrike_DroppingBattery( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+
+	entity battery = Rodeo_TakeBatteryAwayFromPilot( player )
+	vector viewVector = player.GetViewVector()
+	vector playerVel = player.GetVelocity()
+	vector batteryVel = playerVel + viewVector * 200 + < 0, 0, 100 >
+	battery.SetVelocity( batteryVel )
+	battery.s.touchEnabledTime <- Time() + 1
+	
+	WaitFrame()
+	ApplyOrbitalStrike( player )
 }
 
 void function ApplySCP018( entity player )

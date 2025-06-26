@@ -107,11 +107,11 @@ void function CruiseMissileAnim_Think( entity owner, vector cmFireOrigin, vector
 			continue
 		if( player.GetTeam() == owner.GetTeam() )
 		{
-			NSSendLargeMessageToPlayer( player,"友方巡飛彈投放中！", "投放飛艇會標記出所有敵人的的位置！", 7, "rui/callsigns/callsign_95_col" )
+			RUIQueue_NSSendLargeMessageToPlayer( player,"友方巡飛彈投放中！", "投放飛艇會標記出所有敵人的的位置！", 7, "rui/callsigns/callsign_95_col" )
 			EmitSoundOnEntityOnlyToPlayer( player, player, "lstar_lowammowarning" )
 			continue
 		}
-		NSSendLargeMessageToPlayer( player,"巡飛彈來襲！", "注意頭頂！投放飛艇會標記出你的的位置！", 7, "rui/callsigns/callsign_95_col" )
+		RUIQueue_NSSendLargeMessageToPlayer( player,"巡飛彈來襲！", "注意頭頂！投放飛艇會標記出你的的位置！", 7, "rui/callsigns/callsign_95_col" )
 		EmitSoundOnEntityOnlyToPlayer( player, player, "lstar_lowammowarning" )
 	}
 

@@ -44,7 +44,7 @@ void function DropPodSpawnThreaded()
 		foreach( entity player in GetPlayerArray() )
 		{
 			EmitSoundOnEntityOnlyToPlayer( player, player, "Boomtown_RobotArm_90Turn" )
-			NSSendLargeMessageToPlayer( player, "補給艙運送中! ", "使用補給艙來獲得隨機連殺獎勵！", 7, "rui/callsigns/callsign_69_col" )
+			RUIQueue_NSSendLargeMessageToPlayer( player, "補給艙運送中! ", "使用補給艙來獲得隨機連殺獎勵！", 7, "rui/callsigns/callsign_69_col" )
 		}
 
 		array< entity > points = SpawnPoints_GetDropPod()
@@ -177,7 +177,7 @@ function CarePackage_OnUse( pod , player )
 	player.s.OrbitalStrike += orbitalStrike
 	player.s.NukeTitan += nukeTitan
 
-	NSSendAnnouncementMessageToPlayer( player, "已從補給艙中獲得連殺獎勵", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
+	RUIQueue_NSSendAnnouncementMessageToPlayer( player, "已從補給艙中獲得連殺獎勵", "鐵馭狀態下按 泰坦輔助技能鍵（默認為G） 打開菜單！", < 50, 50, 225 >, 255, 5 )
 
 	svGlobal.levelEnt.Signal( "DropPodUsed" )
 }

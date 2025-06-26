@@ -1,0 +1,151 @@
+global function RUIQueue_Init
+global function RUIQueue_NSCreateStatusMessageOnPlayer
+global function RUIQueue_NSEditStatusMessageOnPlayer
+global function RUIQueue_NSDeleteStatusMessageOnPlayer
+global function RUIQueue_NSCreatePollOnPlayer
+global function RUIQueue_NSSendLargeMessageToPlayer
+global function RUIQueue_NSSendPopUpMessageToPlayer
+global function RUIQueue_NSSendAnnouncementMessageToPlayer
+global function RUIQueue_NSSendInfoMessageToPlayer
+
+// sending multiple RUIs in the same tickrate may cause display issues, RUIQueue is made for fix that
+// when multiple RUIs are called in the same time, will push them into a queue and running one by one with a small delay between them
+
+void function RUIQueue_Init()
+{
+	AddCallback_OnClientConnected( OnClientConnected )
+}
+
+table<string, array<string> > mainQueue = {}
+
+void function OnClientConnected( entity player )
+{
+	mainQueue[ player.GetUID() ] <- []
+}
+
+
+
+void function WaitForQueue( entity player )
+{
+	player.EndSignal( "OnDestroy" )
+
+	string id = PushQueue( player )
+
+	while( mainQueue[ player.GetUID() ][0] != id )
+		WaitFrame()
+
+	thread DelayFree( player, id )
+}
+
+void function DelayFree( entity player, string id )
+{
+	player.EndSignal( "OnDestroy" )
+
+	WaitFrame()
+	
+	mainQueue[ player.GetUID() ].removebyvalue( id )
+}
+
+string function PushQueue( entity player )
+{
+	int i = 0
+	while( mainQueue[ player.GetUID() ].contains( string( i ) ) )
+		i++
+
+	string id = string( i )
+	mainQueue[ player.GetUID() ].append( id )
+	
+	return id
+}
+
+
+
+void function RUIQueue_NSCreateStatusMessageOnPlayer( entity player, string title, string description, string id )
+{
+	thread RUIQueue_NSCreateStatusMessageOnPlayer_Threaded( player, title, description, id )
+}
+
+void function RUIQueue_NSEditStatusMessageOnPlayer( entity player, string title, string description, string id  )
+{
+	thread RUIQueue_NSEditStatusMessageOnPlayer_Threaded( player, title, description, id  )
+}
+
+void function RUIQueue_NSDeleteStatusMessageOnPlayer( entity player, string id  )
+{
+	thread RUIQueue_NSDeleteStatusMessageOnPlayer_Threaded( player, id )
+}
+
+void function RUIQueue_NSCreatePollOnPlayer( entity player, string header, array<string> options, float duration )
+{
+	thread RUIQueue_NSCreatePollOnPlayer_Threaded( player, header, options, duration )
+}
+
+void function RUIQueue_NSSendLargeMessageToPlayer( entity player, string title, string description, float duration, string image )
+{
+	thread RUIQueue_NSSendLargeMessageToPlayer_Threaded( player, title, description, duration, image )
+}
+
+void function RUIQueue_NSSendPopUpMessageToPlayer( entity player, string text )
+{
+	thread RUIQueue_NSSendPopUpMessageToPlayer_Threaded( player, text )
+}
+
+void function RUIQueue_NSSendAnnouncementMessageToPlayer( entity player, string title, string description, vector color, int priority, int style )
+{
+	thread RUIQueue_NSSendAnnouncementMessageToPlayer_Threaded( player, title, description, color, priority, style )
+}
+
+void function RUIQueue_NSSendInfoMessageToPlayer( entity player, string text )
+{
+	thread RUIQueue_NSSendInfoMessageToPlayer_Threaded( player, text )
+}
+
+
+
+void function RUIQueue_NSCreateStatusMessageOnPlayer_Threaded( entity player, string title, string description, string id )
+{
+	WaitForQueue( player )
+	NSCreateStatusMessageOnPlayer( player, title, description, id )
+}
+
+void function RUIQueue_NSEditStatusMessageOnPlayer_Threaded( entity player, string title, string description, string id  )
+{
+	WaitForQueue( player )
+	NSEditStatusMessageOnPlayer( player, title, description, id  )
+}
+
+void function RUIQueue_NSDeleteStatusMessageOnPlayer_Threaded( entity player, string id  )
+{
+	WaitForQueue( player )
+	NSDeleteStatusMessageOnPlayer( player, id )
+}
+
+void function RUIQueue_NSCreatePollOnPlayer_Threaded( entity player, string header, array<string> options, float duration )
+{
+	WaitForQueue( player )
+	NSCreatePollOnPlayer( player, header, options, duration )
+}
+
+void function RUIQueue_NSSendLargeMessageToPlayer_Threaded( entity player, string title, string description, float duration, string image )
+{
+	WaitForQueue( player )
+	NSSendLargeMessageToPlayer( player, title, description, duration, image )
+}
+
+void function RUIQueue_NSSendPopUpMessageToPlayer_Threaded( entity player, string text )
+{
+	WaitForQueue( player )
+	NSSendPopUpMessageToPlayer( player, text )
+}
+
+void function RUIQueue_NSSendAnnouncementMessageToPlayer_Threaded( entity player, string title, string description, vector color, int priority, int style )
+{
+	WaitForQueue( player )
+	NSSendAnnouncementMessageToPlayer( player, title, description, color, priority, style )
+}
+
+void function RUIQueue_NSSendInfoMessageToPlayer_Threaded( entity player, string text )
+{
+	WaitForQueue( player )
+	NSSendInfoMessageToPlayer( player, text )
+}

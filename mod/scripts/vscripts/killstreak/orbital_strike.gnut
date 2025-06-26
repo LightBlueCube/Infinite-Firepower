@@ -77,7 +77,7 @@ void function MarkBatteryActive( entity battery, entity player )
 	foreach( player in GetPlayerArray() )
 	{
 		EmitSoundOnEntityOnlyToPlayer( player, player, "coop_generator_underattack_alarm" )
-		NSSendLargeMessageToPlayer( player,"廣域轟炸接近中！", "小心天上......", 7, "rui/callsigns/callsign_94_col" )
+		RUIQueue_NSSendLargeMessageToPlayer( player,"廣域轟炸接近中！", "小心天上......", 7, "rui/callsigns/callsign_94_col" )
 	}
 
 	foreach( pos in strikePos )

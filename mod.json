@@ -85,82 +85,89 @@
 			}
 		},
 
-		// util shared //
+		// util libs //
 
 		{
-			"Path": "tcputil/shared/sh_convar_util.gnut",
+			"Path": "tcputil/lib/convar_util.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/shared/sh_entity_util.gnut",
+			"Path": "tcputil/lib/entity_util.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/shared/sh_better_respawn_point.gnut",
+			"Path": "tcputil/lib/better_respawn_point.gnut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/shared/sh_hudmsg_priority.gnut",
+			"Path": "tcputil/lib/hudmsg_priority.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
 				"After": "HudMessagePriority_Init"
 			}
 		},
 		{
-			"Path": "tcputil/shared/sh_votecommand.gnut",
+			"Path": "tcputil/lib/rui_queue.gnut",
+			"RunOn": "SERVER && MP",
+			"ServerCallback": {
+				"After": "RUIQueue_Init"
+			}
+		},
+		{
+			"Path": "tcputil/lib/votecommand.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
 				"After": "VoteCommand_Init"
 			}
 		},
 		{
-			"Path": "tcputil/shared/sh_chatcommand.gnut",
+			"Path": "tcputil/lib/chatcommand.gnut",
 			"RunOn": "SERVER && MP",
 			"ServerCallback": {
 				"After": "ChatCommand_Init"
 			}
 		},
 
-		// utilitys //
+		// util feats //
 
 		{
-			"Path": "tcputil/random_map.nut",
+			"Path": "tcputil/feat/random_map.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/anti_afk.nut",
+			"Path": "tcputil/feat/anti_afk.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/teamshuffle.nut",
+			"Path": "tcputil/feat/teamshuffle.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/night_sky.nut",
+			"Path": "tcputil/feat/night_sky.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/colorful_chat.nut",
+			"Path": "tcputil/feat/colorful_chat.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/auto_shutdown.nut",
+			"Path": "tcputil/feat/auto_shutdown.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/anti_insult.nut",
+			"Path": "tcputil/feat/anti_insult.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/disable_aimassist.nut",
+			"Path": "tcputil/feat/disable_aimassist.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/dev_tarck_usage.nut",
+			"Path": "tcputil/feat/dev_tarck_usage.nut",
 			"RunOn": "SERVER && MP"
 		},
 		{
-			"Path": "tcputil/vote_skipmatch.nut",
+			"Path": "tcputil/feat/vote_skipmatch.nut",
 			"RunOn": "SERVER && MP"
 		},
 

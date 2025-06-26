@@ -44,49 +44,34 @@ void function PlayerGUITips_LifeLong( entity player )
 			if( !IsValid( player  ) )
 				return
 
-			// defensive fix
-			NSDeleteStatusMessageOnPlayer( player, "ks" )
-			NSDeleteStatusMessageOnPlayer( player, "ks" )
-			NSDeleteStatusMessageOnPlayer( player, "shp" )
-			NSDeleteStatusMessageOnPlayer( player, "shp" )
+			RUIQueue_NSDeleteStatusMessageOnPlayer( player, "ks" )
+			RUIQueue_NSDeleteStatusMessageOnPlayer( player, "shp" )
 		}
 	)
-
-	// for some reason if you pop 2 rui at the same tick, rui stayle will glitched, so hardcode here delay a tick before pop up
-	// cannot reference bool so we use table, fuck you respawn
-	table delay = { main = false }
 
 	for( ;; )
 	{
 		WaitFrame()
 
-		KillStreakTips( player, rui_list, delay )
+		KillStreakTips( player, rui_list )
 		ShieldTips( player, rui_list )
 	}
 }
 
-void function KillStreakTips( entity player, table<string,string> rui_list, table delay )
+void function KillStreakTips( entity player, table<string,string> rui_list )
 {
 	if( player.IsHuman() && ( player.s.NukeTitan != 0 || player.s.CruiseMissile != 0 || player.s.HaveVTOL || player.s.OrbitalStrike != 0 || player.s.SCP018 != 0 ) )
 	{
-		if( !delay.main )
-		{
-			delay.main = true
-			return
-		}
-		else
-			delay.main = false
-
 		if( !( "ks" in rui_list ) )
 		{
-			NSCreateStatusMessageOnPlayer( player, "", "", "ks" )
+			RUIQueue_NSCreateStatusMessageOnPlayer( player, "", "", "ks" )
 			rui_list[ "ks" ] <- ""
 		}
 
 		if( rui_list[ "ks" ] == "1" )
 			return
 
-		NSEditStatusMessageOnPlayer( player, "菜單", "按 泰坦輔助技能鍵（默認G）打開", "ks" )
+		RUIQueue_NSEditStatusMessageOnPlayer( player, "菜單", "按 泰坦輔助技能鍵（默認G）打開", "ks" )
 		rui_list[ "ks" ] <- "1"
 	}
 	else
@@ -94,9 +79,7 @@ void function KillStreakTips( entity player, table<string,string> rui_list, tabl
 		if( !( "ks" in rui_list ) )
 			return
 		
-		// defensive fix
-		NSDeleteStatusMessageOnPlayer( player, "ks" )
-		NSDeleteStatusMessageOnPlayer( player, "ks" )
+		RUIQueue_NSDeleteStatusMessageOnPlayer( player, "ks" )
 		delete rui_list[ "ks" ]
 	}
 }
@@ -107,7 +90,7 @@ void function ShieldTips( entity player, table<string,string> rui_list )
 	{
 		if( !( "shp" in rui_list ) )
 		{
-			NSCreateStatusMessageOnPlayer( player, "", "", "shp" )
+			RUIQueue_NSCreateStatusMessageOnPlayer( player, "", "", "shp" )
 			rui_list[ "shp" ] <- ""
 		}
 
@@ -117,7 +100,7 @@ void function ShieldTips( entity player, table<string,string> rui_list )
 			if( rui_list[ "shp" ] == "1" )
 				return
 
-			NSEditStatusMessageOnPlayer( player, "護盾", "按住 強化鍵（默認C）使用電池", "shp" )
+			RUIQueue_NSEditStatusMessageOnPlayer( player, "護盾", "按住 強化鍵（默認C）使用電池", "shp" )
 			rui_list[ "shp" ] <- "1"
 		}
 		else
@@ -125,7 +108,7 @@ void function ShieldTips( entity player, table<string,string> rui_list )
 			if( rui_list[ "shp" ] == "0" )
 				return
 			
-			NSEditStatusMessageOnPlayer( player, "護盾", "護盾受損, 尋找電池", "shp" )
+			RUIQueue_NSEditStatusMessageOnPlayer( player, "護盾", "護盾受損, 尋找電池", "shp" )
 			rui_list[ "shp" ] <- "0"
 		}
 	}
@@ -134,9 +117,7 @@ void function ShieldTips( entity player, table<string,string> rui_list )
 		if( !( "shp" in rui_list ) )
 			return
 		
-		// defensive fix
-		NSDeleteStatusMessageOnPlayer( player, "shp" )
-		NSDeleteStatusMessageOnPlayer( player, "shp" )
+		RUIQueue_NSDeleteStatusMessageOnPlayer( player, "shp" )
 		delete rui_list[ "shp" ]
 	}
 }
