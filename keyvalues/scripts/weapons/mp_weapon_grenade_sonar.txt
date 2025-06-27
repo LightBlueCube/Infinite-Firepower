@@ -30,7 +30,7 @@ WeaponData
 		// gravity lift
 		gravity_lift
 		{
-			"regen_ammo_refill_rate"						"16"
+			"regen_ammo_refill_rate"						"13.333"
 			"damage_near_value"								"*0"
 			"damage_far_value"								"*0"
 		}

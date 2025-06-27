@@ -202,6 +202,9 @@ void function OnRodeoWeakpointPostDamaged( entity weakpoint, var damageInfo )
 			if( inflictor.GrenadeHasIgnited() )
 				rodeoDamage *= 0.2
 
+	if( titanSoul.IsDoomed() )
+		rodeoDamage *= 0.5
+
 	rodeoDamage *= GetClassicRodeoAdditionalDamageScale()
 	int damageTypes = DamageInfo_GetCustomDamageType( damageInfo ) | DF_BYPASS_SHIELD | DF_CRITICAL // always passthrough shield
 	#if CLASSIC_RODEO_WEAKPOINT_DEBUG

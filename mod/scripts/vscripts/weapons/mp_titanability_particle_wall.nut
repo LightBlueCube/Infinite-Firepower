@@ -571,7 +571,7 @@ const vector DOME_COLOR_CHARGE_EMPTY		 = <255, 80, 80>	// red
 
 const float DOME_COLOR_CROSSOVERFRAC_FULL2MED	= 0.75  // from zero to this fraction, fade between full and medium charge colors
 const float DOME_COLOR_CROSSOVERFRAC_MED2EMPTY	= 0.95  // from "full2med" to this fraction, fade between medium and empty charge colors
-const BRUTE4_DOME_SHIELD_HEALTH = 1500
+const BRUTE4_DOME_SHIELD_HEALTH = 5000
 
 struct BubbleShieldDamageStruct
 {
@@ -917,7 +917,7 @@ var function OnWeaponPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryAtta
 	if ( weaponOwner.IsPlayer() )
 		PlayerUsedOffhand( weaponOwner, weapon )
 
-	float duration = 6
+	float duration = 8
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
@@ -931,14 +931,14 @@ var function OnWeaponNpcPrimaryAttack_dome_shield( entity weapon, WeaponPrimaryA
 	if ( IsValid( soul ) && IsValid( soul.soul.bubbleShield ))
 		return 0
 
-	float duration = 6
+	float duration = 8
 	thread Brute4GiveShortDomeShield( weapon, weaponOwner, duration )
 
 	return 1
 }
 #endif // #if SERVER
 
-void function Brute4GiveShortDomeShield( entity weapon, entity owner, float duration = 6.0 )
+void function Brute4GiveShortDomeShield( entity weapon, entity owner, float duration = 8.0 )
 {
 	#if SERVER
 	owner.EndSignal( "OnDeath" )
